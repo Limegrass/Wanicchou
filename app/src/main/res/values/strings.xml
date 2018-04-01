@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">J-J Learner\'s Dictionary</string>
+    <string name="search_label" translatable="true">Search</string>
+    <string name="search_field_default" translatable="true">Enter a word</string>
+    <string name="word_label" translatable="true">Word</string>
+    <string name="word_default" translatable="true">Search for something!</string>
+    <string name="definition_label" translatable="true">Definition</string>
+    <string name="definition_default" translatable="true">No word found</string>
+    <string name="word_searching" translatable="true">Searching...</string>
+    <string name="word_search_success" translatable="true">Word found!</string>
+    <string name="word_search_failure" translatable="true">Word not found!</string>
+    <string name="btn_text" translatable="true">Send to Anki</string>
+</resources>
