@@ -17,7 +17,6 @@ import org.jsoup.nodes.Document;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -50,14 +49,35 @@ public class HomeActivity extends AppCompatActivity {
         mBinding.wordSearch.etSearchBox.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View view, boolean b) {
-                mBinding.wordSearch.etSearchBox.setText("");
+                if(mBinding.wordSearch.etSearchBox.getText().toString()
+                        .equals(getResources().getString(R.string.search_field_default))) {
+                    mBinding.wordSearch.etSearchBox.getText().clear();
+                }
+            }
+        });
+        mBinding.wordSearch.etContext.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean b) {
+                if(mBinding.wordSearch.etContext.getText().toString()
+                        .equals(getResources().getString(R.string.context_default))) {
+                    mBinding.wordSearch.etContext.getText().clear();
+                }
+            }
+        });
+        mBinding.wordSearch.etNotes.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean b) {
+                if(mBinding.wordSearch.etNotes.getText().toString()
+                        .equals(getResources().getString(R.string.notes_default))) {
+                    mBinding.wordSearch.etNotes.getText().clear();
+                }
             }
         });
 
         mBinding.wordSearch.etSearchBox.setOnKeyListener(new OnKeyListener() {
             @Override
             public boolean onKey(View searchBox, int keyCode, KeyEvent keyEvent) {
-                if( keyEvent.getAction() == KeyEvent.ACTION_DOWN){
+                if(keyEvent.getAction() == KeyEvent.ACTION_DOWN){
                     switch (keyCode){
                         case KeyEvent.KEYCODE_DPAD_CENTER:
                         case KeyEvent.KEYCODE_ENTER:
@@ -228,8 +248,16 @@ public class HomeActivity extends AppCompatActivity {
         fields[AnkiDroidConfig.FIELDS_INDEX_READING] = mBinding.wordSearch.tvWord.getText().toString();
         fields[AnkiDroidConfig.FIELDS_INDEX_MEANING] = mBinding.wordSearch.tvDefinition.getText().toString();
         fields[AnkiDroidConfig.FIELDS_INDEX_FURIGANA] = mBinding.wordSearch.tvWord.getText().toString();
-        fields[AnkiDroidConfig.FIELDS_INDEX_NOTES] = "TESTING";
-        fields[AnkiDroidConfig.FIELDS_INDEX_CONTEXT] = "test";
+        String notes = mBinding.wordSearch.etNotes.getText().toString();
+        if(notes.equals(getResources().getString(R.string.notes_default))){
+            notes = "";
+        }
+        fields[AnkiDroidConfig.FIELDS_INDEX_NOTES] = notes;
+        String wordContext = mBinding.wordSearch.etContext.getText().toString();
+        if(notes.equals(getResources().getString(R.string.context_default))){
+            wordContext = "";
+        }
+        fields[AnkiDroidConfig.FIELDS_INDEX_CONTEXT] = wordContext;
         Set<String> tags = AnkiDroidConfig.TAGS;
         mAnkiDroid.getApi().addNote(modelId, deckId, fields, tags);
     }
