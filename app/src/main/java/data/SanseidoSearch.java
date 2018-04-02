@@ -17,21 +17,38 @@ import java.net.URL;
 public class SanseidoSearch {
 
     final static String SANSEIDOU_BASE_URL = "https://www.sanseido.biz/User/Dic/Index.aspx";
-    final static String PARAM_WORD_QUERY = "Twords";
+    final static String PARAM_WORD_QUERY = "TWords";
 
-    //Not sure what these param refer to, but they are necessary
-    final static String PARAM_ST = "st";
+    // Order of dictionaries under select dictionaries
+    // First is the one that displays
+    // 15 = J-J
+    // 16 = E-J
+    // 17 = J-E
     final static String PARAM_DORDER= "DORDER";
-
-    final static String ST_DEFAULT = "0";
     final static String DORDER_DEFAULT = "171615";
 
-    final static String PARAM_DAILYJE = "DailyJE";
+    // ST is the match preference.
+    // 0 = Forward match
+    // 1 = Exact
+    // 2 = Backwards
+    // 3 = Full text search
+    // 5 = Partial match
+    final static String PARAM_ST = "st";
+    final static String ST_DEFAULT = "1";
+
+    // Enabling and disabling of languages
+    // Display will go by DORDER
     final static String PARAM_DAILYJJ = "DailyJJ";
+    final static String PARAM_DAILYJE = "DailyJE";
+    final static String PARAM_DAILYEJ = "DailyEJ";
     final static String SET_LANG = "checkbox";
 
     final static String SANSEIDO_WORD_ID = "word";
     final static String SANSEIDO_WORD_DEFINITION_ID = "wordBody";
+
+    //TODO: Maybe something more graceful or renaming
+    final static String MULTIPLE_DEFINITION_REGEX = "▼";
+    final static String MULTIPLE_DEFINITION_SEPARATOR = "\n▼";
 
     /**
      * Builds the URL for the desired word(s) to search for on Sanseido.
@@ -78,6 +95,10 @@ public class SanseidoSearch {
         if(definitionParentElement.children().size() > 0){
             definition = definitionParentElement.child(0).text();
         }
+
+        //TODO: FIX REGEX
+        definition = definition.replaceAll(MULTIPLE_DEFINITION_REGEX, MULTIPLE_DEFINITION_SEPARATOR);
+        definition = definition.replaceFirst(MULTIPLE_DEFINITION_REGEX, MULTIPLE_DEFINITION_SEPARATOR);
 
         return definition;
     }
