@@ -21,7 +21,7 @@ import java.util.Set;
 
 import static com.ichi2.anki.api.AddContentApi.READ_WRITE_PERMISSION;
 /**
- * Created by Limegrass on 3/24/2018.
+ * Originally from 'ankidroid/apisample'
  */
 
 public class AnkiDroidHelper {

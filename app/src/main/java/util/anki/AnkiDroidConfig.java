@@ -9,7 +9,8 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Created by Limegrass on 3/24/2018.
+ * Originally from 'ankidroid/apisample'
+ * Modified from original.
  */
 
 final public class AnkiDroidConfig {

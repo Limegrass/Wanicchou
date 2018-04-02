@@ -4,26 +4,28 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.waifusims.j_jlearnersdictionary.HomeActivity">
 
+    <!--TODO: FIX EVERYTHING ABOUT THE UI-->
     <android.support.design.widget.CoordinatorLayout
         android:id="@+id/home_main"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+
         <include
             android:id="@+id/word_search"
-            layout="@layout/word_search"
-            app:layout_constraintTop_toTopOf="parent" />
+            layout="@layout/word_search" />
         <!-- TODO: Make a button that opens up more fields to fill up like notes and context before sending-->
 
-        <include
-            android:id="@+id/fab"
-            layout="@layout/floating_action_button" />
+        <!--<include-->
+            <!--app:layout_constraintTop_toBottomOf="@id/word_search"-->
+            <!--android:id="@+id/anki_additional_fields"-->
+            <!--android:visibility="visible"-->
+            <!--layout="@layout/anki_additional_fields" />-->
 
 
-        <!--include
-            android:id="@+id/word_definition"
-            layout="@layout/word_definition"
-            app:layout_constraintTop_toBottomOf="@id/word_search" /-->
+            <include
+                android:id="@+id/fab"
+                layout="@layout/floating_action_button" />
 
     </android.support.design.widget.CoordinatorLayout>
 </layout>
