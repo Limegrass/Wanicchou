@@ -24,4 +24,8 @@
 
     <!--fab related-->
     <string name="btn_text" translatable="true">Send to Anki</string>
+
+    <!--Toast strings-->
+    <string name="toast_permissions_denied" translatable="true">Permissions denied.</string>
+    <string name="toast_anki_added" translatable="true">Card added to Anki!</string>
 </resources>

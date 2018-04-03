@@ -4,28 +4,39 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.waifusims.j_jlearnersdictionary.HomeActivity">
 
-    <!--TODO: FIX EVERYTHING ABOUT THE UI-->
-    <android.support.design.widget.CoordinatorLayout
-        android:id="@+id/home_main"
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <LinearLayout
+                android:id="@+id/home_main"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
 
+                <include
+                    android:id="@+id/word_search"
+                    layout="@layout/word_search" />
+
+                <include
+                    android:id="@+id/word_definition"
+                    layout="@layout/word_definition"/>
+
+
+                <include
+                    android:id="@+id/anki_additional_fields"
+                    layout="@layout/anki_additional_fields" />
+
+            </LinearLayout>
+        </ScrollView>
+        <!--TODO: Change FAB to be a menu, -->
+        <!--where you can set the set visiblity of anki_additional fields to be on-->
+        <!--before sending, or just send the card if they do not want to edit the fields.-->
         <include
-            android:id="@+id/word_search"
-            layout="@layout/word_search" />
-        <!-- TODO: Make a button that opens up more fields to fill up like notes and context before sending-->
-
-        <!--<include-->
-            <!--app:layout_constraintTop_toBottomOf="@id/word_search"-->
-            <!--android:id="@+id/anki_additional_fields"-->
-            <!--android:visibility="visible"-->
-            <!--layout="@layout/anki_additional_fields" />-->
-
-
-            <include
-                android:id="@+id/fab"
-                layout="@layout/floating_action_button" />
-
-    </android.support.design.widget.CoordinatorLayout>
+            android:id="@+id/fab"
+            layout="@layout/floating_action_button" />
+    </FrameLayout>
 </layout>
