@@ -26,14 +26,14 @@ final public class AnkiDroidConfig {
     //Many fields will be unused at first
     public static final String[] FIELDS =
             {
-                    "Kanji", "Reading", "Meaning", "Furigana", "Notes", "Context"
+                    "Kanji", "Reading", "Definition", "Furigana", "Notes", "Context"
 //                    "Pitch", "Audio", "Grammar",
 //                    "Sentence", "SentenceFurigana","SentenceMeaning",
             };
 
     public static final int FIELDS_INDEX_KANJI = 0;
     public static final int FIELDS_INDEX_READING = 1;
-    public static final int FIELDS_INDEX_MEANING = 2;
+    public static final int FIELDS_INDEX_DEFINITION = 2;
     public static final int FIELDS_INDEX_FURIGANA = 3;
     public static final int FIELDS_INDEX_NOTES  = 4;
     public static final int FIELDS_INDEX_CONTEXT = 5;
@@ -68,24 +68,24 @@ final public class AnkiDroidConfig {
     public static final String[] QFMT = {QFMT1, QFMT2};
     // Template for the answer (use identical for both sides)
     static final String AFMT1 = "{{FrontSide}}\n<br>\n<hr id=answer>\n<br>\n{{Reading}}\n<br>\n" +
-            "<div class=extra>{{Meaning}}";
+            "<div class=extra>{{Definition}}";
     static final String AFMT2 = "{{FrontSide}}\n<br>\n<hr id=answer>\n<br>\n" +
-            "{{Meaning}}";
+            "{{Definition}}";
     public static final String[] AFMT = {AFMT1, AFMT2};
 
     // Define two keys which will be used when using legacy ACTION_SEND intent
     public static final String FRONT_SIDE_KEY = FIELDS[0];  //Kanji
-    public static final String BACK_SIDE_KEY = FIELDS[2];   //Meaning
+    public static final String BACK_SIDE_KEY = FIELDS[2];   //Definition
 
     /**
      * Generate the ArrayList<HashMap> example data which will be sent to AnkiDroid
      */
     public static List<Map<String, String>> getExampleData() {
-//        "Kanji", "Reading", "Meaning", "Furigana", "Notes", "Context"
+//        "Kanji", "Reading", "Definition", "Furigana", "Notes", "Context"
 //        final String[] EXAMPLE_WORDS = {"例", "データ", "送る"};
         final String[] EXAMPLE_KANJIS = {"例", "データ", "送る"};
         final String[] EXAMPLE_READINGS = {"れい", "データ", "おくる"};
-        final String[] EXAMPLE_MEANINGS = {"Example", "Data", "To send"};
+        final String[] EXAMPLE_DEFINITION = {"Example", "Data", "To send"};
 //        final String[] EXAMPLE_TRANSLATIONS = {"Example", "Data", "To send"};
         final String[] EXAMPLE_FURIGANA = {"例[れい]", "データ", "送[おく]る"};
         final String[] EXAMPLE_NOTES = {"test1", "test2", "btw"};
@@ -94,7 +94,7 @@ final public class AnkiDroidConfig {
 //        final String[] EXAMPLE_SENTENCE = {"そんな先例はない。", "きゃ～データが消えた！", "放蕩生活を送る。"};
 //        final String[] EXAMPLE_SENTENCE_FURIGANA = {"そんな 先例[せんれい]はない。", "きゃ～データが 消[き]えた！",
 //                "放蕩[ほうとう] 生活[せいかつ]を 送[おく]る。"};
-//        final String[] EXAMPLE_SENTENCE_MEANING = {"We have no such example", "Oh, I lost the data！",
+//        final String[] EXAMPLE_SENTENCE_DEFINITION = {"We have no such example", "Oh, I lost the data！",
 //                "I lead a fast way of living."};
 
         List<Map<String, String>> data = new ArrayList<>();
@@ -102,7 +102,7 @@ final public class AnkiDroidConfig {
             Map<String, String> hm = new HashMap<>();
             hm.put(FIELDS[0], EXAMPLE_KANJIS[idx]);
             hm.put(FIELDS[1], EXAMPLE_READINGS[idx]);
-            hm.put(FIELDS[2], EXAMPLE_MEANINGS[idx]);
+            hm.put(FIELDS[2], EXAMPLE_DEFINITION[idx]);
             hm.put(FIELDS[3], EXAMPLE_FURIGANA[idx]);
             hm.put(FIELDS[4], EXAMPLE_NOTES[idx]);
             hm.put(FIELDS[5], EXAMPLE_CONTEXT[idx]);

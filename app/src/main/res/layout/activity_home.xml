@@ -4,18 +4,20 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.waifusims.j_jlearnersdictionary.HomeActivity">
 
+    <!--FrameLayout allows stacking of windows-->
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
+
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
+
             <LinearLayout
                 android:id="@+id/home_main"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
-
 
                 <include
                     android:id="@+id/word_search"
@@ -25,10 +27,14 @@
                     android:id="@+id/word_definition"
                     layout="@layout/word_definition"/>
 
-
                 <include
                     android:id="@+id/anki_additional_fields"
                     layout="@layout/anki_additional_fields" />
+
+                <TextView
+                    android:id="@+id/garbage"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
 
             </LinearLayout>
         </ScrollView>

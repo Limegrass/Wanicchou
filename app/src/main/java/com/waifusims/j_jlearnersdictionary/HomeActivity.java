@@ -168,6 +168,16 @@ public class HomeActivity extends AppCompatActivity {
                 }
                 toast = Toast.makeText(context, message, searchCompleteToastDuration);
                 toast.show();
+
+                // TODO: LONG PRESS TO SEARCH FOR A RELATED
+                Map<String, Set<String>> relatedWords = SanseidoSearch.getRelatedWords(htmlTree);
+                for (String key : relatedWords.keySet()){
+                    Set<String> words = relatedWords.get(key);
+
+                    for (String word : words){
+                        mBinding.garbage.append(key + " " + word + "\n");
+                    }
+                }
             }
             else{
             }
@@ -259,7 +269,12 @@ public class HomeActivity extends AppCompatActivity {
         String[] fields = new String[fieldNames.length];
         fields[AnkiDroidConfig.FIELDS_INDEX_KANJI] = mBinding.wordDefinition.tvWord.getText().toString();
         fields[AnkiDroidConfig.FIELDS_INDEX_READING] = mBinding.wordDefinition.tvWord.getText().toString();
-        fields[AnkiDroidConfig.FIELDS_INDEX_MEANING] = mBinding.wordDefinition.tvDefinition.getText().toString();
+
+        // Anki uses HTML, so the newlines are not displayed without a double newline or a break
+        String definition = mBinding.wordDefinition.tvDefinition.getText().toString();
+        definition = definition.replaceAll("\n", "<br>");
+        fields[AnkiDroidConfig.FIELDS_INDEX_DEFINITION] = definition;
+
         fields[AnkiDroidConfig.FIELDS_INDEX_FURIGANA] = mBinding.wordDefinition.tvWord.getText().toString();
         String notes = mBinding.ankiAdditionalFields.etNotes.getText().toString();
         if(notes.equals(getResources().getString(R.string.notes_default))){
