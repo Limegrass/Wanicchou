@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import data.JapaneseVocabulary;
 import data.SanseidoSearch;
 import util.anki.AnkiDroidHelper;
 import util.anki.AnkiDroidConfig;
@@ -83,14 +84,7 @@ public class HomeActivity extends AppCompatActivity {
                         case KeyEvent.KEYCODE_DPAD_CENTER:
                         case KeyEvent.KEYCODE_ENTER:
                             String searchWord = mBinding.wordSearch.etSearchBox.getText().toString();
-                            URL url = null;
-                            try{
-                                url = SanseidoSearch.buildQueryURL(searchWord, true);
-                            }
-                            catch (MalformedURLException e){
-                                e.printStackTrace();
-                            }
-                            new SanseidoQueryTask().execute(url);
+                            new SanseidoQueryTask().execute(searchWord);
                             return true;
                         default:
                             //TODO: Would returning true do anything undesired? Find out
@@ -118,7 +112,7 @@ public class HomeActivity extends AppCompatActivity {
     }
 
 
-    public class SanseidoQueryTask extends AsyncTask<URL, Void, Document>{
+    public class SanseidoQueryTask extends AsyncTask<String, Void, SanseidoSearch>{
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
@@ -132,55 +126,51 @@ public class HomeActivity extends AppCompatActivity {
         }
 
         @Override
-        protected Document doInBackground(URL... urls) {
-            URL searchURL = urls[0];
-            Document htmlTree = null;
+        protected SanseidoSearch doInBackground(String... searchWords) {
+            String word= searchWords[0];
+            SanseidoSearch search = null;
             try{
-                htmlTree = SanseidoSearch.getSanseidoSource(searchURL);
+                search = new SanseidoSearch(word);
             }
             catch (IOException e){
                 e.printStackTrace();
             }
 
-            return htmlTree;
+            return search;
         }
 
         @Override
-        protected void onPostExecute(Document htmlTree) {
-            super.onPostExecute(htmlTree);
+        protected void onPostExecute(SanseidoSearch search) {
+            super.onPostExecute(search);
             toast.cancel();
+            String message = "";
+            final Context context = getApplicationContext();
+            final int searchCompleteToastDuration = Toast.LENGTH_SHORT;
 
-            if(htmlTree != null && !htmlTree.equals("")){
-                String definition = SanseidoSearch.getDefinition(htmlTree);
+            if(search!= null && !search.getVocabulary().getWord().equals("")){
+                message = getResources().getString(R.string.word_search_success);
 
-                final Context context = getApplicationContext();
-                final int searchCompleteToastDuration = Toast.LENGTH_SHORT;
-                String message;
+                JapaneseVocabulary vocabulary = search.getVocabulary();
+                String definition = vocabulary.getDefintion();
+                String searchedWord = vocabulary.getWord();
 
-                if (definition.equals("")){
-                    message = getResources().getString(R.string.word_search_failure);
-                }
-                else{
-                    String successfulWordSearched = SanseidoSearch.getWord(htmlTree);
-                    mBinding.wordDefinition.tvWord.setText(successfulWordSearched);
-                    mBinding.wordDefinition.tvDefinition.setText(definition);
-                    message = getResources().getString(R.string.word_search_success);
-                }
-                toast = Toast.makeText(context, message, searchCompleteToastDuration);
-                toast.show();
+
+                mBinding.wordDefinition.tvWord.setText(searchedWord);
+                mBinding.wordDefinition.tvDefinition.setText(definition);
 
                 // TODO: LONG PRESS TO SEARCH FOR A RELATED
-                Map<String, Set<String>> relatedWords = SanseidoSearch.getRelatedWords(htmlTree);
-                for (String key : relatedWords.keySet()){
-                    Set<String> words = relatedWords.get(key);
-
-                    for (String word : words){
-                        mBinding.garbage.append(key + " " + word + "\n");
+                for (String key : search.getRelatedWords().keySet()){
+                    Set<String> relatedWords = search.getRelatedWords().get(key);
+                    for (String relatedWord : relatedWords){
+                        mBinding.garbage.append(key + " " + relatedWord + "\n");
                     }
                 }
             }
             else{
+                message = getResources().getString(R.string.word_search_failure);
             }
+            toast = Toast.makeText(context, message, searchCompleteToastDuration);
+            toast.show();
         }
 
     }
