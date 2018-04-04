@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">J-J Learner\'s Dictionary</string>
+    <string name="app_name" translatable="true">J-J Learner\'s Dictionary</string>
 
     <!--word_definition related-->
     <string name="search_label" translatable="true">Search</string>

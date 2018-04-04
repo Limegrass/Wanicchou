@@ -1,5 +1,6 @@
 <resources>
-    <string name="app_name">J-J Learner\'s Dictionary</string>
+    <string name="app_name">和ー和学習者辞書</string>
+    <!--word_definition related-->
     <string name="search_label" translatable="true">検索</string>
     <string name="search_field_default" translatable="true">キーボードで入力して</string>
     <string name="word_label" translatable="true">単語</string>
@@ -9,5 +10,18 @@
     <string name="word_searching" translatable="true">検索中。。。</string>
     <string name="word_search_success" translatable="true">出来ました！</string>
     <string name="word_search_failure" translatable="true">その単語が見つけませんでした。。。</string>
+
+    <!--anki_additional_fields-->
+    <string name="context_label" translatable="true">文脈</string>
+    <string name="context_default" translatable="true">どこで見つけました？</string>
+
+    <string name="notes_label" translatable="true">メモ</string>
+    <string name="notes_default" translatable="true">記憶法など</string>
+
+    <!--fab related-->
     <string name="btn_text" translatable="true">暗記に送る</string>
+
+    <!--Toast strings-->
+    <string name="toast_permissions_denied" translatable="true">許可もらえませんでした</string>
+    <string name="toast_anki_added" translatable="true">暗記に遅れました！</string>
 </resources>
