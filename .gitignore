@@ -10,3 +10,4 @@
 *.un
 *.swp
 *~
+/app/release/*
