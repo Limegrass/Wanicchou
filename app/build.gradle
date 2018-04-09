@@ -17,18 +17,19 @@ android {
         }
     }
 
-    dependencies{
+    dependencies {
         compile 'org.jsoup:jsoup:1.10.3'
         compile 'com.ichi2.anki:api:1.1.0alpha5'
         compile 'com.android.support:design:26.1.0'
+        compile 'com.android.support:recyclerview-v7:26.1.0'
     }
 
-    testOptions{
-        unitTests{
+    testOptions {
+        unitTests {
             returnDefaultValues = true
         }
     }
-    dataBinding{
+    dataBinding {
         enabled = true
     }
 }

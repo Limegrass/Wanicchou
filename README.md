@@ -9,13 +9,21 @@ The floating action button sends the searched word into AnkiDroid
 
 ## TODO
 Add related words as links.
+
 Save searched words and definitions into an SQLiteDB for offline usage.
+
 SharedPreferences for which language dictionary the search should be conducted.
+
 Add a way to import sentences before Anki import.
+
 Add clozed type for the sentences.
+
 Add a way to import voices before Anki import.
+
 Label words by JLPT level.
+
 Everything about the UI.
+
 Figure out if it's even okay to use Sanseido's site like this.
 
 ## SOURCES

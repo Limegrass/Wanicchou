@@ -21,7 +21,7 @@ import java.util.Set;
  */
 
 public class SanseidoSearch {
-    private final static String TAG = "SanseidoSearch";
+    private final static String TAG = SanseidoSearch.class.getSimpleName();
 
     private final String SANSEIDO_WORD_ID = "word";
     private final String SANSEIDO_WORD_DEFINITION_ID = "wordBody";
@@ -72,6 +72,10 @@ public class SanseidoSearch {
         definitionSource = findDefinitionSource(html);
         relatedWords = findRelatedWords(html);
         vocabulary = new JapaneseVocabulary(wordSource, definitionSource);
+    }
+
+    public String getWordSource(){
+        return wordSource;
     }
 
     public JapaneseVocabulary getVocabulary(){

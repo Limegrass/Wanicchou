@@ -6,6 +6,8 @@
     <color name="colorPrimaryText">#FFFFFF</color>
     <color name="colorAccent">#FF3F80</color>
 
+    <color name="colorRelatedWord">#101010</color>
+    <color name="colorRelatedWordAlt">#202020</color>
 
     <color name="colorSecondaryText">#FFFFFF</color>
 
