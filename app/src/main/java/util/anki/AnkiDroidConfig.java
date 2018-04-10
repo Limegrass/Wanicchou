@@ -26,7 +26,7 @@ final public class AnkiDroidConfig {
     //Many fields will be unused at first
     public static final String[] FIELDS =
             {
-                    "Word", "Reading", "Definition", "Furigana", "Pitch", "Notes", "Context"
+                    "Word", "Reading", "Definition", "Furigana", "Tone", "Notes", "Context"
 //                    "Pitch", "Audio", "Grammar",
 //                    "Sentence", "SentenceFurigana","SentenceMeaning",
             };
@@ -35,7 +35,7 @@ final public class AnkiDroidConfig {
     public static final int FIELDS_INDEX_READING = 1;
     public static final int FIELDS_INDEX_DEFINITION = 2;
     public static final int FIELDS_INDEX_FURIGANA = 3;
-    public static final int FIELDS_INDEX_PITCH = 4;
+    public static final int FIELDS_INDEX_TONE = 4;
     public static final int FIELDS_INDEX_NOTES  = 5;
     public static final int FIELDS_INDEX_CONTEXT = 6;
 
@@ -56,8 +56,8 @@ final public class AnkiDroidConfig {
             "@font-face { font-family: \"NotoSansJP\"; src: url('_NotoSansJP-Regular.otf'); }\n" +
             "@font-face { font-family: \"NotoSansJP\"; src: url('_NotoSansJP-Bold.otf'); font-weight: bold; }\n" +
             "\n" +
-            ".big { font-size: 24px; }\n" +
-            ".small { font-size: 12px;}\n" +
+            ".big { font-size: 48px; }\n" +
+            ".small { font-size: 18px;}\n" +
             ".highlight{ color: cyan }\n" +
             "ruby rt { visibility: hidden; }\n" +
             "ruby:hover rt { visibility: visible; }\n";

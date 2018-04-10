@@ -255,7 +255,7 @@ public class HomeActivity extends AppCompatActivity {
         fields[AnkiDroidConfig.FIELDS_INDEX_DEFINITION] = definition;
 
         fields[AnkiDroidConfig.FIELDS_INDEX_FURIGANA] = mLastSearched.getVocabulary().getFurigana();
-        fields[AnkiDroidConfig.FIELDS_INDEX_PITCH] = mLastSearched.getVocabulary().getTone();
+        fields[AnkiDroidConfig.FIELDS_INDEX_TONE] = mLastSearched.getVocabulary().getTone();
 
         String notes = mBinding.ankiAdditionalFields.etNotes.getText().toString();
         fields[AnkiDroidConfig.FIELDS_INDEX_NOTES] = notes;

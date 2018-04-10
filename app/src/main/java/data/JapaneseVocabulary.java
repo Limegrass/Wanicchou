@@ -13,34 +13,26 @@ import java.util.regex.Pattern;
 public class JapaneseVocabulary implements Parcelable {
 
     // Regexes, not sure if they should be const static.
-    // Most vocab are enclosed in the braces.
     public static final String EXACT_WORD_REGEX = "(?<=［).*(?=］)";
-
-    // Try to find a word beginning with or enclosed with Kanji
-    public static final String WORD_WITH_KANJI_REGEX =
-            "\\p{Han}+[\\p{Hiragana}|\\p{Katakana}]*\\p{Han}*";
-    // For isolating Kanji
-    public static final String KANJI_ONLY_REGEX = "\\p{Han}";
-
-    // For finding only the kana of a word.
-    public static final String KANA_REGEX = "[\\p{Hiragana}|\\p{Katakana}]+";
-
-    public static final String READING_REGEX =
-            "[\\p{Hiragana}|\\p{Katakana}]+(?=($|[\\p{Han}０-９]|\\d|\\s))";
-    public static final String TONE_REGEX = "[\\d０-９]+";
+    public static final String KANJI_REGEX = "[一-龯][ぁ-んァ-ンー]*";
+    public static final String KANJI_ONLY_REGEX = "[一-龯]*";
+    public static final String KANA_REGEX = "[ぁ-んァ-ンー]+";
+    public static final String READING_REGEX = "[ぁ-んァ-ンー]+(?=($|[一-龯０-９]|\\d|\\s))";
+    //TODO: TONE REGEX AND SET TONE
 
     private String word;
     private String furigana;
+    private String kanji;
     private String reading;
     private String defintion;
-    private String pitch;
+    private String tone;
 
     public JapaneseVocabulary(String wordSource, String definitionSource){
         defintion = definitionSource;
         word = isolateWord(wordSource);
-        reading = isolateReading(wordSource);
-        pitch = isolatePitch(wordSource);
-        furigana = isolateFurigana(wordSource);
+        furigana = isolateFurigana(word);
+        kanji = isolateKanji(word);
+        reading = isolateReading(word);
     }
 
     // TODO: Maybe do something in Sanseido search for related words so this can be private
@@ -52,7 +44,7 @@ public class JapaneseVocabulary implements Parcelable {
      */
     public static String isolateWord(String wordSource){
         Matcher exactMatcher = Pattern.compile(EXACT_WORD_REGEX).matcher(wordSource);
-        Matcher kanjiMatcher = Pattern.compile(WORD_WITH_KANJI_REGEX).matcher(wordSource);
+        Matcher kanjiMatcher = Pattern.compile(KANJI_REGEX).matcher(wordSource);
         Matcher kanaMatcher = Pattern.compile(KANA_REGEX).matcher(wordSource);
 
         if(exactMatcher.find()){
@@ -77,6 +69,10 @@ public class JapaneseVocabulary implements Parcelable {
         return furigana;
     }
 
+    public String getKanji() {
+        return kanji;
+    }
+
     public String getReading() {
         return reading;
     }
@@ -85,65 +81,45 @@ public class JapaneseVocabulary implements Parcelable {
         return defintion;
     }
     public String getTone(){
-        return pitch;
-    }
-
-    /**
-     * Finds the tone from the given word source information
-     * @param wordSource the raw information about the word
-     * @return a string of the pitch of the word
-     */
-    private String isolatePitch(String wordSource){
-        if(wordSource == null || wordSource.equals("")){
-            return "";
-        }
-
-        String tone = "";
-        Matcher toneMatcher = Pattern.compile(TONE_REGEX).matcher(wordSource);
-        if (toneMatcher.find()){
-            tone = toneMatcher.group(0).toString();
-        }
         return tone;
     }
 
 
-    private String isolateKanji(String wordSource){
-        if(wordSource == null || wordSource.equals("")){
+    private String isolateKanji(String word){
+        if(word == null){
             return "";
         }
 
-        String kanjiMatched = "";
-        Matcher kanjiOnlyMatcher = Pattern.compile(KANJI_ONLY_REGEX).matcher(wordSource);
-        while (kanjiOnlyMatcher.find()){
-            kanjiMatched = kanjiOnlyMatcher.group(0).toString();
-            int size = kanjiOnlyMatcher.groupCount();
+        Matcher kanjiOnlyMatcher = Pattern.compile(KANJI_ONLY_REGEX).matcher(word);
+        if (kanjiOnlyMatcher.find()){
+            return kanjiOnlyMatcher.group(0).toString();
         }
-        return kanjiMatched;
+        return word;
     }
 
     //TODO: Method to return Furigana in Anki format as string
     // Could use J-E dic for consistency instead of scraping.
-    private String isolateFurigana(String wordSource){
-        if(wordSource == null || wordSource.equals("")){
+    private String isolateFurigana(String word){
+        if(word == null){
             return "";
         }
 
-        String isolatedWord = isolateWord(wordSource);
-        String kanji = isolateKanji(wordSource);
+        String isolatedWord = isolateWord(word);
+        String kanji = isolateKanji(word);
         // TODO: FIX THIS CRASHING EVERYTHING
         return isolatedWord.substring(0, kanji.length());
     }
 
-    private String isolateReading(String wordSource){
-        if(wordSource == null || wordSource.equals("")){
+    private String isolateReading(String word){
+        if(word == null){
             return "";
         }
 
-        Matcher readingMatcher = Pattern.compile(READING_REGEX).matcher(wordSource);
+        Matcher readingMatcher = Pattern.compile(READING_REGEX).matcher(word);
         if(readingMatcher.find()){
             return readingMatcher.group(0).toString();
         }
-        return wordSource;
+        return word;
     }
 
     //TODO: Separate and format each definition
@@ -161,9 +137,10 @@ public class JapaneseVocabulary implements Parcelable {
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeString(word);
         parcel.writeString(furigana);
+        parcel.writeString(kanji);
         parcel.writeString(reading);
         parcel.writeString(defintion);
-        parcel.writeString(pitch);
+        parcel.writeString(tone);
     }
 
     public static final Parcelable.Creator<JapaneseVocabulary> CREATOR
@@ -182,8 +159,9 @@ public class JapaneseVocabulary implements Parcelable {
     private JapaneseVocabulary(Parcel parcel){
         word = parcel.readString();
         furigana = parcel.readString();
+        kanji = parcel.readString();
         reading = parcel.readString();
         defintion = parcel.readString();
-        pitch = parcel.readString();
+        tone = parcel.readString();
     }
 }
