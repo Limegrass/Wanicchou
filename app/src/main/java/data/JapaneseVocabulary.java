@@ -19,8 +19,6 @@ public class JapaneseVocabulary implements Parcelable {
     // Try to find a word beginning with or enclosed with Kanji
     public static final String WORD_WITH_KANJI_REGEX =
             "\\p{Han}+[\\p{Hiragana}|\\p{Katakana}]*\\p{Han}*";
-    // For isolating Kanji
-    public static final String KANJI_ONLY_REGEX = "\\p{Han}";
 
     // For finding only the kana of a word.
     public static final String KANA_REGEX = "[\\p{Hiragana}|\\p{Katakana}]+";
@@ -40,7 +38,7 @@ public class JapaneseVocabulary implements Parcelable {
         word = isolateWord(wordSource);
         reading = isolateReading(wordSource);
         pitch = isolatePitch(wordSource);
-        furigana = isolateFurigana(wordSource);
+        furigana = isolateFurigana(word, reading);
     }
 
     // TODO: Maybe do something in Sanseido search for related words so this can be private
@@ -107,31 +105,15 @@ public class JapaneseVocabulary implements Parcelable {
     }
 
 
-    private String isolateKanji(String wordSource){
-        if(wordSource == null || wordSource.equals("")){
-            return "";
-        }
-
-        String kanjiMatched = "";
-        Matcher kanjiOnlyMatcher = Pattern.compile(KANJI_ONLY_REGEX).matcher(wordSource);
-        while (kanjiOnlyMatcher.find()){
-            kanjiMatched = kanjiOnlyMatcher.group(0).toString();
-            int size = kanjiOnlyMatcher.groupCount();
-        }
-        return kanjiMatched;
-    }
 
     //TODO: Method to return Furigana in Anki format as string
     // Could use J-E dic for consistency instead of scraping.
-    private String isolateFurigana(String wordSource){
-        if(wordSource == null || wordSource.equals("")){
-            return "";
+    private String isolateFurigana(String isolatedWord, String isolatedReading){
+        if (isolatedWord.equals(isolatedReading)){
+            return isolatedReading;
         }
 
-        String isolatedWord = isolateWord(wordSource);
-        String kanji = isolateKanji(wordSource);
-        // TODO: FIX THIS CRASHING EVERYTHING
-        return isolatedWord.substring(0, kanji.length());
+        return isolatedWord + "[" + isolatedReading + "]";
     }
 
     private String isolateReading(String wordSource){

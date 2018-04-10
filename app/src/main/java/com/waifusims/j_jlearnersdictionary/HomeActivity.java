@@ -29,6 +29,7 @@ import android.view.KeyEvent;
 import android.widget.Toast;
 
 //TODO:  Horizontal UI
+//TODO: OnPause, OnResume
 public class HomeActivity extends AppCompatActivity {
     public static final String LOG_TAG = "JJLD";
     private static final int ADD_PERM_REQUEST = 0;
@@ -238,6 +239,7 @@ public class HomeActivity extends AppCompatActivity {
 
     //TODO: Change click to expand a menu and add associated UI elements
     //TODO: Maybe implement a clozed type when sentence search is included
+    //TODO: Duplicate checking
     /**
      * Use the instant-add API to add flashcards directly to AnkiDroid.
      */
