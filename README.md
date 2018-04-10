@@ -26,6 +26,10 @@ Everything about the UI.
 
 Figure out if it's even okay to use Sanseido's site like this.
 
+Parse definition text for possible words to search instead of having it as an EditText for users to copy and paste themselves.
+
+Furigana definition text after parsing, maybe with JE dict so there's less web requests.
+
 ## SOURCES
 ['ankidroid/apisample'](https://github.com/ankidroid/apisample):
     app/java/util.anki/AnkiDroidHelper.java

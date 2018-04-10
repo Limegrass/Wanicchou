@@ -23,8 +23,7 @@
 
         <EditText
             android:id="@+id/et_context"
-            tools:text="@string/context_default"
-            android:text="@string/context_default"
+            android:hint="@string/context_hint"
             android:inputType="text"
             app:layout_constraintLeft_toRightOf="@id/tv_context_label"
             app:layout_constraintRight_toRightOf="parent"
@@ -52,8 +51,7 @@
             android:layout_height="wrap_content" />
         <EditText
             android:id="@+id/et_notes"
-            tools:text="@string/notes_default"
-            android:text="@string/notes_default"
+            android:hint="@string/notes_hint"
             android:inputType="textMultiLine"
             app:layout_constraintLeft_toRightOf="@id/tv_notes_label"
             app:layout_constraintRight_toRightOf="parent"
