@@ -28,7 +28,6 @@ import android.view.View.OnKeyListener;
 import android.view.KeyEvent;
 import android.widget.Toast;
 
-//TODO: Move ListItemClickListener implementation to a different activity
 public class HomeActivity extends AppCompatActivity {
     public static final String LOG_TAG = "JJLD";
     private static final int ADD_PERM_REQUEST = 0;
@@ -73,8 +72,10 @@ public class HomeActivity extends AppCompatActivity {
                         new Intent(getApplicationContext(), RelatedWordsActivity.class);
                 intentStartRelatedWordsActivity
                         .putExtra(getString(R.string.key_related_words),
-                        mLastSearched);
+                                mLastSearched);
                 startActivity(intentStartRelatedWordsActivity);
+                //TODO: Keep searched word information when coming back from child activity
+                // Unless a new word was selected from the child activity
 
             }
         });
@@ -141,16 +142,7 @@ public class HomeActivity extends AppCompatActivity {
                 mBinding.wordDefinition.tvWord.setText(search.getWordSource());
                 mBinding.wordDefinition.tvDefinition.setText(definition);
 
-                // TODO: LONG PRESS TO SEARCH FOR A RELATED
-                for (String key : search.getRelatedWords().keySet()){
-                    Set<String> relatedWords = search.getRelatedWords().get(key);
-                    for (String relatedWord : relatedWords){
-                        mBinding.garbage.append(key + " " + relatedWord + "\n");
-                    }
-                }
-
-                mBinding.fab.setVisibility(View.VISIBLE);
-                mBinding.btnRelatedWords.setVisibility(View.VISIBLE);
+                showAnkiRelatedUIElements();
 
             }
             else{
@@ -160,6 +152,15 @@ public class HomeActivity extends AppCompatActivity {
             mToast.show();
         }
 
+    }
+
+    private void showAnkiRelatedUIElements(){
+        mBinding.fab.setVisibility(View.VISIBLE);
+        mBinding.btnRelatedWords.setVisibility(View.VISIBLE);
+        mBinding.ankiAdditionalFields.tvContextLabel.setVisibility(View.VISIBLE);
+        mBinding.ankiAdditionalFields.tvNotesLabel.setVisibility(View.VISIBLE);
+        mBinding.ankiAdditionalFields.etContext.setVisibility(View.VISIBLE);
+        mBinding.ankiAdditionalFields.etNotes.setVisibility(View.VISIBLE);
     }
 
 

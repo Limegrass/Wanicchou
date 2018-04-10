@@ -106,7 +106,8 @@ public class JapaneseVocabulary implements Parcelable {
 
         String isolatedWord = isolateWord(word);
         String kanji = isolateKanji(word);
-        return isolatedWord.substring(0, kanji.length()-1);
+        // TODO: FIX THIS CRASHING EVERYTHING
+        return isolatedWord.substring(0, kanji.length());
     }
 
     private String isolateReading(String word){

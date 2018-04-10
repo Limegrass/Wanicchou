@@ -25,7 +25,7 @@ public class WordAdapter extends RecyclerView.Adapter<WordAdapter.WordViewHolder
     // TODO: Generalize for multiple dictionary selection, or restrict user to select only 1 dictionary
     // This may require changing from Map<String, Set<String> > in others to being just a vector
     private List<String> mWords;
-    // TODO: Bandaid solution, fix later in constructor.
+    // TODO: Bandaid solution, fix later in constructor. (See above todo)
     private String mDictionary;
 
     public WordAdapter(Map<String, Set<String>> words, ListItemClickListener listener){

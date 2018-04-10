@@ -21,7 +21,6 @@ public class RelatedWordsActivity extends AppCompatActivity
     private ActivityRelatedWordsBinding mBinding;
     private Toast mToast;
 
-    //TODO: Temp location for RecyclerView, move to separate activity
     private WordAdapter mAdapter;
     private RecyclerView mWordList;
 

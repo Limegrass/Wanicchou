@@ -31,11 +31,6 @@
                     android:id="@+id/anki_additional_fields"
                     layout="@layout/anki_additional_fields" />
 
-                <TextView
-                    android:id="@+id/garbage"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
-
                 <Button
                     android:id="@+id/btn_related_words"
                     tools:text="@string/btn_related_words"
