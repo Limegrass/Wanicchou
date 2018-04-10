@@ -7,10 +7,10 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -24,11 +24,12 @@ public class WordAdapter extends RecyclerView.Adapter<WordAdapter.WordViewHolder
 
     // TODO: Generalize for multiple dictionary selection, or restrict user to select only 1 dictionary
     // This may require changing from Map<String, Set<String> > in others to being just a vector
-    private ArrayList<String> mWords;
+    private List<String> mWords;
     // TODO: Bandaid solution, fix later in constructor.
     private String mDictionary;
 
     public WordAdapter(Map<String, Set<String>> words, ListItemClickListener listener){
+        mWords = new ArrayList<>();
 
         for (String key : words.keySet()){
             for(String word : words.get(key)){
@@ -43,7 +44,7 @@ public class WordAdapter extends RecyclerView.Adapter<WordAdapter.WordViewHolder
     public WordAdapter.WordViewHolder onCreateViewHolder(ViewGroup parent,
                                                      int viewType){
         Context context = parent.getContext();
-        int wordLayoutId = R.layout.related_word;
+        int wordLayoutId = R.layout.word_list_item;
         LayoutInflater inflater = LayoutInflater.from(context);
         boolean attachToParent = false;
         View view = inflater.inflate(wordLayoutId, parent, attachToParent);
@@ -67,14 +68,14 @@ public class WordAdapter extends RecyclerView.Adapter<WordAdapter.WordViewHolder
     }
 
     class WordViewHolder extends RecyclerView.ViewHolder implements OnClickListener{
-        TextView tvDictionary;
-        TextView tvWord;
+        private TextView tvDictionary;
+        private TextView tvWord;
 
         public WordViewHolder(View view){
             super(view);
 
-            tvDictionary = (TextView) view.findViewById(R.id.tv_dictionary);
-            tvWord = (TextView) view.findViewById(R.id.tv_related_word);
+            tvDictionary = view.findViewById(R.id.tv_word_dic_type);
+            tvWord = view.findViewById(R.id.tv_word_item);
             view.setOnClickListener(this);
         }
 

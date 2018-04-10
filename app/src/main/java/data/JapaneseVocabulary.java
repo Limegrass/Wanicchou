@@ -1,5 +1,8 @@
 package data;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -7,7 +10,7 @@ import java.util.regex.Pattern;
  * Created by Limegrass on 4/4/2018.
  */
 
-public class JapaneseVocabulary {
+public class JapaneseVocabulary implements Parcelable {
 
     // Regexes, not sure if they should be const static.
     public static final String EXACT_WORD_REGEX = "(?<=［).*(?=］)";
@@ -103,7 +106,7 @@ public class JapaneseVocabulary {
 
         String isolatedWord = isolateWord(word);
         String kanji = isolateKanji(word);
-        return isolatedWord.substring(0, kanji.length());
+        return isolatedWord.substring(0, kanji.length()-1);
     }
 
     private String isolateReading(String word){
@@ -122,5 +125,42 @@ public class JapaneseVocabulary {
     public static String[] getDefinitions(String definitions){
         //Many are separated by ▼, so can use that to split the string or as a regex.
         return null;
+    }
+
+    @Override
+    public int describeContents() {
+        return hashCode();
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeString(word);
+        parcel.writeString(furigana);
+        parcel.writeString(kanji);
+        parcel.writeString(reading);
+        parcel.writeString(defintion);
+        parcel.writeString(tone);
+    }
+
+    public static final Parcelable.Creator<JapaneseVocabulary> CREATOR
+            = new Parcelable.Creator<JapaneseVocabulary>(){
+        @Override
+        public JapaneseVocabulary createFromParcel(Parcel parcel) {
+            return new JapaneseVocabulary(parcel);
+        }
+
+        @Override
+        public JapaneseVocabulary[] newArray(int size) {
+            return new JapaneseVocabulary[size];
+        }
+    };
+
+    private JapaneseVocabulary(Parcel parcel){
+        word = parcel.readString();
+        furigana = parcel.readString();
+        kanji = parcel.readString();
+        reading = parcel.readString();
+        defintion = parcel.readString();
+        tone = parcel.readString();
     }
 }
