@@ -33,6 +33,7 @@ import android.widget.Toast;
 public class HomeActivity extends AppCompatActivity {
     public static final String LOG_TAG = "JJLD";
     private static final int ADD_PERM_REQUEST = 0;
+    private static final int HOME_ACTIVITY_REQUEST_CODE = 42;
 
     private ActivityHomeBinding mBinding;
     private AnkiDroidHelper mAnkiDroid;
@@ -75,7 +76,8 @@ public class HomeActivity extends AppCompatActivity {
                 intentStartRelatedWordsActivity
                         .putExtra(getString(R.string.key_related_words),
                                 mLastSearched);
-                startActivity(intentStartRelatedWordsActivity);
+                startActivityForResult(intentStartRelatedWordsActivity, HOME_ACTIVITY_REQUEST_CODE);
+
                 //TODO: Keep searched word information when coming back from child activity
                 // Unless a new word was selected from the child activity
 
@@ -94,10 +96,42 @@ public class HomeActivity extends AppCompatActivity {
             }
         });
 
-
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == HOME_ACTIVITY_REQUEST_CODE) {
+            switch (resultCode) {
+                case RESULT_OK:
+                    String key = getString(R.string.key_desired_related_word);
+                    if (data.hasExtra(key)) {
+                        String desiredRelatedWord =
+                                data.getExtras().getString(key);
+                        mBinding.wordSearch.etSearchBox.setText(desiredRelatedWord);
+                        new SanseidoQueryTask().execute(desiredRelatedWord);
+                    }
+                    mToast.cancel();
+                    Context context = this;
+                    String msg = getString(R.string.toast_searching_related);
+                    int duration = Toast.LENGTH_SHORT;
+                    mToast = Toast.makeText(context, msg, duration);
+                    mToast.show();
+                    break;
+                default:
+            }
+        }
+    }
 
     public class SanseidoQueryTask extends AsyncTask<String, Void, SanseidoSearch>{
         @Override

@@ -31,10 +31,12 @@
     <!--Toast strings-->
     <string name="toast_permissions_denied" translatable="true">Permissions denied.</string>
     <string name="toast_anki_added" translatable="true">Card added to Anki!</string>
+    <string name="toast_searching_related" translatable="true">Searching for selected word...</string>
 
     <!--related words activity-->
     <string name="title_activity_related_words" translatable="true">Related Words</string>
 
-    <string name="key_related_words" translatable="false">RelatedWords</string>
+    <string name="key_related_words" translatable="false">relatedWords</string>
+    <string name="key_desired_related_word" translatable="false">desiredRelatedWord</string>
 
 </resources>

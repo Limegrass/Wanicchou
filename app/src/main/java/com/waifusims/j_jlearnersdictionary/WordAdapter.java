@@ -4,7 +4,6 @@ import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -24,18 +23,18 @@ public class WordAdapter extends RecyclerView.Adapter<WordAdapter.WordViewHolder
 
     // TODO: Generalize for multiple dictionary selection, or restrict user to select only 1 dictionary
     // This may require changing from Map<String, Set<String> > in others to being just a vector
-    private List<String> mWords;
+    private List<String> relatedWords;
     // TODO: Bandaid solution, fix later in constructor. (See above todo)
-    private String mDictionary;
+    private String dictionary;
 
     public WordAdapter(Map<String, Set<String>> words, ListItemClickListener listener){
-        mWords = new ArrayList<>();
+        relatedWords = new ArrayList<>();
 
         for (String key : words.keySet()){
             for(String word : words.get(key)){
-                mWords.add(word);
+                relatedWords.add(word);
             }
-            mDictionary = key;
+            dictionary = key;
         }
         mOnClickListener = listener;
     }
@@ -62,12 +61,16 @@ public class WordAdapter extends RecyclerView.Adapter<WordAdapter.WordViewHolder
         holder.bind(position);
     }
 
-    @Override
-    public int getItemCount() {
-        return mWords.size();
+    public String getWordAtPosition(int position){
+        return relatedWords.get(position);
     }
 
-    class WordViewHolder extends RecyclerView.ViewHolder implements OnClickListener{
+    @Override
+    public int getItemCount() {
+        return relatedWords.size();
+    }
+
+    class WordViewHolder extends RecyclerView.ViewHolder implements View.OnLongClickListener{
         private TextView tvDictionary;
         private TextView tvWord;
 
@@ -76,18 +79,21 @@ public class WordAdapter extends RecyclerView.Adapter<WordAdapter.WordViewHolder
 
             tvDictionary = view.findViewById(R.id.tv_word_dic_type);
             tvWord = view.findViewById(R.id.tv_word_item);
-            view.setOnClickListener(this);
+            view.setOnLongClickListener(this);
         }
 
         void bind(int listIndex){
-            tvDictionary.setText(mDictionary);
-            tvWord.setText(mWords.get(listIndex));
+            tvDictionary.setText(dictionary);
+            tvWord.setText(relatedWords.get(listIndex));
         }
 
+
+
         @Override
-        public void onClick(View view) {
+        public boolean onLongClick(View view) {
             int clickedPosition = getAdapterPosition();
             mOnClickListener.onListItemClick(clickedPosition);
+            return false;
         }
     }
 }
