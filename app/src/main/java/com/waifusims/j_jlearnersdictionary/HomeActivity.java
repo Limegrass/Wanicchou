@@ -28,6 +28,7 @@ import android.view.View.OnKeyListener;
 import android.view.KeyEvent;
 import android.widget.Toast;
 
+//TODO:  Horizontal UI
 public class HomeActivity extends AppCompatActivity {
     public static final String LOG_TAG = "JJLD";
     private static final int ADD_PERM_REQUEST = 0;
@@ -88,7 +89,7 @@ public class HomeActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view) {
-                addWordToAnki(view);
+                addWordToAnki();
             }
         });
 
@@ -167,7 +168,7 @@ public class HomeActivity extends AppCompatActivity {
     public void onRequestPermissionsResult (int requestCode, @NonNull String[] permissions,
                                             @NonNull int[] grantResults) {
         if (requestCode==ADD_PERM_REQUEST && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            addCardsToAnkiDroid(AnkiDroidConfig.getExampleData());
+            addWordToAnki();
         } else {
             mToast.cancel();
             Context context = HomeActivity.this;
@@ -239,22 +240,23 @@ public class HomeActivity extends AppCompatActivity {
     //TODO: Maybe implement a clozed type when sentence search is included
     /**
      * Use the instant-add API to add flashcards directly to AnkiDroid.
-     * @param view the view the floating action button exists in
      */
-    private void addWordToAnki(View view){
+    private void addWordToAnki(){
         long deckId = getDeckId();
         long modelId = getModelId();
         String[] fieldNames = mAnkiDroid.getApi().getFieldList(modelId);
         String[] fields = new String[fieldNames.length];
-        fields[AnkiDroidConfig.FIELDS_INDEX_KANJI] = mBinding.wordDefinition.tvWord.getText().toString();
-        fields[AnkiDroidConfig.FIELDS_INDEX_READING] = mBinding.wordDefinition.tvWord.getText().toString();
+        fields[AnkiDroidConfig.FIELDS_INDEX_WORD] = mLastSearched.getVocabulary().getWord();
+        fields[AnkiDroidConfig.FIELDS_INDEX_READING] = mLastSearched.getVocabulary().getReading();
 
         // Anki uses HTML, so the newlines are not displayed without a double newline or a break
         String definition = mBinding.wordDefinition.tvDefinition.getText().toString();
         definition = definition.replaceAll("\n", "<br>");
         fields[AnkiDroidConfig.FIELDS_INDEX_DEFINITION] = definition;
 
-        fields[AnkiDroidConfig.FIELDS_INDEX_FURIGANA] = mBinding.wordDefinition.tvWord.getText().toString();
+        fields[AnkiDroidConfig.FIELDS_INDEX_FURIGANA] = mLastSearched.getVocabulary().getFurigana();
+        fields[AnkiDroidConfig.FIELDS_INDEX_TONE] = mLastSearched.getVocabulary().getTone();
+
         String notes = mBinding.ankiAdditionalFields.etNotes.getText().toString();
         fields[AnkiDroidConfig.FIELDS_INDEX_NOTES] = notes;
         String wordContext = mBinding.ankiAdditionalFields.etContext.getText().toString();
