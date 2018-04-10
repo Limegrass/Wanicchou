@@ -1,15 +1,16 @@
 <resources>
     <string name="app_name" translatable="true">J-J Learner\'s Dictionary</string>
 
+    <!--home_activity-->
     <!--word_definition related-->
     <string name="search_label" translatable="true">Search</string>
-    <string name="search_field_default" translatable="true">Enter a word</string>
+    <string name="search_field_hint" translatable="true">Enter a word</string>
 
     <string name="word_label" translatable="true">Word</string>
-    <string name="word_default" translatable="true">Search for something!</string>
+    <string name="word_hint" translatable="true">Search for something!</string>
 
     <string name="definition_label" translatable="true">Definition</string>
-    <string name="definition_default" translatable="true">No word found</string>
+    <string name="definition_hint" translatable="true">No word found</string>
 
     <string name="word_searching" translatable="true">Searching...</string>
     <string name="word_search_success" translatable="true">Word found!</string>
@@ -17,15 +18,25 @@
 
     <!--anki_additional_fields-->
     <string name="context_label" translatable="true">Context</string>
-    <string name="context_default" translatable="true">Where is it found?</string>
+    <string name="context_hint" translatable="true">Where is it found?</string>
 
     <string name="notes_label" translatable="true">Notes</string>
-    <string name="notes_default" translatable="true">Extras/Mnemonic</string>
+    <string name="notes_hint" translatable="true">Extras/Mnemonic</string>
 
     <!--fab related-->
     <string name="btn_text" translatable="true">Send to Anki</string>
 
+    <string name="btn_related_words">Go to related words</string>
+
     <!--Toast strings-->
     <string name="toast_permissions_denied" translatable="true">Permissions denied.</string>
     <string name="toast_anki_added" translatable="true">Card added to Anki!</string>
+    <string name="toast_searching_related" translatable="true">Searching for selected word...</string>
+
+    <!--related words activity-->
+    <string name="title_activity_related_words" translatable="true">Related Words</string>
+
+    <string name="key_related_words" translatable="false">relatedWords</string>
+    <string name="key_desired_related_word" translatable="false">desiredRelatedWord</string>
+
 </resources>

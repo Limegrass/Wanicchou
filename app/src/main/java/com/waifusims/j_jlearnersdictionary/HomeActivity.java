@@ -1,6 +1,7 @@
 package com.waifusims.j_jlearnersdictionary;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.databinding.DataBindingUtil;
 import android.os.AsyncTask;
@@ -12,11 +13,7 @@ import android.view.View;
 
 import com.waifusims.j_jlearnersdictionary.databinding.ActivityHomeBinding;
 
-import org.jsoup.nodes.Document;
-
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -31,13 +28,17 @@ import android.view.View.OnKeyListener;
 import android.view.KeyEvent;
 import android.widget.Toast;
 
+//TODO:  Horizontal UI
+//TODO: OnPause, OnResume
 public class HomeActivity extends AppCompatActivity {
     public static final String LOG_TAG = "JJLD";
     private static final int ADD_PERM_REQUEST = 0;
+    private static final int HOME_ACTIVITY_REQUEST_CODE = 42;
 
     private ActivityHomeBinding mBinding;
     private AnkiDroidHelper mAnkiDroid;
-    protected Toast toast;
+    private SanseidoSearch mLastSearched;
+    private Toast mToast;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,34 +48,6 @@ public class HomeActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_home);
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_home);
-
-        mBinding.wordSearch.etSearchBox.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View view, boolean b) {
-                if(mBinding.wordSearch.etSearchBox.getText().toString()
-                        .equals(getResources().getString(R.string.search_field_default))) {
-                    mBinding.wordSearch.etSearchBox.getText().clear();
-                }
-            }
-        });
-        mBinding.ankiAdditionalFields.etContext. setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View view, boolean b) {
-                if(mBinding.ankiAdditionalFields.etContext.getText().toString()
-                        .equals(getResources().getString(R.string.context_default))) {
-                    mBinding.ankiAdditionalFields.etContext.getText().clear();
-                }
-            }
-        });
-        mBinding.ankiAdditionalFields.etNotes.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View view, boolean b) {
-                if(mBinding.ankiAdditionalFields.etNotes.getText().toString()
-                        .equals(getResources().getString(R.string.notes_default))) {
-                    mBinding.ankiAdditionalFields.etNotes.getText().clear();
-                }
-            }
-        });
 
         mBinding.wordSearch.etSearchBox.setOnKeyListener(new OnKeyListener() {
             @Override
@@ -95,6 +68,22 @@ public class HomeActivity extends AppCompatActivity {
             }
         });
 
+        mBinding.btnRelatedWords.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intentStartRelatedWordsActivity =
+                        new Intent(getApplicationContext(), RelatedWordsActivity.class);
+                intentStartRelatedWordsActivity
+                        .putExtra(getString(R.string.key_related_words),
+                                mLastSearched);
+                startActivityForResult(intentStartRelatedWordsActivity, HOME_ACTIVITY_REQUEST_CODE);
+
+                //TODO: Keep searched word information when coming back from child activity
+                // Unless a new word was selected from the child activity
+
+            }
+        });
+
         //TODO: Fix it so it requests on add card, not on start up. Avoid crashes before addition.
         if (mAnkiDroid.shouldRequestPermission()) {
             mAnkiDroid.requestPermission(HomeActivity.this, ADD_PERM_REQUEST);
@@ -103,14 +92,46 @@ public class HomeActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view) {
-                addWordToAnki(view);
+                addWordToAnki();
             }
         });
-    // Add all data using AnkiDroid provider
-//    addCardsToAnkiDroid(AnkiDroidConfig.getExampleData());
 
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == HOME_ACTIVITY_REQUEST_CODE) {
+            switch (resultCode) {
+                case RESULT_OK:
+                    String key = getString(R.string.key_desired_related_word);
+                    if (data.hasExtra(key)) {
+                        String desiredRelatedWord =
+                                data.getExtras().getString(key);
+                        mBinding.wordSearch.etSearchBox.setText(desiredRelatedWord);
+                        new SanseidoQueryTask().execute(desiredRelatedWord);
+                    }
+                    mToast.cancel();
+                    Context context = this;
+                    String msg = getString(R.string.toast_searching_related);
+                    int duration = Toast.LENGTH_SHORT;
+                    mToast = Toast.makeText(context, msg, duration);
+                    mToast.show();
+                    break;
+                default:
+            }
+        }
+    }
 
     public class SanseidoQueryTask extends AsyncTask<String, Void, SanseidoSearch>{
         @Override
@@ -118,11 +139,11 @@ public class HomeActivity extends AppCompatActivity {
             super.onPreExecute();
 
             final Context context = getApplicationContext();
-            final String searchingText = getResources().getString(R.string.word_searching);
+            final String searchingText = getString(R.string.word_searching);
             final int searchingToastDuration = Toast.LENGTH_SHORT;
 
-            toast = Toast.makeText(context, searchingText, searchingToastDuration);
-            toast.show();
+            mToast = Toast.makeText(context, searchingText, searchingToastDuration);
+            mToast.show();
         }
 
         @Override
@@ -142,50 +163,54 @@ public class HomeActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(SanseidoSearch search) {
             super.onPostExecute(search);
-            toast.cancel();
-            String message = "";
+            mToast.cancel();
+            String message;
             final Context context = getApplicationContext();
             final int searchCompleteToastDuration = Toast.LENGTH_SHORT;
 
             if(search!= null && !search.getVocabulary().getWord().equals("")){
-                message = getResources().getString(R.string.word_search_success);
+                mLastSearched = search;
+                message = getString(R.string.word_search_success);
 
                 JapaneseVocabulary vocabulary = search.getVocabulary();
                 String definition = vocabulary.getDefintion();
-                String searchedWord = vocabulary.getWord();
 
-
-                mBinding.wordDefinition.tvWord.setText(searchedWord);
+                mBinding.wordDefinition.tvWord.setText(search.getWordSource());
                 mBinding.wordDefinition.tvDefinition.setText(definition);
 
-                // TODO: LONG PRESS TO SEARCH FOR A RELATED
-                for (String key : search.getRelatedWords().keySet()){
-                    Set<String> relatedWords = search.getRelatedWords().get(key);
-                    for (String relatedWord : relatedWords){
-                        mBinding.garbage.append(key + " " + relatedWord + "\n");
-                    }
-                }
+                showAnkiRelatedUIElements();
+
             }
             else{
-                message = getResources().getString(R.string.word_search_failure);
+                message = getString(R.string.word_search_failure);
             }
-            toast = Toast.makeText(context, message, searchCompleteToastDuration);
-            toast.show();
+            mToast = Toast.makeText(context, message, searchCompleteToastDuration);
+            mToast.show();
         }
 
     }
 
+    private void showAnkiRelatedUIElements(){
+        mBinding.fab.setVisibility(View.VISIBLE);
+        mBinding.btnRelatedWords.setVisibility(View.VISIBLE);
+        mBinding.ankiAdditionalFields.tvContextLabel.setVisibility(View.VISIBLE);
+        mBinding.ankiAdditionalFields.tvNotesLabel.setVisibility(View.VISIBLE);
+        mBinding.ankiAdditionalFields.etContext.setVisibility(View.VISIBLE);
+        mBinding.ankiAdditionalFields.etNotes.setVisibility(View.VISIBLE);
+    }
+
+
     public void onRequestPermissionsResult (int requestCode, @NonNull String[] permissions,
                                             @NonNull int[] grantResults) {
         if (requestCode==ADD_PERM_REQUEST && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            addCardsToAnkiDroid(AnkiDroidConfig.getExampleData());
+            addWordToAnki();
         } else {
-            toast.cancel();
+            mToast.cancel();
             Context context = HomeActivity.this;
-            String message = getResources().getString(R.string.toast_permissions_denied);
+            String message = getString(R.string.toast_permissions_denied);
             int duration = Toast.LENGTH_SHORT;
-            toast = Toast.makeText(context, message, duration);
-            toast.show();
+            mToast = Toast.makeText(context, message, duration);
+            mToast.show();
         }
     }
 
@@ -209,7 +234,6 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     //TODO: REMOVE IF NOT NECESSARY
-    //TODO: Maybe implement a clozed type when sentence search is included
     /**
      * Use the instant-add API to add flashcards directly to AnkiDroid.
      * @param data List of cards to be added. Each card has a HashMap of field name / field value pairs.
@@ -248,43 +272,40 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     //TODO: Change click to expand a menu and add associated UI elements
+    //TODO: Maybe implement a clozed type when sentence search is included
+    //TODO: Duplicate checking
     /**
      * Use the instant-add API to add flashcards directly to AnkiDroid.
-     * @param view the view the floating action button exists in
      */
-    private void addWordToAnki(View view){
+    private void addWordToAnki(){
         long deckId = getDeckId();
         long modelId = getModelId();
         String[] fieldNames = mAnkiDroid.getApi().getFieldList(modelId);
         String[] fields = new String[fieldNames.length];
-        fields[AnkiDroidConfig.FIELDS_INDEX_KANJI] = mBinding.wordDefinition.tvWord.getText().toString();
-        fields[AnkiDroidConfig.FIELDS_INDEX_READING] = mBinding.wordDefinition.tvWord.getText().toString();
+        fields[AnkiDroidConfig.FIELDS_INDEX_WORD] = mLastSearched.getVocabulary().getWord();
+        fields[AnkiDroidConfig.FIELDS_INDEX_READING] = mLastSearched.getVocabulary().getReading();
 
         // Anki uses HTML, so the newlines are not displayed without a double newline or a break
         String definition = mBinding.wordDefinition.tvDefinition.getText().toString();
         definition = definition.replaceAll("\n", "<br>");
         fields[AnkiDroidConfig.FIELDS_INDEX_DEFINITION] = definition;
 
-        fields[AnkiDroidConfig.FIELDS_INDEX_FURIGANA] = mBinding.wordDefinition.tvWord.getText().toString();
+        fields[AnkiDroidConfig.FIELDS_INDEX_FURIGANA] = mLastSearched.getVocabulary().getFurigana();
+        fields[AnkiDroidConfig.FIELDS_INDEX_PITCH] = mLastSearched.getVocabulary().getTone();
+
         String notes = mBinding.ankiAdditionalFields.etNotes.getText().toString();
-        if(notes.equals(getResources().getString(R.string.notes_default))){
-            notes = "";
-        }
         fields[AnkiDroidConfig.FIELDS_INDEX_NOTES] = notes;
         String wordContext = mBinding.ankiAdditionalFields.etContext.getText().toString();
-        if(notes.equals(getResources().getString(R.string.context_default))){
-            wordContext = "";
-        }
         fields[AnkiDroidConfig.FIELDS_INDEX_CONTEXT] = wordContext;
         Set<String> tags = AnkiDroidConfig.TAGS;
         mAnkiDroid.getApi().addNote(modelId, deckId, fields, tags);
 
-        toast.cancel();
+        mToast.cancel();
         Context context = HomeActivity.this;
-        String message = getResources().getString(R.string.toast_anki_added);
+        String message = getString(R.string.toast_anki_added);
         int duration = Toast.LENGTH_SHORT;
-        toast = Toast.makeText(context, message, duration);
-        toast.show();
+        mToast = Toast.makeText(context, message, duration);
+        mToast.show();
 
     }
 

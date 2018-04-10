@@ -10,6 +10,7 @@
             android:id="@+id/tv_context_label"
             tools:text="@string/context_label"
             android:text="@string/context_label"
+            android:visibility="invisible"
             android:paddingTop="16dp"
             android:paddingBottom="16dp"
             android:layout_marginStart="16dp"
@@ -23,8 +24,8 @@
 
         <EditText
             android:id="@+id/et_context"
-            tools:text="@string/context_default"
-            android:text="@string/context_default"
+            android:hint="@string/context_hint"
+            android:visibility="invisible"
             android:inputType="text"
             app:layout_constraintLeft_toRightOf="@id/tv_context_label"
             app:layout_constraintRight_toRightOf="parent"
@@ -40,6 +41,7 @@
             android:id="@+id/tv_notes_label"
             tools:text="@string/notes_label"
             android:text="@string/notes_label"
+            android:visibility="invisible"
             android:paddingTop="16dp"
             android:paddingBottom="16dp"
             android:layout_marginStart="16dp"
@@ -52,9 +54,9 @@
             android:layout_height="wrap_content" />
         <EditText
             android:id="@+id/et_notes"
-            tools:text="@string/notes_default"
-            android:text="@string/notes_default"
+            android:hint="@string/notes_hint"
             android:inputType="textMultiLine"
+            android:visibility="invisible"
             app:layout_constraintLeft_toRightOf="@id/tv_notes_label"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="@id/tv_notes_label"

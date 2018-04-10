@@ -1,6 +1,8 @@
 package data;
 
 import android.net.Uri;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.Log;
 
 import org.jsoup.Jsoup;
@@ -20,8 +22,8 @@ import java.util.Set;
  * Created by Limegrass on 3/19/2018.
  */
 
-public class SanseidoSearch {
-    private final static String TAG = "SanseidoSearch";
+public class SanseidoSearch implements Parcelable {
+    private final static String TAG = SanseidoSearch.class.getSimpleName();
 
     private final String SANSEIDO_WORD_ID = "word";
     private final String SANSEIDO_WORD_DEFINITION_ID = "wordBody";
@@ -72,6 +74,10 @@ public class SanseidoSearch {
         definitionSource = findDefinitionSource(html);
         relatedWords = findRelatedWords(html);
         vocabulary = new JapaneseVocabulary(wordSource, definitionSource);
+    }
+
+    public String getWordSource(){
+        return wordSource;
     }
 
     public JapaneseVocabulary getVocabulary(){
@@ -171,5 +177,38 @@ public class SanseidoSearch {
     }
 
 
+    @Override
+    public int describeContents() {
+        return hashCode();
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeString(wordSource);
+        parcel.writeString(definitionSource);
+        parcel.writeValue(vocabulary);
+        parcel.writeValue(relatedWords);
+    }
+
+    public static final Parcelable.Creator<SanseidoSearch> CREATOR
+            = new Parcelable.Creator<SanseidoSearch>(){
+        @Override
+        public SanseidoSearch createFromParcel(Parcel parcel) {
+            return new SanseidoSearch(parcel);
+        }
+
+        @Override
+        public SanseidoSearch[] newArray(int size) {
+            return new SanseidoSearch[size];
+        }
+    };
+
+    private SanseidoSearch(Parcel parcel){
+        final ClassLoader classLoader = getClass().getClassLoader();
+        wordSource = parcel.readString();
+        definitionSource = parcel.readString();
+        vocabulary = (JapaneseVocabulary) parcel.readValue(classLoader);
+        relatedWords = (Map<String, Set<String>>) parcel.readValue(classLoader);
+    }
 
 }

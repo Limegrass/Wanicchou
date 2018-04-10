@@ -1,11 +1,7 @@
 package util.anki;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -26,17 +22,18 @@ final public class AnkiDroidConfig {
     //Many fields will be unused at first
     public static final String[] FIELDS =
             {
-                    "Kanji", "Reading", "Definition", "Furigana", "Notes", "Context"
+                    "Word", "Reading", "Definition", "Furigana", "Pitch", "Notes", "Context"
 //                    "Pitch", "Audio", "Grammar",
 //                    "Sentence", "SentenceFurigana","SentenceMeaning",
             };
 
-    public static final int FIELDS_INDEX_KANJI = 0;
+    public static final int FIELDS_INDEX_WORD = 0;
     public static final int FIELDS_INDEX_READING = 1;
     public static final int FIELDS_INDEX_DEFINITION = 2;
     public static final int FIELDS_INDEX_FURIGANA = 3;
-    public static final int FIELDS_INDEX_NOTES  = 4;
-    public static final int FIELDS_INDEX_CONTEXT = 5;
+    public static final int FIELDS_INDEX_PITCH = 4;
+    public static final int FIELDS_INDEX_NOTES  = 5;
+    public static final int FIELDS_INDEX_CONTEXT = 6;
 
 
 
@@ -55,15 +52,15 @@ final public class AnkiDroidConfig {
             "@font-face { font-family: \"NotoSansJP\"; src: url('_NotoSansJP-Regular.otf'); }\n" +
             "@font-face { font-family: \"NotoSansJP\"; src: url('_NotoSansJP-Bold.otf'); font-weight: bold; }\n" +
             "\n" +
-            ".big { font-size: 48px; }\n" +
-            ".small { font-size: 18px;}\n" +
+            ".big { font-size: 24px; }\n" +
+            ".small { font-size: 12px;}\n" +
             ".highlight{ color: cyan }\n" +
             "ruby rt { visibility: hidden; }\n" +
             "ruby:hover rt { visibility: visible; }\n";
     // Template for the question of each card
 //    static final String QFMT1 = "<div class=big>Reading of: {{Kanji}}</div><br><br>{{Sentence}}";
     //TODO: Add a clozed  type option where they can edit the clozed word through UI
-    static final String QFMT1 = "<div class=big><div class=highlight>{{Kanji}}</div>:読み方</div>";
+    static final String QFMT1 = "<div class=\"big highlight\">{{Word}}:読み方</div>";
     static final String QFMT2 = "<div class=big>{{furigana:Furigana}}:意味</div>";
     public static final String[] QFMT = {QFMT1, QFMT2};
     // Template for the answer (use identical for both sides)
@@ -77,37 +74,4 @@ final public class AnkiDroidConfig {
     public static final String FRONT_SIDE_KEY = FIELDS[0];  //Kanji
     public static final String BACK_SIDE_KEY = FIELDS[2];   //Definition
 
-    /**
-     * Generate the ArrayList<HashMap> example data which will be sent to AnkiDroid
-     */
-    public static List<Map<String, String>> getExampleData() {
-//        "Kanji", "Reading", "Definition", "Furigana", "Notes", "Context"
-//        final String[] EXAMPLE_WORDS = {"例", "データ", "送る"};
-        final String[] EXAMPLE_KANJIS = {"例", "データ", "送る"};
-        final String[] EXAMPLE_READINGS = {"れい", "データ", "おくる"};
-        final String[] EXAMPLE_DEFINITION = {"Example", "Data", "To send"};
-//        final String[] EXAMPLE_TRANSLATIONS = {"Example", "Data", "To send"};
-        final String[] EXAMPLE_FURIGANA = {"例[れい]", "データ", "送[おく]る"};
-        final String[] EXAMPLE_NOTES = {"test1", "test2", "btw"};
-        final String[] EXAMPLE_CONTEXT = {"anime", "bakatest", "imoutosaeireba"};
-//        final String[] EXAMPLE_GRAMMAR = {"P, adj-no, n, n-pref", "P, n", "P, v5r, vt"};
-//        final String[] EXAMPLE_SENTENCE = {"そんな先例はない。", "きゃ～データが消えた！", "放蕩生活を送る。"};
-//        final String[] EXAMPLE_SENTENCE_FURIGANA = {"そんな 先例[せんれい]はない。", "きゃ～データが 消[き]えた！",
-//                "放蕩[ほうとう] 生活[せいかつ]を 送[おく]る。"};
-//        final String[] EXAMPLE_SENTENCE_DEFINITION = {"We have no such example", "Oh, I lost the data！",
-//                "I lead a fast way of living."};
-
-        List<Map<String, String>> data = new ArrayList<>();
-        for (int idx = 0; idx < EXAMPLE_KANJIS.length; idx++) {
-            Map<String, String> hm = new HashMap<>();
-            hm.put(FIELDS[0], EXAMPLE_KANJIS[idx]);
-            hm.put(FIELDS[1], EXAMPLE_READINGS[idx]);
-            hm.put(FIELDS[2], EXAMPLE_DEFINITION[idx]);
-            hm.put(FIELDS[3], EXAMPLE_FURIGANA[idx]);
-            hm.put(FIELDS[4], EXAMPLE_NOTES[idx]);
-            hm.put(FIELDS[5], EXAMPLE_CONTEXT[idx]);
-            data.add(hm);
-        }
-        return data;
-    }
 }
