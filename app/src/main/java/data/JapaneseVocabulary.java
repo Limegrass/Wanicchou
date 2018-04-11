@@ -27,6 +27,9 @@ public class JapaneseVocabulary implements Parcelable {
             "[\\p{Hiragana}|\\p{Katakana}]+(?=($|[\\p{Han}０-９]|\\d|\\s))";
     public static final String TONE_REGEX = "[\\d０-９]+";
 
+    // Some messy dictionary entries have triangles in 
+    public static final String TRIANGLES_REGEX = "[△▲]";
+
     private String word;
     private String furigana;
     private String reading;
@@ -49,6 +52,7 @@ public class JapaneseVocabulary implements Parcelable {
      * @return The full word isolated from any furigana readings or tones
      */
     public static String isolateWord(String wordSource){
+        wordSource = wordSource.replaceAll(TRIANGLES_REGEX, "");
         Matcher exactMatcher = Pattern.compile(EXACT_WORD_REGEX).matcher(wordSource);
         Matcher kanjiMatcher = Pattern.compile(WORD_WITH_KANJI_REGEX).matcher(wordSource);
         Matcher kanaMatcher = Pattern.compile(KANA_REGEX).matcher(wordSource);
