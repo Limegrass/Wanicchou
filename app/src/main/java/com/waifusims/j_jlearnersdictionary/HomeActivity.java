@@ -14,9 +14,6 @@ import android.view.View;
 import com.waifusims.j_jlearnersdictionary.databinding.ActivityHomeBinding;
 
 import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import data.JapaneseVocabulary;
@@ -133,6 +130,9 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Helper class to perform internet tasks on a background thread using AsyncTask.
+     */
     public class SanseidoQueryTask extends AsyncTask<String, Void, SanseidoSearch>{
         @Override
         protected void onPreExecute() {
@@ -190,6 +190,9 @@ public class HomeActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * Helper class to hide and show Anki import related UI elements after a search is performed.
+     */
     private void showAnkiRelatedUIElements(){
         mBinding.fab.setVisibility(View.VISIBLE);
         mBinding.btnRelatedWords.setVisibility(View.VISIBLE);
@@ -200,6 +203,12 @@ public class HomeActivity extends AppCompatActivity {
     }
 
 
+    /**
+     * Helper method to add cards to Anki if permission is granted
+     * @param requestCode a signifier request code
+     * @param permissions the permissions desired
+     * @param grantResults if the permissions were granted
+     */
     public void onRequestPermissionsResult (int requestCode, @NonNull String[] permissions,
                                             @NonNull int[] grantResults) {
         if (requestCode==ADD_PERM_REQUEST && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -214,6 +223,10 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * helper method to retrieve the deck ID for JJLD
+     * @return the deck ID for JJLD in Anki
+     */
     private long getDeckId() {
         Long did = mAnkiDroid.findDeckIdByName(AnkiDroidConfig.DECK_NAME);
         if (did == null) {
@@ -223,6 +236,10 @@ public class HomeActivity extends AppCompatActivity {
         return did;
     }
 
+    /**
+     * helper method to retrieve the model ID for JJLD
+     * @return the model ID for JJLD in Anki
+     */
     private long getModelId() {
         Long mid = mAnkiDroid.findModelIdByName(AnkiDroidConfig.MODEL_NAME, AnkiDroidConfig.FIELDS.length);
         if (mid == null) {
@@ -233,43 +250,6 @@ public class HomeActivity extends AppCompatActivity {
         return mid;
     }
 
-    //TODO: REMOVE IF NOT NECESSARY
-    /**
-     * Use the instant-add API to add flashcards directly to AnkiDroid.
-     * @param data List of cards to be added. Each card has a HashMap of field name / field value pairs.
-     */
-    private void addCardsToAnkiDroid(final List<Map<String, String>> data) {
-        //TODO: Pass in appropriate data
-        //TODO: Test if it adds card, just on enter for now
-        long deckId = getDeckId();
-        long modelId = getModelId();
-        String[] fieldNames = mAnkiDroid.getApi().getFieldList(modelId);
-        // Build list of fields and tags
-        LinkedList<String []> fields = new LinkedList<>();
-        LinkedList<Set<String>> tags = new LinkedList<>();
-
-        //TODO: Is it using a for loop instead of key value pairs to account for changes?
-        for (Map<String, String> fieldMap: data) {
-            // Build a field map accounting for the fact that the user could have changed the fields in the model
-            String[] flds = new String[fieldNames.length];
-            for (int i = 0; i < flds.length; i++) {
-                // Fill up the fields one-by-one until either all fields are filled or we run out of fields to send
-                if (i < AnkiDroidConfig.FIELDS.length) {
-                    flds[i] = fieldMap.get(AnkiDroidConfig.FIELDS[i]);
-                }
-            }
-            tags.add(AnkiDroidConfig.TAGS);
-            fields.add(flds);
-        }
-        // Remove any duplicates from the LinkedLists and then add over the API
-        mAnkiDroid.removeDuplicates(fields, tags, modelId);
-        Context context = HomeActivity.this;
-        //TODO: Add a string formatter for added, if there's ever cases for me to add multiple cards
-        int added = mAnkiDroid.getApi().addNotes(modelId, deckId, fields, tags);
-
-        //TODO: Change text to a string resource
-        Toast.makeText(context, "Card added!", Toast.LENGTH_LONG).show();
-    }
 
     //TODO: Change click to expand a menu and add associated UI elements
     //TODO: Maybe implement a clozed type when sentence search is included
@@ -291,7 +271,7 @@ public class HomeActivity extends AppCompatActivity {
         fields[AnkiDroidConfig.FIELDS_INDEX_DEFINITION] = definition;
 
         fields[AnkiDroidConfig.FIELDS_INDEX_FURIGANA] = mLastSearched.getVocabulary().getFurigana();
-        fields[AnkiDroidConfig.FIELDS_INDEX_PITCH] = mLastSearched.getVocabulary().getTone();
+        fields[AnkiDroidConfig.FIELDS_INDEX_PITCH] = mLastSearched.getVocabulary().getPitch();
 
         String notes = mBinding.ankiAdditionalFields.etNotes.getText().toString();
         fields[AnkiDroidConfig.FIELDS_INDEX_NOTES] = notes;

@@ -31,17 +31,57 @@ public class JapaneseVocabulary implements Parcelable {
     public static final String TRIANGLES_REGEX = "[△▲]";
 
     private String word;
-    private String furigana;
     private String reading;
     private String defintion;
     private String pitch;
 
+    /**
+     * Constructor given a string containing the word and a string containing the definition.
+     * @param wordSource a string that contains the source of the word.
+     * @param definitionSource a string containing the definition of the word.
+     */
     public JapaneseVocabulary(String wordSource, String definitionSource){
         defintion = definitionSource;
         word = isolateWord(wordSource);
         reading = isolateReading(wordSource);
         pitch = isolatePitch(wordSource);
-        furigana = isolateFurigana(word, reading);
+    }
+
+    /**
+     * Checks if the two JapaneseVocabulary objects have the same word, reading, and definition.
+     * @param obj another JapaneseVocabulary instance
+     * @return whether the two instances has the same word, reading, and definition
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this){
+            return true;
+        }
+
+        if(!(obj instanceof JapaneseVocabulary)){
+            return false;
+        }
+        JapaneseVocabulary other = (JapaneseVocabulary) obj;
+
+        //furigana is generated, pitch should not change
+        //Maybe not include definition in case of different site definitions or formatting.
+        return word.equals(other.word)
+                && reading.equals(other.reading)
+                && defintion.equals(other.defintion);
+    }
+
+    /**
+     * Hash code function
+     * @return a hashcode for the vocabulary word
+     */
+    @Override
+    public int hashCode() {
+        int hash = 17;
+        hash = 31 * hash + word.hashCode();
+        hash = 31 * hash + reading.hashCode();
+        hash = 31 * hash + defintion.hashCode();
+        hash = 31 * hash + pitch.hashCode();
+        return hash;
     }
 
     // TODO: Maybe do something in Sanseido search for related words so this can be private
@@ -71,22 +111,47 @@ public class JapaneseVocabulary implements Parcelable {
         }
     }
 
+    /**
+     * Getter for the Japanese word (in Kanji or it's most common dictionary script).
+     * @return the Japanese word in the form it appeared in the dictionary.
+     */
     public String getWord() {
         return word;
     }
 
+    /**
+     * Generates an Anki format furigana string from the word and reading saved.
+     * @return a string for Anki's furigana display.
+     */
     public String getFurigana() {
-        return furigana;
+        if (word.equals(reading)){
+            return reading;
+        }
+
+        return word + "[" + reading + "]";
     }
 
+    /**
+     * Getter for the reading in kana of the word.
+     * @return a string of the kana reading of the vocabulary word.
+     */
     public String getReading() {
         return reading;
     }
 
+    /**
+     * Getter for the definition of the word.
+     * @return a string of the definition of the word.
+     */
     public String getDefintion() {
         return defintion;
     }
-    public String getTone(){
+
+    /**
+     * Getter for the pitch of the word.
+     * @return a string representing the pitch of the word.
+     */
+    public String getPitch(){
         return pitch;
     }
 
@@ -108,18 +173,11 @@ public class JapaneseVocabulary implements Parcelable {
         return tone;
     }
 
-
-
-    //TODO: Method to return Furigana in Anki format as string
-    // Could use J-E dic for consistency instead of scraping.
-    private String isolateFurigana(String isolatedWord, String isolatedReading){
-        if (isolatedWord.equals(isolatedReading)){
-            return isolatedReading;
-        }
-
-        return isolatedWord + "[" + isolatedReading + "]";
-    }
-
+    /**
+     * Helper method to isolate the reading of a Japanese vocabulary word from its source string.
+     * @param wordSource the raw string containing the vocabulary word.
+     * @return a string with the isolated kana reading of the word.
+     */
     private String isolateReading(String wordSource){
         if(wordSource == null || wordSource.equals("")){
             return "";
@@ -132,21 +190,24 @@ public class JapaneseVocabulary implements Parcelable {
         return wordSource;
     }
 
-    //TODO: Separate and format each definition
-    public static String[] getDefinitions(String definitions){
-        //Many are separated by ▼, so can use that to split the string or as a regex.
-        return null;
-    }
 
+    /**
+     * Part of necessary methods to override to make the object parcelable.
+     * @return the hash code of the JapaneseVocabulary.
+     */
     @Override
     public int describeContents() {
         return hashCode();
     }
 
+    /**
+     * parcelization of the JapaneseObject, called when passed between activities.
+     * @param parcel
+     * @param i
+     */
     @Override
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeString(word);
-        parcel.writeString(furigana);
         parcel.writeString(reading);
         parcel.writeString(defintion);
         parcel.writeString(pitch);
@@ -165,9 +226,12 @@ public class JapaneseVocabulary implements Parcelable {
         }
     };
 
+    /**
+     * constructor to unpack the parcel information for passing between activities.
+     * @param parcel
+     */
     private JapaneseVocabulary(Parcel parcel){
         word = parcel.readString();
-        furigana = parcel.readString();
         reading = parcel.readString();
         defintion = parcel.readString();
         pitch = parcel.readString();

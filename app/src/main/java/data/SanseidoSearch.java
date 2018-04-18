@@ -67,6 +67,12 @@ public class SanseidoSearch implements Parcelable {
     private JapaneseVocabulary vocabulary;
 
 
+    /**
+     * Constructor to create an object containing the information retrieved from Sanseido from
+     * a search given a word to search.
+     * @param wordToSearch the desired word to search.
+     * @throws IOException
+     */
     public SanseidoSearch(String wordToSearch) throws IOException {
         URL url = buildQueryURL(wordToSearch, true);
         Document html = fetchSanseidoSource(url);
@@ -76,14 +82,26 @@ public class SanseidoSearch implements Parcelable {
         vocabulary = new JapaneseVocabulary(wordSource, definitionSource);
     }
 
+    /**
+     * Getter for the word source.
+     * @return a raw string from the Sanseido search
+     */
     public String getWordSource(){
         return wordSource;
     }
 
+    /**
+     * Getter for the vocabulary word searched.
+     * @return the string representing the vocabulary word found.
+     */
     public JapaneseVocabulary getVocabulary(){
         return vocabulary;
     }
 
+    /**
+     * Getter for the list of related words from the search.
+     * @return A map mapping the Sanseido dictionary the word exists in and their related words.
+     */
     public Map<String, Set<String>> getRelatedWords(){
         return relatedWords;
     }
@@ -113,18 +131,27 @@ public class SanseidoSearch implements Parcelable {
     }
 
 
-
+    /**
+     * Helper method to create an HTTP request to Sanseido for a given URL.
+     * @param searchURL the URL of the word search to be performed
+     * @return A Jsoup html document tree of the html source from the search.
+     * @throws IOException
+     */
     private Document fetchSanseidoSource(URL searchURL) throws IOException{
         Document htmlTree = Jsoup.connect(searchURL.toString()).get();
 
         return htmlTree;
     }
 
-    //TODO: Create links to words in the related words table
-    private Map<String, Set<String>> findRelatedWords(Document htmlTree){
+    /**
+     * Helper method to isolate the related words of a search from the raw html source.
+     * @param html the raw html jsoup document tree.
+     * @return a map of related words in a set with the key being the dictionary they exist in.
+     */
+    private Map<String, Set<String>> findRelatedWords(Document html){
         Map<String, Set<String>> relatedWords = new HashMap<>();
         // The related words table is the first table in the HTML
-        Element table = htmlTree.select("table").get(RELATED_WORDS_TABLE_INDEX);
+        Element table = html.select("table").get(RELATED_WORDS_TABLE_INDEX);
         Elements rows = table.select("tr");
 
         // Preferred selecting by exact word first, but attempt others if it is a message input
@@ -160,6 +187,11 @@ public class SanseidoSearch implements Parcelable {
         return word.text().toString();
     }
 
+    /**
+     * A helper method to isolate the source text of the definition of the word searched.
+     * @param html the jsoup html document tree.
+     * @return
+     */
     private String findDefinitionSource(Document html){
         Element definitionParentElement = html.getElementById(SANSEIDO_WORD_DEFINITION_ID);
         // The definition is in a further div, single child
@@ -177,6 +209,9 @@ public class SanseidoSearch implements Parcelable {
     }
 
 
+    /*
+     Parcelable methods, needed to pass information between activities.
+     */
     @Override
     public int describeContents() {
         return hashCode();

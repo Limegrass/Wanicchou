@@ -8,8 +8,6 @@ Type a word in the search box, then press enter to conduct a search.
 The floating action button sends the searched word into AnkiDroid
 
 ## TODO
-Add related words as links.
-
 Save searched words and definitions into an SQLiteDB for offline usage.
 
 SharedPreferences for which language dictionary the search should be conducted.
@@ -29,6 +27,8 @@ Figure out if it's even okay to use Sanseido's site like this.
 Parse definition text for possible words to search instead of having it as an EditText for users to copy and paste themselves.
 
 Furigana definition text after parsing, maybe with JE dict so there's less web requests.
+
+Maybe try to network DB from queries.
 
 ## SOURCES
 ['ankidroid/apisample'](https://github.com/ankidroid/apisample):

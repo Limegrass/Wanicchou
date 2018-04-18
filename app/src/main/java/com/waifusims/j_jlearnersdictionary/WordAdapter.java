@@ -14,9 +14,9 @@ import java.util.Map;
 import java.util.Set;
 
 /**
+ * RecyclerView adapter for related words
  * Created by Limegrass on 4/4/2018.
  */
-
 public class WordAdapter extends RecyclerView.Adapter<WordAdapter.WordViewHolder>{
     private static final String TAG = WordAdapter.class.getSimpleName();
     private final ListItemClickListener mOnClickListener;
