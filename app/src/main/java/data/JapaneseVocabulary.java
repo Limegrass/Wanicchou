@@ -1,5 +1,6 @@
 package data;
 
+import android.database.Cursor;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -47,6 +48,27 @@ public class JapaneseVocabulary implements Parcelable {
         pitch = isolatePitch(wordSource);
     }
 
+    public JapaneseVocabulary(String invalidWord){
+        defintion = "N/A";
+        word = invalidWord;
+        reading = "N/A";
+        pitch = "N/A";
+    }
+
+    public JapaneseVocabulary(Cursor savedWordCursor){
+        int defintionIndex =
+                savedWordCursor.getColumnIndex(VocabularyContract.VocabularyEntry.COLUMN_DEFINITION);
+        int wordIndex =
+                savedWordCursor.getColumnIndex(VocabularyContract.VocabularyEntry.COLUMN_WORD);
+        int readingIndex =
+                savedWordCursor.getColumnIndex(VocabularyContract.VocabularyEntry.COLUMN_READING);
+        int pitchIndex =
+                savedWordCursor.getColumnIndex(VocabularyContract.VocabularyEntry.COLUMN_PITCH);
+        defintion = savedWordCursor.getString(defintionIndex);
+        word = savedWordCursor.getString(wordIndex);
+        reading = savedWordCursor.getString(readingIndex);
+        pitch = savedWordCursor.getString(pitchIndex);
+    }
     /**
      * Checks if the two JapaneseVocabulary objects have the same word, reading, and definition.
      * @param obj another JapaneseVocabulary instance

@@ -1,14 +1,18 @@
 package com.waifusims.j_jlearnersdictionary;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.databinding.DataBindingUtil;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 
 import com.waifusims.j_jlearnersdictionary.databinding.ActivityHomeBinding;
@@ -18,6 +22,8 @@ import java.util.Set;
 
 import data.JapaneseVocabulary;
 import data.SanseidoSearch;
+import data.VocabularyContract;
+import data.VocabularyDbHelper;
 import util.anki.AnkiDroidHelper;
 import util.anki.AnkiDroidConfig;
 
@@ -32,10 +38,14 @@ public class HomeActivity extends AppCompatActivity {
     private static final int ADD_PERM_REQUEST = 0;
     private static final int HOME_ACTIVITY_REQUEST_CODE = 42;
 
+    private SQLiteDatabase mDb;
+
     private ActivityHomeBinding mBinding;
     private AnkiDroidHelper mAnkiDroid;
     private SanseidoSearch mLastSearched;
     private Toast mToast;
+
+    // TODO: Update the DB onPause/SavedInstanceState/new search
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,7 +64,23 @@ public class HomeActivity extends AppCompatActivity {
                         case KeyEvent.KEYCODE_DPAD_CENTER:
                         case KeyEvent.KEYCODE_ENTER:
                             String searchWord = mBinding.wordSearch.etSearchBox.getText().toString();
-                            new SanseidoQueryTask().execute(searchWord);
+                            Cursor cursor = getSavedWord(searchWord);
+
+                            if(cursor.moveToFirst()){
+
+                                //TODO: Give option of web search
+                                JapaneseVocabulary vocabulary = new JapaneseVocabulary(cursor);
+
+                                mBinding.wordDefinition.tvWord.setText(vocabulary.getWord());
+                                mBinding.wordDefinition.tvDefinition.setText(vocabulary.getDefintion());
+
+                                showAnkiRelatedUIElements();
+                                hideRelatedWordsButton();
+                            }
+                            else{
+                                Log.d("test", LOG_TAG);
+                                new SanseidoQueryTask().execute(searchWord);
+                            }
                             return true;
                         default:
                             //TODO: Would returning true do anything undesired? Find out
@@ -92,6 +118,10 @@ public class HomeActivity extends AppCompatActivity {
                 addWordToAnki();
             }
         });
+
+
+        VocabularyDbHelper vocabularyDbHelper = new VocabularyDbHelper(this);
+        mDb = vocabularyDbHelper.getWritableDatabase();
 
     }
 
@@ -148,7 +178,7 @@ public class HomeActivity extends AppCompatActivity {
 
         @Override
         protected SanseidoSearch doInBackground(String... searchWords) {
-            String word= searchWords[0];
+            String word = searchWords[0];
             SanseidoSearch search = null;
             try{
                 search = new SanseidoSearch(word);
@@ -168,20 +198,47 @@ public class HomeActivity extends AppCompatActivity {
             final Context context = getApplicationContext();
             final int searchCompleteToastDuration = Toast.LENGTH_SHORT;
 
-            if(search!= null && !search.getVocabulary().getWord().equals("")){
-                mLastSearched = search;
-                message = getString(R.string.word_search_success);
+            if(search != null && !search.getVocabulary().getWord().equals("")){
+                if (!search.getVocabulary().getWord().equals("")) {
+                    mLastSearched = search;
+                    message = getString(R.string.word_search_success);
 
-                JapaneseVocabulary vocabulary = search.getVocabulary();
-                String definition = vocabulary.getDefintion();
+                    JapaneseVocabulary vocabulary = search.getVocabulary();
+                    String definition = vocabulary.getDefintion();
 
-                mBinding.wordDefinition.tvWord.setText(search.getWordSource());
-                mBinding.wordDefinition.tvDefinition.setText(definition);
+                    mBinding.wordDefinition.tvWord.setText(search.getWordSource());
+                    mBinding.wordDefinition.tvDefinition.setText(definition);
 
-                showAnkiRelatedUIElements();
+                    Cursor cursor = getSavedWord(search.getVocabulary().getWord());
+
+                    if (!cursor.moveToFirst()) {
+                        addNewWord(search.getVocabulary());
+                    }
+
+                    showAnkiRelatedUIElements();
+                    showRelatedWordsButton();
+                }
+                else{
+
+                    // TODO: Add empty entry to db for failed searches that aren't network errors.
+                    JapaneseVocabulary invalidWord =
+                            new JapaneseVocabulary(mBinding.wordSearch.etSearchBox
+                                    .getText().toString());
+
+                    Cursor cursor = getSavedWord(invalidWord.getWord());
+
+                    if (!cursor.moveToFirst()) {
+                        addNewWord(search.getVocabulary());
+                    }
+
+                    // TODO: Maybe a different error message
+                    message = getString(R.string.word_search_failure);
+                }
+
 
             }
             else{
+                // TODO: Check for network and http request time outs
                 message = getString(R.string.word_search_failure);
             }
             mToast = Toast.makeText(context, message, searchCompleteToastDuration);
@@ -195,11 +252,20 @@ public class HomeActivity extends AppCompatActivity {
      */
     private void showAnkiRelatedUIElements(){
         mBinding.fab.setVisibility(View.VISIBLE);
-        mBinding.btnRelatedWords.setVisibility(View.VISIBLE);
         mBinding.ankiAdditionalFields.tvContextLabel.setVisibility(View.VISIBLE);
         mBinding.ankiAdditionalFields.tvNotesLabel.setVisibility(View.VISIBLE);
         mBinding.ankiAdditionalFields.etContext.setVisibility(View.VISIBLE);
         mBinding.ankiAdditionalFields.etNotes.setVisibility(View.VISIBLE);
+    }
+
+    // TODO: Refactor everything so I either have related words on SQLite DB searches
+    // Or return something different on web searches.
+    private void showRelatedWordsButton(){
+        mBinding.btnRelatedWords.setVisibility(View.VISIBLE);
+    }
+
+    private void hideRelatedWordsButton(){
+        mBinding.btnRelatedWords.setVisibility(View.INVISIBLE);
     }
 
 
@@ -289,4 +355,60 @@ public class HomeActivity extends AppCompatActivity {
 
     }
 
+
+    private Cursor getSavedWord(String word){
+        final String selection = VocabularyContract.VocabularyEntry.COLUMN_WORD + "=?";
+        final String[] selectionArgs = {word};
+
+        return mDb.query(
+                VocabularyContract.VocabularyEntry.TABLE_NAME,
+                null,
+                selection,
+                selectionArgs,
+                null,
+                null,
+                VocabularyContract.VocabularyEntry._ID
+        );
+    }
+
+    private long addNewWord(JapaneseVocabulary vocab){
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(VocabularyContract.VocabularyEntry.COLUMN_WORD, vocab.getWord());
+        contentValues.put(VocabularyContract.VocabularyEntry.COLUMN_READING, vocab.getReading());
+        contentValues.put(VocabularyContract.VocabularyEntry.COLUMN_DEFINITION, vocab.getDefintion());
+        contentValues.put(VocabularyContract.VocabularyEntry.COLUMN_PITCH, vocab.getPitch());
+
+        contentValues.put(VocabularyContract.VocabularyEntry.COLUMN_NOTES,
+                mBinding.ankiAdditionalFields.etNotes.getText().toString());
+        contentValues.put(VocabularyContract.VocabularyEntry.COLUMN_CONTEXT,
+                mBinding.ankiAdditionalFields.etContext.getText().toString());
+
+        return mDb.insert(VocabularyContract.VocabularyEntry.TABLE_NAME,
+                null, contentValues);
+    }
+
+    private int updateWord(JapaneseVocabulary vocab){
+
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(vocab.getWord(), VocabularyContract.VocabularyEntry.COLUMN_WORD);
+        contentValues.put(vocab.getReading(), VocabularyContract.VocabularyEntry.COLUMN_READING);
+        contentValues.put(vocab.getDefintion(), VocabularyContract.VocabularyEntry.COLUMN_DEFINITION);
+        contentValues.put(vocab.getPitch(), VocabularyContract.VocabularyEntry.COLUMN_PITCH);
+
+        contentValues.put(mBinding.ankiAdditionalFields.etNotes.getText().toString(),
+                VocabularyContract.VocabularyEntry.COLUMN_NOTES);
+        contentValues.put(mBinding.ankiAdditionalFields.etContext.getText().toString(),
+                VocabularyContract.VocabularyEntry.COLUMN_CONTEXT);
+
+        String whereClause = VocabularyContract.VocabularyEntry.COLUMN_WORD + "=" + vocab.getWord();
+        String[] whereArgs = null;
+
+        return mDb.update(VocabularyContract.VocabularyEntry.TABLE_NAME,
+                contentValues,
+                whereClause,
+                whereArgs
+        );
+
+
+    }
 }
