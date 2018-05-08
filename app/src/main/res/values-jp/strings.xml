@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">和ー和学習者辞書</string>
+    <string name="app_name">和日帳</string>
     <!--word_definition related-->
     <string name="search_label" translatable="true">検索</string>
     <string name="search_field_hint" translatable="true">キーボードで入力して</string>
