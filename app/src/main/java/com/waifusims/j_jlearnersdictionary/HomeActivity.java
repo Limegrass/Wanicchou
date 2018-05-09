@@ -271,6 +271,7 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
         mToast.show();
     }
 
+    // Required override but unused
     @Override
     public void onLoaderReset(Loader<SanseidoSearch> loader) {
 
@@ -387,31 +388,25 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
 
 
     private Cursor getSavedWord(String word){
+        final String[] columns = null;
         final String selection = VocabularyContract.VocabularyEntry.COLUMN_WORD + "=?";
         final String[] selectionArgs = {word};
+        final String groupBy = null;
+        final String having = null;
 
         return mDb.query(
                 VocabularyContract.VocabularyEntry.TABLE_NAME,
-                null,
+                columns,
                 selection,
                 selectionArgs,
-                null,
-                null,
+                groupBy,
+                having,
                 VocabularyContract.VocabularyEntry._ID
         );
     }
 
     private long addNewWord(JapaneseVocabulary vocab){
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(VocabularyContract.VocabularyEntry.COLUMN_WORD, vocab.getWord());
-        contentValues.put(VocabularyContract.VocabularyEntry.COLUMN_READING, vocab.getReading());
-        contentValues.put(VocabularyContract.VocabularyEntry.COLUMN_DEFINITION, vocab.getDefintion());
-        contentValues.put(VocabularyContract.VocabularyEntry.COLUMN_PITCH, vocab.getPitch());
-
-        contentValues.put(VocabularyContract.VocabularyEntry.COLUMN_NOTES,
-                mBinding.ankiAdditionalFields.etNotes.getText().toString());
-        contentValues.put(VocabularyContract.VocabularyEntry.COLUMN_CONTEXT,
-                mBinding.ankiAdditionalFields.etContext.getText().toString());
+        ContentValues contentValues = buildVocabularyContentValues(vocab);
 
         return mDb.insert(VocabularyContract.VocabularyEntry.TABLE_NAME,
                 null, contentValues);
@@ -419,6 +414,20 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
 
     private int updateWord(JapaneseVocabulary vocab){
 
+        ContentValues contentValues = buildVocabularyContentValues(vocab);
+
+        String whereClause = VocabularyContract.VocabularyEntry.COLUMN_WORD + "=" + vocab.getWord();
+        String[] whereArgs = null;
+
+        return mDb.update(
+                VocabularyContract.VocabularyEntry.TABLE_NAME,
+                contentValues,
+                whereClause,
+                whereArgs
+        );
+    }
+
+    private ContentValues buildVocabularyContentValues(JapaneseVocabulary vocab){
         ContentValues contentValues = new ContentValues();
         contentValues.put(vocab.getWord(), VocabularyContract.VocabularyEntry.COLUMN_WORD);
         contentValues.put(vocab.getReading(), VocabularyContract.VocabularyEntry.COLUMN_READING);
@@ -429,16 +438,6 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
                 VocabularyContract.VocabularyEntry.COLUMN_NOTES);
         contentValues.put(mBinding.ankiAdditionalFields.etContext.getText().toString(),
                 VocabularyContract.VocabularyEntry.COLUMN_CONTEXT);
-
-        String whereClause = VocabularyContract.VocabularyEntry.COLUMN_WORD + "=" + vocab.getWord();
-        String[] whereArgs = null;
-
-        return mDb.update(VocabularyContract.VocabularyEntry.TABLE_NAME,
-                contentValues,
-                whereClause,
-                whereArgs
-        );
-
-
+        return contentValues;
     }
 }
