@@ -7,12 +7,12 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.databinding.DataBindingUtil;
-import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.content.AsyncTaskLoader;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 
 import com.waifusims.j_jlearnersdictionary.databinding.ActivityHomeBinding;
@@ -26,6 +26,7 @@ import data.VocabularyContract;
 import data.VocabularyDbHelper;
 import util.anki.AnkiDroidHelper;
 import util.anki.AnkiDroidConfig;
+import android.support.v4.app.LoaderManager;
 
 import android.view.View.OnKeyListener;
 import android.view.KeyEvent;
@@ -33,18 +34,20 @@ import android.widget.Toast;
 
 //TODO:  Horizontal UI
 //TODO: OnPause, OnResume
-public class HomeActivity extends AppCompatActivity {
-    public static final String LOG_TAG = "JJLD";
+public class HomeActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<SanseidoSearch>{
+    public static final String LOG_TAG = "Wanicchou";
     private static final int ADD_PERM_REQUEST = 0;
     private static final int HOME_ACTIVITY_REQUEST_CODE = 42;
 
-    private SQLiteDatabase mDb;
+    private static final String SEARCH_WORD_KEY = "search";
+    private static final int SANSEIDO_SEARCH_LOADER = 322;
 
+    private SQLiteDatabase mDb;
     private ActivityHomeBinding mBinding;
     private AnkiDroidHelper mAnkiDroid;
-    private SanseidoSearch mLastSearched;
     private Toast mToast;
 
+    private SanseidoSearch mLastSearched;
     // TODO: Update the DB onPause/SavedInstanceState/new search
 
     @Override
@@ -78,8 +81,19 @@ public class HomeActivity extends AppCompatActivity {
                                 hideRelatedWordsButton();
                             }
                             else{
-                                Log.d("test", LOG_TAG);
-                                new SanseidoQueryTask().execute(searchWord);
+                                Bundle searchBundle = new Bundle();
+                                searchBundle.putString(SEARCH_WORD_KEY, searchWord);
+                                LoaderManager loaderManager = getSupportLoaderManager();
+                                Loader<String> searchLoader =
+                                        loaderManager.getLoader(SANSEIDO_SEARCH_LOADER);
+                                if (searchLoader == null){
+                                    loaderManager.initLoader(SANSEIDO_SEARCH_LOADER,
+                                            searchBundle, HomeActivity.this);
+                                }
+                                else {
+                                    loaderManager.restartLoader(SANSEIDO_SEARCH_LOADER,
+                                            searchBundle, HomeActivity.this);
+                                }
                             }
                             return true;
                         default:
@@ -146,7 +160,6 @@ public class HomeActivity extends AppCompatActivity {
                         String desiredRelatedWord =
                                 data.getExtras().getString(key);
                         mBinding.wordSearch.etSearchBox.setText(desiredRelatedWord);
-                        new SanseidoQueryTask().execute(desiredRelatedWord);
                     }
                     mToast.cancel();
                     Context context = this;
@@ -160,92 +173,109 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
-    /**
-     * Helper class to perform internet tasks on a background thread using AsyncTask.
-     */
-    public class SanseidoQueryTask extends AsyncTask<String, Void, SanseidoSearch>{
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-
-            final Context context = getApplicationContext();
-            final String searchingText = getString(R.string.word_searching);
-            final int searchingToastDuration = Toast.LENGTH_SHORT;
-
-            mToast = Toast.makeText(context, searchingText, searchingToastDuration);
-            mToast.show();
-        }
-
-        @Override
-        protected SanseidoSearch doInBackground(String... searchWords) {
-            String word = searchWords[0];
-            SanseidoSearch search = null;
-            try{
-                search = new SanseidoSearch(word);
-            }
-            catch (IOException e){
-                e.printStackTrace();
-            }
-
-            return search;
-        }
-
-        @Override
-        protected void onPostExecute(SanseidoSearch search) {
-            super.onPostExecute(search);
-            mToast.cancel();
-            String message;
-            final Context context = getApplicationContext();
-            final int searchCompleteToastDuration = Toast.LENGTH_SHORT;
-
-            if(search != null && !search.getVocabulary().getWord().equals("")){
-                if (!search.getVocabulary().getWord().equals("")) {
-                    mLastSearched = search;
-                    message = getString(R.string.word_search_success);
-
-                    JapaneseVocabulary vocabulary = search.getVocabulary();
-                    String definition = vocabulary.getDefintion();
-
-                    mBinding.wordDefinition.tvWord.setText(search.getWordSource());
-                    mBinding.wordDefinition.tvDefinition.setText(definition);
-
-                    Cursor cursor = getSavedWord(search.getVocabulary().getWord());
-
-                    if (!cursor.moveToFirst()) {
-                        addNewWord(search.getVocabulary());
-                    }
-
-                    showAnkiRelatedUIElements();
-                    showRelatedWordsButton();
-                }
-                else{
-
-                    // TODO: Add empty entry to db for failed searches that aren't network errors.
-                    JapaneseVocabulary invalidWord =
-                            new JapaneseVocabulary(mBinding.wordSearch.etSearchBox
-                                    .getText().toString());
-
-                    Cursor cursor = getSavedWord(invalidWord.getWord());
-
-                    if (!cursor.moveToFirst()) {
-                        addNewWord(search.getVocabulary());
-                    }
-
-                    // TODO: Maybe a different error message
-                    message = getString(R.string.word_search_failure);
+    @Override
+    public Loader<SanseidoSearch> onCreateLoader(int id, final Bundle args) {
+        return new AsyncTaskLoader<SanseidoSearch>(this) {
+            @Override
+            protected void onStartLoading() {
+                super.onStartLoading();
+                if (args == null) {
+                    return;
                 }
 
+                final Context context = getApplicationContext();
+                final String searchingText = getString(R.string.word_searching);
+                final int searchingToastDuration = Toast.LENGTH_SHORT;
 
+                mToast = Toast.makeText(context, searchingText, searchingToastDuration);
+                mToast.show();
+
+                forceLoad();
             }
-            else{
-                // TODO: Check for network and http request time outs
-                message = getString(R.string.word_search_failure);
+
+            @Override
+            public SanseidoSearch loadInBackground() {
+
+                String searchWord = args.getString(SEARCH_WORD_KEY);
+                if (searchWord == null || searchWord.equals("")) {
+                    return null;
+                }
+
+                SanseidoSearch search = null;
+                try{
+                    search = new SanseidoSearch(searchWord);
+                }
+                catch (IOException e){
+                    e.printStackTrace();
+                }
+
+                return search;
             }
-            mToast = Toast.makeText(context, message, searchCompleteToastDuration);
-            mToast.show();
-        }
+
+        };
 
     }
+
+    @Override
+    public void onLoadFinished(Loader<SanseidoSearch> loader, SanseidoSearch search) {
+
+        mToast.cancel();
+        String message;
+        final Context context = getApplicationContext();
+        final int searchCompleteToastDuration = Toast.LENGTH_SHORT;
+
+        if(search != null && !search.getVocabulary().getWord().equals("")){
+            if (!search.getVocabulary().getWord().equals("")) {
+                mLastSearched = search;
+                message = getString(R.string.word_search_success);
+
+                JapaneseVocabulary vocabulary = search.getVocabulary();
+                String definition = vocabulary.getDefintion();
+
+                mBinding.wordDefinition.tvWord.setText(search.getWordSource());
+                mBinding.wordDefinition.tvDefinition.setText(definition);
+
+                Cursor cursor = getSavedWord(search.getVocabulary().getWord());
+
+                if (!cursor.moveToFirst()) {
+                    addNewWord(search.getVocabulary());
+                }
+
+                showAnkiRelatedUIElements();
+                showRelatedWordsButton();
+            }
+            else{
+
+                // TODO: Add empty entry to db for failed searches that aren't network errors.
+                JapaneseVocabulary invalidWord =
+                        new JapaneseVocabulary(mBinding.wordSearch.etSearchBox
+                                .getText().toString());
+
+                Cursor cursor = getSavedWord(invalidWord.getWord());
+
+                if (!cursor.moveToFirst()) {
+                    addNewWord(search.getVocabulary());
+                }
+
+                // TODO: Maybe a different error message
+                message = getString(R.string.word_search_failure);
+            }
+
+
+        }
+        else{
+            // TODO: Check for network and http request time outs
+            message = getString(R.string.word_search_failure);
+        }
+        mToast = Toast.makeText(context, message, searchCompleteToastDuration);
+        mToast.show();
+    }
+
+    @Override
+    public void onLoaderReset(Loader<SanseidoSearch> loader) {
+
+    }
+
 
     /**
      * Helper class to hide and show Anki import related UI elements after a search is performed.
