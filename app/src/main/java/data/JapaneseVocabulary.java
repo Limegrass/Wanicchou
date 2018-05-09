@@ -13,46 +13,50 @@ import java.util.regex.Pattern;
 
 public class JapaneseVocabulary implements Parcelable {
 
+    // Should these be in the Android Strings file?
     // Regexes, not sure if they should be const static.
     // Most vocab are enclosed in the braces.
-    public static final String EXACT_WORD_REGEX = "(?<=［).*(?=］)";
+    private static final String EXACT_WORD_REGEX = "(?<=［).*(?=］)";
 
     // Try to find a word beginning with or enclosed with Kanji
-    public static final String WORD_WITH_KANJI_REGEX =
+    private static final String WORD_WITH_KANJI_REGEX =
             "\\p{Han}+[\\p{Hiragana}|\\p{Katakana}]*\\p{Han}*";
 
     // For finding only the kana of a word.
-    public static final String KANA_REGEX = "[\\p{Hiragana}|\\p{Katakana}]+";
+    private static final String KANA_REGEX = "[\\p{Hiragana}|\\p{Katakana}]+";
 
-    public static final String READING_REGEX =
+    private static final String READING_REGEX =
             "[\\p{Hiragana}|\\p{Katakana}]+(?=($|[\\p{Han}０-９]|\\d|\\s))";
-    public static final String TONE_REGEX = "[\\d０-９]+";
+    private static final String TONE_REGEX = "[\\d０-９]+";
 
     // Some messy dictionary entries have triangles in 
-    public static final String TRIANGLES_REGEX = "[△▲]";
+    private static final String TRIANGLES_REGEX = "[△▲]";
 
     private String word;
     private String reading;
-    private String defintion;
+    private String definition;
     private String pitch;
+    private DictionaryType dictionaryType;
 
     /**
      * Constructor given a string containing the word and a string containing the definition.
      * @param wordSource a string that contains the source of the word.
      * @param definitionSource a string containing the definition of the word.
      */
-    public JapaneseVocabulary(String wordSource, String definitionSource){
-        defintion = definitionSource;
+    public JapaneseVocabulary(String wordSource, String definitionSource, DictionaryType dictionaryType){
+        definition = definitionSource;
         word = isolateWord(wordSource);
         reading = isolateReading(wordSource);
         pitch = isolatePitch(wordSource);
+        this.dictionaryType = dictionaryType;
     }
 
-    public JapaneseVocabulary(String invalidWord){
-        defintion = "N/A";
+    public JapaneseVocabulary(String invalidWord, DictionaryType dictionaryType){
+        definition = "N/A";
         word = invalidWord;
         reading = "N/A";
         pitch = "N/A";
+        this.dictionaryType = dictionaryType;
     }
 
     public JapaneseVocabulary(Cursor savedWordCursor){
@@ -64,7 +68,7 @@ public class JapaneseVocabulary implements Parcelable {
                 savedWordCursor.getColumnIndex(VocabularyContract.VocabularyEntry.COLUMN_READING);
         int pitchIndex =
                 savedWordCursor.getColumnIndex(VocabularyContract.VocabularyEntry.COLUMN_PITCH);
-        defintion = savedWordCursor.getString(defintionIndex);
+        definition = savedWordCursor.getString(defintionIndex);
         word = savedWordCursor.getString(wordIndex);
         reading = savedWordCursor.getString(readingIndex);
         pitch = savedWordCursor.getString(pitchIndex);
@@ -89,7 +93,8 @@ public class JapaneseVocabulary implements Parcelable {
         //Maybe not include definition in case of different site definitions or formatting.
         return word.equals(other.word)
                 && reading.equals(other.reading)
-                && defintion.equals(other.defintion);
+                && (dictionaryType == other.dictionaryType)
+                && definition.equals(other.definition);
     }
 
     /**
@@ -101,7 +106,7 @@ public class JapaneseVocabulary implements Parcelable {
         int hash = 17;
         hash = 31 * hash + word.hashCode();
         hash = 31 * hash + reading.hashCode();
-        hash = 31 * hash + defintion.hashCode();
+        hash = 31 * hash + definition.hashCode();
         hash = 31 * hash + pitch.hashCode();
         return hash;
     }
@@ -141,6 +146,10 @@ public class JapaneseVocabulary implements Parcelable {
         return word;
     }
 
+    public DictionaryType getDictionaryType(){
+        return dictionaryType;
+    }
+
     /**
      * Generates an Anki format furigana string from the word and reading saved.
      * @return a string for Anki's furigana display.
@@ -166,7 +175,7 @@ public class JapaneseVocabulary implements Parcelable {
      * @return a string of the definition of the word.
      */
     public String getDefintion() {
-        return defintion;
+        return definition;
     }
 
     /**
@@ -231,8 +240,9 @@ public class JapaneseVocabulary implements Parcelable {
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeString(word);
         parcel.writeString(reading);
-        parcel.writeString(defintion);
+        parcel.writeString(definition);
         parcel.writeString(pitch);
+        parcel.writeValue(dictionaryType);
     }
 
     public static final Parcelable.Creator<JapaneseVocabulary> CREATOR
@@ -253,9 +263,11 @@ public class JapaneseVocabulary implements Parcelable {
      * @param parcel
      */
     private JapaneseVocabulary(Parcel parcel){
+        final ClassLoader classLoader = getClass().getClassLoader();
         word = parcel.readString();
         reading = parcel.readString();
-        defintion = parcel.readString();
+        definition = parcel.readString();
         pitch = parcel.readString();
+        dictionaryType = (DictionaryType) parcel.readValue(classLoader);
     }
 }

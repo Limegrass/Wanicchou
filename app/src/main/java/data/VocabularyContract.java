@@ -11,12 +11,13 @@ public final class VocabularyContract {
     private VocabularyContract() {}
 
     public static class VocabularyEntry implements BaseColumns{
-        public static final String TABLE_NAME = "vocabulary";
-        public static final String COLUMN_WORD = "word";
-        public static final String COLUMN_READING = "reading";
-        public static final String COLUMN_DEFINITION = "definition";
-        public static final String COLUMN_PITCH = "pitch";
-        public static final String COLUMN_NOTES = "notes";
-        public static final String COLUMN_CONTEXT = "context";
+        public static final String TABLE_NAME = "VocabularyWords";
+        public static final String COLUMN_WORD = "Word";
+        public static final String COLUMN_READING = "Reading";
+        public static final String COLUMN_DEFINITION = "Definition";
+        public static final String COLUMN_DICTIONARY_TYPE = "DictionaryType";
+        public static final String COLUMN_PITCH = "Pitch";
+        public static final String COLUMN_NOTES = "Notes";
+        public static final String COLUMN_CONTEXT = "Context";
     }
 }

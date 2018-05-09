@@ -74,12 +74,13 @@ public class SanseidoSearch implements Parcelable {
      * @throws IOException
      */
     public SanseidoSearch(String wordToSearch) throws IOException {
+        //TODO: Refactor the URL and vocab to reference a saved pref var for if it's JJ, JE, or EJ
         URL url = buildQueryURL(wordToSearch, true);
         Document html = fetchSanseidoSource(url);
         wordSource = findWordSource(html);
         definitionSource = findDefinitionSource(html);
         relatedWords = findRelatedWords(html);
-        vocabulary = new JapaneseVocabulary(wordSource, definitionSource);
+        vocabulary = new JapaneseVocabulary(wordSource, definitionSource, DictionaryType.JJ);
     }
 
     /**
