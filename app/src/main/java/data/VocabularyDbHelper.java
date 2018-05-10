@@ -12,7 +12,7 @@ import data.VocabularyContract.*;
 public class VocabularyDbHelper extends SQLiteOpenHelper{
     private static final String DATABASE_NAME = "WanicchouVocab.db";
 
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 4;
 
     public VocabularyDbHelper(Context context){
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -35,8 +35,8 @@ public class VocabularyDbHelper extends SQLiteOpenHelper{
                         // Could be an int, but all usages would just
                         // use strings and
                         // avoids full/half width troubles
-                        + VocabularyEntry.COLUMN_PITCH + " VARCHAR(2), "
-                        + VocabularyEntry.COLUMN_DICTIONARY_TYPE + " VARCHAR(2)"
+                        + VocabularyEntry.COLUMN_PITCH + " VARCHAR(8), "
+                        + VocabularyEntry.COLUMN_DICTIONARY_TYPE + " VARCHAR(8)"
                         + ")";
 
         sqLiteDatabase.execSQL(SQL_CREATE_VOCAB_TABLE);

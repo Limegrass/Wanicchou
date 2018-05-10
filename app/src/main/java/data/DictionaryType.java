@@ -5,17 +5,20 @@ package data;
  */
 
 public enum DictionaryType {
-    JJ ("JJ"),
-    JE ("JE"),
-    EJ ("EJ");
+    JJ, JE, EJ;
 
-    private String type;
-
-    DictionaryType(String type) {
-        this.type = type;
+    public String toJapaneseDictionaryType(){
+        String eng = this.toString();
+        switch (eng){
+            case "JJ":
+                return "国語";
+            case "JE":
+                return "和英";
+            case "EJ":
+                return "英和";
+            default:
+                return "";
+        }
     }
 
-    public String getType() {
-        return type;
-    }
 }

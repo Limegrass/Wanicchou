@@ -10,7 +10,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class RelatedWordsDbHelper extends SQLiteOpenHelper{
     private static final String DATABASE_NAME = "WanicchouRelatedWords.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 4;
 
     public RelatedWordsDbHelper(Context context){
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -23,9 +23,11 @@ public class RelatedWordsDbHelper extends SQLiteOpenHelper{
                         + RelatedWordsContract.RelatedWordEntry.TABLE_NAME
                         + " ("
                         + RelatedWordsContract.RelatedWordEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-                        + RelatedWordsContract.RelatedWordEntry.COLUMN_RELATED_WORD + " VARCHAR(32) NOT NULL "
+                        + RelatedWordsContract.RelatedWordEntry.COLUMN_DICTIONARY_TYPE + " VARCHAR(8), "
+                        + RelatedWordsContract.RelatedWordEntry.COLUMN_RELATED_WORD + " VARCHAR(32) NOT NULL, "
+                        + RelatedWordsContract.RelatedWordEntry.FK_BASE_WORD + " INTEGER NOT NULL, "
                         + "CONSTRAINT " + RelatedWordsContract.RelatedWordEntry.FK_BASE_WORD
-                        + " FOREIGN KEY " + "(" + VocabularyContract.VocabularyEntry._ID + ") "
+                        + " FOREIGN KEY (" + VocabularyContract.VocabularyEntry._ID + ") "
                         + "REFERENCES " + VocabularyContract.VocabularyEntry.TABLE_NAME
                         + "(" + VocabularyContract.VocabularyEntry._ID + ") "
                         + ")";

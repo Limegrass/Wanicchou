@@ -13,5 +13,6 @@ public class RelatedWordsContract {
         public static final String TABLE_NAME = "RelatedWords";
         public static final String FK_BASE_WORD = "FKBaseWord";
         public static final String COLUMN_RELATED_WORD = "RelatedWord";
+        public static final String COLUMN_DICTIONARY_TYPE = "DictionaryType";
     }
 }

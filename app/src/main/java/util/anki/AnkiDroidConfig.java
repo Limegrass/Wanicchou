@@ -22,7 +22,7 @@ final public class AnkiDroidConfig {
     //Many fields will be unused at first
     public static final String[] FIELDS =
             {
-                    "Word", "Reading", "Definition", "Furigana", "Pitch", "Notes", "Context"
+                    "Word", "Reading", "Definition", "Furigana", "Pitch", "Notes", "Context", "Dictionary Type"
 //                    "Pitch", "Audio", "Grammar",
 //                    "Sentence", "SentenceFurigana","SentenceMeaning",
             };
@@ -34,6 +34,7 @@ final public class AnkiDroidConfig {
     public static final int FIELDS_INDEX_PITCH = 4;
     public static final int FIELDS_INDEX_NOTES  = 5;
     public static final int FIELDS_INDEX_CONTEXT = 6;
+    public static final int FIELDS_INDEX_DICTIONARY_TYPE = 7;
 
 
 
