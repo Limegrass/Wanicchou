@@ -1,5 +1,6 @@
 package data;
 
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -61,11 +62,13 @@ public class SanseidoSearch implements Parcelable {
     private final static int RELATED_WORDS_VOCAB_INDEX = 1;
     private final static int RELATED_WORDS_TABLE_INDEX = 0;
 
-    private String wordSource;
-    private String definitionSource;
+    //TODO: Refactor to it uses the enum type
     private Map<String, Set<String>> relatedWords;
     private JapaneseVocabulary vocabulary;
 
+
+    // TODO: Fix 宝物 not being able to redirect to itself properly. Goes to 宝
+    // I can do this by stripping all non kana/kanji chars from the word source and putting it in the search.
 
     /**
      * Constructor to create an object containing the information retrieved from Sanseido from
@@ -74,20 +77,19 @@ public class SanseidoSearch implements Parcelable {
      * @throws IOException
      */
     public SanseidoSearch(String wordToSearch) throws IOException {
+        //TODO: Refactor the URL and vocab to reference a saved pref var for if it's JJ, JE, or EJ
         URL url = buildQueryURL(wordToSearch, true);
         Document html = fetchSanseidoSource(url);
-        wordSource = findWordSource(html);
-        definitionSource = findDefinitionSource(html);
         relatedWords = findRelatedWords(html);
-        vocabulary = new JapaneseVocabulary(wordSource, definitionSource);
+        vocabulary = new JapaneseVocabulary(
+                findWordSource(html),
+                findDefinitionSource(html),
+                DictionaryType.JJ);
     }
 
-    /**
-     * Getter for the word source.
-     * @return a raw string from the Sanseido search
-     */
-    public String getWordSource(){
-        return wordSource;
+    public SanseidoSearch(JapaneseVocabulary japaneseVocabulary, Map<String, Set<String> > relatedWords){
+        this.vocabulary = japaneseVocabulary;
+        this.relatedWords = relatedWords;
     }
 
     /**
@@ -159,6 +161,7 @@ public class SanseidoSearch implements Parcelable {
         // inputted
 
         // TODO: HANDLE ALL THE AWFUL INPUTS THAT THE FORWARD SEARCHING CAN HAVE
+        // TODO: Refactor this to use DictionaryType enum
         Log.d(TAG, "" + rows.size());
         for (Element row : rows) {
             Elements columns = row.select("td");
@@ -219,8 +222,6 @@ public class SanseidoSearch implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeString(wordSource);
-        parcel.writeString(definitionSource);
         parcel.writeValue(vocabulary);
         parcel.writeValue(relatedWords);
     }
@@ -240,8 +241,6 @@ public class SanseidoSearch implements Parcelable {
 
     private SanseidoSearch(Parcel parcel){
         final ClassLoader classLoader = getClass().getClassLoader();
-        wordSource = parcel.readString();
-        definitionSource = parcel.readString();
         vocabulary = (JapaneseVocabulary) parcel.readValue(classLoader);
         relatedWords = (Map<String, Set<String>>) parcel.readValue(classLoader);
     }
