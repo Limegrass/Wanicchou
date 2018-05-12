@@ -1,4 +1,4 @@
-# JJLD
+# 和日帳 （わにっちょう）Wanicchou
 J-J Dictionary drawing definitions from [Sanseido](https://www.sanseido.biz/) interfaced with the AnkiDroid API to quickly add words and their definitions.
 
 ![Screenshot](/docs/app-image.png)
@@ -8,7 +8,7 @@ Type a word in the search box, then press enter to conduct a search.
 The floating action button sends the searched word into AnkiDroid
 
 ## TODO
-Save searched words and definitions into an SQLiteDB for offline usage.
+<s>Save searched words and definitions into an SQLiteDB for offline usage.</s>
 
 SharedPreferences for which language dictionary the search should be conducted.
 
