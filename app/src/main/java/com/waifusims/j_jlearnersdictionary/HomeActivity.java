@@ -41,7 +41,6 @@ import android.view.KeyEvent;
 import android.widget.Toast;
 
 //TODO:  Horizontal UI
-//TODO: OnPause, OnResume
 public class HomeActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<SanseidoSearch>{
     public static final String LOG_TAG = "Wanicchou";
     private static final int ADD_PERM_REQUEST = 0;
@@ -57,7 +56,6 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
     private Toast mToast;
 
     private SanseidoSearch mLastSearched;
-    // TODO: Update the DB onPause/SavedInstanceState/new search
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -519,7 +517,6 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
                                 mLastSearched);
                 startActivityForResult(intentStartRelatedWordsActivity, HOME_ACTIVITY_REQUEST_CODE);
 
-                //TODO: Keep searched word information when coming back from child activity
                 // Unless a new word was selected from the child activity
 
             }
