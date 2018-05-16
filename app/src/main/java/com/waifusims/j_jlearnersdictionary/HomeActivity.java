@@ -3,15 +3,18 @@ package com.waifusims.j_jlearnersdictionary;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.databinding.DataBindingUtil;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.View;
 
 import com.waifusims.j_jlearnersdictionary.databinding.ActivityHomeBinding;
@@ -65,107 +68,62 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
         setContentView(R.layout.activity_home);
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_home);
 
-        mBinding.wordSearch.etSearchBox.setOnKeyListener(new OnKeyListener() {
-            @Override
-            public boolean onKey(View searchBox, int keyCode, KeyEvent keyEvent) {
-                if(keyEvent.getAction() == KeyEvent.ACTION_DOWN){
-                    switch (keyCode){
-                        case KeyEvent.KEYCODE_DPAD_CENTER:
-                        case KeyEvent.KEYCODE_ENTER:
-                            String searchWord = mBinding.wordSearch.etSearchBox.getText().toString();
-                            Cursor cursor = getWordFromDb(searchWord);
-
-                            if(cursor.moveToFirst()){
-
-                                //TODO: Give option of web search
-                                JapaneseVocabulary vocabulary = new JapaneseVocabulary(cursor);
-
-                                mBinding.wordDefinition.tvWord.setText(vocabulary.getWord());
-                                mBinding.wordDefinition.tvDefinition.setText(vocabulary.getDefintion());
-
-                                mLastSearched = new SanseidoSearch(vocabulary,
-                                        getExistingRelatedWordsFromDb(vocabulary.getWord()));
-
-
-
-                                showAnkiRelatedUIElements();
-                            }
-                            else{
-                                Bundle searchBundle = new Bundle();
-                                searchBundle.putString(SEARCH_WORD_KEY, searchWord);
-                                LoaderManager loaderManager = getSupportLoaderManager();
-                                Loader<String> searchLoader =
-                                        loaderManager.getLoader(SANSEIDO_SEARCH_LOADER);
-                                if (searchLoader == null){
-                                    loaderManager.initLoader(SANSEIDO_SEARCH_LOADER,
-                                            searchBundle, HomeActivity.this);
-                                }
-                                else {
-                                    loaderManager.restartLoader(SANSEIDO_SEARCH_LOADER,
-                                            searchBundle, HomeActivity.this);
-                                }
-                            }
-                            return true;
-                        default:
-                            //TODO: Would returning true do anything undesired? Find out
-                            return false;
-                    }
-                }
-                return false;
-            }
-        });
-
-        mBinding.btnRelatedWords.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intentStartRelatedWordsActivity =
-                        new Intent(getApplicationContext(), RelatedWordsActivity.class);
-                intentStartRelatedWordsActivity
-                        .putExtra(getString(R.string.key_related_words),
-                                mLastSearched);
-                startActivityForResult(intentStartRelatedWordsActivity, HOME_ACTIVITY_REQUEST_CODE);
-
-                //TODO: Keep searched word information when coming back from child activity
-                // Unless a new word was selected from the child activity
-
-            }
-        });
-
-        //TODO: Fix it so it requests on add card, not on start up. Avoid crashes before addition.
-        if (mAnkiDroid.shouldRequestPermission()) {
-            mAnkiDroid.requestPermission(HomeActivity.this, ADD_PERM_REQUEST);
-        }
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View view) {
-                addWordToAnki();
-            }
-        });
-
+        setUpClickListeners();
 
         VocabularyDbHelper vocabularyDbHelper = new VocabularyDbHelper(this);
         mVocabDb = vocabularyDbHelper.getWritableDatabase();
         RelatedWordsDbHelper relatedWordsDbHelper = new RelatedWordsDbHelper(this);
         mRelatedWordsDb = relatedWordsDbHelper.getWritableDatabase();
+    }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelable(getString(R.string.key_last_searched), mLastSearched);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        mLastSearched = savedInstanceState.getParcelable(getString(R.string.key_last_searched));
+        showVocabOnUI();
+        showAnkiRelatedUIElements();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        if(mLastSearched != null){
+            // Save the current state of the word entry to the DB
+            updateWordInDb(mLastSearched.getVocabulary());
+
+            // Save the word so it can be retrieved and researched when the activity is returned.
+            SharedPreferences sharedPreferences =
+                    PreferenceManager.getDefaultSharedPreferences(this);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putString(getString(R.string.key_search_word),
+                    mLastSearched.getVocabulary().getWord());
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        SharedPreferences sharedPreferences =
+                PreferenceManager.getDefaultSharedPreferences(this);
+        String searchWord = sharedPreferences.getString( getString(R.string.key_search_word), "" );
+        if(!TextUtils.isEmpty(searchWord)){
+            showWordFromDB(searchWord);
+        }
+
+
     }
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
         mVocabDb.close();
         mRelatedWordsDb.close();
+        super.onDestroy();
     }
 
     @Override
@@ -180,7 +138,10 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
                                 data.getExtras().getString(key);
                         mBinding.wordSearch.etSearchBox.setText(desiredRelatedWord);
                     }
-                    mToast.cancel();
+                    if(mToast != null){
+                        mToast.cancel();
+                    }
+                    // TODO: It's not actually doing the search right now
                     Context context = this;
                     String msg = getString(R.string.toast_searching_related);
                     int duration = Toast.LENGTH_SHORT;
@@ -188,6 +149,7 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
                     mToast.show();
                     break;
                 default:
+                    onResume();
             }
         }
     }
@@ -209,17 +171,13 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
         final int searchCompleteToastDuration = Toast.LENGTH_SHORT;
 
         if(search != null){
-            if (!search.getVocabulary().getWord().equals("")) {
+            if (!TextUtils.isEmpty(search.getVocabulary().getWord())) {
                 mLastSearched = search;
                 message = getString(R.string.word_search_success);
 
-                JapaneseVocabulary vocabulary = search.getVocabulary();
-                String definition = vocabulary.getDefintion();
+                showVocabOnUI();
 
-                mBinding.wordDefinition.tvWord.setText(vocabulary.getWord());
-                mBinding.wordDefinition.tvDefinition.setText(definition);
-
-                Cursor cursor = getWordFromDb(vocabulary.getWord());
+                Cursor cursor = getWordFromDb(search.getVocabulary().getWord());
 
                 if (!cursor.moveToFirst()) {
                     addWordToDb(search.getVocabulary());
@@ -419,7 +377,7 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
             return existingRelatedWordsMap;
         }
 
-        return new HashMap<String, Set<String> >();
+        return new HashMap<>();
     }
 
     private Cursor getWordFromDb(String word){
@@ -488,8 +446,8 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
 
         ContentValues contentValues = buildVocabularyContentValues(vocab);
 
-        String whereClause = VocabularyContract.VocabularyEntry.COLUMN_WORD + "=" + vocab.getWord();
-        String[] whereArgs = null;
+        String whereClause = VocabularyContract.VocabularyEntry.COLUMN_WORD + "=?";
+        String[] whereArgs = {vocab.getWord()};
 
         return mVocabDb.update(
                 VocabularyContract.VocabularyEntry.TABLE_NAME,
@@ -513,5 +471,93 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
         contentValues.put(VocabularyContract.VocabularyEntry.COLUMN_CONTEXT,
                 mBinding.ankiAdditionalFields.etContext.getText().toString());
         return contentValues;
+    }
+
+    private void setUpClickListeners(){
+        mBinding.wordSearch.etSearchBox.setOnKeyListener(new OnKeyListener() {
+            @Override
+            public boolean onKey(View searchBox, int keyCode, KeyEvent keyEvent) {
+                if(keyEvent.getAction() == KeyEvent.ACTION_DOWN){
+                    switch (keyCode){
+                        case KeyEvent.KEYCODE_DPAD_CENTER:
+                        case KeyEvent.KEYCODE_ENTER:
+                            String searchWord = mBinding.wordSearch.etSearchBox.getText().toString();
+
+                            // If the word is not in the DB, we need to make a search
+                            if(!showWordFromDB(searchWord)) {
+                                Bundle searchBundle = new Bundle();
+                                searchBundle.putString(SEARCH_WORD_KEY, searchWord);
+                                LoaderManager loaderManager = getSupportLoaderManager();
+                                Loader<String> searchLoader =
+                                        loaderManager.getLoader(SANSEIDO_SEARCH_LOADER);
+                                if (searchLoader == null){
+                                    loaderManager.initLoader(SANSEIDO_SEARCH_LOADER,
+                                            searchBundle, HomeActivity.this);
+                                }
+                                else {
+                                    loaderManager.restartLoader(SANSEIDO_SEARCH_LOADER,
+                                            searchBundle, HomeActivity.this);
+                                }
+                            }
+                            return true;
+                        default:
+                            //TODO: Would returning true do anything undesired? Find out
+                            return false;
+                    }
+                }
+                return false;
+            }
+        });
+
+        mBinding.btnRelatedWords.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intentStartRelatedWordsActivity =
+                        new Intent(getApplicationContext(), RelatedWordsActivity.class);
+                intentStartRelatedWordsActivity
+                        .putExtra(getString(R.string.key_related_words),
+                                mLastSearched);
+                startActivityForResult(intentStartRelatedWordsActivity, HOME_ACTIVITY_REQUEST_CODE);
+
+                //TODO: Keep searched word information when coming back from child activity
+                // Unless a new word was selected from the child activity
+
+            }
+        });
+
+        //TODO: Fix it so it requests on add card, not on start up. Avoid crashes before addition.
+        if (mAnkiDroid.shouldRequestPermission()) {
+            mAnkiDroid.requestPermission(HomeActivity.this, ADD_PERM_REQUEST);
+        }
+        FloatingActionButton fab = findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view) {
+                addWordToAnki();
+            }
+        });
+    }
+
+    private boolean showWordFromDB(String searchWord){
+        Cursor cursor = getWordFromDb(searchWord);
+        //TODO: Give option of web search
+        if(cursor.moveToFirst()){
+            JapaneseVocabulary vocabulary = new JapaneseVocabulary(cursor);
+
+            mLastSearched = new SanseidoSearch(vocabulary,
+                    getExistingRelatedWordsFromDb(vocabulary.getWord()));
+            showVocabOnUI();
+            showAnkiRelatedUIElements();
+            return true;
+        }
+        return false;
+    }
+
+    private void showVocabOnUI(){
+        JapaneseVocabulary vocabulary = mLastSearched.getVocabulary();
+        String definition = vocabulary.getDefintion();
+
+        mBinding.wordDefinition.tvWord.setText(vocabulary.getWord());
+        mBinding.wordDefinition.tvDefinition.setText(definition);
     }
 }
