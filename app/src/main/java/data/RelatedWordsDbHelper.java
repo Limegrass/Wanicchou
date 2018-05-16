@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
  * Created by Limegrass on 5/9/2018.
  */
 
+// TODO: Refactor to use Rooms https://developer.android.com/training/data-storage/room/
 public class RelatedWordsDbHelper extends SQLiteOpenHelper{
     private static final String DATABASE_NAME = "WanicchouRelatedWords.db";
     private static final int DATABASE_VERSION = 4;
