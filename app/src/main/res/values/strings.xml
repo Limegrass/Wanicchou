@@ -2,6 +2,7 @@
     <string name="app_name" translatable="true">Wanicchou</string>
 
     <!--home_activity-->
+    <string name="key_last_searched" translatable="false">lastSearched</string>
     <!--word_definition related-->
     <string name="search_label" translatable="true">Search</string>
     <string name="search_field_hint" translatable="true">Enter a word</string>
@@ -38,5 +39,8 @@
 
     <string name="key_related_words" translatable="false">relatedWords</string>
     <string name="key_desired_related_word" translatable="false">desiredRelatedWord</string>
+
+    <!--shared preferences keys-->
+    <string name="key_search_word" translatable="false">searchWord</string>
 
 </resources>
