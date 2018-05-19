@@ -16,7 +16,7 @@ import data.SanseidoSearch;
  * Separate activity to display the related words of a SanseidoSearch.
  * If a word is long pressed, it will be searched and brought back to the home activity.
  */
-public class RelatedWordsActivity extends AppCompatActivity
+public class WordListActivity extends AppCompatActivity
         implements WordAdapter.ListItemClickListener{
 
     private SanseidoSearch searchData;

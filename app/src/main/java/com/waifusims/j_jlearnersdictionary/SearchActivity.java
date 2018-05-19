@@ -41,7 +41,7 @@ import android.view.KeyEvent;
 import android.widget.Toast;
 
 //TODO:  Horizontal UI
-public class HomeActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<SanseidoSearch>{
+public class SearchActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<SanseidoSearch>{
     public static final String LOG_TAG = "Wanicchou";
     private static final int ADD_PERM_REQUEST = 0;
     private static final int HOME_ACTIVITY_REQUEST_CODE = 42;
@@ -154,7 +154,7 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
 
     @Override
     public Loader<SanseidoSearch> onCreateLoader(int id, final Bundle args) {
-        return new SanseidoSearchAsyncTaskLoader(HomeActivity.this,
+        return new SanseidoSearchAsyncTaskLoader(SearchActivity.this,
                 args.getString(SEARCH_WORD_KEY));
     }
 
@@ -250,7 +250,7 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
             if (mToast != null){
                 mToast.cancel();
             }
-            Context context = HomeActivity.this;
+            Context context = SearchActivity.this;
             String message = getString(R.string.toast_permissions_denied);
             int duration = Toast.LENGTH_SHORT;
             mToast = Toast.makeText(context, message, duration);
@@ -319,7 +319,7 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
         mAnkiDroid.getApi().addNote(modelId, deckId, fields, tags);
 
         mToast.cancel();
-        Context context = HomeActivity.this;
+        Context context = SearchActivity.this;
         String message = getString(R.string.toast_anki_added);
         int duration = Toast.LENGTH_SHORT;
         mToast = Toast.makeText(context, message, duration);
@@ -490,11 +490,11 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
                                         loaderManager.getLoader(SANSEIDO_SEARCH_LOADER);
                                 if (searchLoader == null){
                                     loaderManager.initLoader(SANSEIDO_SEARCH_LOADER,
-                                            searchBundle, HomeActivity.this);
+                                            searchBundle, SearchActivity.this);
                                 }
                                 else {
                                     loaderManager.restartLoader(SANSEIDO_SEARCH_LOADER,
-                                            searchBundle, HomeActivity.this);
+                                            searchBundle, SearchActivity.this);
                                 }
                             }
                             return true;
@@ -511,7 +511,7 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
             @Override
             public void onClick(View view) {
                 Intent intentStartRelatedWordsActivity =
-                        new Intent(getApplicationContext(), RelatedWordsActivity.class);
+                        new Intent(getApplicationContext(), WordListActivity.class);
                 intentStartRelatedWordsActivity
                         .putExtra(getString(R.string.key_related_words),
                                 mLastSearched);
@@ -524,7 +524,7 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
 
         //TODO: Fix it so it requests on add card, not on start up. Avoid crashes before addition.
         if (mAnkiDroid.shouldRequestPermission()) {
-            mAnkiDroid.requestPermission(HomeActivity.this, ADD_PERM_REQUEST);
+            mAnkiDroid.requestPermission(SearchActivity.this, ADD_PERM_REQUEST);
         }
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener(){
