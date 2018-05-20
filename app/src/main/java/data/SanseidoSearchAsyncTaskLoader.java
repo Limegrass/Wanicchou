@@ -1,7 +1,10 @@
 package data;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.support.v4.content.AsyncTaskLoader;
+import android.text.TextUtils;
 import android.widget.Toast;
 
 import com.waifusims.j_jlearnersdictionary.R;
@@ -13,12 +16,14 @@ import java.io.IOException;
  */
 
 public class SanseidoSearchAsyncTaskLoader extends AsyncTaskLoader<SanseidoSearch>{
-    private String searchWord;
+    private String mSearchWord;
     private Toast mToast;
+    private DictionaryType mDictionaryType;
 
-    public SanseidoSearchAsyncTaskLoader(final Context context, String searchWord){
+    public SanseidoSearchAsyncTaskLoader(final Context context, String searchWord, DictionaryType dictionaryType){
         super(context);
-        this.searchWord = searchWord;
+        mSearchWord = searchWord;
+        mDictionaryType = dictionaryType;
     }
 
     @Override
@@ -38,13 +43,14 @@ public class SanseidoSearchAsyncTaskLoader extends AsyncTaskLoader<SanseidoSearc
     @Override
     public SanseidoSearch loadInBackground() {
 
-        if (searchWord == null || searchWord.equals("")) {
+        if (TextUtils.isEmpty(mSearchWord)) {
             return null;
         }
 
         SanseidoSearch search = null;
         try{
-            search = new SanseidoSearch(searchWord);
+            Context context = getContext();
+            search = new SanseidoSearch(mSearchWord, mDictionaryType);
         }
         catch (IOException e){
             e.printStackTrace();

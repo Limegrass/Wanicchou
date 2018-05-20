@@ -20,5 +20,17 @@ public enum DictionaryType {
                 return "";
         }
     }
+    public static DictionaryType fromSanseidoKey(String key){
+        switch (key){
+            case "DailyJJ":
+                return JJ;
+            case "DailyJE":
+                return JE;
+            case "DailyEJ":
+                return EJ;
+            default:
+                return JJ;
+        }
+    }
 
 }

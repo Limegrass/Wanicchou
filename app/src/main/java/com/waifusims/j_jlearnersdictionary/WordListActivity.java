@@ -1,11 +1,15 @@
 package com.waifusims.j_jlearnersdictionary;
 
+import android.app.ActionBar;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
+import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.waifusims.j_jlearnersdictionary.databinding.ActivityRelatedWordsBinding;
@@ -28,11 +32,17 @@ public class WordListActivity extends AppCompatActivity
 
     // TODO: Long press word selection
     // TODO: Anki import for all selected words
+    // TODO: Fix toast interactions between activities
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_related_words);
+        ActionBar actionbar = this.getActionBar();
+        if (actionbar != null) {
+            actionbar.setDisplayHomeAsUpEnabled(true);
+        }
+
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_related_words);
 
         Intent intentThatStartedThis = getIntent();
@@ -50,6 +60,15 @@ public class WordListActivity extends AppCompatActivity
         mAdapter = new WordAdapter(searchData.getRelatedWords(),
                 this);
         mWordList.setAdapter(mAdapter);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int itemId = item.getItemId();
+        if (itemId == android.R.id.home) {
+            NavUtils.navigateUpFromSameTask(this);
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override

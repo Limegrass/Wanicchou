@@ -15,10 +15,14 @@ import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 
 import com.waifusims.j_jlearnersdictionary.databinding.ActivityHomeBinding;
 
+import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -41,7 +45,8 @@ import android.view.KeyEvent;
 import android.widget.Toast;
 
 //TODO:  Horizontal UI
-public class SearchActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<SanseidoSearch>{
+public class SearchActivity extends AppCompatActivity
+        implements LoaderManager.LoaderCallbacks<SanseidoSearch> {
     public static final String LOG_TAG = "Wanicchou";
     private static final int ADD_PERM_REQUEST = 0;
     private static final int HOME_ACTIVITY_REQUEST_CODE = 42;
@@ -113,8 +118,6 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
         if(!TextUtils.isEmpty(searchWord)){
             showWordFromDB(searchWord);
         }
-
-
     }
 
     @Override
@@ -153,9 +156,34 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.search_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int itemId = item.getItemId();
+        if (itemId == R.id.action_settings) {
+            Intent startSettingsActivityIntent = new Intent(this, SettingsActivity.class);
+            startActivity(startSettingsActivityIntent);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
     public Loader<SanseidoSearch> onCreateLoader(int id, final Bundle args) {
+        Context context = SearchActivity.this;
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        String dictionaryTypeString = sharedPreferences.getString(getString(R.string.key_pref_dictionary_type),
+                getString(R.string.default_pref_dictionary_type));
+        DictionaryType dictionaryType = DictionaryType.fromSanseidoKey(dictionaryTypeString);
         return new SanseidoSearchAsyncTaskLoader(SearchActivity.this,
-                args.getString(SEARCH_WORD_KEY));
+                args.getString(SEARCH_WORD_KEY),
+                dictionaryType
+                );
     }
 
     @Override
@@ -557,4 +585,5 @@ public class SearchActivity extends AppCompatActivity implements LoaderManager.L
         mBinding.wordDefinition.tvWord.setText(vocabulary.getWord());
         mBinding.wordDefinition.tvDefinition.setText(definition);
     }
+
 }
