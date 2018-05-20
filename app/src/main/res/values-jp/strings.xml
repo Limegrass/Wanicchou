@@ -1,5 +1,8 @@
 <resources>
     <string name="app_name">和日帳</string>
+
+    <!--search activity-->
+    <string name="action_settings" translatable="true">設定</string>
     <!--word_definition related-->
     <string name="search_label" translatable="true">検索</string>
     <string name="search_field_hint" translatable="true">キーボードで入力して</string>
