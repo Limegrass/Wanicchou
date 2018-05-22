@@ -287,75 +287,6 @@ public class SearchActivity extends AppCompatActivity
         }
     }
 
-    // TODO: Move these methods to the Helper
-    /**
-     * helper method to retrieve the deck ID for JJLD
-     * @return the deck ID for JJLD in Anki
-     */
-    private long getDeckId() {
-        Long did = mAnkiDroid.findDeckIdByName(AnkiDroidConfig.DECK_NAME);
-        if (did == null) {
-            did = mAnkiDroid.getApi().addNewDeck(AnkiDroidConfig.DECK_NAME);
-            mAnkiDroid.storeDeckReference(AnkiDroidConfig.DECK_NAME, did);
-        }
-        return did;
-    }
-
-    /**
-     * helper method to retrieve the model ID for JJLD
-     * @return the model ID for JJLD in Anki
-     */
-    private long getModelId() {
-        Long mid = mAnkiDroid.findModelIdByName(AnkiDroidConfig.MODEL_NAME, AnkiDroidConfig.FIELDS.length);
-        if (mid == null) {
-            mid = mAnkiDroid.getApi().addNewCustomModel(AnkiDroidConfig.MODEL_NAME, AnkiDroidConfig.FIELDS,
-                    AnkiDroidConfig.CARD_NAMES, AnkiDroidConfig.QFMT, AnkiDroidConfig.AFMT, AnkiDroidConfig.CSS, getDeckId(), null);
-            mAnkiDroid.storeModelReference(AnkiDroidConfig.MODEL_NAME, mid);
-        }
-        return mid;
-    }
-
-
-    //TODO: Change click to expand a menu and add associated UI elements
-    //TODO: Maybe implement a clozed type when sentence search is included
-    //TODO: Duplicate checking
-    /**
-     * Use the instant-add API to add flashcards directly to AnkiDroid.
-     */
-    private void addWordToAnki(){
-        long deckId = getDeckId();
-        long modelId = getModelId();
-        String[] fieldNames = mAnkiDroid.getApi().getFieldList(modelId);
-        String[] fields = new String[fieldNames.length];
-        fields[AnkiDroidConfig.FIELDS_INDEX_WORD] = mLastSearched.getVocabulary().getWord();
-        fields[AnkiDroidConfig.FIELDS_INDEX_READING] = mLastSearched.getVocabulary().getReading();
-
-        // Anki uses HTML, so the newlines are not displayed without a double newline or a break
-        String definition = mBinding.wordDefinition.tvDefinition.getText().toString();
-        definition = definition.replaceAll("\n", "<br>");
-        fields[AnkiDroidConfig.FIELDS_INDEX_DEFINITION] = definition;
-
-        fields[AnkiDroidConfig.FIELDS_INDEX_FURIGANA] = mLastSearched.getVocabulary().getFurigana();
-        fields[AnkiDroidConfig.FIELDS_INDEX_PITCH] = mLastSearched.getVocabulary().getPitch();
-
-        String notes = mBinding.ankiAdditionalFields.etNotes.getText().toString();
-        fields[AnkiDroidConfig.FIELDS_INDEX_NOTES] = notes;
-        String wordContext = mBinding.ankiAdditionalFields.etContext.getText().toString();
-        fields[AnkiDroidConfig.FIELDS_INDEX_CONTEXT] = wordContext;
-        fields[AnkiDroidConfig.FIELDS_INDEX_DICTIONARY_TYPE] =
-                mLastSearched.getVocabulary().getDictionaryType().toString();
-        Set<String> tags = AnkiDroidConfig.TAGS;
-        mAnkiDroid.getApi().addNote(modelId, deckId, fields, tags);
-
-        mToast.cancel();
-        Context context = SearchActivity.this;
-        String message = getString(R.string.toast_anki_added);
-        int duration = Toast.LENGTH_SHORT;
-        mToast = Toast.makeText(context, message, duration);
-        mToast.show();
-
-    }
-
     private Map<String, Set<String> > getExistingRelatedWordsFromDb(String word){
         Cursor wordInVocabDb = getWordFromDb(word);
         if (!wordInVocabDb.moveToFirst()){
@@ -606,4 +537,42 @@ public class SearchActivity extends AppCompatActivity
         mBinding.wordDefinition.tvDefinition.setText(definition);
     }
 
+    //TODO: Change click to expand a menu and add associated UI elements
+    //TODO: Maybe implement a clozed type when sentence search is included
+    //TODO: Duplicate checking
+    /**
+     * Use the instant-add API to add flashcards directly to AnkiDroid.
+     */
+    public void addWordToAnki(){
+        long deckId = mAnkiDroid.getDeckId();
+        long modelId = mAnkiDroid.getModelId();
+        String[] fieldNames = mAnkiDroid.getApi().getFieldList(modelId);
+        String[] fields = new String[fieldNames.length];
+        fields[AnkiDroidConfig.FIELDS_INDEX_WORD] = mLastSearched.getVocabulary().getWord();
+        fields[AnkiDroidConfig.FIELDS_INDEX_READING] = mLastSearched.getVocabulary().getReading();
+
+        // Anki uses HTML, so the newlines are not displayed without a double newline or a break
+        String definition = mBinding.wordDefinition.tvDefinition.getText().toString();
+        definition = definition.replaceAll("\n", "<br>");
+        fields[AnkiDroidConfig.FIELDS_INDEX_DEFINITION] = definition;
+
+        fields[AnkiDroidConfig.FIELDS_INDEX_FURIGANA] = mLastSearched.getVocabulary().getFurigana();
+        fields[AnkiDroidConfig.FIELDS_INDEX_PITCH] = mLastSearched.getVocabulary().getPitch();
+
+        String notes = mBinding.ankiAdditionalFields.etNotes.getText().toString();
+        fields[AnkiDroidConfig.FIELDS_INDEX_NOTES] = notes;
+        String wordContext = mBinding.ankiAdditionalFields.etContext.getText().toString();
+        fields[AnkiDroidConfig.FIELDS_INDEX_CONTEXT] = wordContext;
+        fields[AnkiDroidConfig.FIELDS_INDEX_DICTIONARY_TYPE] =
+                mLastSearched.getVocabulary().getDictionaryType().toString();
+        Set<String> tags = AnkiDroidConfig.TAGS;
+        mAnkiDroid.getApi().addNote(modelId, deckId, fields, tags);
+
+        mToast.cancel();
+        Context context = SearchActivity.this;
+        String message = getString(R.string.toast_anki_added);
+        int duration = Toast.LENGTH_SHORT;
+        mToast = Toast.makeText(context, message, duration);
+        mToast.show();
+    }
 }
