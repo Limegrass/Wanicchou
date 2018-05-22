@@ -8,9 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import com.waifusims.j_jlearnersdictionary.databinding.ActivityRelatedWordsBinding;
 
@@ -25,14 +23,12 @@ public class WordListActivity extends AppCompatActivity
 
     private SanseidoSearch searchData;
     private ActivityRelatedWordsBinding mBinding;
-    private Toast mToast;
 
     private WordAdapter mAdapter;
     private RecyclerView mWordList;
 
     // TODO: Long press word selection
     // TODO: Anki import for all selected words
-    // TODO: Fix toast interactions between activities
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

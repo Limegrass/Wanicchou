@@ -22,7 +22,6 @@ import android.view.View;
 
 import com.waifusims.j_jlearnersdictionary.databinding.ActivityHomeBinding;
 
-import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -112,11 +111,13 @@ public class SearchActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
+        Context context = SearchActivity.this;
         SharedPreferences sharedPreferences =
-                PreferenceManager.getDefaultSharedPreferences(this);
+                PreferenceManager.getDefaultSharedPreferences(context);
         String searchWord = sharedPreferences.getString( getString(R.string.key_search_word), "" );
+        DictionaryType dictionaryType = getCurrentDictionaryPreference();
         if(!TextUtils.isEmpty(searchWord)){
-            showWordFromDB(searchWord);
+            showWordFromDB(searchWord, dictionaryType);
         }
     }
 
@@ -176,11 +177,8 @@ public class SearchActivity extends AppCompatActivity
     @Override
     public Loader<SanseidoSearch> onCreateLoader(int id, final Bundle args) {
         Context context = SearchActivity.this;
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        String dictionaryTypeString = sharedPreferences.getString(getString(R.string.key_pref_dictionary_type),
-                getString(R.string.default_pref_dictionary_type));
-        DictionaryType dictionaryType = DictionaryType.fromSanseidoKey(dictionaryTypeString);
-        return new SanseidoSearchAsyncTaskLoader(SearchActivity.this,
+        DictionaryType dictionaryType = getCurrentDictionaryPreference();
+        return new SanseidoSearchAsyncTaskLoader(context,
                 args.getString(SEARCH_WORD_KEY),
                 dictionaryType
                 );
@@ -205,7 +203,8 @@ public class SearchActivity extends AppCompatActivity
 
                 Cursor cursor = getWordFromDb(search.getVocabulary().getWord());
 
-                if (!cursor.moveToFirst()) {
+                if (!cursor.moveToFirst() ||
+                        search.getVocabulary().getDictionaryType() != getCurrentDictionaryPreference()) {
                     addWordToDb(search.getVocabulary());
                     addWordsToRelatedWordsDb(search.getVocabulary().getWord(),
                             search.getRelatedWords());
@@ -217,9 +216,11 @@ public class SearchActivity extends AppCompatActivity
 
                 // TODO: Add empty entry to db for failed searches that aren't network errors.
                 // TODO: Probably a null somewhere since I do this
+                // TODO: Get dictionaryType at time of search request
+                DictionaryType dictionaryType = getCurrentDictionaryPreference();
                 JapaneseVocabulary invalidWord =
                         new JapaneseVocabulary(mBinding.wordSearch.etSearchBox
-                                .getText().toString(), DictionaryType.JJ);
+                                .getText().toString(), dictionaryType);
 
                 Cursor cursor = getWordFromDb(invalidWord.getWord());
 
@@ -408,8 +409,9 @@ public class SearchActivity extends AppCompatActivity
 
     private Cursor getWordFromDb(String word){
         final String[] columns = null;
-        final String selection = VocabularyContract.VocabularyEntry.COLUMN_WORD + "=?";
-        final String[] selectionArgs = {word};
+        final String selection = VocabularyContract.VocabularyEntry.COLUMN_WORD + "=? AND " +
+                VocabularyContract.VocabularyEntry.COLUMN_DICTIONARY_TYPE + "=?";
+        final String[] selectionArgs = {word, getCurrentDictionaryPreference().toString()};
         final String groupBy = null;
         final String having = null;
 
@@ -434,9 +436,11 @@ public class SearchActivity extends AppCompatActivity
             }
         }
 
-        //Word must exist in Vocab DB to add related words
         Cursor searchWordCursor = getWordFromDb(searchWord);
-        searchWordCursor.moveToFirst();
+        if(!searchWordCursor.moveToFirst()){
+            return -1;
+        }
+
         int fkSearchWordId = searchWordCursor.getInt(
                 searchWordCursor.getColumnIndex(VocabularyContract.VocabularyEntry._ID));
 
@@ -508,9 +512,10 @@ public class SearchActivity extends AppCompatActivity
                         case KeyEvent.KEYCODE_DPAD_CENTER:
                         case KeyEvent.KEYCODE_ENTER:
                             String searchWord = mBinding.wordSearch.etSearchBox.getText().toString();
+                            DictionaryType requestedDictionaryType = getCurrentDictionaryPreference();
 
                             // If the word is not in the DB, we need to make a search
-                            if(!showWordFromDB(searchWord)) {
+                            if(!showWordFromDB(searchWord, requestedDictionaryType)) {
                                 Bundle searchBundle = new Bundle();
                                 searchBundle.putString(SEARCH_WORD_KEY, searchWord);
                                 LoaderManager loaderManager = getSupportLoaderManager();
@@ -563,11 +568,15 @@ public class SearchActivity extends AppCompatActivity
         });
     }
 
-    private boolean showWordFromDB(String searchWord){
+    private boolean showWordFromDB(String searchWord, DictionaryType dictionaryType){
         Cursor cursor = getWordFromDb(searchWord);
         //TODO: Give option of web search
         if(cursor.moveToFirst()){
             JapaneseVocabulary vocabulary = new JapaneseVocabulary(cursor);
+
+            if (vocabulary.getDictionaryType() != dictionaryType){
+                return false;
+            }
 
             mLastSearched = new SanseidoSearch(vocabulary,
                     getExistingRelatedWordsFromDb(vocabulary.getWord()));
@@ -576,6 +585,17 @@ public class SearchActivity extends AppCompatActivity
             return true;
         }
         return false;
+    }
+
+    private DictionaryType getCurrentDictionaryPreference(){
+        Context context = this;
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        String dictionaryTypeString = sharedPreferences.getString(
+                getString(R.string.key_pref_dictionary_type),
+                getString(R.string.default_pref_dictionary_type)
+        );
+        DictionaryType dictionaryType = DictionaryType.fromSanseidoKey(dictionaryTypeString);
+        return dictionaryType;
     }
 
     private void showVocabOnUI(){

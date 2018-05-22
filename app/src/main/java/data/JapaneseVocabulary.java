@@ -75,20 +75,7 @@ public class JapaneseVocabulary implements Parcelable {
         reading = savedWordCursor.getString(readingIndex);
         pitch = savedWordCursor.getString(pitchIndex);
         String dicTypeString = savedWordCursor.getString(dictionaryIndex);
-        switch(dicTypeString){
-            case "JJ":
-                dictionaryType = DictionaryType.JJ;
-                break;
-            case "JE":
-                dictionaryType = DictionaryType.JE;
-                break;
-            case "EJ":
-                dictionaryType = DictionaryType.EJ;
-                break;
-            default:
-                dictionaryType = DictionaryType.JJ;
-
-        }
+        dictionaryType = DictionaryType.fromSanseidoKey(dicTypeString);
     }
     /**
      * Checks if the two JapaneseVocabulary objects have the same word, reading, and definition.
