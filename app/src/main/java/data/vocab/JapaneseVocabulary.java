@@ -1,4 +1,4 @@
-package data;
+package data.vocab;
 
 import android.database.Cursor;
 import android.os.Parcel;
@@ -6,6 +6,8 @@ import android.os.Parcelable;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import data.db.VocabularyContract;
 
 /**
  * Created by Limegrass on 4/4/2018.

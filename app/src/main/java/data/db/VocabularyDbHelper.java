@@ -1,9 +1,9 @@
-package data;
+package data.db;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import data.VocabularyContract.*;
+import data.db.VocabularyContract.*;
 
 /**
  * Created by Limegrass on 5/7/2018.

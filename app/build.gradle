@@ -22,6 +22,13 @@ android {
         implementation 'com.ichi2.anki:api:1.1.0alpha5'
         implementation 'com.android.support:design:26.1.0'
         implementation 'com.android.support:recyclerview-v7:26.1.0'
+
+        def room_version = "1.1.0"
+        implementation "android.arch.persistence.room:runtime:$room_version"
+
+        def lifecycle_version = "1.1.1"
+        implementation "android.arch.lifecycle:extensions:$lifecycle_version"
+
     }
 
     testOptions {
