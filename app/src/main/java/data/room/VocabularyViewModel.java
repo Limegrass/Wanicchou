@@ -31,9 +31,16 @@ public class VocabularyViewModel extends AndroidViewModel{
         mRepo.delete(vocab);
     }
 
-    public VocabularyEntity getWord(String word, DictionaryType dictionaryType)
-            throws ExecutionException, InterruptedException {
-        return mRepo.getWord(word, dictionaryType);
+    public VocabularyEntity getWord(String word, DictionaryType dictionaryType) {
+        VocabularyEntity ret = null;
+        try {
+            ret = mRepo.getWord(word, dictionaryType);
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return ret;
     }
 
 
