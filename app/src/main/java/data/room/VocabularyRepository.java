@@ -5,6 +5,9 @@ import android.arch.lifecycle.LiveData;
 import android.os.AsyncTask;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+
+import data.vocab.DictionaryType;
 
 public class VocabularyRepository {
     private VocabularyDao mVocabDao;
@@ -31,6 +34,13 @@ public class VocabularyRepository {
 
     public void delete(VocabularyEntity vocab){
         new entryModificationAsyncTask(mVocabDao, ACTION_DELETE).execute(vocab);
+    }
+    // TODO: UPDATE BUT IDK HOW TI WORKS BECAUSE GARBO DOCS
+
+    //TODO: FUCKING GOOGLE CAN YOU JUST TELL ME WHAT THE RETURN TYPE OF A FAILED QUERY IS????
+    public VocabularyEntity getWord(String word, DictionaryType dictionaryType)
+            throws ExecutionException, InterruptedException {
+        return new queryAsyncTask(mVocabDao, dictionaryType).execute(word).get();
     }
 
     private static class entryModificationAsyncTask extends AsyncTask<VocabularyEntity, Void, Void>{
@@ -60,6 +70,20 @@ public class VocabularyRepository {
         }
     }
 
+    private static class queryAsyncTask extends AsyncTask<String, Void, VocabularyEntity>{
+        private VocabularyDao mAsyncTaskDao;
+        private DictionaryType mDictionaryType;
 
+        protected queryAsyncTask(VocabularyDao dao, DictionaryType dictionaryType){
+            mAsyncTaskDao = dao;
+            mDictionaryType = dictionaryType;
+        }
+
+        @Override
+        protected VocabularyEntity doInBackground(String... words) {
+            return mAsyncTaskDao.getWord(words[0], mDictionaryType.toString());
+        }
+
+    }
 
 }

@@ -5,6 +5,9 @@ import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.LiveData;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+
+import data.vocab.DictionaryType;
 
 public class VocabularyViewModel extends AndroidViewModel{
     private VocabularyRepository mRepo;
@@ -23,5 +26,15 @@ public class VocabularyViewModel extends AndroidViewModel{
     public void insert(VocabularyEntity vocab){
         mRepo.insert(vocab);
     }
+
+    public void delete(VocabularyEntity vocab){
+        mRepo.delete(vocab);
+    }
+
+    public VocabularyEntity getWord(String word, DictionaryType dictionaryType)
+            throws ExecutionException, InterruptedException {
+        return mRepo.getWord(word, dictionaryType);
+    }
+
 
 }

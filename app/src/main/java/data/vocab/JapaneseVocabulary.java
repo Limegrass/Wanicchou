@@ -8,6 +8,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import data.db.VocabularyContract;
+import data.room.VocabularyEntity;
 
 /**
  * Created by Limegrass on 4/4/2018.
@@ -51,6 +52,15 @@ public class JapaneseVocabulary implements Parcelable {
         reading = isolateReading(wordSource);
         pitch = isolatePitch(wordSource);
         this.dictionaryType = dictionaryType;
+    }
+
+    public JapaneseVocabulary(VocabularyEntity entity){
+        //TODO: Change entity elements to be getter/setters
+        word = entity.mWord;
+        reading = entity.mReading;
+        definition = entity.mDefinition;
+        pitch = entity.mPitch;
+        dictionaryType = DictionaryType.fromSanseidoKey(entity.mDictionaryType);
     }
 
     public JapaneseVocabulary(String invalidWord, DictionaryType dictionaryType){

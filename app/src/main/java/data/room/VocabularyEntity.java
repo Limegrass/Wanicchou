@@ -44,6 +44,8 @@ public class VocabularyEntity {
     @NonNull
     public String mWordContext;
 
+    public VocabularyEntity(){}
+
     public VocabularyEntity(JapaneseVocabulary vocabulary, String notes, String wordContext){
         mWord = vocabulary.getWord();
         mDefinition = vocabulary.getDefintion();
