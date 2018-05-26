@@ -1,12 +1,10 @@
 package com.waifusims.j_jlearnersdictionary;
 
 import android.arch.lifecycle.ViewModelProviders;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.databinding.DataBindingUtil;
 import android.preference.PreferenceManager;
@@ -23,7 +21,6 @@ import android.view.View;
 
 import com.waifusims.j_jlearnersdictionary.databinding.ActivityHomeBinding;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -36,12 +33,8 @@ import data.room.voc.VocabularyEntity;
 import data.room.voc.VocabularyViewModel;
 import data.vocab.DictionaryType;
 import data.vocab.JapaneseVocabulary;
-import data.db.RelatedWordsContract;
-import data.db.RelatedWordsDbHelper;
 import data.vocab.search.SanseidoSearch;
 import data.vocab.search.SanseidoSearchAsyncTaskLoader;
-import data.db.VocabularyContract;
-import data.db.VocabularyDbHelper;
 import util.anki.AnkiDroidHelper;
 import util.anki.AnkiDroidConfig;
 import android.support.v4.app.LoaderManager;
@@ -80,11 +73,6 @@ public class SearchActivity extends AppCompatActivity
         setContentView(R.layout.activity_home);
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_home);
         setUpClickListeners();
-
-        VocabularyDbHelper vocabularyDbHelper = new VocabularyDbHelper(this);
-        mVocabDb = vocabularyDbHelper.getWritableDatabase();
-        RelatedWordsDbHelper relatedWordsDbHelper = new RelatedWordsDbHelper(this);
-        mRelatedWordsDb = relatedWordsDbHelper.getWritableDatabase();
 
         mVocabViewModel = ViewModelProviders.of(this).get(VocabularyViewModel.class);
         mRelatedWordsViewModel = ViewModelProviders.of(this).get(RelatedWordViewModel.class);
