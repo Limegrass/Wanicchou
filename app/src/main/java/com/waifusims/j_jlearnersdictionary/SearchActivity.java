@@ -23,13 +23,17 @@ import android.view.View;
 
 import com.waifusims.j_jlearnersdictionary.databinding.ActivityHomeBinding;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import data.room.VocabularyEntity;
-import data.room.VocabularyViewModel;
+import data.room.rel.RelatedWordEntity;
+import data.room.rel.RelatedWordViewModel;
+import data.room.voc.VocabularyEntity;
+import data.room.voc.VocabularyViewModel;
 import data.vocab.DictionaryType;
 import data.vocab.JapaneseVocabulary;
 import data.db.RelatedWordsContract;
@@ -62,6 +66,7 @@ public class SearchActivity extends AppCompatActivity
     private AnkiDroidHelper mAnkiDroid;
     private Toast mToast;
     private VocabularyViewModel mVocabViewModel;
+    private RelatedWordViewModel mRelatedWordsViewModel;
 
     private SanseidoSearch mLastSearched;
 
@@ -82,6 +87,7 @@ public class SearchActivity extends AppCompatActivity
         mRelatedWordsDb = relatedWordsDbHelper.getWritableDatabase();
 
         mVocabViewModel = ViewModelProviders.of(this).get(VocabularyViewModel.class);
+        mRelatedWordsViewModel = ViewModelProviders.of(this).get(RelatedWordViewModel.class);
     }
 
     @Override
@@ -130,9 +136,8 @@ public class SearchActivity extends AppCompatActivity
                 PreferenceManager.getDefaultSharedPreferences(context);
         String searchWord = sharedPreferences.getString(getString(R.string.key_search_word),
                 stringIfMissing);
-        DictionaryType dictionaryType = getCurrentDictionaryPreference();
         if(!TextUtils.isEmpty(searchWord)){
-            showWordFromDB(searchWord, dictionaryType);
+            showWordFromDB(searchWord);
         }
     }
 
@@ -258,89 +263,32 @@ public class SearchActivity extends AppCompatActivity
 
         int fkBaseWordID = entity.getId();
 
-        final String[] columns = {RelatedWordsContract.RelatedWordEntry.COLUMN_RELATED_WORD,
-                RelatedWordsContract.RelatedWordEntry.COLUMN_DICTIONARY_TYPE};
-        final String selection = RelatedWordsContract.RelatedWordEntry.FK_BASE_WORD+ "=?";
-        final String[] selectionArgs = {String.valueOf(fkBaseWordID)};
-        final String groupBy = null;
-        final String having = null;
-
-        Cursor existingRelatedWordsCursor = mRelatedWordsDb.query(
-                RelatedWordsContract.RelatedWordEntry.TABLE_NAME,
-                columns,
-                selection,
-                selectionArgs,
-                groupBy,
-                having,
-                VocabularyContract.VocabularyEntry._ID
-        );
-
-        if(existingRelatedWordsCursor.moveToFirst()){
-            Map<String, Set<String> > existingRelatedWordsMap = new HashMap<>();
-            int relatedWordIndex =
-                    existingRelatedWordsCursor.getColumnIndex(
-                            RelatedWordsContract.RelatedWordEntry.COLUMN_RELATED_WORD);
-
-            do {
-                String relatedWord = existingRelatedWordsCursor.getString(relatedWordIndex);
-                String dictionaryType = existingRelatedWordsCursor
-                        .getString(existingRelatedWordsCursor
-                                .getColumnIndex(RelatedWordsContract.RelatedWordEntry.COLUMN_DICTIONARY_TYPE));
-                if(!existingRelatedWordsMap.containsKey(dictionaryType)){
-                    Set<String> wordSet = new HashSet<>();
-                    existingRelatedWordsMap.put(dictionaryType, wordSet);
-                }
-                existingRelatedWordsMap.get(dictionaryType).add(relatedWord);
-            } while (existingRelatedWordsCursor.moveToNext());
-
-            return existingRelatedWordsMap;
-        }
-
-        return new HashMap<>();
-    }
-
-    //TODO Update DB related methods
-    //Check List: getExistingRelated, addWordstoRelated,UpdatedInDb, showFromDB
-    private VocabularyEntity getWordFromDb(String word) {
-        VocabularyEntity entity = null;
-        entity = mVocabViewModel.getWord(word, getCurrentDictionaryPreference());
-        return entity;
-    }
-
-    private long addWordsToRelatedWordsDb(String searchWord, Map<String, Set<String> > relatedWords){
-        long numEntries = 0;
-
-        Map<String, Set<String>> existingRelatedWordsMap = getExistingRelatedWordsFromDb(searchWord);
-        Set<String> existingRelatedWords = new HashSet<>();
-        if(existingRelatedWordsMap != null){
-            for(String key : existingRelatedWordsMap.keySet()) {
-                existingRelatedWords.addAll(existingRelatedWordsMap.get(key));
+        Map<String, Set<String> > existingRelatedWordsMap = new HashMap<>();
+        for (DictionaryType type : DictionaryType.values()){
+            List<RelatedWordEntity> relatedWordEntities =
+                    mRelatedWordsViewModel.getRelatedWordList(fkBaseWordID, type);
+            Set<String> relatedWords = new HashSet<>();
+            for(RelatedWordEntity relatedWordEntity : relatedWordEntities){
+                relatedWords.add(relatedWordEntity.getRelatedWord());
             }
+            existingRelatedWordsMap.put(type.toJapaneseDictionaryType(), relatedWords);
         }
+        return existingRelatedWordsMap;
+    }
 
+    private void addWordsToRelatedWordsDb(String searchWord, Map<String, Set<String> > newRelatedWords){
         VocabularyEntity entity = getWordFromDb(searchWord);
-        if(entity == null){
-            return -1;
-        }
-
-        int fkSearchWordId = entity.getId();
-
-        for (String dictionaryType : relatedWords.keySet()){
-            for(String relatedWord : relatedWords.get(dictionaryType)){
-                //Check if the entry exists, then insert it if it doesn't.
-                if(!existingRelatedWords.contains(relatedWord)){
-                    ContentValues relatedWordContentValues = new ContentValues();
-                    relatedWordContentValues.put(RelatedWordsContract.RelatedWordEntry.FK_BASE_WORD, fkSearchWordId);
-                    relatedWordContentValues.put(RelatedWordsContract.RelatedWordEntry.COLUMN_RELATED_WORD, relatedWord);
-                    relatedWordContentValues.put(RelatedWordsContract.RelatedWordEntry.COLUMN_DICTIONARY_TYPE, dictionaryType);
-                    numEntries = mRelatedWordsDb.insert(
-                            RelatedWordsContract.RelatedWordEntry.TABLE_NAME,
-                            null,
-                            relatedWordContentValues);
-                }
+        for (String dictionaryType : newRelatedWords.keySet()){
+            for(String relatedWord : newRelatedWords.get(dictionaryType)){
+                    RelatedWordEntity relatedWordToAdd =
+                            new RelatedWordEntity(entity, relatedWord, dictionaryType);
+                    mRelatedWordsViewModel.insert(relatedWordToAdd);
             }
         }
-        return numEntries;
+    }
+
+    private VocabularyEntity getWordFromDb(String word) {
+        return mVocabViewModel.getWord(word, getCurrentDictionaryPreference());
     }
 
     private void addWordToDb(JapaneseVocabulary vocab){
@@ -352,7 +300,7 @@ public class SearchActivity extends AppCompatActivity
     }
 
     private void updateWordInDb(JapaneseVocabulary vocab){
-
+        //I need the ID, so I have to DB query. Could work around if I save ID
         VocabularyEntity wordInDb = getWordFromDb(vocab.getWord());
         wordInDb.setWord(vocab.getWord());
         wordInDb.setDefinition(vocab.getDefintion());
@@ -366,7 +314,7 @@ public class SearchActivity extends AppCompatActivity
     }
 
 
-    private boolean showWordFromDB(String searchWord, DictionaryType dictionaryType){
+    private boolean showWordFromDB(String searchWord){
         VocabularyEntity entity = getWordFromDb(searchWord);
         //TODO: Give option of web search
         if(entity != null){
@@ -471,10 +419,8 @@ public class SearchActivity extends AppCompatActivity
                         case KeyEvent.KEYCODE_DPAD_CENTER:
                         case KeyEvent.KEYCODE_ENTER:
                             String searchWord = mBinding.wordSearch.etSearchBox.getText().toString();
-                            DictionaryType requestedDictionaryType = getCurrentDictionaryPreference();
-
                             // If the word is not in the DB, we need to make a search
-                            if(!showWordFromDB(searchWord, requestedDictionaryType)) {
+                            if(!showWordFromDB(searchWord)) {
                                 Bundle searchBundle = new Bundle();
                                 searchBundle.putString(SEARCH_WORD_KEY, searchWord);
                                 LoaderManager loaderManager = getSupportLoaderManager();

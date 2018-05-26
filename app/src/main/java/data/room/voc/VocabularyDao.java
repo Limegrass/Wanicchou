@@ -1,4 +1,4 @@
-package data.room;
+package data.room.voc;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.persistence.room.Dao;

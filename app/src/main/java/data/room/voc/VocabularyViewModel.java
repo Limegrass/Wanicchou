@@ -1,11 +1,10 @@
-package data.room;
+package data.room.voc;
 
 import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.LiveData;
 
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 import data.vocab.DictionaryType;
 
@@ -36,15 +35,7 @@ public class VocabularyViewModel extends AndroidViewModel{
     }
 
     public VocabularyEntity getWord(String word, DictionaryType dictionaryType) {
-        VocabularyEntity ret = null;
-        try {
-            ret = mRepo.getWord(word, dictionaryType);
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        return ret;
+        return mRepo.getWord(word, dictionaryType);
     }
 
 

@@ -1,4 +1,4 @@
-package data.room;
+package data.room.voc;
 
 import android.app.Application;
 import android.arch.lifecycle.LiveData;
@@ -7,6 +7,7 @@ import android.os.AsyncTask;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import data.room.WanicchouDatabase;
 import data.vocab.DictionaryType;
 
 public class VocabularyRepository {
@@ -42,9 +43,16 @@ public class VocabularyRepository {
     // TODO: UPDATE BUT IDK HOW TI WORKS BECAUSE GARBO DOCS
 
     //TODO: FUCKING GOOGLE CAN YOU JUST TELL ME WHAT THE RETURN TYPE OF A FAILED QUERY IS????
-    public VocabularyEntity getWord(String word, DictionaryType dictionaryType)
-            throws ExecutionException, InterruptedException {
-        return new queryAsyncTask(mVocabDao, dictionaryType).execute(word).get();
+    public VocabularyEntity getWord(String word, DictionaryType dictionaryType){
+        VocabularyEntity ret = null;
+        try {
+            ret = new queryAsyncTask(mVocabDao, dictionaryType).execute(word).get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+        return ret;
     }
 
     private static class entryModificationAsyncTask extends AsyncTask<VocabularyEntity, Void, Void>{

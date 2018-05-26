@@ -8,7 +8,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import data.db.VocabularyContract;
-import data.room.VocabularyEntity;
+import data.room.voc.VocabularyEntity;
 
 /**
  * Created by Limegrass on 4/4/2018.

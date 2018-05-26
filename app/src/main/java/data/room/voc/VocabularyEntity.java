@@ -1,4 +1,4 @@
-package data.room;
+package data.room.voc;
 
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
@@ -14,6 +14,7 @@ import data.vocab.JapaneseVocabulary;
 )
 public class VocabularyEntity {
     @PrimaryKey(autoGenerate = true)
+    @NonNull
     private int id;
 
     @ColumnInfo(name = "Word")
