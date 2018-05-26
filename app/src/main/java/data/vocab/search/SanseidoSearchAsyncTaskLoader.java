@@ -1,8 +1,6 @@
-package data;
+package data.vocab.search;
 
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 import android.support.v4.content.AsyncTaskLoader;
 import android.text.TextUtils;
 import android.widget.Toast;
@@ -10,6 +8,8 @@ import android.widget.Toast;
 import com.waifusims.j_jlearnersdictionary.R;
 
 import java.io.IOException;
+
+import data.vocab.DictionaryType;
 
 /**
  * Created by Limegrass on 5/9/2018.
@@ -23,6 +23,10 @@ public class SanseidoSearchAsyncTaskLoader extends AsyncTaskLoader<SanseidoSearc
     public SanseidoSearchAsyncTaskLoader(final Context context, String searchWord, DictionaryType dictionaryType){
         super(context);
         mSearchWord = searchWord;
+        mDictionaryType = dictionaryType;
+    }
+
+    public void changeDictionaryType(DictionaryType dictionaryType){
         mDictionaryType = dictionaryType;
     }
 

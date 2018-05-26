@@ -1,4 +1,4 @@
-package data;
+package data.vocab;
 
 import android.database.Cursor;
 import android.os.Parcel;
@@ -6,6 +6,9 @@ import android.os.Parcelable;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import data.db.VocabularyContract;
+import data.room.voc.VocabularyEntity;
 
 /**
  * Created by Limegrass on 4/4/2018.
@@ -49,6 +52,15 @@ public class JapaneseVocabulary implements Parcelable {
         reading = isolateReading(wordSource);
         pitch = isolatePitch(wordSource);
         this.dictionaryType = dictionaryType;
+    }
+
+    public JapaneseVocabulary(VocabularyEntity entity){
+        //TODO: Change entity elements to be getter/setters
+        word = entity.getWord();
+        reading = entity.getReading();
+        definition = entity.getDefinition();
+        pitch = entity.getPitch();
+        dictionaryType = DictionaryType.fromSanseidoKey(entity.getDefinition());
     }
 
     public JapaneseVocabulary(String invalidWord, DictionaryType dictionaryType){

@@ -1,11 +1,10 @@
 package com.waifusims.j_jlearnersdictionary;
 
-import android.content.ContentValues;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.databinding.DataBindingUtil;
 import android.preference.PreferenceManager;
@@ -24,17 +23,18 @@ import com.waifusims.j_jlearnersdictionary.databinding.ActivityHomeBinding;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import data.DictionaryType;
-import data.JapaneseVocabulary;
-import data.RelatedWordsContract;
-import data.RelatedWordsDbHelper;
-import data.SanseidoSearch;
-import data.SanseidoSearchAsyncTaskLoader;
-import data.VocabularyContract;
-import data.VocabularyDbHelper;
+import data.room.rel.RelatedWordEntity;
+import data.room.rel.RelatedWordViewModel;
+import data.room.voc.VocabularyEntity;
+import data.room.voc.VocabularyViewModel;
+import data.vocab.DictionaryType;
+import data.vocab.JapaneseVocabulary;
+import data.vocab.search.SanseidoSearch;
+import data.vocab.search.SanseidoSearchAsyncTaskLoader;
 import util.anki.AnkiDroidHelper;
 import util.anki.AnkiDroidConfig;
 import android.support.v4.app.LoaderManager;
@@ -58,24 +58,24 @@ public class SearchActivity extends AppCompatActivity
     private ActivityHomeBinding mBinding;
     private AnkiDroidHelper mAnkiDroid;
     private Toast mToast;
+    private VocabularyViewModel mVocabViewModel;
+    private RelatedWordViewModel mRelatedWordsViewModel;
 
     private SanseidoSearch mLastSearched;
+
+    /* ==================================== +Lifecycle ================================== */
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         mAnkiDroid = new AnkiDroidHelper(this);
-
         setContentView(R.layout.activity_home);
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_home);
-
         setUpClickListeners();
 
-        VocabularyDbHelper vocabularyDbHelper = new VocabularyDbHelper(this);
-        mVocabDb = vocabularyDbHelper.getWritableDatabase();
-        RelatedWordsDbHelper relatedWordsDbHelper = new RelatedWordsDbHelper(this);
-        mRelatedWordsDb = relatedWordsDbHelper.getWritableDatabase();
+        mVocabViewModel = ViewModelProviders.of(this).get(VocabularyViewModel.class);
+        mRelatedWordsViewModel = ViewModelProviders.of(this).get(RelatedWordViewModel.class);
     }
 
     @Override
@@ -100,8 +100,9 @@ public class SearchActivity extends AppCompatActivity
             updateWordInDb(mLastSearched.getVocabulary());
 
             // Save the word so it can be retrieved and researched when the activity is returned.
+            Context context = this;
             SharedPreferences sharedPreferences =
-                    PreferenceManager.getDefaultSharedPreferences(this);
+                    PreferenceManager.getDefaultSharedPreferences(context);
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putString(getString(R.string.key_search_word),
                     mLastSearched.getVocabulary().getWord());
@@ -111,13 +112,20 @@ public class SearchActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
+        Loader<SanseidoSearch> loader =
+                getSupportLoaderManager().getLoader(SANSEIDO_SEARCH_LOADER);
+        if(loader != null){
+            SanseidoSearchAsyncTaskLoader loaderCast = (SanseidoSearchAsyncTaskLoader) loader;
+            loaderCast.changeDictionaryType(getCurrentDictionaryPreference());
+        }
         Context context = SearchActivity.this;
+        String stringIfMissing = "";
         SharedPreferences sharedPreferences =
                 PreferenceManager.getDefaultSharedPreferences(context);
-        String searchWord = sharedPreferences.getString( getString(R.string.key_search_word), "" );
-        DictionaryType dictionaryType = getCurrentDictionaryPreference();
+        String searchWord = sharedPreferences.getString(getString(R.string.key_search_word),
+                stringIfMissing);
         if(!TextUtils.isEmpty(searchWord)){
-            showWordFromDB(searchWord, dictionaryType);
+            showWordFromDB(searchWord);
         }
     }
 
@@ -156,23 +164,7 @@ public class SearchActivity extends AppCompatActivity
         }
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater menuInflater = getMenuInflater();
-        menuInflater.inflate(R.menu.search_menu, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int itemId = item.getItemId();
-        if (itemId == R.id.action_settings) {
-            Intent startSettingsActivityIntent = new Intent(this, SettingsActivity.class);
-            startActivity(startSettingsActivityIntent);
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
+    /* ==================================== +Loader and +Search ================================== */
 
     @Override
     public Loader<SanseidoSearch> onCreateLoader(int id, final Bundle args) {
@@ -181,7 +173,7 @@ public class SearchActivity extends AppCompatActivity
         return new SanseidoSearchAsyncTaskLoader(context,
                 args.getString(SEARCH_WORD_KEY),
                 dictionaryType
-                );
+        );
     }
 
     @Override
@@ -201,9 +193,10 @@ public class SearchActivity extends AppCompatActivity
 
                 showVocabOnUI();
 
-                Cursor cursor = getWordFromDb(search.getVocabulary().getWord());
+                //TODO : Get Dic Type at Search time
+                VocabularyEntity entity = getWordFromDb(search.getVocabulary().getWord());
 
-                if (!cursor.moveToFirst() ||
+                if (entity == null ||
                         search.getVocabulary().getDictionaryType() != getCurrentDictionaryPreference()) {
                     addWordToDb(search.getVocabulary());
                     addWordsToRelatedWordsDb(search.getVocabulary().getWord(),
@@ -222,10 +215,10 @@ public class SearchActivity extends AppCompatActivity
                         new JapaneseVocabulary(mBinding.wordSearch.etSearchBox
                                 .getText().toString(), dictionaryType);
 
-                Cursor cursor = getWordFromDb(invalidWord.getWord());
+                VocabularyEntity entity = getWordFromDb(search.getVocabulary().getWord());
 
-                if (!cursor.moveToFirst()) {
-                    addWordToDb(search.getVocabulary());
+                if (entity == null) {
+                    addWordToDb(invalidWord);
                 }
 
                 // TODO: Maybe a different error message
@@ -245,10 +238,99 @@ public class SearchActivity extends AppCompatActivity
     // Required override but unused
     @Override
     public void onLoaderReset(Loader<SanseidoSearch> loader) {
-
     }
 
 
+    /* ==================================== +Databases ================================== */
+
+    private Map<String, Set<String> > getExistingRelatedWordsFromDb(String word){
+        VocabularyEntity entity = mVocabViewModel.getWord(word, getCurrentDictionaryPreference());
+        if (entity == null){
+            return null;
+        }
+
+        int fkBaseWordID = entity.getId();
+
+        Map<String, Set<String> > existingRelatedWordsMap = new HashMap<>();
+        for (DictionaryType type : DictionaryType.values()){
+            List<RelatedWordEntity> relatedWordEntities =
+                    mRelatedWordsViewModel.getRelatedWordList(fkBaseWordID, type);
+            Set<String> relatedWords = new HashSet<>();
+            for(RelatedWordEntity relatedWordEntity : relatedWordEntities){
+                relatedWords.add(relatedWordEntity.getRelatedWord());
+            }
+            existingRelatedWordsMap.put(type.toJapaneseDictionaryType(), relatedWords);
+        }
+        return existingRelatedWordsMap;
+    }
+
+    private void addWordsToRelatedWordsDb(String searchWord, Map<String, Set<String> > newRelatedWords){
+        VocabularyEntity entity = getWordFromDb(searchWord);
+        for (String dictionaryType : newRelatedWords.keySet()){
+            for(String relatedWord : newRelatedWords.get(dictionaryType)){
+                    RelatedWordEntity relatedWordToAdd =
+                            new RelatedWordEntity(entity, relatedWord, dictionaryType);
+                    mRelatedWordsViewModel.insert(relatedWordToAdd);
+            }
+        }
+    }
+
+    private VocabularyEntity getWordFromDb(String word) {
+        return mVocabViewModel.getWord(word, getCurrentDictionaryPreference());
+    }
+
+    private void addWordToDb(JapaneseVocabulary vocab){
+        String notes = mBinding.ankiAdditionalFields.etNotes.getText().toString();
+        String wordContext = mBinding.ankiAdditionalFields.etContext.getText().toString();
+
+        VocabularyEntity vocabularyEntity = new VocabularyEntity(vocab, notes, wordContext);
+        mVocabViewModel.insert(vocabularyEntity);
+    }
+
+    private void updateWordInDb(JapaneseVocabulary vocab){
+        //I need the ID, so I have to DB query. Could work around if I save ID
+        VocabularyEntity wordInDb = getWordFromDb(vocab.getWord());
+        wordInDb.setWord(vocab.getWord());
+        wordInDb.setDefinition(vocab.getDefintion());
+        wordInDb.setReading(vocab.getReading());
+        wordInDb.setPitch(vocab.getPitch());
+        wordInDb.setDictionaryType(vocab.getDictionaryType().toString());
+        wordInDb.setNotes(getWordNotes());
+        wordInDb.setWordContext(getWordContext());
+
+        mVocabViewModel.update(wordInDb);
+    }
+
+
+    private boolean showWordFromDB(String searchWord){
+        VocabularyEntity entity = getWordFromDb(searchWord);
+        //TODO: Give option of web search
+        if(entity != null){
+            JapaneseVocabulary vocabulary = new JapaneseVocabulary(entity);
+            mBinding.ankiAdditionalFields.etNotes.setText(entity.getNotes());
+            mBinding.ankiAdditionalFields.etContext.setText(entity.getWordContext());
+
+            mLastSearched = new SanseidoSearch(vocabulary,
+                    getExistingRelatedWordsFromDb(vocabulary.getWord()));
+            showVocabOnUI();
+            showAnkiRelatedUIElements();
+            return true;
+        }
+        return false;
+    }
+
+    private DictionaryType getCurrentDictionaryPreference(){
+        Context context = this;
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        String dictionaryTypeString = sharedPreferences.getString(
+                getString(R.string.key_pref_dictionary_type),
+                getString(R.string.default_pref_dictionary_type)
+        );
+        DictionaryType dictionaryType = DictionaryType.fromSanseidoKey(dictionaryTypeString);
+        return dictionaryType;
+    }
+
+    /* ==================================== +UI and +Helpers ================================== */
     /**
      * Helper class to hide and show Anki import related UI elements after a search is performed.
      */
@@ -261,177 +343,59 @@ public class SearchActivity extends AppCompatActivity
         mBinding.ankiAdditionalFields.etNotes.setVisibility(View.VISIBLE);
     }
 
-    // TODO: Refactor everything so I either have related words on SQLite DB searches
-    // Or return something different on web searches.
+    private void showVocabOnUI(){
+        JapaneseVocabulary vocabulary = mLastSearched.getVocabulary();
+        String definition = vocabulary.getDefintion();
+        mBinding.wordDefinition.tvWord.setText(vocabulary.getWord());
+        mBinding.wordDefinition.tvDefinition.setText(definition);
+    }
 
+    //TODO: Make UI be TVs until clicked on, then become ET
+    private String getWordNotes(){
+        return mBinding.ankiAdditionalFields.etNotes.getText().toString();
+    }
 
+    private String getWordContext(){
+        return mBinding.ankiAdditionalFields.etContext.getText().toString();
+    }
+
+    //TODO: Change click to expand a menu and add associated UI elements
+    //TODO: Maybe implement a clozed type when sentence search is included
+    //TODO: Duplicate checking
     /**
-     * Helper method to add cards to Anki if permission is granted
-     * @param requestCode a signifier request code
-     * @param permissions the permissions desired
-     * @param grantResults if the permissions were granted
+     * Use the instant-add API to add flashcards directly to AnkiDroid.
      */
-    public void onRequestPermissionsResult (int requestCode, @NonNull String[] permissions,
-                                            @NonNull int[] grantResults) {
-        if (requestCode==ADD_PERM_REQUEST && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            addWordToAnki();
-        } else {
-            if (mToast != null){
-                mToast.cancel();
-            }
-            Context context = SearchActivity.this;
-            String message = getString(R.string.toast_permissions_denied);
-            int duration = Toast.LENGTH_SHORT;
-            mToast = Toast.makeText(context, message, duration);
-            mToast.show();
-        }
-    }
+    private void addWordToAnki(){
+        long deckId = mAnkiDroid.getDeckId();
+        long modelId = mAnkiDroid.getModelId();
+        String[] fieldNames = mAnkiDroid.getApi().getFieldList(modelId);
+        String[] fields = new String[fieldNames.length];
+        fields[AnkiDroidConfig.FIELDS_INDEX_WORD] = mLastSearched.getVocabulary().getWord();
+        fields[AnkiDroidConfig.FIELDS_INDEX_READING] = mLastSearched.getVocabulary().getReading();
 
-    private Map<String, Set<String> > getExistingRelatedWordsFromDb(String word){
-        Cursor wordInVocabDb = getWordFromDb(word);
-        if (!wordInVocabDb.moveToFirst()){
-            return null;
-        }
-        int idIndex = wordInVocabDb
-                .getColumnIndex(VocabularyContract.VocabularyEntry._ID);
+        // Anki uses HTML, so the newlines are not displayed without a double newline or a break
+        String definition = mBinding.wordDefinition.tvDefinition.getText().toString();
+        definition = definition.replaceAll("\n", "<br>");
+        fields[AnkiDroidConfig.FIELDS_INDEX_DEFINITION] = definition;
 
-        int fkBaseWordID = wordInVocabDb.getInt(idIndex);
+        fields[AnkiDroidConfig.FIELDS_INDEX_FURIGANA] = mLastSearched.getVocabulary().getFurigana();
+        fields[AnkiDroidConfig.FIELDS_INDEX_PITCH] = mLastSearched.getVocabulary().getPitch();
 
-        final String[] columns = {RelatedWordsContract.RelatedWordEntry.COLUMN_RELATED_WORD,
-                RelatedWordsContract.RelatedWordEntry.COLUMN_DICTIONARY_TYPE};
-        final String selection = RelatedWordsContract.RelatedWordEntry.FK_BASE_WORD+ "=?";
-        final String[] selectionArgs = {String.valueOf(fkBaseWordID)};
-        final String groupBy = null;
-        final String having = null;
+        String notes = mBinding.ankiAdditionalFields.etNotes.getText().toString();
+        fields[AnkiDroidConfig.FIELDS_INDEX_NOTES] = notes;
+        String wordContext = mBinding.ankiAdditionalFields.etContext.getText().toString();
+        fields[AnkiDroidConfig.FIELDS_INDEX_CONTEXT] = wordContext;
+        fields[AnkiDroidConfig.FIELDS_INDEX_DICTIONARY_TYPE] =
+                mLastSearched.getVocabulary().getDictionaryType().toString();
+        Set<String> tags = AnkiDroidConfig.TAGS;
+        mAnkiDroid.getApi().addNote(modelId, deckId, fields, tags);
 
-        Cursor existingRelatedWordsCursor = mRelatedWordsDb.query(
-                RelatedWordsContract.RelatedWordEntry.TABLE_NAME,
-                columns,
-                selection,
-                selectionArgs,
-                groupBy,
-                having,
-                VocabularyContract.VocabularyEntry._ID
-        );
-
-        if(existingRelatedWordsCursor.moveToFirst()){
-            Map<String, Set<String> > existingRelatedWordsMap = new HashMap<>();
-            int relatedWordIndex =
-                    existingRelatedWordsCursor.getColumnIndex(
-                            RelatedWordsContract.RelatedWordEntry.COLUMN_RELATED_WORD);
-
-            do {
-                String relatedWord = existingRelatedWordsCursor.getString(relatedWordIndex);
-                String dictionaryType = existingRelatedWordsCursor
-                        .getString(existingRelatedWordsCursor
-                                .getColumnIndex(RelatedWordsContract.RelatedWordEntry.COLUMN_DICTIONARY_TYPE));
-                if(!existingRelatedWordsMap.containsKey(dictionaryType)){
-                    Set<String> wordSet = new HashSet<>();
-                    existingRelatedWordsMap.put(dictionaryType, wordSet);
-                }
-                existingRelatedWordsMap.get(dictionaryType).add(relatedWord);
-            } while (existingRelatedWordsCursor.moveToNext());
-
-            return existingRelatedWordsMap;
-        }
-
-        return new HashMap<>();
-    }
-
-    private Cursor getWordFromDb(String word){
-        final String[] columns = null;
-        final String selection = VocabularyContract.VocabularyEntry.COLUMN_WORD + "=? AND " +
-                VocabularyContract.VocabularyEntry.COLUMN_DICTIONARY_TYPE + "=?";
-        final String[] selectionArgs = {word, getCurrentDictionaryPreference().toString()};
-        final String groupBy = null;
-        final String having = null;
-
-        return mVocabDb.query(
-                VocabularyContract.VocabularyEntry.TABLE_NAME,
-                columns,
-                selection,
-                selectionArgs,
-                groupBy,
-                having,
-                VocabularyContract.VocabularyEntry._ID
-        );
-    }
-    private long addWordsToRelatedWordsDb(String searchWord, Map<String, Set<String> > relatedWords){
-        long numEntries = 0;
-
-        Map<String, Set<String>> existingRelatedWordsMap = getExistingRelatedWordsFromDb(searchWord);
-        Set<String> existingRelatedWords = new HashSet<>();
-        if(existingRelatedWordsMap != null){
-            for(String key : existingRelatedWordsMap.keySet()) {
-                existingRelatedWords.addAll(existingRelatedWordsMap.get(key));
-            }
-        }
-
-        Cursor searchWordCursor = getWordFromDb(searchWord);
-        if(!searchWordCursor.moveToFirst()){
-            return -1;
-        }
-
-        int fkSearchWordId = searchWordCursor.getInt(
-                searchWordCursor.getColumnIndex(VocabularyContract.VocabularyEntry._ID));
-
-        for (String dictionaryType : relatedWords.keySet()){
-            for(String relatedWord : relatedWords.get(dictionaryType)){
-                //Check if the entry exists, then insert it if it doesn't.
-                if(!existingRelatedWords.contains(relatedWord)){
-                    ContentValues relatedWordContentValues = new ContentValues();
-                    relatedWordContentValues.put(RelatedWordsContract.RelatedWordEntry.FK_BASE_WORD, fkSearchWordId);
-                    relatedWordContentValues.put(RelatedWordsContract.RelatedWordEntry.COLUMN_RELATED_WORD, relatedWord);
-                    relatedWordContentValues.put(RelatedWordsContract.RelatedWordEntry.COLUMN_DICTIONARY_TYPE, dictionaryType);
-                    numEntries = mRelatedWordsDb.insert(
-                            RelatedWordsContract.RelatedWordEntry.TABLE_NAME,
-                            null,
-                            relatedWordContentValues);
-                }
-            }
-        }
-        return numEntries;
-    }
-
-
-    private long addWordToDb(JapaneseVocabulary vocab){
-        ContentValues contentValues = buildVocabularyContentValues(vocab);
-
-        return mVocabDb.insert(
-                VocabularyContract.VocabularyEntry.TABLE_NAME,
-                null,
-                contentValues);
-    }
-
-    private int updateWordInDb(JapaneseVocabulary vocab){
-
-        ContentValues contentValues = buildVocabularyContentValues(vocab);
-
-        String whereClause = VocabularyContract.VocabularyEntry.COLUMN_WORD + "=?";
-        String[] whereArgs = {vocab.getWord()};
-
-        return mVocabDb.update(
-                VocabularyContract.VocabularyEntry.TABLE_NAME,
-                contentValues,
-                whereClause,
-                whereArgs
-        );
-    }
-
-    private ContentValues buildVocabularyContentValues(JapaneseVocabulary vocab){
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(VocabularyContract.VocabularyEntry.COLUMN_WORD, vocab.getWord());
-        contentValues.put(VocabularyContract.VocabularyEntry.COLUMN_READING, vocab.getReading());
-        contentValues.put(VocabularyContract.VocabularyEntry.COLUMN_DEFINITION, vocab.getDefintion());
-        contentValues.put(VocabularyContract.VocabularyEntry.COLUMN_PITCH, vocab.getPitch());
-        contentValues.put(VocabularyContract.VocabularyEntry.COLUMN_DICTIONARY_TYPE,
-                vocab.getDictionaryType().toString());
-
-        contentValues.put(VocabularyContract.VocabularyEntry.COLUMN_NOTES,
-                mBinding.ankiAdditionalFields.etNotes.getText().toString());
-        contentValues.put(VocabularyContract.VocabularyEntry.COLUMN_CONTEXT,
-                mBinding.ankiAdditionalFields.etContext.getText().toString());
-        return contentValues;
+        mToast.cancel();
+        Context context = SearchActivity.this;
+        String message = getString(R.string.toast_anki_added);
+        int duration = Toast.LENGTH_SHORT;
+        mToast = Toast.makeText(context, message, duration);
+        mToast.show();
     }
 
     private void setUpClickListeners(){
@@ -443,10 +407,8 @@ public class SearchActivity extends AppCompatActivity
                         case KeyEvent.KEYCODE_DPAD_CENTER:
                         case KeyEvent.KEYCODE_ENTER:
                             String searchWord = mBinding.wordSearch.etSearchBox.getText().toString();
-                            DictionaryType requestedDictionaryType = getCurrentDictionaryPreference();
-
                             // If the word is not in the DB, we need to make a search
-                            if(!showWordFromDB(searchWord, requestedDictionaryType)) {
+                            if(!showWordFromDB(searchWord)) {
                                 Bundle searchBundle = new Bundle();
                                 searchBundle.putString(SEARCH_WORD_KEY, searchWord);
                                 LoaderManager loaderManager = getSupportLoaderManager();
@@ -499,80 +461,46 @@ public class SearchActivity extends AppCompatActivity
         });
     }
 
-    private boolean showWordFromDB(String searchWord, DictionaryType dictionaryType){
-        Cursor cursor = getWordFromDb(searchWord);
-        //TODO: Give option of web search
-        if(cursor.moveToFirst()){
-            JapaneseVocabulary vocabulary = new JapaneseVocabulary(cursor);
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.search_menu, menu);
+        return true;
+    }
 
-            if (vocabulary.getDictionaryType() != dictionaryType){
-                return false;
-            }
-
-            mLastSearched = new SanseidoSearch(vocabulary,
-                    getExistingRelatedWordsFromDb(vocabulary.getWord()));
-            showVocabOnUI();
-            showAnkiRelatedUIElements();
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int itemId = item.getItemId();
+        Context context = this;
+        Class childActivity = SettingsActivity.class;
+        if (itemId == R.id.action_settings) {
+            Intent startSettingsActivityIntent = new Intent(context, childActivity);
+            startActivity(startSettingsActivityIntent);
             return true;
         }
-        return false;
+        return super.onOptionsItemSelected(item);
     }
 
-    private DictionaryType getCurrentDictionaryPreference(){
-        Context context = this;
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        String dictionaryTypeString = sharedPreferences.getString(
-                getString(R.string.key_pref_dictionary_type),
-                getString(R.string.default_pref_dictionary_type)
-        );
-        DictionaryType dictionaryType = DictionaryType.fromSanseidoKey(dictionaryTypeString);
-        return dictionaryType;
-    }
-
-    private void showVocabOnUI(){
-        JapaneseVocabulary vocabulary = mLastSearched.getVocabulary();
-        String definition = vocabulary.getDefintion();
-
-        mBinding.wordDefinition.tvWord.setText(vocabulary.getWord());
-        mBinding.wordDefinition.tvDefinition.setText(definition);
-    }
-
-    //TODO: Change click to expand a menu and add associated UI elements
-    //TODO: Maybe implement a clozed type when sentence search is included
-    //TODO: Duplicate checking
+    //TODO: Fix this breaking first launch
     /**
-     * Use the instant-add API to add flashcards directly to AnkiDroid.
+     * Helper method to add cards to Anki if permission is granted
+     * @param requestCode a signifier request code
+     * @param permissions the permissions desired
+     * @param grantResults if the permissions were granted
      */
-    public void addWordToAnki(){
-        long deckId = mAnkiDroid.getDeckId();
-        long modelId = mAnkiDroid.getModelId();
-        String[] fieldNames = mAnkiDroid.getApi().getFieldList(modelId);
-        String[] fields = new String[fieldNames.length];
-        fields[AnkiDroidConfig.FIELDS_INDEX_WORD] = mLastSearched.getVocabulary().getWord();
-        fields[AnkiDroidConfig.FIELDS_INDEX_READING] = mLastSearched.getVocabulary().getReading();
-
-        // Anki uses HTML, so the newlines are not displayed without a double newline or a break
-        String definition = mBinding.wordDefinition.tvDefinition.getText().toString();
-        definition = definition.replaceAll("\n", "<br>");
-        fields[AnkiDroidConfig.FIELDS_INDEX_DEFINITION] = definition;
-
-        fields[AnkiDroidConfig.FIELDS_INDEX_FURIGANA] = mLastSearched.getVocabulary().getFurigana();
-        fields[AnkiDroidConfig.FIELDS_INDEX_PITCH] = mLastSearched.getVocabulary().getPitch();
-
-        String notes = mBinding.ankiAdditionalFields.etNotes.getText().toString();
-        fields[AnkiDroidConfig.FIELDS_INDEX_NOTES] = notes;
-        String wordContext = mBinding.ankiAdditionalFields.etContext.getText().toString();
-        fields[AnkiDroidConfig.FIELDS_INDEX_CONTEXT] = wordContext;
-        fields[AnkiDroidConfig.FIELDS_INDEX_DICTIONARY_TYPE] =
-                mLastSearched.getVocabulary().getDictionaryType().toString();
-        Set<String> tags = AnkiDroidConfig.TAGS;
-        mAnkiDroid.getApi().addNote(modelId, deckId, fields, tags);
-
-        mToast.cancel();
-        Context context = SearchActivity.this;
-        String message = getString(R.string.toast_anki_added);
-        int duration = Toast.LENGTH_SHORT;
-        mToast = Toast.makeText(context, message, duration);
-        mToast.show();
+    public void onRequestPermissionsResult (int requestCode, @NonNull String[] permissions,
+                                            @NonNull int[] grantResults) {
+        if (requestCode==ADD_PERM_REQUEST && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            addWordToAnki();
+        } else {
+            if (mToast != null){
+                mToast.cancel();
+            }
+            Context context = SearchActivity.this;
+            String message = getString(R.string.toast_permissions_denied);
+            int duration = Toast.LENGTH_SHORT;
+            mToast = Toast.makeText(context, message, duration);
+            mToast.show();
+        }
     }
 }

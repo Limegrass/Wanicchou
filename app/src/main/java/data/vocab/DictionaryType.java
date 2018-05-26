@@ -1,4 +1,4 @@
-package data;
+package data.vocab;
 
 /**
  * Created by Limegrass on 5/9/2018.

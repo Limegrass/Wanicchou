@@ -2,7 +2,7 @@
 <resources>
     <string-array
         name="dictionaryTypeArray">
-        <item>Japanees to Japanese</item>
+        <item>Japanese to Japanese</item>
         <item>Japanese to English</item>
         <item>English to Japanese</item>
     </string-array>

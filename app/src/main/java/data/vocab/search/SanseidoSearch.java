@@ -1,12 +1,8 @@
-package data;
+package data.vocab.search;
 
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.preference.PreferenceManager;
 import android.util.Log;
 
 import org.jsoup.Jsoup;
@@ -21,6 +17,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import data.vocab.DictionaryType;
+import data.vocab.JapaneseVocabulary;
 
 /**
  * Created by Limegrass on 3/19/2018.
@@ -87,7 +86,7 @@ public class SanseidoSearch implements Parcelable {
         vocabulary = new JapaneseVocabulary(
                 findWordSource(html),
                 findDefinitionSource(html),
-                DictionaryType.JJ);
+                dictionaryType);
     }
 
 
