@@ -53,8 +53,6 @@ public class SearchActivity extends AppCompatActivity
     private static final String SEARCH_WORD_KEY = "search";
     private static final int SANSEIDO_SEARCH_LOADER = 322;
 
-    private SQLiteDatabase mVocabDb;
-    private SQLiteDatabase mRelatedWordsDb;
     private ActivityHomeBinding mBinding;
     private AnkiDroidHelper mAnkiDroid;
     private Toast mToast;
@@ -131,8 +129,6 @@ public class SearchActivity extends AppCompatActivity
 
     @Override
     protected void onDestroy() {
-        mVocabDb.close();
-        mRelatedWordsDb.close();
         super.onDestroy();
     }
 
