@@ -10,14 +10,13 @@ import android.arch.persistence.room.Update;
 
 import java.util.List;
 
-import data.vocab.JapaneseVocabulary;
 
 @Dao
 public interface VocabularyDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     public void insertWord(VocabularyEntity vocabulary);
 
-    @Update
+    @Update(onConflict = OnConflictStrategy.REPLACE)
     public void updateWord(VocabularyEntity vocabulary);
 
     @Delete
@@ -33,6 +32,6 @@ public interface VocabularyDao {
     public VocabularyEntity[] getLastXSavedWords(int x);
 
     @Query("SELECT * FROM VocabularyWords " +
-            "WHERE Word = :word AND DictionaryType = :dictionaryType LIMIT 1")
+            "WHERE word = :word AND dictionaryType = :dictionaryType LIMIT 1")
     public VocabularyEntity getWord(String word, String dictionaryType);
 }

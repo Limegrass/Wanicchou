@@ -32,6 +32,10 @@ public class VocabularyRepository {
         new entryModificationAsyncTask(mVocabDao, ACTION_INSERT).execute(vocab);
     }
 
+    public void update(VocabularyEntity vocab){
+        new entryModificationAsyncTask(mVocabDao, ACTION_UPDATE).execute(vocab);
+    }
+
     public void delete(VocabularyEntity vocab){
         new entryModificationAsyncTask(mVocabDao, ACTION_DELETE).execute(vocab);
     }

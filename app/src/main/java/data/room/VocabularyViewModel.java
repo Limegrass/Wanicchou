@@ -23,6 +23,10 @@ public class VocabularyViewModel extends AndroidViewModel{
         return mAllWords;
     }
 
+    public void update(VocabularyEntity vocab){
+        mRepo.update(vocab);
+    }
+
     public void insert(VocabularyEntity vocab){
         mRepo.insert(vocab);
     }
