@@ -317,7 +317,9 @@ public class SearchActivity extends AppCompatActivity
             }
 
             JapaneseVocabulary vocabulary = new JapaneseVocabulary(entity);
+            mBinding.ankiAdditionalFields.tvNotes.setText(entity.getNotes());
             mBinding.ankiAdditionalFields.etNotes.setText(entity.getNotes());
+            mBinding.ankiAdditionalFields.tvContext.setText(entity.getWordContext());
             mBinding.ankiAdditionalFields.etContext.setText(entity.getWordContext());
 
             mLastSearched = new SanseidoSearch(vocabulary,
@@ -356,16 +358,15 @@ public class SearchActivity extends AppCompatActivity
         mBinding.wordDefinition.tvWord.setText(vocabulary.getWord());
         mBinding.wordDefinition.tvDefinition.setText(definition);
         mBinding.wordDefinition.etDefinition.setText(definition);
-        clearAnkiFields();
     }
 
     //TODO: Make UI be TVs until clicked on, then become ET
     private String getWordNotes(){
-        return mBinding.ankiAdditionalFields.etNotes.getText().toString();
+        return mBinding.ankiAdditionalFields.tvNotes.getText().toString();
     }
 
     private String getWordContext(){
-        return mBinding.ankiAdditionalFields.etContext.getText().toString();
+        return mBinding.ankiAdditionalFields.tvContext.getText().toString();
     }
 
     private void clearAnkiFields(){
@@ -475,7 +476,8 @@ public class SearchActivity extends AppCompatActivity
             @Override
             public void onFocusChange(View view, boolean hasFocus) {
                 if (!hasFocus){
-                    String changedText = getWordContext();
+                    String changedText =
+                            mBinding.ankiAdditionalFields.etContext.getText().toString();
                     mBinding.ankiAdditionalFields.tvContext.setText(changedText);
                     mBinding.ankiAdditionalFields.vsContext.showNext();
                     InputMethodManager inputMethodManager =
@@ -517,7 +519,7 @@ public class SearchActivity extends AppCompatActivity
             @Override
             public void onFocusChange(View view, boolean hasFocus) {
                 if (!hasFocus){
-                    String changedText = getWordNotes();
+                    String changedText = mBinding.ankiAdditionalFields.etNotes.getText().toString();
                     mBinding.ankiAdditionalFields.tvNotes.setText(changedText);
                     mBinding.ankiAdditionalFields.vsNotes.showNext();
                     InputMethodManager inputMethodManager =
@@ -587,6 +589,7 @@ public class SearchActivity extends AppCompatActivity
         //TODO: Fix it so it requests on add card, not on start up. Avoid crashes before addition.
 
         FloatingActionButton fab = findViewById(R.id.fab);
+        // TODO: Hide if Anki is not installed.
         fab.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view) {

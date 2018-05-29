@@ -12,10 +12,12 @@ import data.room.rel.RelatedWordEntity;
 import data.room.voc.VocabularyDao;
 import data.room.voc.VocabularyEntity;
 
+// TODO: What's a schema export for?
 @Database(
         entities = {VocabularyEntity.class,
                 RelatedWordEntity.class},
-        version = 1
+        version = 1,
+        exportSchema = false
 )
 @TypeConverters(
         {Converters.class}

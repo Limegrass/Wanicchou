@@ -76,7 +76,7 @@ public class SanseidoSearch implements Parcelable {
      * Constructor to create an object containing the information retrieved from Sanseido from
      * a search given a word to search.
      * @param wordToSearch the desired word to search.
-     * @throws IOException
+     * @throws IOException if the search cannot be completed
      */
     public SanseidoSearch(String wordToSearch, DictionaryType dictionaryType) throws IOException {
         //TODO: Refactor the URL and vocab to reference a saved pref var for if it's JJ, JE, or EJ
@@ -117,7 +117,7 @@ public class SanseidoSearch implements Parcelable {
      * @param word the Japanese word to search for
      * @param dictionaryType which dictionary to search from Sanseido
      * @return the Sanseido url created
-     * @throws MalformedURLException
+     * @throws MalformedURLException if a search url cannot be built
      */
     private URL buildQueryURL(String word, DictionaryType dictionaryType) throws MalformedURLException{
 
@@ -148,12 +148,10 @@ public class SanseidoSearch implements Parcelable {
      * Helper method to create an HTTP request to Sanseido for a given URL.
      * @param searchURL the URL of the word search to be performed
      * @return A Jsoup html document tree of the html source from the search.
-     * @throws IOException
+     * @throws IOException if the search cannot be completed.
      */
     private Document fetchSanseidoSource(URL searchURL) throws IOException{
-        Document htmlTree = Jsoup.connect(searchURL.toString()).get();
-
-        return htmlTree;
+        return Jsoup.connect(searchURL.toString()).get();
     }
 
     /**
@@ -177,12 +175,12 @@ public class SanseidoSearch implements Parcelable {
         for (Element row : rows) {
             Elements columns = row.select("td");
 
-            String dictionary = columns.get(RELATED_WORDS_TYPE_CLASS_INDEX).text().toString();
+            String dictionary = columns.get(RELATED_WORDS_TYPE_CLASS_INDEX).text();
             if (!relatedWords.containsKey(dictionary)){
                 relatedWords.put(dictionary, new HashSet<String>());
             }
 
-            String tableEntry = columns.get(RELATED_WORDS_VOCAB_INDEX).text().toString();
+            String tableEntry = columns.get(RELATED_WORDS_VOCAB_INDEX).text();
             String isolatedWord = JapaneseVocabulary.isolateWord(tableEntry);
 
             relatedWords.get(dictionary).add(isolatedWord);
@@ -198,13 +196,13 @@ public class SanseidoSearch implements Parcelable {
     private String findWordSource(Document html){
         Element word = html.getElementById(SANSEIDO_WORD_ID);
 
-        return word.text().toString();
+        return word.text();
     }
 
     /**
      * A helper method to isolate the source text of the definition of the word searched.
      * @param html the jsoup html document tree.
-     * @return
+     * @return the raw definition source
      */
     private String findDefinitionSource(Document html){
         Element definitionParentElement = html.getElementById(SANSEIDO_WORD_DEFINITION_ID);
