@@ -4,6 +4,7 @@ J-J Dictionary drawing definitions from [Sanseido](https://www.sanseido.biz/) in
 ![Screenshot](/docs/app-image.png)
 
 ## USAGE
+<b>IT WILL CRASH ON FIRST LAUNCH PERMISSION REQUEST. HAVEN'T GOTTEN AROUND TO FIXING IT YET.</b>
 Type a word in the search box, then press enter to conduct a search.
 The floating action button sends the searched word into AnkiDroid
 

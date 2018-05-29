@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.database.sqlite.SQLiteDatabase;
 import android.databinding.DataBindingUtil;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -19,7 +18,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 
-import com.waifusims.j_jlearnersdictionary.databinding.ActivityHomeBinding;
+import com.waifusims.j_jlearnersdictionary.databinding.ActivitySearchBinding;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -53,7 +52,7 @@ public class SearchActivity extends AppCompatActivity
     private static final String SEARCH_WORD_KEY = "search";
     private static final int SANSEIDO_SEARCH_LOADER = 322;
 
-    private ActivityHomeBinding mBinding;
+    private ActivitySearchBinding mBinding;
     private AnkiDroidHelper mAnkiDroid;
     private Toast mToast;
     private VocabularyViewModel mVocabViewModel;
@@ -68,8 +67,8 @@ public class SearchActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
 
         mAnkiDroid = new AnkiDroidHelper(this);
-        setContentView(R.layout.activity_home);
-        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_home);
+        setContentView(R.layout.activity_search);
+        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_search);
         setUpClickListeners();
 
         mVocabViewModel = ViewModelProviders.of(this).get(VocabularyViewModel.class);
@@ -286,6 +285,9 @@ public class SearchActivity extends AppCompatActivity
     private void updateWordInDb(JapaneseVocabulary vocab){
         //I need the ID, so I have to DB query. Could work around if I save ID
         VocabularyEntity wordInDb = getWordFromDb(vocab.getWord());
+        if (wordInDb == null){
+            return;
+        }
         wordInDb.setWord(vocab.getWord());
         wordInDb.setDefinition(vocab.getDefintion());
         wordInDb.setReading(vocab.getReading());
@@ -355,6 +357,11 @@ public class SearchActivity extends AppCompatActivity
         return mBinding.ankiAdditionalFields.etContext.getText().toString();
     }
 
+    private void clearAnkiFields(){
+        mBinding.ankiAdditionalFields.etContext.setText("");
+        mBinding.ankiAdditionalFields.etNotes.setText("");
+    }
+
     //TODO: Change click to expand a menu and add associated UI elements
     //TODO: Maybe implement a clozed type when sentence search is included
     //TODO: Duplicate checking
@@ -402,7 +409,11 @@ public class SearchActivity extends AppCompatActivity
                     switch (keyCode){
                         case KeyEvent.KEYCODE_DPAD_CENTER:
                         case KeyEvent.KEYCODE_ENTER:
+                            if(mLastSearched != null){
+                                updateWordInDb(mLastSearched.getVocabulary());
+                            }
                             String searchWord = mBinding.wordSearch.etSearchBox.getText().toString();
+                            clearAnkiFields();
                             // If the word is not in the DB, we need to make a search
                             if(!showWordFromDB(searchWord)) {
                                 Bundle searchBundle = new Bundle();
@@ -445,13 +456,14 @@ public class SearchActivity extends AppCompatActivity
         });
 
         //TODO: Fix it so it requests on add card, not on start up. Avoid crashes before addition.
-        if (mAnkiDroid.shouldRequestPermission()) {
-            mAnkiDroid.requestPermission(SearchActivity.this, ADD_PERM_REQUEST);
-        }
+
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view) {
+                if (mAnkiDroid.shouldRequestPermission()) {
+                    mAnkiDroid.requestPermission(SearchActivity.this, ADD_PERM_REQUEST);
+                }
                 addWordToAnki();
             }
         });

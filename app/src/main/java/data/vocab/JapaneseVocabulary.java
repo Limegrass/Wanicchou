@@ -7,7 +7,6 @@ import android.os.Parcelable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import data.db.VocabularyContract;
 import data.room.voc.VocabularyEntity;
 
 /**
@@ -71,24 +70,6 @@ public class JapaneseVocabulary implements Parcelable {
         this.dictionaryType = dictionaryType;
     }
 
-    public JapaneseVocabulary(Cursor savedWordCursor){
-        int defintionIndex =
-                savedWordCursor.getColumnIndex(VocabularyContract.VocabularyEntry.COLUMN_DEFINITION);
-        int wordIndex =
-                savedWordCursor.getColumnIndex(VocabularyContract.VocabularyEntry.COLUMN_WORD);
-        int readingIndex =
-                savedWordCursor.getColumnIndex(VocabularyContract.VocabularyEntry.COLUMN_READING);
-        int pitchIndex =
-                savedWordCursor.getColumnIndex(VocabularyContract.VocabularyEntry.COLUMN_PITCH);
-        int dictionaryIndex =
-                savedWordCursor.getColumnIndex(VocabularyContract.VocabularyEntry.COLUMN_DICTIONARY_TYPE);
-        definition = savedWordCursor.getString(defintionIndex);
-        word = savedWordCursor.getString(wordIndex);
-        reading = savedWordCursor.getString(readingIndex);
-        pitch = savedWordCursor.getString(pitchIndex);
-        String dicTypeString = savedWordCursor.getString(dictionaryIndex);
-        dictionaryType = DictionaryType.fromSanseidoKey(dicTypeString);
-    }
     /**
      * Checks if the two JapaneseVocabulary objects have the same word, reading, and definition.
      * @param obj another JapaneseVocabulary instance
