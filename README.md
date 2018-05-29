@@ -11,7 +11,7 @@ The floating action button sends the searched word into AnkiDroid
 ## TODO
 <s>Save searched words and definitions into an SQLiteDB for offline usage.</s>
 
-SharedPreferences for which language dictionary the search should be conducted.
+<s>SharedPreferences for which language dictionary the search should be conducted.</s>
 
 Add a way to import sentences before Anki import.
 

@@ -592,6 +592,7 @@ public class SearchActivity extends AppCompatActivity
             public void onClick(View view) {
                 if (mAnkiDroid.shouldRequestPermission()) {
                     mAnkiDroid.requestPermission(SearchActivity.this, ADD_PERM_REQUEST);
+                    return;
                 }
                 addWordToAnki();
             }
