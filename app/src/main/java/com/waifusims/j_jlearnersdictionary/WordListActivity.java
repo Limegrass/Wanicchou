@@ -1,27 +1,28 @@
 package com.waifusims.j_jlearnersdictionary;
 
+import android.app.ActionBar;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
+import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.widget.Toast;
+import android.view.MenuItem;
 
 import com.waifusims.j_jlearnersdictionary.databinding.ActivityRelatedWordsBinding;
 
-import data.SanseidoSearch;
+import data.vocab.search.SanseidoSearch;
 
 /**
  * Separate activity to display the related words of a SanseidoSearch.
  * If a word is long pressed, it will be searched and brought back to the home activity.
  */
-public class RelatedWordsActivity extends AppCompatActivity
+public class WordListActivity extends AppCompatActivity
         implements WordAdapter.ListItemClickListener{
 
     private SanseidoSearch searchData;
     private ActivityRelatedWordsBinding mBinding;
-    private Toast mToast;
 
     private WordAdapter mAdapter;
     private RecyclerView mWordList;
@@ -33,6 +34,11 @@ public class RelatedWordsActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_related_words);
+        ActionBar actionbar = this.getActionBar();
+        if (actionbar != null) {
+            actionbar.setDisplayHomeAsUpEnabled(true);
+        }
+
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_related_words);
 
         Intent intentThatStartedThis = getIntent();
@@ -50,6 +56,15 @@ public class RelatedWordsActivity extends AppCompatActivity
         mAdapter = new WordAdapter(searchData.getRelatedWords(),
                 this);
         mWordList.setAdapter(mAdapter);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int itemId = item.getItemId();
+        if (itemId == android.R.id.home) {
+            NavUtils.navigateUpFromSameTask(this);
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override

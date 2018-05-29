@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array
+        name="dictionaryTypeArray">
+        <item>Japanese to Japanese</item>
+        <item>Japanese to English</item>
+        <item>English to Japanese</item>
+    </string-array>
+    <string-array
+        name="dictionaryTypeValues">
+        <item>DailyJJ</item>
+        <item>DailyJE</item>
+        <item>DailyEJ</item>
+    </string-array>
+
+</resources>

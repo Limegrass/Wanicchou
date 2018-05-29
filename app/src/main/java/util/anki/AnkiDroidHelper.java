@@ -196,4 +196,35 @@ public class AnkiDroidHelper {
         return null;
     }
 
+    // TODO: Move these methods to the Helper
+    /**
+     * helper method to retrieve the deck ID for JJLD
+     * @return the deck ID for JJLD in Anki
+     */
+    public long getDeckId() {
+        Long did = findDeckIdByName(AnkiDroidConfig.DECK_NAME);
+        if (did == null) {
+            did = getApi().addNewDeck(AnkiDroidConfig.DECK_NAME);
+            storeDeckReference(AnkiDroidConfig.DECK_NAME, did);
+        }
+        return did;
+    }
+
+    /**
+     * helper method to retrieve the model ID for JJLD
+     * @return the model ID for JJLD in Anki
+     */
+    public long getModelId() {
+        Long mid = findModelIdByName(AnkiDroidConfig.MODEL_NAME, AnkiDroidConfig.FIELDS.length);
+        if (mid == null) {
+            mid = getApi().addNewCustomModel(AnkiDroidConfig.MODEL_NAME, AnkiDroidConfig.FIELDS,
+                    AnkiDroidConfig.CARD_NAMES, AnkiDroidConfig.QFMT, AnkiDroidConfig.AFMT, AnkiDroidConfig.CSS, getDeckId(), null);
+            storeModelReference(AnkiDroidConfig.MODEL_NAME, mid);
+        }
+        return mid;
+    }
+
+
+
+
 }

@@ -11,20 +11,32 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".HomeActivity">
+
+        <activity
+            android:name=".SearchActivity"
+            android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
-            android:name=".RelatedWordsActivity"
+            android:name=".WordListActivity"
             android:label="@string/title_activity_related_words"
-            android:parentActivityName=".HomeActivity">
+            android:parentActivityName=".SearchActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".HomeActivity"/>
+                android:value=".SearchActivity" />
+        </activity>
+
+        <activity
+            android:name=".SettingsActivity"
+            android:label="@string/action_settings"
+            android:parentActivityName=".SearchActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".SearchActivity"/>
         </activity>
     </application>
 

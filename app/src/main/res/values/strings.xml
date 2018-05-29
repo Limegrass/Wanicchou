@@ -1,8 +1,9 @@
 <resources>
     <string name="app_name" translatable="true">Wanicchou</string>
 
-    <!--home_activity-->
+    <!--search activity-->
     <string name="key_last_searched" translatable="false">lastSearched</string>
+    <string name="action_settings" translatable="true">Settings</string>
     <!--word_definition related-->
     <string name="search_label" translatable="true">Search</string>
     <string name="search_field_hint" translatable="true">Enter a word</string>
@@ -42,5 +43,11 @@
 
     <!--shared preferences keys-->
     <string name="key_search_word" translatable="false">searchWord</string>
+
+    <!--settings strings-->
+    <string name="title_search_settings_category" translatable="true">Search Settings</string>
+    <string name="title_dictionary_type" translatable="true">Dictionary Type</string>
+    <string name="key_pref_dictionary_type" translatable="false">listPrefDicType</string>
+    <string name="default_pref_dictionary_type" translatable="false">DailyJJ</string>
 
 </resources>

@@ -1,4 +1,4 @@
-package data;
+package data.vocab;
 
 /**
  * Created by Limegrass on 5/9/2018.
@@ -18,6 +18,18 @@ public enum DictionaryType {
                 return "英和";
             default:
                 return "";
+        }
+    }
+    public static DictionaryType fromSanseidoKey(String key){
+        switch (key){
+            case "DailyJJ":
+                return JJ;
+            case "DailyJE":
+                return JE;
+            case "DailyEJ":
+                return EJ;
+            default:
+                return JJ;
         }
     }
 

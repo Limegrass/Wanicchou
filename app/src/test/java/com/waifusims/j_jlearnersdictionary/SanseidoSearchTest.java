@@ -8,7 +8,7 @@ import org.junit.Test;
 import android.test.InstrumentationTestCase;
 import android.test.mock.MockContext;
 
-import data.SanseidoSearch;
+import data.vocab.search.SanseidoSearch;
 
 /**
  * Example local unit test, which will execute on the development machine (host).

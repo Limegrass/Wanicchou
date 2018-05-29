@@ -1,6 +1,5 @@
-package data;
+package data.vocab.search;
 
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -18,6 +17,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import data.vocab.DictionaryType;
+import data.vocab.JapaneseVocabulary;
 
 /**
  * Created by Limegrass on 3/19/2018.
@@ -76,16 +78,17 @@ public class SanseidoSearch implements Parcelable {
      * @param wordToSearch the desired word to search.
      * @throws IOException
      */
-    public SanseidoSearch(String wordToSearch) throws IOException {
+    public SanseidoSearch(String wordToSearch, DictionaryType dictionaryType) throws IOException {
         //TODO: Refactor the URL and vocab to reference a saved pref var for if it's JJ, JE, or EJ
-        URL url = buildQueryURL(wordToSearch, true);
+        URL url = buildQueryURL(wordToSearch, dictionaryType);
         Document html = fetchSanseidoSource(url);
         relatedWords = findRelatedWords(html);
         vocabulary = new JapaneseVocabulary(
                 findWordSource(html),
                 findDefinitionSource(html),
-                DictionaryType.JJ);
+                dictionaryType);
     }
+
 
     public SanseidoSearch(JapaneseVocabulary japaneseVocabulary, Map<String, Set<String> > relatedWords){
         this.vocabulary = japaneseVocabulary;
@@ -112,21 +115,29 @@ public class SanseidoSearch implements Parcelable {
      * Builds the URL for the desired word(s) to search for on Sanseido.
      *
      * @param word the Japanese word to search for
-     * @param JJDic whether to return the definition in Japanese or not (else, English)
+     * @param dictionaryType which dictionary to search from Sanseido
      * @return the Sanseido url created
      * @throws MalformedURLException
      */
-    private URL buildQueryURL(String word, boolean JJDic) throws MalformedURLException{
+    private URL buildQueryURL(String word, DictionaryType dictionaryType) throws MalformedURLException{
 
         Uri.Builder uriBuilder = Uri.parse(SANSEIDOU_BASE_URL).buildUpon()
                         .appendQueryParameter(PARAM_ST, ST_EXACT)
                         .appendQueryParameter(PARAM_DORDER, DORDER_DEFAULT)
                         .appendQueryParameter(PARAM_WORD_QUERY, word);
-        if(JJDic){
-            uriBuilder.appendQueryParameter(PARAM_DAILYJJ, SET_LANG);
-        }
-        else{
-            uriBuilder.appendQueryParameter(PARAM_DAILYJE, SET_LANG);
+        switch (dictionaryType) {
+
+            case JJ:
+                uriBuilder.appendQueryParameter(PARAM_DAILYJJ, SET_LANG);
+                break;
+            case JE:
+                uriBuilder.appendQueryParameter(PARAM_DAILYJE, SET_LANG);
+                break;
+            case EJ:
+                uriBuilder.appendQueryParameter(PARAM_DAILYEJ, SET_LANG);
+                break;
+            default:
+                uriBuilder.appendQueryParameter(PARAM_DAILYJJ, SET_LANG);
         }
 
         return new URL(uriBuilder.build().toString());

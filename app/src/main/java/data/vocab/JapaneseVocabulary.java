@@ -1,4 +1,4 @@
-package data;
+package data.vocab;
 
 import android.database.Cursor;
 import android.os.Parcel;
@@ -6,6 +6,8 @@ import android.os.Parcelable;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import data.room.voc.VocabularyEntity;
 
 /**
  * Created by Limegrass on 4/4/2018.
@@ -51,6 +53,15 @@ public class JapaneseVocabulary implements Parcelable {
         this.dictionaryType = dictionaryType;
     }
 
+    public JapaneseVocabulary(VocabularyEntity entity){
+        //TODO: Change entity elements to be getter/setters
+        word = entity.getWord();
+        reading = entity.getReading();
+        definition = entity.getDefinition();
+        pitch = entity.getPitch();
+        dictionaryType = DictionaryType.fromSanseidoKey(entity.getDefinition());
+    }
+
     public JapaneseVocabulary(String invalidWord, DictionaryType dictionaryType){
         definition = "N/A";
         word = invalidWord;
@@ -59,37 +70,6 @@ public class JapaneseVocabulary implements Parcelable {
         this.dictionaryType = dictionaryType;
     }
 
-    public JapaneseVocabulary(Cursor savedWordCursor){
-        int defintionIndex =
-                savedWordCursor.getColumnIndex(VocabularyContract.VocabularyEntry.COLUMN_DEFINITION);
-        int wordIndex =
-                savedWordCursor.getColumnIndex(VocabularyContract.VocabularyEntry.COLUMN_WORD);
-        int readingIndex =
-                savedWordCursor.getColumnIndex(VocabularyContract.VocabularyEntry.COLUMN_READING);
-        int pitchIndex =
-                savedWordCursor.getColumnIndex(VocabularyContract.VocabularyEntry.COLUMN_PITCH);
-        int dictionaryIndex =
-                savedWordCursor.getColumnIndex(VocabularyContract.VocabularyEntry.COLUMN_DICTIONARY_TYPE);
-        definition = savedWordCursor.getString(defintionIndex);
-        word = savedWordCursor.getString(wordIndex);
-        reading = savedWordCursor.getString(readingIndex);
-        pitch = savedWordCursor.getString(pitchIndex);
-        String dicTypeString = savedWordCursor.getString(dictionaryIndex);
-        switch(dicTypeString){
-            case "JJ":
-                dictionaryType = DictionaryType.JJ;
-                break;
-            case "JE":
-                dictionaryType = DictionaryType.JE;
-                break;
-            case "EJ":
-                dictionaryType = DictionaryType.EJ;
-                break;
-            default:
-                dictionaryType = DictionaryType.JJ;
-
-        }
-    }
     /**
      * Checks if the two JapaneseVocabulary objects have the same word, reading, and definition.
      * @param obj another JapaneseVocabulary instance
