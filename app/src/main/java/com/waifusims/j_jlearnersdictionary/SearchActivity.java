@@ -41,6 +41,7 @@ import android.support.v4.app.LoaderManager;
 import android.view.View.OnKeyListener;
 import android.view.KeyEvent;
 import android.widget.Toast;
+import android.widget.ViewSwitcher;
 
 //TODO:  Horizontal UI
 public class SearchActivity extends AppCompatActivity
@@ -335,10 +336,7 @@ public class SearchActivity extends AppCompatActivity
     private void showAnkiRelatedUIElements(){
         mBinding.btnRelatedWords.setVisibility(View.VISIBLE);
         mBinding.fab.setVisibility(View.VISIBLE);
-        mBinding.ankiAdditionalFields.tvContextLabel.setVisibility(View.VISIBLE);
-        mBinding.ankiAdditionalFields.tvNotesLabel.setVisibility(View.VISIBLE);
-        mBinding.ankiAdditionalFields.etContext.setVisibility(View.VISIBLE);
-        mBinding.ankiAdditionalFields.etNotes.setVisibility(View.VISIBLE);
+        mBinding.ankiAdditionalFields.viewAnkiFields.setVisibility(View.VISIBLE);
     }
 
     private void showVocabOnUI(){
@@ -346,6 +344,7 @@ public class SearchActivity extends AppCompatActivity
         String definition = vocabulary.getDefintion();
         mBinding.wordDefinition.tvWord.setText(vocabulary.getWord());
         mBinding.wordDefinition.tvDefinition.setText(definition);
+        mBinding.wordDefinition.etDefinition.setText(definition);
     }
 
     //TODO: Make UI be TVs until clicked on, then become ET
@@ -402,6 +401,82 @@ public class SearchActivity extends AppCompatActivity
     }
 
     private void setUpClickListeners(){
+        // Definition TV/ET
+        mBinding.wordDefinition.tvDefinition.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mBinding.wordDefinition.vsDefinition.showNext();
+                mBinding.wordDefinition.etDefinition.requestFocus();
+            }
+        });
+
+        mBinding.wordDefinition.etDefinition.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean hasFocus) {
+                if (!hasFocus){
+                    String changedText = mBinding.wordDefinition.etDefinition.getText().toString();
+                    mBinding.wordDefinition.tvDefinition.setText(changedText);
+                    mBinding.wordDefinition.vsDefinition.showNext();
+                }
+            }
+        });
+
+        // Context Label, TV, and ET
+        mBinding.ankiAdditionalFields.tvContextLabel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mBinding.ankiAdditionalFields.vsContext.showNext();
+                mBinding.ankiAdditionalFields.etContext.requestFocus();
+            }
+        });
+
+        mBinding.ankiAdditionalFields.tvContext.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mBinding.ankiAdditionalFields.vsContext.showNext();
+                mBinding.ankiAdditionalFields.etContext.requestFocus();
+            }
+        });
+
+        mBinding.ankiAdditionalFields.etContext.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean hasFocus) {
+                if (!hasFocus){
+                    String changedText = mBinding.ankiAdditionalFields.tvContext.getText().toString();
+                    mBinding.ankiAdditionalFields.tvContext.setText(changedText);
+                    mBinding.ankiAdditionalFields.vsContext.showNext();
+                }
+            }
+        });
+
+
+        // Notes label, TV, ET
+        mBinding.ankiAdditionalFields.tvNotesLabel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mBinding.ankiAdditionalFields.vsNotes.showNext();
+                mBinding.ankiAdditionalFields.etNotes.requestFocus();
+            }
+        });
+        mBinding.ankiAdditionalFields.tvNotes.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mBinding.ankiAdditionalFields.vsNotes.showNext();
+                mBinding.ankiAdditionalFields.etNotes.requestFocus();
+            }
+        });
+
+        mBinding.ankiAdditionalFields.etNotes.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean hasFocus) {
+                if (!hasFocus){
+                    String changedText = mBinding.ankiAdditionalFields.etNotes.getText().toString();
+                    mBinding.ankiAdditionalFields.tvNotes.setText(changedText);
+                    mBinding.ankiAdditionalFields.vsNotes.showNext();
+                }
+            }
+        });
+
         mBinding.wordSearch.etSearchBox.setOnKeyListener(new OnKeyListener() {
             @Override
             public boolean onKey(View searchBox, int keyCode, KeyEvent keyEvent) {
