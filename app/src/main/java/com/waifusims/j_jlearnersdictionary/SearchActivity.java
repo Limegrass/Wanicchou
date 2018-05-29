@@ -40,6 +40,7 @@ import android.support.v4.app.LoaderManager;
 
 import android.view.View.OnKeyListener;
 import android.view.KeyEvent;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 import android.widget.ViewSwitcher;
 
@@ -172,6 +173,7 @@ public class SearchActivity extends AppCompatActivity
         );
     }
 
+    //TODO: Make this stop executing coming back from SettingsActivity/(OnResume?)
     @Override
     public void onLoadFinished(Loader<SanseidoSearch> loader, SanseidoSearch search) {
 
@@ -262,11 +264,16 @@ public class SearchActivity extends AppCompatActivity
 
     private void addWordsToRelatedWordsDb(String searchWord, Map<String, Set<String> > newRelatedWords){
         VocabularyEntity entity = getWordFromDb(searchWord);
+        if (entity == null){
+            return;
+        }
         for (String dictionaryType : newRelatedWords.keySet()){
             for(String relatedWord : newRelatedWords.get(dictionaryType)){
-                    RelatedWordEntity relatedWordToAdd =
-                            new RelatedWordEntity(entity, relatedWord, dictionaryType);
-                    mRelatedWordsViewModel.insert(relatedWordToAdd);
+                String simpleDicType = DictionaryType.fromSanseidoKanji(dictionaryType).toString();
+                RelatedWordEntity relatedWordToAdd =
+                        new RelatedWordEntity(entity, relatedWord,
+                                simpleDicType);
+                mRelatedWordsViewModel.insert(relatedWordToAdd);
             }
         }
     }
@@ -305,6 +312,10 @@ public class SearchActivity extends AppCompatActivity
         VocabularyEntity entity = getWordFromDb(searchWord);
         //TODO: Give option of web search
         if(entity != null){
+            if (DictionaryType.fromString(entity.getDictionaryType()) != getCurrentDictionaryPreference()){
+                return false;
+            }
+
             JapaneseVocabulary vocabulary = new JapaneseVocabulary(entity);
             mBinding.ankiAdditionalFields.etNotes.setText(entity.getNotes());
             mBinding.ankiAdditionalFields.etContext.setText(entity.getWordContext());
@@ -345,6 +356,7 @@ public class SearchActivity extends AppCompatActivity
         mBinding.wordDefinition.tvWord.setText(vocabulary.getWord());
         mBinding.wordDefinition.tvDefinition.setText(definition);
         mBinding.wordDefinition.etDefinition.setText(definition);
+        clearAnkiFields();
     }
 
     //TODO: Make UI be TVs until clicked on, then become ET
@@ -357,7 +369,10 @@ public class SearchActivity extends AppCompatActivity
     }
 
     private void clearAnkiFields(){
+
+        mBinding.ankiAdditionalFields.tvContext.setText("");
         mBinding.ankiAdditionalFields.etContext.setText("");
+        mBinding.ankiAdditionalFields.tvNotes.setText("");
         mBinding.ankiAdditionalFields.etNotes.setText("");
     }
 
@@ -407,6 +422,10 @@ public class SearchActivity extends AppCompatActivity
             public void onClick(View view) {
                 mBinding.wordDefinition.vsDefinition.showNext();
                 mBinding.wordDefinition.etDefinition.requestFocus();
+                InputMethodManager inputMethodManager =
+                        (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                inputMethodManager.showSoftInput(mBinding.wordDefinition.etDefinition,
+                        InputMethodManager.SHOW_IMPLICIT);
             }
         });
 
@@ -417,6 +436,12 @@ public class SearchActivity extends AppCompatActivity
                     String changedText = mBinding.wordDefinition.etDefinition.getText().toString();
                     mBinding.wordDefinition.tvDefinition.setText(changedText);
                     mBinding.wordDefinition.vsDefinition.showNext();
+                    InputMethodManager inputMethodManager =
+                            (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    inputMethodManager.hideSoftInputFromWindow(
+                            mBinding.ankiAdditionalFields.etNotes.getWindowToken(),
+                            0
+                    );
                 }
             }
         });
@@ -427,6 +452,10 @@ public class SearchActivity extends AppCompatActivity
             public void onClick(View view) {
                 mBinding.ankiAdditionalFields.vsContext.showNext();
                 mBinding.ankiAdditionalFields.etContext.requestFocus();
+                InputMethodManager inputMethodManager =
+                        (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                inputMethodManager.showSoftInput(mBinding.ankiAdditionalFields.etContext,
+                        InputMethodManager.SHOW_IMPLICIT);
             }
         });
 
@@ -435,6 +464,10 @@ public class SearchActivity extends AppCompatActivity
             public void onClick(View view) {
                 mBinding.ankiAdditionalFields.vsContext.showNext();
                 mBinding.ankiAdditionalFields.etContext.requestFocus();
+                InputMethodManager inputMethodManager =
+                        (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                inputMethodManager.showSoftInput(mBinding.ankiAdditionalFields.etContext,
+                        InputMethodManager.SHOW_IMPLICIT);
             }
         });
 
@@ -442,9 +475,15 @@ public class SearchActivity extends AppCompatActivity
             @Override
             public void onFocusChange(View view, boolean hasFocus) {
                 if (!hasFocus){
-                    String changedText = mBinding.ankiAdditionalFields.tvContext.getText().toString();
+                    String changedText = getWordContext();
                     mBinding.ankiAdditionalFields.tvContext.setText(changedText);
                     mBinding.ankiAdditionalFields.vsContext.showNext();
+                    InputMethodManager inputMethodManager =
+                            (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    inputMethodManager.hideSoftInputFromWindow(
+                            mBinding.ankiAdditionalFields.etNotes.getWindowToken(),
+                            0
+                    );
                 }
             }
         });
@@ -456,6 +495,10 @@ public class SearchActivity extends AppCompatActivity
             public void onClick(View view) {
                 mBinding.ankiAdditionalFields.vsNotes.showNext();
                 mBinding.ankiAdditionalFields.etNotes.requestFocus();
+                InputMethodManager inputMethodManager =
+                        (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                inputMethodManager.showSoftInput(mBinding.ankiAdditionalFields.etNotes,
+                        InputMethodManager.SHOW_IMPLICIT);
             }
         });
         mBinding.ankiAdditionalFields.tvNotes.setOnClickListener(new View.OnClickListener() {
@@ -463,6 +506,10 @@ public class SearchActivity extends AppCompatActivity
             public void onClick(View view) {
                 mBinding.ankiAdditionalFields.vsNotes.showNext();
                 mBinding.ankiAdditionalFields.etNotes.requestFocus();
+                InputMethodManager inputMethodManager =
+                        (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                inputMethodManager.showSoftInput(mBinding.ankiAdditionalFields.etNotes,
+                        InputMethodManager.SHOW_IMPLICIT);
             }
         });
 
@@ -470,9 +517,16 @@ public class SearchActivity extends AppCompatActivity
             @Override
             public void onFocusChange(View view, boolean hasFocus) {
                 if (!hasFocus){
-                    String changedText = mBinding.ankiAdditionalFields.etNotes.getText().toString();
+                    String changedText = getWordNotes();
                     mBinding.ankiAdditionalFields.tvNotes.setText(changedText);
                     mBinding.ankiAdditionalFields.vsNotes.showNext();
+                    InputMethodManager inputMethodManager =
+                            (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    inputMethodManager.hideSoftInputFromWindow(
+                            mBinding.ankiAdditionalFields.etNotes.getWindowToken(),
+                            0
+                    );
+
                 }
             }
         });
@@ -554,9 +608,15 @@ public class SearchActivity extends AppCompatActivity
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int itemId = item.getItemId();
-        Context context = this;
-        Class childActivity = SettingsActivity.class;
+
         if (itemId == R.id.action_settings) {
+            Context context = this;
+            Class childActivity = SettingsActivity.class;
+
+//            Intent intentChangeSettings =
+//                    new Intent(context, childActivity);
+//            startActivityForResult(intentChangeSettings, HOME_ACTIVITY_REQUEST_CODE);
+
             Intent startSettingsActivityIntent = new Intent(context, childActivity);
             startActivity(startSettingsActivityIntent);
             return true;

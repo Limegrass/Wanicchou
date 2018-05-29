@@ -75,7 +75,8 @@
                 android:hint="@string/definition_hint"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:clickable="true"/>
+                android:clickable="true"
+                android:focusable="true"/>
             <EditText
                 android:id="@+id/et_definition"
                 android:hint="@string/definition_hint"

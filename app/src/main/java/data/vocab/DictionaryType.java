@@ -17,9 +17,23 @@ public enum DictionaryType {
             case "EJ":
                 return "英和";
             default:
-                return "";
+                return null;
         }
     }
+
+    public static DictionaryType fromString(String key){
+        switch (key){
+            case "JJ":
+                return JJ;
+            case "JE":
+                return JE;
+            case "EJ":
+                return EJ;
+            default:
+                return null;
+        }
+    }
+
     public static DictionaryType fromSanseidoKey(String key){
         switch (key){
             case "DailyJJ":
@@ -29,8 +43,20 @@ public enum DictionaryType {
             case "DailyEJ":
                 return EJ;
             default:
-                return JJ;
+                return null;
         }
     }
 
+    public static DictionaryType fromSanseidoKanji(String key){
+        switch (key){
+            case "【国語】":
+                return JJ;
+            case "【和英】":
+                return JE;
+            case "【英和】":
+                return EJ;
+            default:
+                return null;
+        }
+    }
 }

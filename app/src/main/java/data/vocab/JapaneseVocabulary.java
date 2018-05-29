@@ -59,7 +59,7 @@ public class JapaneseVocabulary implements Parcelable {
         reading = entity.getReading();
         definition = entity.getDefinition();
         pitch = entity.getPitch();
-        dictionaryType = DictionaryType.fromSanseidoKey(entity.getDefinition());
+        dictionaryType = DictionaryType.fromString(entity.getDictionaryType());
     }
 
     public JapaneseVocabulary(String invalidWord, DictionaryType dictionaryType){

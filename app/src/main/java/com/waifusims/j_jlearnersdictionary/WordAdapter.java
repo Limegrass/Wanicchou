@@ -25,16 +25,17 @@ public class WordAdapter extends RecyclerView.Adapter<WordAdapter.WordViewHolder
     // This may require changing from Map<String, Set<String> > in others to being just a vector
     private List<String> relatedWords;
     // TODO: Bandaid solution, fix later in constructor. (See above todo)
-    private String dictionary;
+    private List<String> dictionary;
 
     public WordAdapter(Map<String, Set<String>> words, ListItemClickListener listener){
         relatedWords = new ArrayList<>();
+        dictionary = new ArrayList<>();
 
-        for (String key : words.keySet()){
-            for(String word : words.get(key)){
+        for (String dictionaryKey : words.keySet()){
+            for(String word : words.get(dictionaryKey)){
                 relatedWords.add(word);
+                dictionary.add(dictionaryKey);
             }
-            dictionary = key;
         }
         mOnClickListener = listener;
     }
@@ -83,7 +84,7 @@ public class WordAdapter extends RecyclerView.Adapter<WordAdapter.WordViewHolder
         }
 
         void bind(int listIndex){
-            tvDictionary.setText(dictionary);
+            tvDictionary.setText(dictionary.get(listIndex));
             tvWord.setText(relatedWords.get(listIndex));
         }
 

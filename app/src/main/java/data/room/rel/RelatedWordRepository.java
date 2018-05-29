@@ -59,11 +59,8 @@ public class RelatedWordRepository {
     public List<RelatedWordEntity> getRelatedWordList(int fkWordId, DictionaryType dictionaryType) {
         List<RelatedWordEntity> ret = new ArrayList<>();
         try {
-            for(DictionaryType type : DictionaryType.values())
-            {
-                List<RelatedWordEntity> partial = new queryAsyncTask(mRelatedWordDao, type).execute(fkWordId).get();
-                ret.addAll(partial);
-            }
+            ret = new queryAsyncTask(mRelatedWordDao, dictionaryType).execute(fkWordId).get();
+
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
