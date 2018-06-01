@@ -20,6 +20,7 @@ import java.util.Set;
 
 import data.vocab.DictionaryType;
 import data.vocab.JapaneseVocabulary;
+import data.vocab.MatchType;
 
 /**
  * Created by Limegrass on 3/19/2018.
@@ -47,17 +48,10 @@ public class SanseidoSearch implements Parcelable {
 
     // ST is the behavior of the search
     private final static String PARAM_ST = "st";
-    private final static String ST_FORWARD = "0";
-    private final static String ST_EXACT = "1";
-    private final static String ST_BACKWARDS = "2";
-    private final static String ST_FULL_TEXT = "3";
-    private final static String ST_PARTIAL = "5";
 
     // Enabling and disabling of languages
     // Display will go by DORDER
-    private final static String PARAM_DAILYJJ = "DailyJJ";
-    private final static String PARAM_DAILYJE = "DailyJE";
-    private final static String PARAM_DAILYEJ = "DailyEJ";
+    private final static String PARAM_DIC_PREFIX = "Daily";
     private final static String SET_LANG = "checkbox";
 
     private final static int RELATED_WORDS_TYPE_CLASS_INDEX = 0;
@@ -78,9 +72,12 @@ public class SanseidoSearch implements Parcelable {
      * @param wordToSearch the desired word to search.
      * @throws IOException if the search cannot be completed
      */
-    public SanseidoSearch(String wordToSearch, DictionaryType dictionaryType) throws IOException {
-        //TODO: Refactor the URL and vocab to reference a saved pref var for if it's JJ, JE, or EJ
-        URL url = buildQueryURL(wordToSearch, dictionaryType);
+    public SanseidoSearch(String wordToSearch,
+                          DictionaryType dictionaryType,
+                          MatchType matchType)
+            throws IOException {
+        //TODO: Fix relatedWords searching, as it is not working properly for forwards search
+        URL url = buildQueryURL(wordToSearch, dictionaryType, matchType);
         Document html = fetchSanseidoSource(url);
         relatedWords = findRelatedWords(html);
         vocabulary = new JapaneseVocabulary(
@@ -119,10 +116,13 @@ public class SanseidoSearch implements Parcelable {
      * @return the Sanseido url created
      * @throws MalformedURLException if a search url cannot be built
      */
-    private URL buildQueryURL(String word, DictionaryType dictionaryType) throws MalformedURLException{
+    private URL buildQueryURL(String word,
+                              DictionaryType dictionaryType,
+                              MatchType matchType)
+            throws MalformedURLException{
 
         Uri.Builder uriBuilder = Uri.parse(SANSEIDOU_BASE_URL).buildUpon()
-                        .appendQueryParameter(PARAM_ST, ST_EXACT)
+                .appendQueryParameter(PARAM_ST, matchType.searchKey())
                 .appendQueryParameter(PARAM_DORDER, DORDER_DEFAULT)
                 .appendQueryParameter(PARAM_WORD_QUERY, word)
                 .appendQueryParameter(PARAM_DIC_PREFIX + dictionaryType.toString(), SET_LANG);

@@ -49,5 +49,9 @@
     <string name="pref_dictionary_type_title" translatable="true">Dictionary Type</string>
     <string name="pref_dictionary_type_key" translatable="false">listPrefDicType</string>
     <string name="pref_dictionary_type_default" translatable="false">JJ</string>
+    <string name="pref_match_type_title" translatable="true">Match Type</string>
+    <string name="pref_match_type_key" translatable="false">listPrefSearchDir</string>
+    <string name="pref_match_type_default" translatable="false">1</string>
+
 
 </resources>

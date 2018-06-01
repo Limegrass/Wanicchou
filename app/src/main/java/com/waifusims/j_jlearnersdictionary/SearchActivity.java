@@ -32,6 +32,7 @@ import data.room.voc.VocabularyEntity;
 import data.room.voc.VocabularyViewModel;
 import data.vocab.DictionaryType;
 import data.vocab.JapaneseVocabulary;
+import data.vocab.MatchType;
 import data.vocab.search.SanseidoSearch;
 import data.vocab.search.SanseidoSearchAsyncTaskLoader;
 import util.anki.AnkiDroidHelper;
@@ -166,9 +167,11 @@ public class SearchActivity extends AppCompatActivity
     public Loader<SanseidoSearch> onCreateLoader(int id, final Bundle args) {
         Context context = SearchActivity.this;
         DictionaryType dictionaryType = getCurrentDictionaryPreference();
+        MatchType matchType = getCurrentMatchType();
         return new SanseidoSearchAsyncTaskLoader(context,
                 args.getString(SEARCH_WORD_KEY),
-                dictionaryType
+                dictionaryType,
+                matchType
         );
     }
 
@@ -337,11 +340,17 @@ public class SearchActivity extends AppCompatActivity
                 getString(R.string.pref_dictionary_type_key),
                 getString(R.string.pref_dictionary_type_default)
         );
-        DictionaryType dictionaryType = DictionaryType.fromSanseidoKey(dictionaryTypeString);
-        return dictionaryType;
         return DictionaryType.fromString(dictionaryTypeString);
     }
 
+    private MatchType getCurrentMatchType(){
+        Context context = this;
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        String matchTypeString = sharedPreferences.getString(
+                getString(R.string.pref_match_type_key),
+                getString(R.string.pref_match_type_default)
+        );
+        return MatchType.fromString(matchTypeString);
     }
 
     /* ==================================== +UI and +Helpers ================================== */

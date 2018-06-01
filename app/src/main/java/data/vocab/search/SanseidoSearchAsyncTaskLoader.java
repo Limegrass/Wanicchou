@@ -10,6 +10,7 @@ import com.waifusims.j_jlearnersdictionary.R;
 import java.io.IOException;
 
 import data.vocab.DictionaryType;
+import data.vocab.MatchType;
 
 /**
  * Created by Limegrass on 5/9/2018.
@@ -19,11 +20,16 @@ public class SanseidoSearchAsyncTaskLoader extends AsyncTaskLoader<SanseidoSearc
     private String mSearchWord;
     private Toast mToast;
     private DictionaryType mDictionaryType;
+    private MatchType mMatchType;
 
-    public SanseidoSearchAsyncTaskLoader(final Context context, String searchWord, DictionaryType dictionaryType){
+    public SanseidoSearchAsyncTaskLoader(final Context context,
+                                         String searchWord,
+                                         DictionaryType dictionaryType,
+                                         MatchType matchType) {
         super(context);
         mSearchWord = searchWord;
         mDictionaryType = dictionaryType;
+        mMatchType = matchType;
     }
 
     public void changeDictionaryType(DictionaryType dictionaryType){
@@ -54,7 +60,7 @@ public class SanseidoSearchAsyncTaskLoader extends AsyncTaskLoader<SanseidoSearc
         SanseidoSearch search = null;
         try{
             Context context = getContext();
-            search = new SanseidoSearch(mSearchWord, mDictionaryType);
+            search = new SanseidoSearch(mSearchWord, mDictionaryType, mMatchType);
         }
         catch (IOException e){
             e.printStackTrace();

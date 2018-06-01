@@ -10,10 +10,10 @@
         android:entryValues="@array/pref_dictionary_type_values"/>
 
     <ListPreference
-        android:title="@string/pref_search_direction_title"
-        android:key="@string/pref_search_direction_key"
-        android:defaultValue="@string/pref_search_direction_default"
-        android:entries="@array/pref_search_direction_entries"
-        android:entryValues="@array/pref_search_direction_values"/>
+        android:title="@string/pref_match_type_title"
+        android:key="@string/pref_match_type_key"
+        android:defaultValue="@string/pref_match_type_default"
+        android:entries="@array/pref_match_type_entries"
+        android:entryValues="@array/pref_match_type_values"/>
 
 </PreferenceScreen>

@@ -10,6 +10,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
         implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     private ListPreference mDicTypeListPref;
+    private ListPreference mMatchTypeListPref;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -17,6 +18,8 @@ public class SettingsFragment extends PreferenceFragmentCompat
 
         mDicTypeListPref = (ListPreference) getPreferenceScreen()
                 .findPreference(getContext().getString(R.string.pref_dictionary_type_key));
+        mMatchTypeListPref = (ListPreference) getPreferenceScreen()
+                .findPreference(getContext().getString(R.string.pref_match_type_key));
     }
 
     @Override
@@ -24,6 +27,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
         super.onResume();
         mDicTypeListPref.setSummary(mDicTypeListPref.getEntry().toString());
         getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
+        mMatchTypeListPref.setSummary(mMatchTypeListPref.getEntry().toString());
         getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
     }
 
@@ -43,6 +47,8 @@ public class SettingsFragment extends PreferenceFragmentCompat
         if (key.equals(getContext().getString(R.string.pref_dictionary_type_key))){
             mDicTypeListPref.setSummary(mDicTypeListPref.getEntry().toString());
         }
+        if (key.equals(getContext().getString(R.string.pref_match_type_key))){
+            mMatchTypeListPref.setSummary(mMatchTypeListPref.getEntry().toString());
         }
 
     }
