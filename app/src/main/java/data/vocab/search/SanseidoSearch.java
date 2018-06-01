@@ -123,22 +123,9 @@ public class SanseidoSearch implements Parcelable {
 
         Uri.Builder uriBuilder = Uri.parse(SANSEIDOU_BASE_URL).buildUpon()
                         .appendQueryParameter(PARAM_ST, ST_EXACT)
-                        .appendQueryParameter(PARAM_DORDER, DORDER_DEFAULT)
-                        .appendQueryParameter(PARAM_WORD_QUERY, word);
-        switch (dictionaryType) {
-
-            case JJ:
-                uriBuilder.appendQueryParameter(PARAM_DAILYJJ, SET_LANG);
-                break;
-            case JE:
-                uriBuilder.appendQueryParameter(PARAM_DAILYJE, SET_LANG);
-                break;
-            case EJ:
-                uriBuilder.appendQueryParameter(PARAM_DAILYEJ, SET_LANG);
-                break;
-            default:
-                uriBuilder.appendQueryParameter(PARAM_DAILYJJ, SET_LANG);
-        }
+                .appendQueryParameter(PARAM_DORDER, DORDER_DEFAULT)
+                .appendQueryParameter(PARAM_WORD_QUERY, word)
+                .appendQueryParameter(PARAM_DIC_PREFIX + dictionaryType.toString(), SET_LANG);
 
         return new URL(uriBuilder.build().toString());
     }
@@ -248,7 +235,7 @@ public class SanseidoSearch implements Parcelable {
         }
     };
 
-    private SanseidoSearch(Parcel parcel){
+    private SanseidoSearch(Parcel parcel) {
         final ClassLoader classLoader = getClass().getClassLoader();
         vocabulary = (JapaneseVocabulary) parcel.readValue(classLoader);
         relatedWords = (Map<String, Set<String>>) parcel.readValue(classLoader);

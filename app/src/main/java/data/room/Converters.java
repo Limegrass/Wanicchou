@@ -11,8 +11,8 @@ public class Converters {
     }
 
     @TypeConverter
-    public DictionaryType stringToDictionaryType(String sanseidoKey){
-        return sanseidoKey == null ? null : DictionaryType.fromSanseidoKey(sanseidoKey);
+    public DictionaryType stringToDictionaryType(String key){
+        return key == null ? null : DictionaryType.fromString(key);
     }
 
 }

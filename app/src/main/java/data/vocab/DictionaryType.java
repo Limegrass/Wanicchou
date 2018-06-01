@@ -7,9 +7,9 @@ package data.vocab;
 public enum DictionaryType {
     JJ, JE, EJ;
 
-    public String toJapaneseDictionaryType(){
-        String eng = this.toString();
-        switch (eng){
+    public String toJapaneseDictionaryKanji(){
+        String key = this.toString();
+        switch (key){
             case "JJ":
                 return "国語";
             case "JE":
@@ -28,19 +28,6 @@ public enum DictionaryType {
             case "JE":
                 return JE;
             case "EJ":
-                return EJ;
-            default:
-                return null;
-        }
-    }
-
-    public static DictionaryType fromSanseidoKey(String key){
-        switch (key){
-            case "DailyJJ":
-                return JJ;
-            case "DailyJE":
-                return JE;
-            case "DailyEJ":
                 return EJ;
             default:
                 return null;

@@ -256,7 +256,7 @@ public class SearchActivity extends AppCompatActivity
             for(RelatedWordEntity relatedWordEntity : relatedWordEntities){
                 relatedWords.add(relatedWordEntity.getRelatedWord());
             }
-            existingRelatedWordsMap.put(type.toJapaneseDictionaryType(), relatedWords);
+            existingRelatedWordsMap.put(type.toJapaneseDictionaryKanji(), relatedWords);
         }
         return existingRelatedWordsMap;
     }
@@ -339,6 +339,9 @@ public class SearchActivity extends AppCompatActivity
         );
         DictionaryType dictionaryType = DictionaryType.fromSanseidoKey(dictionaryTypeString);
         return dictionaryType;
+        return DictionaryType.fromString(dictionaryTypeString);
+    }
+
     }
 
     /* ==================================== +UI and +Helpers ================================== */
