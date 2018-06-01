@@ -2,7 +2,7 @@
     <string name="app_name">和日帳</string>
 
     <!--search activity-->
-    <string name="action_settings" translatable="true">設定</string>
+    <string name="settings_action_label" translatable="true">設定</string>
     <!--word_definition related-->
     <string name="search_label" translatable="true">検索</string>
     <string name="search_field_hint" translatable="true">キーボードで入力して</string>
@@ -22,17 +22,17 @@
     <string name="notes_hint" translatable="true">記憶法など</string>
 
     <!--fab related-->
-    <string name="btn_text" translatable="true">暗記に送る</string>
+    <string name="fab_btn_label" translatable="true">暗記に送る</string>
 
     <!--Toast strings-->
-    <string name="toast_permissions_denied" translatable="true">許可もらえませんでした</string>
-    <string name="toast_anki_added" translatable="true">暗記に遅れました！</string>
-    <string name="toast_searching_related" translatable="true">選択した単語の検索中。。。</string>
+    <string name="permissions_denied_toast" translatable="true">許可もらえませんでした</string>
+    <string name="anki_added_toast" translatable="true">暗記に遅れました！</string>
+    <string name="searching_related_toast" translatable="true">選択した単語の検索中。。。</string>
 
 
-    <string name="btn_related_words" translatable="true">関係ある言葉へ</string>
+    <string name="related_words_btn_label" translatable="true">関係ある言葉へ</string>
 
     <!--related words activity-->
-    <string name="title_activity_related_words" translatable="true">関係ある言葉</string>
+    <string name="activity_related_words_title" translatable="true">関係ある言葉</string>
 
 </resources>

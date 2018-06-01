@@ -13,4 +13,20 @@
         <item>DailyEJ</item>
     </string-array>
 
+
+    <string-array
+        name="pref_search_direction_entries">
+        <item>Forward Match</item>
+        <item>Exact Match</item>
+        <item>Backwards Match</item>
+        <item>Full Text Search</item>
+        <item>Partial Match</item>
+    </string-array>
+
+    <string-array
+        name="pref_search_direction_values">
+        <item>DailyJJ</item>
+        <item>DailyJE</item>
+        <item>DailyEJ</item>
+    </string-array>
 </resources>

@@ -23,7 +23,7 @@
 
         <activity
             android:name=".WordListActivity"
-            android:label="@string/title_activity_related_words"
+            android:label="@string/activity_related_words_title"
             android:parentActivityName=".SearchActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -32,7 +32,7 @@
 
         <activity
             android:name=".SettingsActivity"
-            android:label="@string/action_settings"
+            android:label="@string/settings_action_label"
             android:parentActivityName=".SearchActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

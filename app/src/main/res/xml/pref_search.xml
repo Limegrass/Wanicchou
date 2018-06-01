@@ -1,12 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <PreferenceCategory
-        android:title="@string/title_search_settings_category" />
+        android:title="@string/search_settings_category_title" />
     <ListPreference
-        android:title="@string/title_dictionary_type"
-        android:key="@string/key_pref_dictionary_type"
-        android:defaultValue="@string/default_pref_dictionary_type"
-        android:entries="@array/dictionaryTypeArray"
-        android:entryValues="@array/dictionaryTypeValues"/>
+        android:title="@string/pref_dictionary_type_title"
+        android:key="@string/pref_dictionary_type_key"
+        android:defaultValue="@string/pref_dictionary_type_default"
+        android:entries="@array/pref_dictionary_type_entries"
+        android:entryValues="@array/pref_dictionary_type_values"/>
+
+    <ListPreference
+        android:title="@string/pref_search_direction_title"
+        android:key="@string/pref_search_direction_key"
+        android:defaultValue="@string/pref_search_direction_default"
+        android:entries="@array/pref_search_direction_entries"
+        android:entryValues="@array/pref_search_direction_values"/>
 
 </PreferenceScreen>

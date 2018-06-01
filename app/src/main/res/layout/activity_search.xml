@@ -32,8 +32,8 @@
 
                 <Button
                     android:id="@+id/btn_related_words"
-                    tools:text="@string/btn_related_words"
-                    android:text="@string/btn_related_words"
+                    tools:text="@string/related_words_btn_label"
+                    android:text="@string/related_words_btn_label"
                     android:visibility="invisible"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />

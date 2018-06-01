@@ -51,7 +51,7 @@ public class WordListActivity extends AppCompatActivity
         mWordList.setHasFixedSize(true);
 
         searchData = (SanseidoSearch) intentThatStartedThis
-                .getExtras().get(getString(R.string.key_related_words));
+                .getExtras().get(getString(R.string.related_word_key));
 
         mAdapter = new WordAdapter(searchData.getRelatedWords(),
                 this);
@@ -72,7 +72,7 @@ public class WordListActivity extends AppCompatActivity
 
         Intent data = new Intent();
         String desiredWord = mAdapter.getWordAtPosition(clickedItemIndex);
-        data.putExtra(getString(R.string.key_desired_related_word), desiredWord);
+        data.putExtra(getString(R.string.desired_related_word_key), desiredWord);
         setResult(RESULT_OK, data);
         finish();
     }

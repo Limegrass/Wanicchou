@@ -2,8 +2,8 @@
     <string name="app_name" translatable="true">Wanicchou</string>
 
     <!--search activity-->
-    <string name="key_last_searched" translatable="false">lastSearched</string>
-    <string name="action_settings" translatable="true">Settings</string>
+    <string name="last_searched_key" translatable="false">lastSearched</string>
+    <string name="settings_action_label" translatable="true">Settings</string>
     <!--word_definition related-->
     <string name="search_label" translatable="true">Search</string>
     <string name="search_field_hint" translatable="true">Enter a word</string>
@@ -26,28 +26,28 @@
     <string name="notes_hint" translatable="true">Extras/Mnemonic</string>
 
     <!--fab related-->
-    <string name="btn_text" translatable="true">Send to Anki</string>
+    <string name="fab_btn_label" translatable="true">Send to Anki</string>
 
-    <string name="btn_related_words">Go to related words</string>
+    <string name="related_words_btn_label">Go to related words</string>
 
     <!--Toast strings-->
-    <string name="toast_permissions_denied" translatable="true">Permissions denied.</string>
-    <string name="toast_anki_added" translatable="true">Card added to Anki!</string>
-    <string name="toast_searching_related" translatable="true">Searching for selected word...</string>
+    <string name="permissions_denied_toast" translatable="true">Permissions denied.</string>
+    <string name="anki_added_toast" translatable="true">Card added to Anki!</string>
+    <string name="searching_related_toast" translatable="true">Searching for selected word...</string>
 
     <!--related words activity-->
-    <string name="title_activity_related_words" translatable="true">Related Words</string>
+    <string name="activity_related_words_title" translatable="true">Related Words</string>
 
-    <string name="key_related_words" translatable="false">relatedWords</string>
-    <string name="key_desired_related_word" translatable="false">desiredRelatedWord</string>
+    <string name="related_word_key" translatable="false">relatedWords</string>
+    <string name="desired_related_word_key" translatable="false">desiredRelatedWord</string>
 
     <!--shared preferences keys-->
-    <string name="key_search_word" translatable="false">searchWord</string>
+    <string name="search_word_key" translatable="false">searchWord</string>
 
     <!--settings strings-->
-    <string name="title_search_settings_category" translatable="true">Search Settings</string>
-    <string name="title_dictionary_type" translatable="true">Dictionary Type</string>
-    <string name="key_pref_dictionary_type" translatable="false">listPrefDicType</string>
-    <string name="default_pref_dictionary_type" translatable="false">DailyJJ</string>
+    <string name="search_settings_category_title" translatable="true">Search Settings</string>
+    <string name="pref_dictionary_type_title" translatable="true">Dictionary Type</string>
+    <string name="pref_dictionary_type_key" translatable="false">listPrefDicType</string>
+    <string name="pref_dictionary_type_default" translatable="false">DailyJJ</string>
 
 </resources>

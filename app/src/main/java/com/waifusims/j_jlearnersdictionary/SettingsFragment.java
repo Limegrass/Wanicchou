@@ -16,7 +16,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
         super.onCreate(savedInstanceState);
 
         mListPrefDicType = (ListPreference) getPreferenceScreen()
-                .findPreference(getContext().getString(R.string.key_pref_dictionary_type));
+                .findPreference(getContext().getString(R.string.pref_dictionary_type_key));
     }
 
     @Override
@@ -39,7 +39,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if (key.equals(getContext().getString(R.string.key_pref_dictionary_type))){
+        if (key.equals(getContext().getString(R.string.pref_dictionary_type_key))){
             mListPrefDicType.setSummary(mListPrefDicType.getEntry().toString());
         }
 

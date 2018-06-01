@@ -42,7 +42,6 @@ import android.view.View.OnKeyListener;
 import android.view.KeyEvent;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
-import android.widget.ViewSwitcher;
 
 //TODO:  Horizontal UI
 public class SearchActivity extends AppCompatActivity
@@ -80,13 +79,13 @@ public class SearchActivity extends AppCompatActivity
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putParcelable(getString(R.string.key_last_searched), mLastSearched);
+        outState.putParcelable(getString(R.string.last_searched_key), mLastSearched);
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        mLastSearched = savedInstanceState.getParcelable(getString(R.string.key_last_searched));
+        mLastSearched = savedInstanceState.getParcelable(getString(R.string.last_searched_key));
         showVocabOnUI();
         showAnkiRelatedUIElements();
     }
@@ -103,7 +102,7 @@ public class SearchActivity extends AppCompatActivity
             SharedPreferences sharedPreferences =
                     PreferenceManager.getDefaultSharedPreferences(context);
             SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putString(getString(R.string.key_search_word),
+            editor.putString(getString(R.string.search_word_key),
                     mLastSearched.getVocabulary().getWord());
         }
     }
@@ -121,7 +120,7 @@ public class SearchActivity extends AppCompatActivity
         String stringIfMissing = "";
         SharedPreferences sharedPreferences =
                 PreferenceManager.getDefaultSharedPreferences(context);
-        String searchWord = sharedPreferences.getString(getString(R.string.key_search_word),
+        String searchWord = sharedPreferences.getString(getString(R.string.search_word_key),
                 stringIfMissing);
         if(!TextUtils.isEmpty(searchWord)){
             showWordFromDB(searchWord);
@@ -139,7 +138,7 @@ public class SearchActivity extends AppCompatActivity
         if(requestCode == HOME_ACTIVITY_REQUEST_CODE) {
             switch (resultCode) {
                 case RESULT_OK:
-                    String key = getString(R.string.key_desired_related_word);
+                    String key = getString(R.string.desired_related_word_key);
                     if (data.hasExtra(key)) {
                         String desiredRelatedWord =
                                 data.getExtras().getString(key);
@@ -150,7 +149,7 @@ public class SearchActivity extends AppCompatActivity
                     }
                     // TODO: It's not actually doing the search right now
                     Context context = this;
-                    String msg = getString(R.string.toast_searching_related);
+                    String msg = getString(R.string.searching_related_toast);
                     int duration = Toast.LENGTH_SHORT;
                     mToast = Toast.makeText(context, msg, duration);
                     mToast.show();
@@ -335,8 +334,8 @@ public class SearchActivity extends AppCompatActivity
         Context context = this;
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         String dictionaryTypeString = sharedPreferences.getString(
-                getString(R.string.key_pref_dictionary_type),
-                getString(R.string.default_pref_dictionary_type)
+                getString(R.string.pref_dictionary_type_key),
+                getString(R.string.pref_dictionary_type_default)
         );
         DictionaryType dictionaryType = DictionaryType.fromSanseidoKey(dictionaryTypeString);
         return dictionaryType;
@@ -410,7 +409,7 @@ public class SearchActivity extends AppCompatActivity
 
         mToast.cancel();
         Context context = SearchActivity.this;
-        String message = getString(R.string.toast_anki_added);
+        String message = getString(R.string.anki_added_toast);
         int duration = Toast.LENGTH_SHORT;
         mToast = Toast.makeText(context, message, duration);
         mToast.show();
@@ -577,7 +576,7 @@ public class SearchActivity extends AppCompatActivity
                 Intent intentStartRelatedWordsActivity =
                         new Intent(getApplicationContext(), WordListActivity.class);
                 intentStartRelatedWordsActivity
-                        .putExtra(getString(R.string.key_related_words),
+                        .putExtra(getString(R.string.related_word_key),
                                 mLastSearched);
                 startActivityForResult(intentStartRelatedWordsActivity, HOME_ACTIVITY_REQUEST_CODE);
 
@@ -644,7 +643,7 @@ public class SearchActivity extends AppCompatActivity
                 mToast.cancel();
             }
             Context context = SearchActivity.this;
-            String message = getString(R.string.toast_permissions_denied);
+            String message = getString(R.string.permissions_denied_toast);
             int duration = Toast.LENGTH_SHORT;
             mToast = Toast.makeText(context, message, duration);
             mToast.show();
