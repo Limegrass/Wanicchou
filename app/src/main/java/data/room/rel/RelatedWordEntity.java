@@ -20,6 +20,7 @@ import data.vocab.DictionaryType;
 )
 public class RelatedWordEntity {
     @PrimaryKey(autoGenerate = true)
+    @ColumnInfo(name = "RelatedWordId")
     @NonNull
     private int id;
 

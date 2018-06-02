@@ -7,6 +7,10 @@ import android.arch.persistence.room.TypeConverter;
 import android.arch.persistence.room.TypeConverters;
 import android.content.Context;
 
+import data.room.context.ContextDao;
+import data.room.context.ContextEntity;
+import data.room.notes.NoteDao;
+import data.room.notes.NoteEntity;
 import data.room.rel.RelatedWordDao;
 import data.room.rel.RelatedWordEntity;
 import data.room.voc.VocabularyDao;
@@ -14,8 +18,12 @@ import data.room.voc.VocabularyEntity;
 
 // TODO: What's a schema export for?
 @Database(
-        entities = {VocabularyEntity.class,
-                RelatedWordEntity.class},
+        entities = {
+                VocabularyEntity.class,
+                RelatedWordEntity.class,
+                NoteEntity.class,
+                ContextEntity.class
+        },
         version = 1,
         exportSchema = false
 )
@@ -30,6 +38,8 @@ import data.room.voc.VocabularyEntity;
 public abstract class WanicchouDatabase extends RoomDatabase {
     public abstract VocabularyDao vocabularyDao();
     public abstract RelatedWordDao relatedWordDao();
+    public abstract NoteDao noteDao();
+    public abstract ContextDao contextDao();
 
     // Singleton to avoid multiple DB connections
     private static WanicchouDatabase INSTANCE;

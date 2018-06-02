@@ -17,6 +17,7 @@ import data.vocab.JapaneseVocabulary;
 )
 public class VocabularyEntity {
     @PrimaryKey(autoGenerate = true)
+    @ColumnInfo(name = "VocabularyId")
     @NonNull
     private int id;
 

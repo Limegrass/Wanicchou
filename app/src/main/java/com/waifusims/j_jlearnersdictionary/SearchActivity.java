@@ -308,7 +308,6 @@ public class SearchActivity extends AppCompatActivity
         mVocabViewModel.update(wordInDb);
     }
 
-
     private boolean showWordFromDB(String searchWord){
         VocabularyEntity entity = getWordFromDb(searchWord);
         //TODO: Give option of web search

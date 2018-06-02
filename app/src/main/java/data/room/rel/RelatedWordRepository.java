@@ -118,16 +118,16 @@ public class RelatedWordRepository {
         }
 
         @Override
-        protected Void doInBackground(RelatedWordEntity... vocabularyEntities) {
+        protected Void doInBackground(RelatedWordEntity... relatedWordEntities) {
             switch (mAction) {
                 case ACTION_UPDATE:
-                    mAsyncTaskDao.update(vocabularyEntities[0]);
+                    mAsyncTaskDao.update(relatedWordEntities[0]);
                     break;
                 case ACTION_INSERT:
-                    mAsyncTaskDao.insert(vocabularyEntities[0]);
+                    mAsyncTaskDao.insert(relatedWordEntities[0]);
                     break;
                 case ACTION_DELETE:
-                    mAsyncTaskDao.delete(vocabularyEntities[0]);
+                    mAsyncTaskDao.delete(relatedWordEntities[0]);
                     break;
                 default:
             }

@@ -56,7 +56,7 @@ public interface VocabularyDao {
      * @param x The number of entries to return.
      * @return An array of words saved into the database, ordered by most recent to least.
      */
-    @Query("SELECT * FROM VocabularyWords ORDER BY id DESC LIMIT :x")
+    @Query("SELECT * FROM VocabularyWords ORDER BY VocabularyId DESC LIMIT :x")
     public VocabularyEntity[] getLastXSavedWords(int x);
 
     /**
