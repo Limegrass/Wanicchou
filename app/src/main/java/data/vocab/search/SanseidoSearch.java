@@ -87,6 +87,11 @@ public class SanseidoSearch implements Parcelable {
     }
 
 
+    /**
+     * Constructs a search object from a given vocab and it's related words
+     * @param japaneseVocabulary The vocabulary with it's word-definition pair
+     * @param relatedWords Words related to the vocabulary specific to it's search type.
+     */
     public SanseidoSearch(JapaneseVocabulary japaneseVocabulary, Map<String, Set<String> > relatedWords){
         this.vocabulary = japaneseVocabulary;
         this.relatedWords = relatedWords;
@@ -122,7 +127,7 @@ public class SanseidoSearch implements Parcelable {
             throws MalformedURLException{
 
         Uri.Builder uriBuilder = Uri.parse(SANSEIDOU_BASE_URL).buildUpon()
-                .appendQueryParameter(PARAM_ST, matchType.searchKey())
+                .appendQueryParameter(PARAM_ST, matchType.sanseidoKey())
                 .appendQueryParameter(PARAM_DORDER, DORDER_DEFAULT)
                 .appendQueryParameter(PARAM_WORD_QUERY, word)
                 .appendQueryParameter(PARAM_DIC_PREFIX + dictionaryType.toString(), SET_LANG);
@@ -213,20 +218,29 @@ public class SanseidoSearch implements Parcelable {
     }
 
 
-    /*
-     Parcelable methods, needed to pass information between activities.
+    /**
+     * Describes contents for Parcelable.
+     * @return The hashcode of the object.
      */
     @Override
     public int describeContents() {
         return hashCode();
     }
 
+    /**
+     * Parcelization of the search object
+     * @param parcel The parcel to write to.
+     * @param i Flags for parcelization.
+     */
     @Override
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeValue(vocabulary);
         parcel.writeValue(relatedWords);
     }
 
+    /**
+     * Creator for parcelization.
+     */
     public static final Parcelable.Creator<SanseidoSearch> CREATOR
             = new Parcelable.Creator<SanseidoSearch>(){
         @Override
@@ -240,6 +254,10 @@ public class SanseidoSearch implements Parcelable {
         }
     };
 
+    /**
+     * Constructor from a parcel.
+     * @param parcel The parcel to read from.
+     */
     private SanseidoSearch(Parcel parcel) {
         final ClassLoader classLoader = getClass().getClassLoader();
         vocabulary = (JapaneseVocabulary) parcel.readValue(classLoader);

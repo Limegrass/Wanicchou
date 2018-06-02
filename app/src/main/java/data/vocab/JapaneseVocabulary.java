@@ -53,6 +53,10 @@ public class JapaneseVocabulary implements Parcelable {
         this.dictionaryType = dictionaryType;
     }
 
+    /**
+     * Constructs a Japanese Vocab object from an element from the Vocabulary database.
+     * @param entity An entry from the Vocabulary Database
+     */
     public JapaneseVocabulary(VocabularyEntity entity){
         //TODO: Change entity elements to be getter/setters
         word = entity.getWord();
@@ -62,6 +66,11 @@ public class JapaneseVocabulary implements Parcelable {
         dictionaryType = DictionaryType.fromString(entity.getDictionaryType());
     }
 
+    /**
+     * Constructor for invalid word searches, to avoid repeatedly requesting invalid searches.
+     * @param invalidWord The word whose search completed but failed.
+     * @param dictionaryType The dictionary type the search completed but failed under.
+     */
     public JapaneseVocabulary(String invalidWord, DictionaryType dictionaryType){
         definition = "N/A";
         word = invalidWord;
@@ -143,6 +152,10 @@ public class JapaneseVocabulary implements Parcelable {
         return word;
     }
 
+    /**
+     * Gets the dictionary type of the current vocabulary's dictionary entry.
+     * @return The dictionary type of the word-definition pair.
+     */
     public DictionaryType getDictionaryType(){
         return dictionaryType;
     }
@@ -229,9 +242,10 @@ public class JapaneseVocabulary implements Parcelable {
     }
 
     /**
-     * parcelization of the JapaneseObject, called when passed between activities.
-     * @param parcel
-     * @param i
+     * Parcelization of the JapaneseObject, called when the object is
+     * passed between activities.
+     * @param parcel Parcel to write to.
+     * @param i Flags for the parcelization.
      */
     @Override
     public void writeToParcel(Parcel parcel, int i) {
@@ -242,6 +256,9 @@ public class JapaneseVocabulary implements Parcelable {
         parcel.writeValue(dictionaryType);
     }
 
+    /**
+     * Creator for the parcels.
+     */
     public static final Parcelable.Creator<JapaneseVocabulary> CREATOR
             = new Parcelable.Creator<JapaneseVocabulary>(){
         @Override
@@ -257,7 +274,7 @@ public class JapaneseVocabulary implements Parcelable {
 
     /**
      * constructor to unpack the parcel information for passing between activities.
-     * @param parcel
+     * @param parcel The parcel to read from an construct the JapaneseVocabulary object.
      */
     private JapaneseVocabulary(Parcel parcel){
         final ClassLoader classLoader = getClass().getClassLoader();

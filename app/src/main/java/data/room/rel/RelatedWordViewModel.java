@@ -5,6 +5,7 @@ import android.arch.lifecycle.AndroidViewModel;
 
 import java.util.List;
 
+import data.room.voc.VocabularyEntity;
 import data.vocab.DictionaryType;
 
 public class RelatedWordViewModel extends AndroidViewModel{
@@ -27,11 +28,23 @@ public class RelatedWordViewModel extends AndroidViewModel{
         mRepo.delete(relatedWordEntity);
     }
 
-    public List<RelatedWordEntity> getRelatedWordList(int fkWordId) {
-        return mRepo.getRelatedWordList(fkWordId);
+    /**
+     * Gets the related words for all dictionary types for a certain word
+     * @param vocabularyEntity The entity from which a foreign key will be extracted.
+     * @return A list of all words related to the base vocabulary word.
+     */
+    public List<RelatedWordEntity> getRelatedWordList(VocabularyEntity vocabularyEntity) {
+        return mRepo.getRelatedWordList(vocabularyEntity);
     }
 
-    public List<RelatedWordEntity> getRelatedWordList(int fkWordId, DictionaryType dictionaryType) {
-        return mRepo.getRelatedWordList(fkWordId, dictionaryType);
+    /**
+     * Gets the related words for a certain dictionary type for a certain word
+     * @param vocabularyEntity The entity from which a foreign key will be extracted.
+     * @param dictionaryType the dictionary type of the relation to search for.
+     * @return A list of all words related to the base vocabulary word in a certain dictionary.
+     */
+    public List<RelatedWordEntity> getRelatedWordList(VocabularyEntity vocabularyEntity,
+                                                      DictionaryType dictionaryType) {
+        return mRepo.getRelatedWordList(vocabularyEntity, dictionaryType);
     }
 }

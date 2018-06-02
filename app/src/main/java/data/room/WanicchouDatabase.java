@@ -22,6 +22,11 @@ import data.room.voc.VocabularyEntity;
 @TypeConverters(
         {Converters.class}
 )
+/**
+ * Database object using the Room Persistence Library.
+ * Singleton design to avoid multiple instances of database
+ * connection when it is not needed.
+ */
 public abstract class WanicchouDatabase extends RoomDatabase {
     public abstract VocabularyDao vocabularyDao();
     public abstract RelatedWordDao relatedWordDao();

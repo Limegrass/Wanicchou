@@ -7,7 +7,11 @@ package data.vocab;
 public enum MatchType {
     FORWARDS, EXACT, BACKWARDS, PARTIAL, FULL_TEXT;
 
-    public String searchKey(){
+    /**
+     * Converts the match type to its corresponding key for a Sanseido search.
+     * @return A string of the search key for Sanseido Searches.
+     */
+    public String sanseidoKey(){
         switch (this){
             case FORWARDS:
                 return "0";
@@ -24,6 +28,12 @@ public enum MatchType {
         }
     }
 
+
+    /**
+     * Converts the Sanseido search key into a MatchType enum object, for clarity.
+     * @param key The Sanseido search key.
+     * @return The MatchType for the Sanseido key if it is a valid key, else null.
+     */
     public static MatchType fromString(String key){
         switch (key) {
             case "0":

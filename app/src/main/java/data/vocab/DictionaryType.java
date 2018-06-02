@@ -7,6 +7,10 @@ package data.vocab;
 public enum DictionaryType {
     JJ, JE, EJ;
 
+    /**
+     * Converts to the Japanese name of the DictionaryType.
+     * @return The Japanese names of the dictionary type.
+     */
     public String toJapaneseDictionaryKanji(){
         String key = this.toString();
         switch (key){
@@ -21,6 +25,11 @@ public enum DictionaryType {
         }
     }
 
+    /**
+     * Converts from the Japanese dictionary type to the enum type.
+     * @param key The Japanese dictionary type key.
+     * @return A DictionaryType corresponding to the key, if it exists. Else, null.
+     */
     public static DictionaryType fromJapaneseDictionaryKanji(String key){
         switch (key){
             case "国語":
@@ -34,6 +43,11 @@ public enum DictionaryType {
         }
     }
 
+    /**
+     * Converts a string representation of the dictionary type if it exists.
+     * @param key The string representation of the dictionary type.
+     * @return A DictionaryType corresponding to the key, if it exists. Else, null.
+     */
     public static DictionaryType fromString(String key){
         switch (key){
             case "JJ":

@@ -249,12 +249,11 @@ public class SearchActivity extends AppCompatActivity
             return null;
         }
 
-        int fkBaseWordID = entity.getId();
 
         Map<String, Set<String> > existingRelatedWordsMap = new HashMap<>();
         for (DictionaryType type : DictionaryType.values()){
             List<RelatedWordEntity> relatedWordEntities =
-                    mRelatedWordsViewModel.getRelatedWordList(fkBaseWordID, type);
+                    mRelatedWordsViewModel.getRelatedWordList(entity, type);
             Set<String> relatedWords = new HashSet<>();
             for(RelatedWordEntity relatedWordEntity : relatedWordEntities){
                 relatedWords.add(relatedWordEntity.getRelatedWord());

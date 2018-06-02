@@ -10,8 +10,12 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import data.room.WanicchouDatabase;
+import data.room.voc.VocabularyEntity;
 import data.vocab.DictionaryType;
 
+/**
+ * A repository class to abstract all the Room Persistence Library elements underneath.
+ */
 public class RelatedWordRepository {
 
     private RelatedWordDao mRelatedWordDao;
@@ -20,32 +24,54 @@ public class RelatedWordRepository {
     private static final int ACTION_UPDATE = 1;
     private static final int ACTION_INSERT = 2;
 
+    /**
+     * Constructor for the repository.
+     * @param application The application of the database.
+     */
     public RelatedWordRepository(Application application){
         WanicchouDatabase database = WanicchouDatabase.getDatabase(application);
         mRelatedWordDao = database.relatedWordDao();
     }
 
 
+    /**
+     * Inserts a word into the database
+     * @param relatedWordEntity the related word entity to insert.
+     */
     public void insert(RelatedWordEntity relatedWordEntity){
         new entryModificationAsyncTask(mRelatedWordDao, ACTION_INSERT).execute(relatedWordEntity);
     }
 
+    /**
+     * Updates a related word entry in the database
+     * @param relatedWordEntity The related word entity to update.
+     */
     public void update(RelatedWordEntity relatedWordEntity){
         new entryModificationAsyncTask(mRelatedWordDao, ACTION_UPDATE).execute(relatedWordEntity);
     }
 
+    /**
+     * Deletes a related word entry from the database if it exists.
+     * @param relatedWordEntity The related word entity to delete.
+     */
     public void delete(RelatedWordEntity relatedWordEntity){
         new entryModificationAsyncTask(mRelatedWordDao, ACTION_DELETE).execute(relatedWordEntity);
     }
-    // TODO: UPDATE BUT IDK HOW TI WORKS BECAUSE GARBO DOCS
 
-    //TODO: FUCKING GOOGLE CAN YOU JUST TELL ME WHAT THE RETURN TYPE OF A FAILED QUERY IS????
-    public List<RelatedWordEntity> getRelatedWordList(int fkWordId) {
+    /**
+     * Generates a list of related words given a VocabularyEntity's id key.
+     * Checks all dictionary types.
+     * @param vocabularyEntity the entity which a foreign key will be extracted from.
+     * @return A list of related words from the related words database for
+     * the given vocabulary entity.
+     */
+    public List<RelatedWordEntity> getRelatedWordList(VocabularyEntity vocabularyEntity) {
         List<RelatedWordEntity> ret = new ArrayList<>();
         try {
             for(DictionaryType type : DictionaryType.values())
             {
-                List<RelatedWordEntity> partial = new queryAsyncTask(mRelatedWordDao, type).execute(fkWordId).get();
+                List<RelatedWordEntity> partial = new queryAsyncTask(mRelatedWordDao, type).
+                        execute(vocabularyEntity).get();
                 ret.addAll(partial);
             }
         } catch (InterruptedException e) {
@@ -56,10 +82,20 @@ public class RelatedWordRepository {
         return ret;
     }
 
-    public List<RelatedWordEntity> getRelatedWordList(int fkWordId, DictionaryType dictionaryType) {
+    /**
+     * Generates a list of related words given a VocabularyEntity's id key
+     * and a given dictionary type.
+     * @param vocabularyEntity the foreign key of the vocabulary entity.
+     * @param dictionaryType the dictionary type of the search.
+     * @return A list of related words from the related words database for
+     * the given vocabulary entity.
+     */
+    public List<RelatedWordEntity> getRelatedWordList(VocabularyEntity vocabularyEntity
+            , DictionaryType dictionaryType) {
+
         List<RelatedWordEntity> ret = new ArrayList<>();
         try {
-            ret = new queryAsyncTask(mRelatedWordDao, dictionaryType).execute(fkWordId).get();
+            ret = new queryAsyncTask(mRelatedWordDao, dictionaryType).execute(vocabularyEntity).get();
 
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -69,6 +105,9 @@ public class RelatedWordRepository {
         return ret;
     }
 
+    /**
+     * AsyncTask to perform the entry modifications in the database.
+     */
     private static class entryModificationAsyncTask extends AsyncTask<RelatedWordEntity, Void, Void> {
         private RelatedWordDao mAsyncTaskDao;
         private int mAction;
@@ -96,7 +135,10 @@ public class RelatedWordRepository {
         }
     }
 
-    private static class queryAsyncTask extends AsyncTask<Integer, Void, List<RelatedWordEntity>> {
+    /**
+     * Async Task to perform query tasks to the database.
+     */
+    private static class queryAsyncTask extends AsyncTask<VocabularyEntity, Void, List<RelatedWordEntity>> {
         private RelatedWordDao mAsyncTaskDao;
         private DictionaryType mDictionaryType;
 
@@ -105,8 +147,14 @@ public class RelatedWordRepository {
             mDictionaryType = dictionaryType;
         }
 
-        protected List<RelatedWordEntity> doInBackground(Integer... keys) {
-            return mAsyncTaskDao.getRelatedWordsFromId(keys[0], mDictionaryType);
+        /**
+         * Find the list of related words given a foreign key and the dictionary type the
+         * Async Task was constructed with.
+         * @param entities the entity which a foreign key will be extracted from.
+         * @return A list of words related to that key.
+         */
+        protected List<RelatedWordEntity> doInBackground(VocabularyEntity... entities) {
+            return mAsyncTaskDao.getRelatedWordsFromId(entities[0], mDictionaryType);
         }
 
     }

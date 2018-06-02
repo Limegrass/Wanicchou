@@ -22,6 +22,13 @@ public class SanseidoSearchAsyncTaskLoader extends AsyncTaskLoader<SanseidoSearc
     private DictionaryType mDictionaryType;
     private MatchType mMatchType;
 
+    /**
+     * Constructor to perform a search Asynchronously.
+     * @param context The context for the loader.
+     * @param searchWord The word to search for.
+     * @param dictionaryType The dictionary to search in.
+     * @param matchType The way the search performs a match.
+     */
     public SanseidoSearchAsyncTaskLoader(final Context context,
                                          String searchWord,
                                          DictionaryType dictionaryType,
@@ -32,10 +39,17 @@ public class SanseidoSearchAsyncTaskLoader extends AsyncTaskLoader<SanseidoSearc
         mMatchType = matchType;
     }
 
+    /**
+     * Set the dictionary type of the search if it changes.
+     * @param dictionaryType the dictionary type to change the search to.
+     */
     public void changeDictionaryType(DictionaryType dictionaryType){
         mDictionaryType = dictionaryType;
     }
 
+    /**
+     * Initializes all fields and displays a toast on load start.
+     */
     @Override
     protected void onStartLoading() {
         super.onStartLoading();
@@ -50,6 +64,10 @@ public class SanseidoSearchAsyncTaskLoader extends AsyncTaskLoader<SanseidoSearc
         forceLoad();
     }
 
+    /**
+     * Performs a Sanseido Search.
+     * @return The completed SanseidoSearch object.
+     */
     @Override
     public SanseidoSearch loadInBackground() {
 
@@ -59,7 +77,6 @@ public class SanseidoSearchAsyncTaskLoader extends AsyncTaskLoader<SanseidoSearc
 
         SanseidoSearch search = null;
         try{
-            Context context = getContext();
             search = new SanseidoSearch(mSearchWord, mDictionaryType, mMatchType);
         }
         catch (IOException e){

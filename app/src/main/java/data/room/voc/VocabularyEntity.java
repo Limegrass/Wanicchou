@@ -8,6 +8,9 @@ import android.support.annotation.NonNull;
 
 import data.vocab.JapaneseVocabulary;
 
+/**
+ * Vocabulary Entry for the Room Persistence Library, for Words and their definitions.
+ */
 @Entity(
         tableName = "VocabularyWords",
         indices = {@Index(value = {"Word", "DictionaryType"}, unique = true)}
@@ -46,8 +49,20 @@ public class VocabularyEntity {
     @NonNull
     private String wordContext;
 
+    /**
+     * Empty constructor for the RPM.
+     */
     public VocabularyEntity(){}
 
+    // TODO: Move notes to its own DB, Context to its own DB
+    // This can likely enable to void JapaneseVocabulary as an object in general and use only
+    // The DB Entries, moving all methods to this.
+    /**
+     * Constructor given a vocabulary word, along with notes and context for the vocab.
+     * @param vocabulary The vocabulary word to construct the entity from.
+     * @param notes The notes of the word.
+     * @param wordContext The context the word the user read the word from.
+     */
     public VocabularyEntity(JapaneseVocabulary vocabulary, String notes, String wordContext){
         word = vocabulary.getWord();
         definition = vocabulary.getDefintion();
