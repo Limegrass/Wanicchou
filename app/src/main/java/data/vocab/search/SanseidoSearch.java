@@ -162,15 +162,20 @@ public class SanseidoSearch implements Parcelable {
         for (Element row : rows) {
             Elements columns = row.select("td");
 
-            String dictionary = columns.get(RELATED_WORDS_TYPE_CLASS_INDEX).text();
-            if (!relatedWords.containsKey(dictionary)){
-                relatedWords.put(dictionary, new HashSet<String>());
+            String dictionaryTypeString = columns.get(RELATED_WORDS_TYPE_CLASS_INDEX).text();
+
+            if (dictionaryTypeString != null){
+                dictionaryTypeString = dictionaryTypeString.substring(1, dictionaryTypeString.length()-1);
+            }
+
+            if (!relatedWords.containsKey(dictionaryTypeString)){
+                relatedWords.put(dictionaryTypeString, new HashSet<String>());
             }
 
             String tableEntry = columns.get(RELATED_WORDS_VOCAB_INDEX).text();
             String isolatedWord = JapaneseVocabulary.isolateWord(tableEntry);
 
-            relatedWords.get(dictionary).add(isolatedWord);
+            relatedWords.get(dictionaryTypeString).add(isolatedWord);
         }
         return relatedWords;
     }

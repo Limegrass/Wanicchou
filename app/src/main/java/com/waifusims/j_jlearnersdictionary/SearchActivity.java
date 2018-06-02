@@ -271,7 +271,7 @@ public class SearchActivity extends AppCompatActivity
         }
         for (String dictionaryType : newRelatedWords.keySet()){
             for(String relatedWord : newRelatedWords.get(dictionaryType)){
-                String simpleDicType = DictionaryType.fromSanseidoKanji(dictionaryType).toString();
+                String simpleDicType = DictionaryType.fromJapaneseDictionaryKanji(dictionaryType).toString();
                 RelatedWordEntity relatedWordToAdd =
                         new RelatedWordEntity(entity, relatedWord,
                                 simpleDicType);

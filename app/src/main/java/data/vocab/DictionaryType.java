@@ -21,6 +21,19 @@ public enum DictionaryType {
         }
     }
 
+    public static DictionaryType fromJapaneseDictionaryKanji(String key){
+        switch (key){
+            case "国語":
+                return JJ;
+            case "和英":
+                return JE;
+            case "英和":
+                return EJ;
+            default:
+                return null;
+        }
+    }
+
     public static DictionaryType fromString(String key){
         switch (key){
             case "JJ":
@@ -34,16 +47,4 @@ public enum DictionaryType {
         }
     }
 
-    public static DictionaryType fromSanseidoKanji(String key){
-        switch (key){
-            case "【国語】":
-                return JJ;
-            case "【和英】":
-                return JE;
-            case "【英和】":
-                return EJ;
-            default:
-                return null;
-        }
-    }
 }
