@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import data.room.context.ContextViewModel;
+import data.room.notes.NoteViewModel;
 import data.room.rel.RelatedWordEntity;
 import data.room.rel.RelatedWordViewModel;
 import data.room.voc.VocabularyEntity;
@@ -59,6 +61,8 @@ public class SearchActivity extends AppCompatActivity
     private Toast mToast;
     private VocabularyViewModel mVocabViewModel;
     private RelatedWordViewModel mRelatedWordsViewModel;
+    private NoteViewModel mNoteViewModel;
+    private ContextViewModel mContextViewModel;
 
     private SanseidoSearch mLastSearched;
 
@@ -75,6 +79,8 @@ public class SearchActivity extends AppCompatActivity
 
         mVocabViewModel = ViewModelProviders.of(this).get(VocabularyViewModel.class);
         mRelatedWordsViewModel = ViewModelProviders.of(this).get(RelatedWordViewModel.class);
+        mNoteViewModel = ViewModelProviders.of(this).get(NoteViewModel.class);
+        mContextViewModel = ViewModelProviders.of(this).get(ContextViewModel.class);
     }
 
     @Override
@@ -95,9 +101,6 @@ public class SearchActivity extends AppCompatActivity
     protected void onPause() {
         super.onPause();
         if(mLastSearched != null){
-            // Save the current state of the word entry to the DB
-            updateWordInDb(mLastSearched.getVocabulary());
-
             // Save the word so it can be retrieved and researched when the activity is returned.
             Context context = this;
             SharedPreferences sharedPreferences =
@@ -111,6 +114,8 @@ public class SearchActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
+        //TODO: Remove loader calls here and manage the dictionary type
+        // Of the loader some other way if possible
         Loader<SanseidoSearch> loader =
                 getSupportLoaderManager().getLoader(SANSEIDO_SEARCH_LOADER);
         if(loader != null){
@@ -126,11 +131,6 @@ public class SearchActivity extends AppCompatActivity
         if(!TextUtils.isEmpty(searchWord)){
             showWordFromDB(searchWord);
         }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
     }
 
     @Override
@@ -197,16 +197,18 @@ public class SearchActivity extends AppCompatActivity
                 VocabularyEntity entity = getWordFromDb(search.getVocabulary().getWord());
 
                 if (entity == null ||
-                        search.getVocabulary().getDictionaryType() != getCurrentDictionaryPreference()) {
+                    search.getVocabulary().getDictionaryType() != getCurrentDictionaryPreference()) {
                     addWordToDb(search.getVocabulary());
                     addWordsToRelatedWordsDb(search.getVocabulary().getWord(),
                             search.getRelatedWords());
+
+                    mNoteViewModel.insertNewNote(search.getVocabulary().getWord());
+                    mContextViewModel.insertNewContext(search.getVocabulary().getWord());
                 }
 
                 showAnkiRelatedUIElements();
             }
             else{
-
                 // TODO: Add empty entry to db for failed searches that aren't network errors.
                 // TODO: Probably a null somewhere since I do this
                 // TODO: Get dictionaryType at time of search request
@@ -216,16 +218,12 @@ public class SearchActivity extends AppCompatActivity
                                 .getText().toString(), dictionaryType);
 
                 VocabularyEntity entity = getWordFromDb(search.getVocabulary().getWord());
-
                 if (entity == null) {
                     addWordToDb(invalidWord);
                 }
-
                 // TODO: Maybe a different error message
                 message = getString(R.string.word_search_failure);
             }
-
-
         }
         else{
             // TODO: Check for network and http request time outs
@@ -287,10 +285,11 @@ public class SearchActivity extends AppCompatActivity
         String notes = mBinding.ankiAdditionalFields.etNotes.getText().toString();
         String wordContext = mBinding.ankiAdditionalFields.etContext.getText().toString();
 
-        VocabularyEntity vocabularyEntity = new VocabularyEntity(vocab, notes, wordContext);
+        VocabularyEntity vocabularyEntity = new VocabularyEntity(vocab);
         mVocabViewModel.insert(vocabularyEntity);
     }
 
+    // TODO: Redo this method because it doesn't do anything, call it in onFocusChanged for tvDefinition
     private void updateWordInDb(JapaneseVocabulary vocab){
         //I need the ID, so I have to DB query. Could work around if I save ID
         VocabularyEntity wordInDb = getWordFromDb(vocab.getWord());
@@ -302,25 +301,27 @@ public class SearchActivity extends AppCompatActivity
         wordInDb.setReading(vocab.getReading());
         wordInDb.setPitch(vocab.getPitch());
         wordInDb.setDictionaryType(vocab.getDictionaryType().toString());
-        wordInDb.setNotes(getWordNotes());
-        wordInDb.setWordContext(getWordContext());
-
         mVocabViewModel.update(wordInDb);
     }
 
     private boolean showWordFromDB(String searchWord){
-        VocabularyEntity entity = getWordFromDb(searchWord);
+        VocabularyEntity vocabEntity = getWordFromDb(searchWord);
         //TODO: Give option of web search
-        if(entity != null){
-            if (DictionaryType.fromString(entity.getDictionaryType()) != getCurrentDictionaryPreference()){
+        if(vocabEntity != null){
+            if (DictionaryType.fromString(vocabEntity.getDictionaryType()) != getCurrentDictionaryPreference()){
                 return false;
             }
 
-            JapaneseVocabulary vocabulary = new JapaneseVocabulary(entity);
-            mBinding.ankiAdditionalFields.tvNotes.setText(entity.getNotes());
-            mBinding.ankiAdditionalFields.etNotes.setText(entity.getNotes());
-            mBinding.ankiAdditionalFields.tvContext.setText(entity.getWordContext());
-            mBinding.ankiAdditionalFields.etContext.setText(entity.getWordContext());
+            JapaneseVocabulary vocabulary = new JapaneseVocabulary(vocabEntity);
+
+
+            String note = mNoteViewModel.getNoteOf(vocabEntity.getWord());
+            String wordContext = mContextViewModel.getContextOf(vocabEntity.getWord());
+
+            mBinding.ankiAdditionalFields.tvNotes.setText(note);
+            mBinding.ankiAdditionalFields.etNotes.setText(note);
+            mBinding.ankiAdditionalFields.tvContext.setText(wordContext);
+            mBinding.ankiAdditionalFields.etContext.setText(wordContext);
 
             mLastSearched = new SanseidoSearch(vocabulary,
                     getExistingRelatedWordsFromDb(vocabulary.getWord()));
@@ -329,6 +330,16 @@ public class SearchActivity extends AppCompatActivity
             return true;
         }
         return false;
+    }
+
+    private void updateNote(){
+        mNoteViewModel.updateNote(mLastSearched.getVocabulary().getWord(),
+                mBinding.ankiAdditionalFields.tvNotes.getText().toString());
+    }
+
+    private void updateContext(){
+        mContextViewModel.updateContext(mLastSearched.getVocabulary().getWord(),
+                mBinding.ankiAdditionalFields.tvContext.getText().toString());
     }
 
     private DictionaryType getCurrentDictionaryPreference(){
@@ -489,6 +500,7 @@ public class SearchActivity extends AppCompatActivity
                             mBinding.ankiAdditionalFields.etContext.getText().toString();
                     mBinding.ankiAdditionalFields.tvContext.setText(changedText);
                     mBinding.ankiAdditionalFields.vsContext.showNext();
+                    updateContext();
                     InputMethodManager inputMethodManager =
                             (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                     inputMethodManager.hideSoftInputFromWindow(
@@ -531,6 +543,7 @@ public class SearchActivity extends AppCompatActivity
                     String changedText = mBinding.ankiAdditionalFields.etNotes.getText().toString();
                     mBinding.ankiAdditionalFields.tvNotes.setText(changedText);
                     mBinding.ankiAdditionalFields.vsNotes.showNext();
+                    updateNote();
                     InputMethodManager inputMethodManager =
                             (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                     inputMethodManager.hideSoftInputFromWindow(
@@ -549,9 +562,6 @@ public class SearchActivity extends AppCompatActivity
                     switch (keyCode){
                         case KeyEvent.KEYCODE_DPAD_CENTER:
                         case KeyEvent.KEYCODE_ENTER:
-                            if(mLastSearched != null){
-                                updateWordInDb(mLastSearched.getVocabulary());
-                            }
                             String searchWord = mBinding.wordSearch.etSearchBox.getText().toString();
                             clearAnkiFields();
                             // If the word is not in the DB, we need to make a search
