@@ -22,12 +22,12 @@ public interface RelatedWordDao {
      * Insert the word relation into the database.
      * @param entity the word relation pairing entity
      */
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert
     public void insert(RelatedWordEntity entity);
 
     /**
      * Update the word relation in the database.
-     * @param entity the word relation in the database to update.
+     * @param entity the word relation in the database to updateNote.
      */
     @Update(onConflict = OnConflictStrategy.REPLACE)
     public void update(RelatedWordEntity entity);

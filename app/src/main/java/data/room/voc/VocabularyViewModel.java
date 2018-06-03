@@ -26,7 +26,7 @@ public class VocabularyViewModel extends AndroidViewModel{
 
     /**
      * Updates the word in the database.
-     * @param vocab The word entry to update in the database.
+     * @param vocab The word entry to updateNote in the database.
      */
     public void update(VocabularyEntity vocab){
         mRepo.update(vocab);

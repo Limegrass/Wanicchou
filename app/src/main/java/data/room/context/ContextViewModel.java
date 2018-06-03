@@ -16,34 +16,39 @@ public class ContextViewModel extends AndroidViewModel{
         mRepo = new ContextRepository(application);
     }
 
-    /**
-     * Inserts the note into the database.
-     * @param entity The note to insert into the database
-     */
-    public void insert(ContextEntity entity){
-        mRepo.insert(entity);
+    public boolean insertNewContext(String word){
+        if(mRepo.getContextEntityOf(word) != null){
+            return false;
+        }
+        ContextEntity contextEntity = new ContextEntity(word, "");
+        mRepo.insert(contextEntity);
+        return true;
     }
 
     /**
-     * Updates the note in the database, if it exists.
-     * @param entity The note to update.
+     * Updates the context in the DB for the given word
+     * @param word The word whose context should be updated.
+     * @param updatedContext The updated context
      */
-    public void update(ContextEntity entity){
+    public void updateContext(String word, String updatedContext){
+        ContextEntity entity = mRepo.getContextEntityOf(word);
+        entity.setContext(updatedContext);
         mRepo.update(entity);
     }
 
     /**
-     * Deletes a note from the database, if it exists.
-     * @param entity The note to delete.
+     * Deletes the linguistic context saved for a word, if it exists.
+     * @param word The word whose linguistic context should be deleted.
      */
-    public void delete(ContextEntity entity){
-        mRepo.delete(entity);
+    public void delete(String word){
+        ContextEntity contextEntity = mRepo.getContextEntityOf(word);
+        mRepo.delete(contextEntity);
     }
 
     /**
-     * Gets the note of a given word from the database
+     * Gets the linguistic context of a given word from the database
      * @param word The word to search for in the database.
-     * @return The note of the word searched for if it exists. Else null.
+     * @return The linguistic context of the word searched if it exists. Else null.
      */
     public String getContextOf(String word){
         return mRepo.getContextOf(word);

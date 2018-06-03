@@ -16,27 +16,34 @@ public class NoteViewModel extends AndroidViewModel{
     }
 
     /**
-     * Inserts the note into the database.
-     * @param entity The note to insert into the database
+     * Inserts a word into the database with an empty note if a
+     * note does not already exist.
+     * @param word The word to insert a new entity for.
+     * @return True if the word was added to the DB, false if it already existed.
      */
-    public void insert(NoteEntity entity){
-        mRepo.insert(entity);
+    public boolean insertNewNote(String word){
+        //If the word already exists
+        if(mRepo.getNoteEntityOf(word) != null){
+            return false;
+        }
+        NoteEntity noteEntity = new NoteEntity(word, "");
+        mRepo.insert(noteEntity);
+        return true;
     }
 
-    /**
-     * Updates the note in the database, if it exists.
-     * @param entity The note to update.
-     */
-    public void update(NoteEntity entity){
+    public void updateNote(String word, String updatedNotes){
+        NoteEntity entity = mRepo.getNoteEntityOf(word);
+        entity.setNote(updatedNotes);
         mRepo.update(entity);
     }
 
     /**
-     * Deletes a note from the database, if it exists.
-     * @param entity The note to delete.
+     * Deletes the notes of a word, if it exists.
+     * @param word The word whose notes should be deleted.
      */
-    public void delete(NoteEntity entity){
-        mRepo.delete(entity);
+    public void delete(String word){
+        NoteEntity noteEntity = mRepo.getNoteEntityOf(word);
+        mRepo.delete(noteEntity);
     }
 
     /**

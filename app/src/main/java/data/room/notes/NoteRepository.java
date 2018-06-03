@@ -32,7 +32,7 @@ public class NoteRepository {
 
     /**
      * Updates a note in the database, if it exists.
-     * @param note The note to update.
+     * @param note The note to updateNote.
      */
     public void update(NoteEntity note){
         new entryModificationAsyncTask(mNoteDao, ACTION_UPDATE).execute(note);
@@ -66,7 +66,26 @@ public class NoteRepository {
     }
 
     /**
-     * Async task to insert/update/delete entries in the database.
+     * Gets the note entity of a word asynchronously.
+     * @param word The word whose notes to search for.
+     * @return The NoteEntity of the word searched for if it exists, else null.
+     */
+    public NoteEntity getNoteEntityOf(String word){
+        NoteEntity ret = null;
+
+        try {
+            ret = new noteEntityQueryTask(mNoteDao).execute(word).get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+        return ret;
+    }
+
+
+    /**
+     * Async task to insert/updateNote/delete entries in the database.
      */
     private static class entryModificationAsyncTask extends AsyncTask<NoteEntity, Void, Void> {
         private NoteDao mAsyncTaskDao;
@@ -108,6 +127,23 @@ public class NoteRepository {
         @Override
         protected String doInBackground(String... words) {
             return mAsyncTaskDao.getNoteOf(words[0]);
+        }
+
+    }
+
+    /**
+     * Async task to request NoteEntity.
+     */
+    private static class noteEntityQueryTask extends AsyncTask<String, Void, NoteEntity> {
+        private NoteDao mAsyncTaskDao;
+
+        protected noteEntityQueryTask(NoteDao dao){
+            mAsyncTaskDao = dao;
+        }
+
+        @Override
+        protected NoteEntity doInBackground(String... words) {
+            return mAsyncTaskDao.getNoteEntityOf(words[0]);
         }
 
     }

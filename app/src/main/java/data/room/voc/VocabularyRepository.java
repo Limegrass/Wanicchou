@@ -81,7 +81,7 @@ public class VocabularyRepository {
     }
 
     /**
-     * Async task to insert/update/delete entries in the database.
+     * Async task to insert/updateNote/delete entries in the database.
      */
     private static class entryModificationAsyncTask extends AsyncTask<VocabularyEntity, Void, Void>{
         private VocabularyDao mAsyncTaskDao;

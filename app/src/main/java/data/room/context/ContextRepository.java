@@ -33,7 +33,7 @@ public class ContextRepository {
 
     /**
      * Updates a note in the database, if it exists.
-     * @param note The note to update.
+     * @param note The note to updateNote.
      */
     public void update(ContextEntity note){
         new entryModificationAsyncTask(mContextDao, ACTION_UPDATE).execute(note);
@@ -56,7 +56,7 @@ public class ContextRepository {
         String ret = null;
 
         try {
-            ret = new queryAsyncTask(mContextDao).execute(word).get();
+            ret = new contextQueryTask(mContextDao).execute(word).get();
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
@@ -67,7 +67,26 @@ public class ContextRepository {
     }
 
     /**
-     * Async task to insert/update/delete entries in the database.
+     * Gets the context entity of a word asynchronously.
+     * @param word The word whose context to search for.
+     * @return The ContextEntity of the word searched for if it exists, else null.
+     */
+    public ContextEntity getContextEntityOf(String word){
+        ContextEntity ret = null;
+
+        try {
+            ret = new contextEntityQueryTask(mContextDao).execute(word).get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+
+        return ret;
+    }
+
+    /**
+     * Async task to insert/updateNote/delete entries in the database.
      */
     private static class entryModificationAsyncTask extends AsyncTask<ContextEntity, Void, Void> {
         private ContextDao mAsyncTaskDao;
@@ -97,18 +116,35 @@ public class ContextRepository {
     }
 
     /**
-     * Async task for queries into the database.
+     * Async task to request for notes
      */
-    private static class queryAsyncTask extends AsyncTask<String, Void, String> {
+    private static class contextQueryTask extends AsyncTask<String, Void, String> {
         private ContextDao mAsyncTaskDao;
 
-        protected queryAsyncTask(ContextDao dao){
+        protected contextQueryTask(ContextDao dao){
             mAsyncTaskDao = dao;
         }
 
         @Override
         protected String doInBackground(String... words) {
             return mAsyncTaskDao.getContextOf(words[0]);
+        }
+
+    }
+
+    /**
+     * Async task to request ContextEntities.
+     */
+    private static class contextEntityQueryTask extends AsyncTask<String, Void, ContextEntity> {
+        private ContextDao mAsyncTaskDao;
+
+        protected contextEntityQueryTask(ContextDao dao){
+            mAsyncTaskDao = dao;
+        }
+
+        @Override
+        protected ContextEntity doInBackground(String... words) {
+            return mAsyncTaskDao.getContextEntityOf(words[0]);
         }
 
     }

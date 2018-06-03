@@ -44,7 +44,7 @@ public class RelatedWordRepository {
 
     /**
      * Updates a related word entry in the database
-     * @param relatedWordEntity The related word entity to update.
+     * @param relatedWordEntity The related word entity to updateNote.
      */
     public void update(RelatedWordEntity relatedWordEntity){
         new entryModificationAsyncTask(mRelatedWordDao, ACTION_UPDATE).execute(relatedWordEntity);

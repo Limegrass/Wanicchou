@@ -14,12 +14,12 @@ public interface NoteDao {
      * Inserts a note.
      * @param note The note to insert
      */
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert
     public void insert(NoteEntity note);
 
     /**
      * Updates a note, if it exists.
-     * @param note The note entry to update
+     * @param note The note entry to updateNote
      */
     @Update(onConflict = OnConflictStrategy.REPLACE)
     public void update(NoteEntity note);
@@ -44,4 +44,13 @@ public interface NoteDao {
      */
     @Query("SELECT Note FROM Notes WHERE Word = :word")
     public String getNoteOf(String word);
+
+
+    /**
+     * Gets the note entity for a particular word
+     * @param word The word to search for.
+     * @return The saved note entity of the word searched.
+     */
+    @Query("SELECT * FROM Notes WHERE Word = :word")
+    public NoteEntity getNoteEntityOf(String word);
 }

@@ -20,12 +20,12 @@ public interface VocabularyDao {
      * Inserts the vocab entity into the database.
      * @param vocabulary the vocabulary entity to insert into the database.
      */
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert
     public void insertWord(VocabularyEntity vocabulary);
 
     /**
      * Updates the vocab entity in the database, if it exists. Replaces on conflict.
-     * @param vocabulary the vocabulary entity to update.
+     * @param vocabulary the vocabulary entity to updateNote.
      */
     @Update(onConflict = OnConflictStrategy.REPLACE)
     public void updateWord(VocabularyEntity vocabulary);
