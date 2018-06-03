@@ -75,7 +75,9 @@ public class SearchActivity extends AppCompatActivity
         mAnkiDroid = new AnkiDroidHelper(this);
         setContentView(R.layout.activity_search);
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_search);
+
         setUpClickListeners();
+        setUpOnFocusChangeListeners();
 
         mVocabViewModel = ViewModelProviders.of(this).get(VocabularyViewModel.class);
         mRelatedWordsViewModel = ViewModelProviders.of(this).get(RelatedWordViewModel.class);
@@ -178,59 +180,72 @@ public class SearchActivity extends AppCompatActivity
     //TODO: Make this stop executing coming back from SettingsActivity/(OnResume?)
     @Override
     public void onLoadFinished(Loader<SanseidoSearch> loader, SanseidoSearch search) {
+        switch(loader.getId()){
+            case SANSEIDO_SEARCH_LOADER:
+                if(mToast != null){
+                    mToast.cancel();
+                }
+                String message;
+                final Context context = getApplicationContext();
+                final int searchCompleteToastDuration = Toast.LENGTH_SHORT;
 
-        if(mToast != null){
-            mToast.cancel();
-        }
-        String message;
-        final Context context = getApplicationContext();
-        final int searchCompleteToastDuration = Toast.LENGTH_SHORT;
+                if(search != null){
+                    if (!TextUtils.isEmpty(search.getVocabulary().getWord())) {
+                        mLastSearched = search;
+                        message = getString(R.string.word_search_success);
 
-        if(search != null){
-            if (!TextUtils.isEmpty(search.getVocabulary().getWord())) {
-                mLastSearched = search;
-                message = getString(R.string.word_search_success);
+                        showVocabOnUI();
 
-                showVocabOnUI();
+                        //TODO : Get Dic Type at Search time
+                        VocabularyEntity entity = getWordFromDb(search.getVocabulary().getWord());
 
-                //TODO : Get Dic Type at Search time
-                VocabularyEntity entity = getWordFromDb(search.getVocabulary().getWord());
+                        if (entity == null) {
+                            if(mVocabViewModel.insert(search.getVocabulary())) {
+                                addWordsToRelatedWordsDb(search.getVocabulary().getWord(),
+                                        search.getRelatedWords());
 
-                if (entity == null ||
-                    search.getVocabulary().getDictionaryType() != getCurrentDictionaryPreference()) {
-                    addWordToDb(search.getVocabulary());
-                    addWordsToRelatedWordsDb(search.getVocabulary().getWord(),
-                            search.getRelatedWords());
+                                mNoteViewModel.insertNewNote(search.getVocabulary().getWord());
+                                mContextViewModel.insertNewContext(search.getVocabulary().getWord());
+                            }
 
-                    mNoteViewModel.insertNewNote(search.getVocabulary().getWord());
-                    mContextViewModel.insertNewContext(search.getVocabulary().getWord());
+                        }
+
+                        showAnkiRelatedUIElements();
+                    }
+                    else{
+                        // TODO: Add empty entry to db for failed searches that aren't network errors.
+                        // TODO: Probably a null somewhere since I do this
+                        // TODO: Get dictionaryType at time of search request
+                        DictionaryType dictionaryType = getCurrentDictionaryPreference();
+                        JapaneseVocabulary invalidWord =
+                                new JapaneseVocabulary(mBinding.wordSearch.etSearchBox
+                                        .getText().toString(), dictionaryType);
+
+                        VocabularyEntity entity = getWordFromDb(search.getVocabulary().getWord());
+                        if (entity == null) {
+                            mVocabViewModel.insert(invalidWord);
+                        }
+                        // TODO: Maybe a different error message
+                        message = getString(R.string.word_search_failure);
+                    }
+                }
+                else{
+                    // TODO: Check for network and http request time outs
+                    message = getString(R.string.word_search_failure);
                 }
 
-                showAnkiRelatedUIElements();
-            }
-            else{
-                // TODO: Add empty entry to db for failed searches that aren't network errors.
-                // TODO: Probably a null somewhere since I do this
-                // TODO: Get dictionaryType at time of search request
-                DictionaryType dictionaryType = getCurrentDictionaryPreference();
-                JapaneseVocabulary invalidWord =
-                        new JapaneseVocabulary(mBinding.wordSearch.etSearchBox
-                                .getText().toString(), dictionaryType);
-
-                VocabularyEntity entity = getWordFromDb(search.getVocabulary().getWord());
-                if (entity == null) {
-                    addWordToDb(invalidWord);
+                SanseidoSearchAsyncTaskLoader ssLoader = (SanseidoSearchAsyncTaskLoader)loader;
+                if(!ssLoader.hasDisplayedToast()){
+                    ssLoader.setHasDisplayedToast(true);
+                    mToast = Toast.makeText(context, message, searchCompleteToastDuration);
+                    mToast.show();
                 }
-                // TODO: Maybe a different error message
-                message = getString(R.string.word_search_failure);
-            }
+                break;
+            default:
+                return;
+
         }
-        else{
-            // TODO: Check for network and http request time outs
-            message = getString(R.string.word_search_failure);
-        }
-        mToast = Toast.makeText(context, message, searchCompleteToastDuration);
-        mToast.show();
+
     }
 
     // Required override but unused
@@ -241,37 +256,36 @@ public class SearchActivity extends AppCompatActivity
 
     /* ==================================== +Databases ================================== */
 
-    private Map<String, Set<String> > getExistingRelatedWordsFromDb(String word){
+    private Map<DictionaryType, Set<String> > getExistingRelatedWordsFromDb(String word){
         VocabularyEntity entity = mVocabViewModel.getWord(word, getCurrentDictionaryPreference());
         if (entity == null){
             return null;
         }
 
 
-        Map<String, Set<String> > existingRelatedWordsMap = new HashMap<>();
-        for (DictionaryType type : DictionaryType.values()){
+        Map<DictionaryType, Set<String> > existingRelatedWordsMap = new HashMap<>();
+        for (DictionaryType dictionaryType : DictionaryType.values()){
             List<RelatedWordEntity> relatedWordEntities =
-                    mRelatedWordsViewModel.getRelatedWordList(entity, type);
+                    mRelatedWordsViewModel.getRelatedWordList(entity, dictionaryType);
             Set<String> relatedWords = new HashSet<>();
             for(RelatedWordEntity relatedWordEntity : relatedWordEntities){
                 relatedWords.add(relatedWordEntity.getRelatedWord());
             }
-            existingRelatedWordsMap.put(type.toJapaneseDictionaryKanji(), relatedWords);
+            existingRelatedWordsMap.put(dictionaryType, relatedWords);
         }
         return existingRelatedWordsMap;
     }
 
-    private void addWordsToRelatedWordsDb(String searchWord, Map<String, Set<String> > newRelatedWords){
+    private void addWordsToRelatedWordsDb(String searchWord, Map<DictionaryType, Set<String> > newRelatedWords){
         VocabularyEntity entity = getWordFromDb(searchWord);
         if (entity == null){
             return;
         }
-        for (String dictionaryType : newRelatedWords.keySet()){
+        for (DictionaryType dictionaryType : newRelatedWords.keySet()){
             for(String relatedWord : newRelatedWords.get(dictionaryType)){
-                String simpleDicType = DictionaryType.fromJapaneseDictionaryKanji(dictionaryType).toString();
                 RelatedWordEntity relatedWordToAdd =
                         new RelatedWordEntity(entity, relatedWord,
-                                simpleDicType);
+                                dictionaryType.toString());
                 mRelatedWordsViewModel.insert(relatedWordToAdd);
             }
         }
@@ -281,13 +295,6 @@ public class SearchActivity extends AppCompatActivity
         return mVocabViewModel.getWord(word, getCurrentDictionaryPreference());
     }
 
-    private void addWordToDb(JapaneseVocabulary vocab){
-        String notes = mBinding.ankiAdditionalFields.etNotes.getText().toString();
-        String wordContext = mBinding.ankiAdditionalFields.etContext.getText().toString();
-
-        VocabularyEntity vocabularyEntity = new VocabularyEntity(vocab);
-        mVocabViewModel.insert(vocabularyEntity);
-    }
 
     // TODO: Redo this method because it doesn't do anything, call it in onFocusChanged for tvDefinition
     private void updateWordInDb(JapaneseVocabulary vocab){
@@ -427,20 +434,7 @@ public class SearchActivity extends AppCompatActivity
         mToast.show();
     }
 
-    private void setUpClickListeners(){
-        // Definition TV/ET
-        mBinding.wordDefinition.tvDefinition.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mBinding.wordDefinition.vsDefinition.showNext();
-                mBinding.wordDefinition.etDefinition.requestFocus();
-                InputMethodManager inputMethodManager =
-                        (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                inputMethodManager.showSoftInput(mBinding.wordDefinition.etDefinition,
-                        InputMethodManager.SHOW_IMPLICIT);
-            }
-        });
-
+    private void setUpOnFocusChangeListeners(){
         mBinding.wordDefinition.etDefinition.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View view, boolean hasFocus) {
@@ -457,6 +451,60 @@ public class SearchActivity extends AppCompatActivity
                 }
             }
         });
+
+        mBinding.ankiAdditionalFields.etContext.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean hasFocus) {
+                if (!hasFocus){
+                    String changedText =
+                            mBinding.ankiAdditionalFields.etContext.getText().toString();
+                    mBinding.ankiAdditionalFields.tvContext.setText(changedText);
+                    mBinding.ankiAdditionalFields.vsContext.showNext();
+                    updateContext();
+                    InputMethodManager inputMethodManager =
+                            (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    inputMethodManager.hideSoftInputFromWindow(
+                            mBinding.ankiAdditionalFields.etNotes.getWindowToken(),
+                            0
+                    );
+                }
+            }
+        });
+
+        mBinding.ankiAdditionalFields.etNotes.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean hasFocus) {
+                if (!hasFocus){
+                    String changedText = mBinding.ankiAdditionalFields.etNotes.getText().toString();
+                    mBinding.ankiAdditionalFields.tvNotes.setText(changedText);
+                    mBinding.ankiAdditionalFields.vsNotes.showNext();
+                    updateNote();
+                    InputMethodManager inputMethodManager =
+                            (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    inputMethodManager.hideSoftInputFromWindow(
+                            mBinding.ankiAdditionalFields.etNotes.getWindowToken(),
+                            0
+                    );
+
+                }
+            }
+        });
+    }
+
+    private void setUpClickListeners(){
+        // Definition TV/ET
+        mBinding.wordDefinition.tvDefinition.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mBinding.wordDefinition.vsDefinition.showNext();
+                mBinding.wordDefinition.etDefinition.requestFocus();
+                InputMethodManager inputMethodManager =
+                        (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                inputMethodManager.showSoftInput(mBinding.wordDefinition.etDefinition,
+                        InputMethodManager.SHOW_IMPLICIT);
+            }
+        });
+
 
         // Context Label, TV, and ET
         mBinding.ankiAdditionalFields.tvContextLabel.setOnClickListener(new View.OnClickListener() {
@@ -483,24 +531,6 @@ public class SearchActivity extends AppCompatActivity
             }
         });
 
-        mBinding.ankiAdditionalFields.etContext.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View view, boolean hasFocus) {
-                if (!hasFocus){
-                    String changedText =
-                            mBinding.ankiAdditionalFields.etContext.getText().toString();
-                    mBinding.ankiAdditionalFields.tvContext.setText(changedText);
-                    mBinding.ankiAdditionalFields.vsContext.showNext();
-                    updateContext();
-                    InputMethodManager inputMethodManager =
-                            (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                    inputMethodManager.hideSoftInputFromWindow(
-                            mBinding.ankiAdditionalFields.etNotes.getWindowToken(),
-                            0
-                    );
-                }
-            }
-        });
 
 
         // Notes label, TV, ET
@@ -527,24 +557,6 @@ public class SearchActivity extends AppCompatActivity
             }
         });
 
-        mBinding.ankiAdditionalFields.etNotes.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View view, boolean hasFocus) {
-                if (!hasFocus){
-                    String changedText = mBinding.ankiAdditionalFields.etNotes.getText().toString();
-                    mBinding.ankiAdditionalFields.tvNotes.setText(changedText);
-                    mBinding.ankiAdditionalFields.vsNotes.showNext();
-                    updateNote();
-                    InputMethodManager inputMethodManager =
-                            (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                    inputMethodManager.hideSoftInputFromWindow(
-                            mBinding.ankiAdditionalFields.etNotes.getWindowToken(),
-                            0
-                    );
-
-                }
-            }
-        });
 
         mBinding.wordSearch.etSearchBox.setOnKeyListener(new OnKeyListener() {
             @Override
@@ -638,7 +650,6 @@ public class SearchActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
-    //TODO: Fix this breaking first launch
     /**
      * Helper method to add cards to Anki if permission is granted
      * @param requestCode a signifier request code

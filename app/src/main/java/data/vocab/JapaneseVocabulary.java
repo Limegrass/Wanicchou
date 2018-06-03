@@ -58,7 +58,6 @@ public class JapaneseVocabulary implements Parcelable {
      * @param entity An entry from the Vocabulary Database
      */
     public JapaneseVocabulary(VocabularyEntity entity){
-        //TODO: Change entity elements to be getter/setters
         word = entity.getWord();
         reading = entity.getReading();
         definition = entity.getDefinition();

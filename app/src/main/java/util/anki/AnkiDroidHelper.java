@@ -196,7 +196,6 @@ public class AnkiDroidHelper {
         return null;
     }
 
-    // TODO: Move these methods to the Helper
     /**
      * helper method to retrieve the deck ID for JJLD
      * @return the deck ID for JJLD in Anki

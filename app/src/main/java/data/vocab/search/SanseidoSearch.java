@@ -59,7 +59,7 @@ public class SanseidoSearch implements Parcelable {
     private final static int RELATED_WORDS_TABLE_INDEX = 0;
 
     //TODO: Refactor to it uses the enum type
-    private Map<String, Set<String>> relatedWords;
+    private Map<DictionaryType, Set<String>> relatedWords;
     private JapaneseVocabulary vocabulary;
 
 
@@ -92,7 +92,7 @@ public class SanseidoSearch implements Parcelable {
      * @param japaneseVocabulary The vocabulary with it's word-definition pair
      * @param relatedWords Words related to the vocabulary specific to it's search type.
      */
-    public SanseidoSearch(JapaneseVocabulary japaneseVocabulary, Map<String, Set<String> > relatedWords){
+    public SanseidoSearch(JapaneseVocabulary japaneseVocabulary, Map<DictionaryType, Set<String> > relatedWords){
         this.vocabulary = japaneseVocabulary;
         this.relatedWords = relatedWords;
     }
@@ -109,7 +109,7 @@ public class SanseidoSearch implements Parcelable {
      * Getter for the list of related words from the search.
      * @return A map mapping the Sanseido dictionary the word exists in and their related words.
      */
-    public Map<String, Set<String>> getRelatedWords(){
+    public Map<DictionaryType, Set<String>> getRelatedWords(){
         return relatedWords;
     }
 
@@ -151,8 +151,8 @@ public class SanseidoSearch implements Parcelable {
      * @param html the raw html jsoup document tree.
      * @return a map of related words in a set with the key being the dictionary they exist in.
      */
-    private Map<String, Set<String>> findRelatedWords(Document html){
-        Map<String, Set<String>> relatedWords = new HashMap<>();
+    private Map<DictionaryType, Set<String>> findRelatedWords(Document html){
+        Map<DictionaryType, Set<String>> relatedWords = new HashMap<>();
         // The related words table is the first table in the HTML
         Element table = html.select("table").get(RELATED_WORDS_TABLE_INDEX);
         Elements rows = table.select("tr");
@@ -162,25 +162,28 @@ public class SanseidoSearch implements Parcelable {
         // inputted
 
         // TODO: HANDLE ALL THE AWFUL INPUTS THAT THE FORWARD SEARCHING CAN HAVE
-        // TODO: Refactor this to use DictionaryType enum
         Log.d(TAG, "" + rows.size());
         for (Element row : rows) {
             Elements columns = row.select("td");
 
             String dictionaryTypeString = columns.get(RELATED_WORDS_TYPE_CLASS_INDEX).text();
 
+            //Essentially using DictionaryType enum by substringing out the brackets 【 】
             if (dictionaryTypeString != null){
                 dictionaryTypeString = dictionaryTypeString.substring(1, dictionaryTypeString.length()-1);
+
+                DictionaryType dictionaryType =
+                        DictionaryType.fromJapaneseDictionaryKanji(dictionaryTypeString);
+
+                if (!relatedWords.containsKey(dictionaryType)){
+                    relatedWords.put(dictionaryType, new HashSet<String>());
+                }
+
+                String tableEntry = columns.get(RELATED_WORDS_VOCAB_INDEX).text();
+                String isolatedWord = JapaneseVocabulary.isolateWord(tableEntry);
+
+                relatedWords.get(dictionaryType).add(isolatedWord);
             }
-
-            if (!relatedWords.containsKey(dictionaryTypeString)){
-                relatedWords.put(dictionaryTypeString, new HashSet<String>());
-            }
-
-            String tableEntry = columns.get(RELATED_WORDS_VOCAB_INDEX).text();
-            String isolatedWord = JapaneseVocabulary.isolateWord(tableEntry);
-
-            relatedWords.get(dictionaryTypeString).add(isolatedWord);
         }
         return relatedWords;
     }
@@ -261,7 +264,7 @@ public class SanseidoSearch implements Parcelable {
     private SanseidoSearch(Parcel parcel) {
         final ClassLoader classLoader = getClass().getClassLoader();
         vocabulary = (JapaneseVocabulary) parcel.readValue(classLoader);
-        relatedWords = (Map<String, Set<String>>) parcel.readValue(classLoader);
+        relatedWords = (Map<DictionaryType, Set<String>>) parcel.readValue(classLoader);
     }
 
 }

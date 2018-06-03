@@ -21,6 +21,7 @@ public class SanseidoSearchAsyncTaskLoader extends AsyncTaskLoader<SanseidoSearc
     private Toast mToast;
     private DictionaryType mDictionaryType;
     private MatchType mMatchType;
+    private boolean hasDisplayedToast;
 
     /**
      * Constructor to perform a search Asynchronously.
@@ -37,6 +38,7 @@ public class SanseidoSearchAsyncTaskLoader extends AsyncTaskLoader<SanseidoSearc
         mSearchWord = searchWord;
         mDictionaryType = dictionaryType;
         mMatchType = matchType;
+        hasDisplayedToast = false;
     }
 
     /**
@@ -46,6 +48,15 @@ public class SanseidoSearchAsyncTaskLoader extends AsyncTaskLoader<SanseidoSearc
     public void changeDictionaryType(DictionaryType dictionaryType){
         mDictionaryType = dictionaryType;
     }
+
+    public boolean hasDisplayedToast(){
+        return hasDisplayedToast;
+    }
+
+    public void setHasDisplayedToast(boolean displayed){
+        hasDisplayedToast = displayed;
+    }
+
 
     /**
      * Initializes all fields and displays a toast on load start.
@@ -59,8 +70,10 @@ public class SanseidoSearchAsyncTaskLoader extends AsyncTaskLoader<SanseidoSearc
         final String searchingText = context.getString(R.string.word_searching);
         final int searchingToastDuration = Toast.LENGTH_LONG;
 
-        mToast = Toast.makeText(context, searchingText, searchingToastDuration);
-        mToast.show();
+        if(!hasDisplayedToast){
+            mToast = Toast.makeText(context, searchingText, searchingToastDuration);
+            mToast.show();
+        }
         forceLoad();
     }
 

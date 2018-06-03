@@ -7,6 +7,7 @@ import android.arch.lifecycle.LiveData;
 import java.util.List;
 
 import data.vocab.DictionaryType;
+import data.vocab.JapaneseVocabulary;
 
 /**
  * Vocab ViewModel
@@ -33,11 +34,17 @@ public class VocabularyViewModel extends AndroidViewModel{
     }
 
     /**
-     * Inserts a word into the database.
-     * @param vocab The word to insert into the database.
+     * Inserts a word into the database given a JapaneseVocabulary, if it does not already exist.
+     * @param vocabulary The word to insert into the database.
+     * @return True if insert was successful, false if not (already existing).
      */
-    public void insert(VocabularyEntity vocab){
-        mRepo.insert(vocab);
+    public boolean insert(JapaneseVocabulary vocabulary){
+        if(getWord(vocabulary.getWord(), vocabulary.getDictionaryType()) == null){
+            VocabularyEntity vocabularyEntity = new VocabularyEntity(vocabulary);
+            mRepo.insert(vocabularyEntity);
+            return true;
+        }
+        return false;
     }
 
     /**

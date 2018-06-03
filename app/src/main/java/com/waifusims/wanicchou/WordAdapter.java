@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import data.vocab.DictionaryType;
+
 /**
  * RecyclerView adapter for related words
  * Created by Limegrass on 4/4/2018.
@@ -21,20 +23,18 @@ public class WordAdapter extends RecyclerView.Adapter<WordAdapter.WordViewHolder
     private static final String TAG = WordAdapter.class.getSimpleName();
     private final ListItemClickListener mOnClickListener;
 
-    // TODO: Generalize for multiple dictionary selection, or restrict user to select only 1 dictionary
-    // This may require changing from Map<String, Set<String> > in others to being just a vector
     private List<String> relatedWords;
     // TODO: Bandaid solution, fix later in constructor. (See above todo)
-    private List<String> dictionary;
+    private List<DictionaryType> dictionary;
 
-    public WordAdapter(Map<String, Set<String>> words, ListItemClickListener listener){
+    public WordAdapter(Map<DictionaryType, Set<String>> words, ListItemClickListener listener){
         relatedWords = new ArrayList<>();
         dictionary = new ArrayList<>();
 
-        for (String dictionaryKey : words.keySet()){
-            for(String word : words.get(dictionaryKey)){
+        for (DictionaryType dictionaryType : words.keySet()){
+            for(String word : words.get(dictionaryType)){
                 relatedWords.add(word);
-                dictionary.add(dictionaryKey);
+                dictionary.add(dictionaryType);
             }
         }
         mOnClickListener = listener;
@@ -84,7 +84,7 @@ public class WordAdapter extends RecyclerView.Adapter<WordAdapter.WordViewHolder
         }
 
         void bind(int listIndex){
-            tvDictionary.setText(dictionary.get(listIndex));
+            tvDictionary.setText(dictionary.get(listIndex).toJapaneseDictionaryKanji());
             tvWord.setText(relatedWords.get(listIndex));
         }
 
