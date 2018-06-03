@@ -5,7 +5,7 @@ import android.support.v4.content.AsyncTaskLoader;
 import android.text.TextUtils;
 import android.widget.Toast;
 
-import com.waifusims.j_jlearnersdictionary.R;
+import com.waifusims.wanicchou.R;
 
 import java.io.IOException;
 

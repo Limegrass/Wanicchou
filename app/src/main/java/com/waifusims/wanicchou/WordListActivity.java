@@ -1,4 +1,4 @@
-package com.waifusims.j_jlearnersdictionary;
+package com.waifusims.wanicchou;
 
 import android.app.ActionBar;
 import android.content.Intent;
@@ -10,7 +10,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.MenuItem;
 
-import com.waifusims.j_jlearnersdictionary.databinding.ActivityRelatedWordsBinding;
+import com.waifusims.wanicchou.databinding.ActivityRelatedWordsBinding;
 
 import data.vocab.search.SanseidoSearch;
 

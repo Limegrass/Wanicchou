@@ -1,4 +1,4 @@
-package com.waifusims.j_jlearnersdictionary;
+package com.waifusims.wanicchou;
 
 import android.content.Context;
 

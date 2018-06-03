@@ -1,4 +1,4 @@
-package com.waifusims.j_jlearnersdictionary;
+package com.waifusims.wanicchou;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;

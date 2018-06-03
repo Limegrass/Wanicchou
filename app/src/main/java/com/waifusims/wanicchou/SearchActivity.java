@@ -1,4 +1,4 @@
-package com.waifusims.j_jlearnersdictionary;
+package com.waifusims.wanicchou;
 
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
@@ -18,7 +18,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 
-import com.waifusims.j_jlearnersdictionary.databinding.ActivitySearchBinding;
+import com.waifusims.wanicchou.databinding.ActivitySearchBinding;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -378,15 +378,6 @@ public class SearchActivity extends AppCompatActivity
         mBinding.wordDefinition.tvWord.setText(vocabulary.getWord());
         mBinding.wordDefinition.tvDefinition.setText(definition);
         mBinding.wordDefinition.etDefinition.setText(definition);
-    }
-
-    //TODO: Make UI be TVs until clicked on, then become ET
-    private String getWordNotes(){
-        return mBinding.ankiAdditionalFields.tvNotes.getText().toString();
-    }
-
-    private String getWordContext(){
-        return mBinding.ankiAdditionalFields.tvContext.getText().toString();
     }
 
     private void clearAnkiFields(){

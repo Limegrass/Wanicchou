@@ -1,4 +1,4 @@
-package com.waifusims.j_jlearnersdictionary;
+package com.waifusims.wanicchou;
 
 import android.app.ActionBar;
 import android.support.v4.app.NavUtils;
