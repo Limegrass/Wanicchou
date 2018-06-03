@@ -52,7 +52,7 @@ public class ContextRepository {
      * @param word The word to search for.
      * @return The notes saved for the word.
      */
-    public String getContext(String word){
+    public String getContextOf(String word){
         String ret = null;
 
         try {

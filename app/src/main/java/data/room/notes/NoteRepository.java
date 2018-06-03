@@ -51,7 +51,7 @@ public class NoteRepository {
      * @param word The word to search for.
      * @return The notes saved for the word.
      */
-    public String getNote(String word){
+    public String getNoteOf(String word){
         String ret = null;
 
         try {

@@ -42,14 +42,6 @@ public class VocabularyEntity {
     private String pitch;
 
 
-    @ColumnInfo(name = "Notes")
-    @NonNull
-    private String notes;
-
-    @ColumnInfo(name = "Context")
-    @NonNull
-    private String wordContext;
-
     /**
      * Empty constructor for the RPM.
      */
@@ -61,18 +53,13 @@ public class VocabularyEntity {
     /**
      * Constructor given a vocabulary word, along with notes and context for the vocab.
      * @param vocabulary The vocabulary word to construct the entity from.
-     * @param notes The notes of the word.
-     * @param wordContext The context the word the user read the word from.
      */
-    public VocabularyEntity(JapaneseVocabulary vocabulary, String notes, String wordContext){
+    public VocabularyEntity(JapaneseVocabulary vocabulary){
         word = vocabulary.getWord();
         definition = vocabulary.getDefintion();
         reading = vocabulary.getReading();
         dictionaryType = vocabulary.getDictionaryType().toString();
         pitch = vocabulary.getPitch();
-
-        this.notes = notes;
-        this.wordContext = wordContext;
     }
 
     public int getId() {
@@ -128,22 +115,5 @@ public class VocabularyEntity {
         this.pitch = pitch;
     }
 
-    @NonNull
-    public String getNotes() {
-        return notes;
-    }
-
-    public void setNotes(@NonNull String notes) {
-        this.notes = notes;
-    }
-
-    @NonNull
-    public String getWordContext() {
-        return wordContext;
-    }
-
-    public void setWordContext(@NonNull String wordContext) {
-        this.wordContext = wordContext;
-    }
 }
 

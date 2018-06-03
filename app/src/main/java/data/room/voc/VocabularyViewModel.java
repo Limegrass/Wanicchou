@@ -13,21 +13,15 @@ import data.vocab.DictionaryType;
  */
 public class VocabularyViewModel extends AndroidViewModel{
     private VocabularyRepository mRepo;
-//    private LiveData<List<VocabularyEntity>> mAllWords;
 
     /**
-     * Constructor for the ViewModel
+     * Constructor for the ViewModel.
      * @param application The application the database exists in.
      */
     public VocabularyViewModel(Application application){
         super(application);
         mRepo = new VocabularyRepository(application);
-//        mAllWords = mRepo.getAllWords();
     }
-
-//    public LiveData<List<VocabularyEntity>> getAllWords(){
-//        return mAllWords;
-//    }
 
 
     /**
