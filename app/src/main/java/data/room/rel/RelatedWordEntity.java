@@ -16,7 +16,7 @@ import data.vocab.DictionaryType;
  */
 @Entity(
         tableName = "RelatedWords",
-        indices = {@Index(value = {"RelatedWord", "DictionaryType"}, unique = true)}
+        indices = {@Index(value = {"FKBaseWordId", "RelatedWord", "DictionaryType"}, unique = true)}
 )
 public class RelatedWordEntity {
     @PrimaryKey(autoGenerate = true)

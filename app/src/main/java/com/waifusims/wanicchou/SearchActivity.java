@@ -222,6 +222,15 @@ public class SearchActivity extends AppCompatActivity
                                     mNoteViewModel.insertNewNote(search.getVocabulary().getWord());
                                     mContextViewModel.insertNewContext(search.getVocabulary().getWord());
                                 }
+                            }
+                            else{
+                                String note = mNoteViewModel.getNoteOf(entity.getWord());
+                                mBinding.ankiAdditionalFields.etNotes.setText(note);
+                                mBinding.ankiAdditionalFields.tvNotes.setText(note);
+
+                                String wordContext = mContextViewModel.getContextOf(entity.getWord());
+                                mBinding.ankiAdditionalFields.etContext.setText(wordContext);
+                                mBinding.ankiAdditionalFields.tvContext.setText(wordContext);
 
                             }
 
@@ -412,6 +421,30 @@ public class SearchActivity extends AppCompatActivity
         mBinding.ankiAdditionalFields.etNotes.setText("");
     }
 
+    private void startSearchLoader(String searchWord){
+        if(!showWordFromDB(searchWord, getCurrentDictionaryPreference())) {
+            Bundle searchBundle = new Bundle();
+            searchBundle.putString(SEARCH_WORD_KEY, searchWord);
+            LoaderManager loaderManager = getSupportLoaderManager();
+            Loader<SanseidoSearch> searchLoader =
+                    loaderManager.getLoader(SANSEIDO_SEARCH_LOADER);
+            if (searchLoader == null) {
+                loaderManager.initLoader(SANSEIDO_SEARCH_LOADER,
+                        searchBundle, SearchActivity.this);
+            } else {
+                ((SanseidoSearchAsyncTaskLoader) searchLoader).changeDictionaryType(getCurrentDictionaryPreference());
+                loaderManager.restartLoader(SANSEIDO_SEARCH_LOADER,
+                        searchBundle, SearchActivity.this);
+            }
+
+            Context context = SearchActivity.this;
+            final String searchingText = getString(R.string.word_searching);
+            final int searchingToastDuration = Toast.LENGTH_LONG;
+
+            mToast = Toast.makeText(context, searchingText, searchingToastDuration);
+            mToast.show();
+        }
+    }
     //TODO: Change click to expand a menu and add associated UI elements
     //TODO: Maybe implement a clozed type when sentence search is included
     //TODO: Duplicate checking
@@ -618,31 +651,9 @@ public class SearchActivity extends AppCompatActivity
                             String searchWord = mBinding.wordSearch.etSearchBox.getText().toString();
                             clearAnkiFields();
                             // If the word is not in the DB, we need to make a search
-                            if(!showWordFromDB(searchWord, getCurrentDictionaryPreference())) {
-                                Bundle searchBundle = new Bundle();
-                                searchBundle.putString(SEARCH_WORD_KEY, searchWord);
-                                LoaderManager loaderManager = getSupportLoaderManager();
-                                Loader<SanseidoSearch> searchLoader =
-                                        loaderManager.getLoader(SANSEIDO_SEARCH_LOADER);
-                                if (searchLoader == null){
-                                    loaderManager.initLoader(SANSEIDO_SEARCH_LOADER,
-                                            searchBundle, SearchActivity.this);
-                                }
-                                else {
-                                    SanseidoSearchAsyncTaskLoader ssLoader =
-                                            (SanseidoSearchAsyncTaskLoader) searchLoader;
-                                    ((SanseidoSearchAsyncTaskLoader) searchLoader).changeDictionaryType(getCurrentDictionaryPreference());
-                                    loaderManager.restartLoader(SANSEIDO_SEARCH_LOADER,
-                                            searchBundle, SearchActivity.this);
-                                }
 
-                                Context context = SearchActivity.this;
-                                final String searchingText = getString(R.string.word_searching);
-                                final int searchingToastDuration = Toast.LENGTH_LONG;
+                            startSearchLoader(searchWord);
 
-                                mToast = Toast.makeText(context, searchingText, searchingToastDuration);
-                                mToast.show();
-                            }
                             return true;
                         default:
                             //TODO: Would returning true do anything undesired? Find out
