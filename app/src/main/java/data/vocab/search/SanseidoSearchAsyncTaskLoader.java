@@ -3,10 +3,6 @@ package data.vocab.search;
 import android.content.Context;
 import android.support.v4.content.AsyncTaskLoader;
 import android.text.TextUtils;
-import android.widget.Toast;
-
-import com.waifusims.wanicchou.R;
-
 import java.io.IOException;
 
 import data.vocab.DictionaryType;
@@ -18,10 +14,9 @@ import data.vocab.MatchType;
 
 public class SanseidoSearchAsyncTaskLoader extends AsyncTaskLoader<SanseidoSearch>{
     private String mSearchWord;
-    private Toast mToast;
     private DictionaryType mDictionaryType;
     private MatchType mMatchType;
-    private boolean hasDisplayedToast;
+    private boolean firstLoadFinished;
 
     /**
      * Constructor to perform a search Asynchronously.
@@ -38,7 +33,7 @@ public class SanseidoSearchAsyncTaskLoader extends AsyncTaskLoader<SanseidoSearc
         mSearchWord = searchWord;
         mDictionaryType = dictionaryType;
         mMatchType = matchType;
-        hasDisplayedToast = false;
+        firstLoadFinished = true;
     }
 
     /**
@@ -49,12 +44,16 @@ public class SanseidoSearchAsyncTaskLoader extends AsyncTaskLoader<SanseidoSearc
         mDictionaryType = dictionaryType;
     }
 
-    public boolean hasDisplayedToast(){
-        return hasDisplayedToast;
+    public DictionaryType getDictionaryType() {
+        return mDictionaryType;
     }
 
-    public void setHasDisplayedToast(boolean displayed){
-        hasDisplayedToast = displayed;
+    public boolean isFirstLoadFinished(){
+        return firstLoadFinished;
+    }
+
+    public void setFirstLoadFinished(boolean loaded){
+        firstLoadFinished = loaded;
     }
 
 
@@ -66,14 +65,6 @@ public class SanseidoSearchAsyncTaskLoader extends AsyncTaskLoader<SanseidoSearc
         super.onStartLoading();
 
 
-        final Context context = getContext();
-        final String searchingText = context.getString(R.string.word_searching);
-        final int searchingToastDuration = Toast.LENGTH_LONG;
-
-        if(!hasDisplayedToast){
-            mToast = Toast.makeText(context, searchingText, searchingToastDuration);
-            mToast.show();
-        }
         forceLoad();
     }
 
@@ -95,8 +86,6 @@ public class SanseidoSearchAsyncTaskLoader extends AsyncTaskLoader<SanseidoSearc
         catch (IOException e){
             e.printStackTrace();
         }
-
-        mToast.cancel();
         return search;
     }
 }

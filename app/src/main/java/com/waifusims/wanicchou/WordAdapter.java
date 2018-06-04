@@ -24,7 +24,6 @@ public class WordAdapter extends RecyclerView.Adapter<WordAdapter.WordViewHolder
     private final ListItemClickListener mOnClickListener;
 
     private List<String> relatedWords;
-    // TODO: Bandaid solution, fix later in constructor. (See above todo)
     private List<DictionaryType> dictionary;
 
     public WordAdapter(Map<DictionaryType, Set<String>> words, ListItemClickListener listener){

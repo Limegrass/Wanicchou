@@ -43,6 +43,7 @@
 
     <!--shared preferences keys-->
     <string name="search_word_key" translatable="false">searchWord</string>
+    <string name="dic_type_key" translatable="false">dicType</string>
 
     <!--settings strings-->
     <string name="search_settings_category_title" translatable="true">Search Settings</string>

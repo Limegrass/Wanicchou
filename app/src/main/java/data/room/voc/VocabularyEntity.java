@@ -47,9 +47,9 @@ public class VocabularyEntity {
      */
     public VocabularyEntity(){}
 
-    // TODO: Move notes to its own DB, Context to its own DB
-    // This can likely enable to void JapaneseVocabulary as an object in general and use only
-    // The DB Entries, moving all methods to this.
+    // TODO?: Maybe consolidate this and the JapaneseVocab class
+    // Having everything in one class vs having a class that cleans
+    // and this entity class
     /**
      * Constructor given a vocabulary word, along with notes and context for the vocab.
      * @param vocabulary The vocabulary word to construct the entity from.
