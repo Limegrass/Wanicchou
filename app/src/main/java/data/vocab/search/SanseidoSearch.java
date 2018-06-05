@@ -3,6 +3,7 @@ package data.vocab.search;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 import android.util.Log;
 
 import org.jsoup.Jsoup;
@@ -22,10 +23,11 @@ import data.vocab.DictionaryType;
 import data.vocab.JapaneseVocabulary;
 import data.vocab.MatchType;
 
+//TODO: Equals, Hashcode methods
+
 /**
  * Created by Limegrass on 3/19/2018.
  */
-
 public class SanseidoSearch implements Parcelable {
     private final static String TAG = SanseidoSearch.class.getSimpleName();
 
@@ -77,6 +79,16 @@ public class SanseidoSearch implements Parcelable {
                           MatchType matchType)
             throws IOException {
         //TODO: Fix relatedWords searching, as it is not working properly for forwards search
+        if(TextUtils.isEmpty(wordToSearch)) {
+            throw new IllegalArgumentException("Search term cannot be empty!");
+        }
+        if(dictionaryType == null){
+            throw new IllegalArgumentException("Dictionary Type cannot be null!");
+        }
+        if(matchType == null){
+            throw new IllegalArgumentException("Match Type cannot be null!");
+        }
+
         URL url = buildQueryURL(wordToSearch, dictionaryType, matchType);
         Document html = fetchSanseidoSource(url);
         relatedWords = findRelatedWords(html);
@@ -126,11 +138,12 @@ public class SanseidoSearch implements Parcelable {
                               MatchType matchType)
             throws MalformedURLException{
 
-        Uri.Builder uriBuilder = Uri.parse(SANSEIDOU_BASE_URL).buildUpon()
-                .appendQueryParameter(PARAM_ST, matchType.sanseidoKey())
-                .appendQueryParameter(PARAM_DORDER, DORDER_DEFAULT)
-                .appendQueryParameter(PARAM_WORD_QUERY, word)
-                .appendQueryParameter(PARAM_DIC_PREFIX + dictionaryType.toString(), SET_LANG);
+        Uri.Builder uriBuilder = Uri.parse(SANSEIDOU_BASE_URL).buildUpon();
+
+        uriBuilder.appendQueryParameter(PARAM_ST, matchType.sanseidoKey());
+        uriBuilder.appendQueryParameter(PARAM_DORDER, DORDER_DEFAULT);
+        uriBuilder.appendQueryParameter(PARAM_WORD_QUERY, word);
+        uriBuilder.appendQueryParameter(PARAM_DIC_PREFIX + dictionaryType.toString(), SET_LANG);
 
         return new URL(uriBuilder.build().toString());
     }
@@ -162,7 +175,7 @@ public class SanseidoSearch implements Parcelable {
         // inputted
 
         // TODO: HANDLE ALL THE AWFUL INPUTS THAT THE FORWARD SEARCHING CAN HAVE
-        Log.d(TAG, "" + rows.size());
+        Log.d(TAG, String.valueOf(rows.size()));
         for (Element row : rows) {
             Elements columns = row.select("td");
 

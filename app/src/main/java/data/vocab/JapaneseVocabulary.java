@@ -22,13 +22,13 @@ public class JapaneseVocabulary implements Parcelable {
 
     // Try to find a word beginning with or enclosed with Kanji
     private static final String WORD_WITH_KANJI_REGEX =
-            "\\p{Han}+[\\p{Hiragana}|\\p{Katakana}]*\\p{Han}*";
+            "\\p{script=Han}+[\\p{script=Hiragana}|\\p{script=Katakana}]*\\p{script=Han}*";
 
     // For finding only the kana of a word.
-    private static final String KANA_REGEX = "[\\p{Hiragana}|\\p{Katakana}]+";
+    private static final String KANA_REGEX = "[\\p{script=Hiragana}|\\p{script=Katakana}]+";
 
     private static final String READING_REGEX =
-            "[\\p{Hiragana}|\\p{Katakana}]+(?=($|[\\p{Han}０-９]|\\d|\\s))";
+            "[\\p{script=Hiragana}|\\p{script=Katakana}]+(?=($|[\\p{script=Han}０-９]|\\d|\\s))";
     private static final String TONE_REGEX = "[\\d０-９]+";
 
     // Some messy dictionary entries have triangles in 

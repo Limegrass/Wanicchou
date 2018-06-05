@@ -46,6 +46,7 @@ import android.view.KeyEvent;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
+// TODO: Automatically select EJ for English input
 //TODO:  Horizontal UI
 public class SearchActivity extends AppCompatActivity
         implements LoaderManager.LoaderCallbacks<SanseidoSearch> {
