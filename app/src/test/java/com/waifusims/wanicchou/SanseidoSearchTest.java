@@ -1,34 +1,77 @@
 package com.waifusims.wanicchou;
 
-import android.content.Context;
+import junit.framework.Assert;
 
-import org.junit.Before;
 import org.junit.Test;
 
-import android.test.InstrumentationTestCase;
-import android.test.mock.MockContext;
-
+import data.vocab.DictionaryType;
+import data.vocab.MatchType;
 import data.vocab.search.SanseidoSearch;
 
-/**
- * Example local unit test, which will execute on the development machine (host).
- *
- * @see <a href="http://d.android.com/tools/testing">Testing documentation</a>
- */
-public class SanseidoSearchTest extends InstrumentationTestCase {
-    Context mContext;
+import static junit.framework.Assert.assertEquals;
 
-    @Before
-    public void setUp() throws  Exception{
-        super.setUp();
-        mContext = new MockContext();
-        assertNotNull(mContext);
+/**
+ * Test for Sanseido Search
+ * Also somehwat indirectly Japanese Vocabulary
+ */
+public class SanseidoSearchTest {
+
+    @Test
+    public void testJJExact() throws Exception {
+        SanseidoSearch sanseidoSearch =
+                new SanseidoSearch("アニメ", DictionaryType.JJ, MatchType.EXACT);
+        assertEquals(sanseidoSearch.getVocabulary().getWord(), "アニメ");
+        assertEquals(sanseidoSearch.getVocabulary().getDictionaryType(), DictionaryType.JJ);
+        assertEquals(sanseidoSearch.getVocabulary().getDefintion(), "アニメーションの略．");
+        assertEquals(sanseidoSearch.getVocabulary().getPitch(), "1");
+        assertEquals(sanseidoSearch.getRelatedWords().size(), 1);
     }
 
     @Test
-    public void urlGenerated() throws Exception {
-        System.out.println(SanseidoSearch.buildQueryURL("アニメ", true).toString());
-        assertEquals(SanseidoSearch.buildQueryURL("アニメ", true).toString(),
-                "https://www.sanseido.biz/User/Dic/Index.aspx?st=0&DORDER=171615&DailyJJ=checkbox&TWords=%E3%82%A2%E3%83%8B%E3%83%A1");
+    public void testJEForwards() throws Exception {
+        SanseidoSearch sanseidoSearch =
+                new SanseidoSearch("雪", DictionaryType.JE, MatchType.FORWARDS);
+        assertEquals(sanseidoSearch.getVocabulary().getWord(), "雪害");
+        assertEquals(sanseidoSearch.getVocabulary().getDictionaryType(), DictionaryType.JE);
+        assertEquals(sanseidoSearch.getVocabulary().getDefintion(), "snow damage．");
+        assertEquals(sanseidoSearch.getVocabulary().getPitch(), "");
+        int size = 0;
+        for (DictionaryType dictionaryType : sanseidoSearch.getRelatedWords().keySet()){
+            size += sanseidoSearch.getRelatedWords().get(dictionaryType).size();
+        }
+        assertEquals(size, 20);
+    }
+
+    @Test
+    public void testEmptyWord() throws Exception {
+        try{
+            SanseidoSearch sanseidoSearch =
+                    new SanseidoSearch("", DictionaryType.EJ, MatchType.BACKWARDS);
+            Assert.fail("Should have thrown IllegalArgumentException.");
+        }
+        catch (IllegalArgumentException e){
+
+        }
+
+    }
+
+    @Test
+    public void testNullDictionaryType() throws Exception {
+        try{
+            SanseidoSearch sanseidoSearch =
+                    new SanseidoSearch("テスト", null, MatchType.EXACT);
+            Assert.fail("Should have thrown IllegalArgumentException.");
+        }
+        catch (IllegalArgumentException e){ }
+    }
+
+    @Test
+    public void testNullMatchType() throws Exception {
+        try{
+            SanseidoSearch sanseidoSearch =
+                    new SanseidoSearch("テスト", DictionaryType.JJ, null);
+            Assert.fail("Should have thrown IllegalArgumentException.");
+        }
+        catch (IllegalArgumentException e){ }
     }
 }
