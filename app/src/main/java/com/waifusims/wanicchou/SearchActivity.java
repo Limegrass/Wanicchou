@@ -20,10 +20,8 @@ import android.view.View;
 
 import com.waifusims.wanicchou.databinding.ActivitySearchBinding;
 
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import data.room.context.ContextViewModel;
@@ -35,6 +33,7 @@ import data.room.voc.VocabularyViewModel;
 import data.vocab.DictionaryType;
 import data.vocab.JapaneseVocabulary;
 import data.vocab.MatchType;
+import data.vocab.search.RelatedWordEntry;
 import data.vocab.search.SanseidoSearch;
 import data.vocab.search.SanseidoSearchAsyncTaskLoader;
 import util.anki.AnkiDroidHelper;
@@ -86,6 +85,7 @@ public class SearchActivity extends AppCompatActivity
         mRelatedWordsViewModel = ViewModelProviders.of(this).get(RelatedWordViewModel.class);
         mNoteViewModel = ViewModelProviders.of(this).get(NoteViewModel.class);
         mContextViewModel = ViewModelProviders.of(this).get(ContextViewModel.class);
+
     }
 
     @Override
@@ -115,6 +115,7 @@ public class SearchActivity extends AppCompatActivity
                     mLastSearched.getVocabulary().getWord());
             editor.putString(getString(R.string.dic_type_key),
                     mLastSearched.getVocabulary().getDictionaryType().toString());
+            editor.apply();
         }
     }
 
@@ -158,7 +159,9 @@ public class SearchActivity extends AppCompatActivity
                     if (data.hasExtra(key)) {
                         String desiredRelatedWord =
                                 data.getExtras().getString(key);
-                        mBinding.wordSearch.etSearchBox.setText(desiredRelatedWord);
+                        if(!TextUtils.isEmpty(desiredRelatedWord)){
+                            mBinding.wordSearch.etSearchBox.setText(desiredRelatedWord);
+                        }
                     }
                     if(mToast != null){
                         mToast.cancel();
@@ -283,38 +286,34 @@ public class SearchActivity extends AppCompatActivity
 
     /* ==================================== +Databases ================================== */
 
-    private Map<DictionaryType, Set<String> > getExistingRelatedWordsFromDb(String word){
+    private List<RelatedWordEntry> getExistingRelatedWordsFromDb(String word){
         VocabularyEntity entity = mVocabViewModel.getWord(word, getCurrentDictionaryPreference());
         if (entity == null){
             return null;
         }
 
 
-        Map<DictionaryType, Set<String> > existingRelatedWordsMap = new HashMap<>();
+        List<RelatedWordEntry> relatedWords = new ArrayList<>();
         for (DictionaryType dictionaryType : DictionaryType.values()){
             List<RelatedWordEntity> relatedWordEntities =
                     mRelatedWordsViewModel.getRelatedWordList(entity, dictionaryType);
-            Set<String> relatedWords = new HashSet<>();
             for(RelatedWordEntity relatedWordEntity : relatedWordEntities){
-                relatedWords.add(relatedWordEntity.getRelatedWord());
+                relatedWords.add(new RelatedWordEntry(relatedWordEntity.getRelatedWord(), relatedWordEntity.getDictionaryType()));
             }
-            existingRelatedWordsMap.put(dictionaryType, relatedWords);
         }
-        return existingRelatedWordsMap;
+        return relatedWords;
     }
 
-    private void addWordsToRelatedWordsDb(JapaneseVocabulary vocabulary, Map<DictionaryType, Set<String> > newRelatedWords){
+    private void addWordsToRelatedWordsDb(JapaneseVocabulary vocabulary, List<RelatedWordEntry> newRelatedWords){
         VocabularyEntity entity = getWordFromDb(vocabulary.getWord(), vocabulary.getDictionaryType());
         if (entity == null){
             return;
         }
-        for (DictionaryType dictionaryType : newRelatedWords.keySet()){
-            for(String relatedWord : newRelatedWords.get(dictionaryType)){
-                RelatedWordEntity relatedWordToAdd =
-                        new RelatedWordEntity(entity, relatedWord,
-                                dictionaryType.toString());
-                mRelatedWordsViewModel.insert(relatedWordToAdd);
-            }
+        for (RelatedWordEntry entry : newRelatedWords){
+            RelatedWordEntity relatedWordToAdd =
+                    new RelatedWordEntity(entity, entry.getRelatedWord(),
+                            entry.getDictionaryType().toString());
+            mRelatedWordsViewModel.insert(relatedWordToAdd);
         }
     }
 

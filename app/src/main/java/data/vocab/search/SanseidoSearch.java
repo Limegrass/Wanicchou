@@ -14,10 +14,8 @@ import org.jsoup.select.Elements;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 import data.vocab.DictionaryType;
 import data.vocab.JapaneseVocabulary;
@@ -56,12 +54,12 @@ public class SanseidoSearch implements Parcelable {
     private final static String PARAM_DIC_PREFIX = "Daily";
     private final static String SET_LANG = "checkbox";
 
-    private final static int RELATED_WORDS_TYPE_CLASS_INDEX = 0;
-    private final static int RELATED_WORDS_VOCAB_INDEX = 1;
-    private final static int RELATED_WORDS_TABLE_INDEX = 0;
+    protected final static int RELATED_WORDS_TYPE_CLASS_INDEX = 0;
+    protected final static int RELATED_WORDS_VOCAB_INDEX = 1;
+    protected final static int RELATED_WORDS_TABLE_INDEX = 0;
 
     //TODO: Refactor to it uses the enum type
-    private Map<DictionaryType, Set<String>> relatedWords;
+    private List<RelatedWordEntry> relatedWords;
     private JapaneseVocabulary vocabulary;
 
 
@@ -98,16 +96,25 @@ public class SanseidoSearch implements Parcelable {
                 dictionaryType);
     }
 
+    public SanseidoSearch(Document html, DictionaryType dictionaryType){
+        relatedWords = findRelatedWords(html);
+        vocabulary = new JapaneseVocabulary(findWordSource(html),
+                findDefinitionSource(html),
+                dictionaryType);
+
+    }
 
     /**
      * Constructs a search object from a given vocab and it's related words
      * @param japaneseVocabulary The vocabulary with it's word-definition pair
      * @param relatedWords Words related to the vocabulary specific to it's search type.
      */
-    public SanseidoSearch(JapaneseVocabulary japaneseVocabulary, Map<DictionaryType, Set<String> > relatedWords){
+    public SanseidoSearch(JapaneseVocabulary japaneseVocabulary, List<RelatedWordEntry> relatedWords){
         this.vocabulary = japaneseVocabulary;
         this.relatedWords = relatedWords;
     }
+
+    // ======================== GETTERS AND SETTERS ==================================
 
     /**
      * Getter for the vocabulary word searched.
@@ -117,13 +124,20 @@ public class SanseidoSearch implements Parcelable {
         return vocabulary;
     }
 
-    /**
-     * Getter for the list of related words from the search.
-     * @return A map mapping the Sanseido dictionary the word exists in and their related words.
-     */
-    public Map<DictionaryType, Set<String>> getRelatedWords(){
+    protected void setVocabulary(JapaneseVocabulary vocabulary) {
+        this.vocabulary = vocabulary;
+    }
+
+    public List<RelatedWordEntry> getRelatedWords() {
         return relatedWords;
     }
+
+    protected void setRelatedWords(List<RelatedWordEntry> relatedWords) {
+        this.relatedWords = relatedWords;
+    }
+
+
+    // ================================ HELPERS ===================================
 
     /**
      * Builds the URL for the desired word(s) to search for on Sanseido.
@@ -133,7 +147,7 @@ public class SanseidoSearch implements Parcelable {
      * @return the Sanseido url created
      * @throws MalformedURLException if a search url cannot be built
      */
-    private URL buildQueryURL(String word,
+    protected URL buildQueryURL(String word,
                               DictionaryType dictionaryType,
                               MatchType matchType)
             throws MalformedURLException{
@@ -164,8 +178,9 @@ public class SanseidoSearch implements Parcelable {
      * @param html the raw html jsoup document tree.
      * @return a map of related words in a set with the key being the dictionary they exist in.
      */
-    private Map<DictionaryType, Set<String>> findRelatedWords(Document html){
-        Map<DictionaryType, Set<String>> relatedWords = new HashMap<>();
+    private List<RelatedWordEntry> findRelatedWords(Document html){
+        List<RelatedWordEntry> relatedWordEntries = new ArrayList<>();
+
         // The related words table is the first table in the HTML
         Element table = html.select("table").get(RELATED_WORDS_TABLE_INDEX);
         Elements rows = table.select("tr");
@@ -177,6 +192,7 @@ public class SanseidoSearch implements Parcelable {
         // TODO: HANDLE ALL THE AWFUL INPUTS THAT THE FORWARD SEARCHING CAN HAVE
         Log.d(TAG, String.valueOf(rows.size()));
         for (Element row : rows) {
+
             Elements columns = row.select("td");
 
             String dictionaryTypeString = columns.get(RELATED_WORDS_TYPE_CLASS_INDEX).text();
@@ -188,17 +204,13 @@ public class SanseidoSearch implements Parcelable {
                 DictionaryType dictionaryType =
                         DictionaryType.fromJapaneseDictionaryKanji(dictionaryTypeString);
 
-                if (!relatedWords.containsKey(dictionaryType)){
-                    relatedWords.put(dictionaryType, new HashSet<String>());
-                }
-
                 String tableEntry = columns.get(RELATED_WORDS_VOCAB_INDEX).text();
                 String isolatedWord = JapaneseVocabulary.isolateWord(tableEntry);
 
-                relatedWords.get(dictionaryType).add(isolatedWord);
+                relatedWordEntries.add(new RelatedWordEntry(isolatedWord, dictionaryType));
             }
         }
-        return relatedWords;
+        return relatedWordEntries;
     }
 
     /**
@@ -234,6 +246,7 @@ public class SanseidoSearch implements Parcelable {
     }
 
 
+    // ==================================== PARCELABLE ========================================
     /**
      * Describes contents for Parcelable.
      * @return The hashcode of the object.
@@ -242,6 +255,7 @@ public class SanseidoSearch implements Parcelable {
     public int describeContents() {
         return hashCode();
     }
+
 
     /**
      * Parcelization of the search object
@@ -277,7 +291,9 @@ public class SanseidoSearch implements Parcelable {
     private SanseidoSearch(Parcel parcel) {
         final ClassLoader classLoader = getClass().getClassLoader();
         vocabulary = (JapaneseVocabulary) parcel.readValue(classLoader);
-        relatedWords = (Map<DictionaryType, Set<String>>) parcel.readValue(classLoader);
+        relatedWords = (List<RelatedWordEntry>) parcel.readValue(classLoader);
     }
+
+
 
 }

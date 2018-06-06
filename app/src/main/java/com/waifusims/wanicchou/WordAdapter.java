@@ -8,12 +8,9 @@ import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
-import data.vocab.DictionaryType;
+import data.vocab.search.RelatedWordEntry;
 
 /**
  * RecyclerView adapter for related words
@@ -23,19 +20,10 @@ public class WordAdapter extends RecyclerView.Adapter<WordAdapter.WordViewHolder
     private static final String TAG = WordAdapter.class.getSimpleName();
     private final ListItemClickListener mOnClickListener;
 
-    private List<String> relatedWords;
-    private List<DictionaryType> dictionary;
+    private List<RelatedWordEntry> relatedWords;
 
-    public WordAdapter(Map<DictionaryType, Set<String>> words, ListItemClickListener listener){
-        relatedWords = new ArrayList<>();
-        dictionary = new ArrayList<>();
-
-        for (DictionaryType dictionaryType : words.keySet()){
-            for(String word : words.get(dictionaryType)){
-                relatedWords.add(word);
-                dictionary.add(dictionaryType);
-            }
-        }
+    public WordAdapter(List<RelatedWordEntry> words, ListItemClickListener listener){
+        relatedWords = words;
         mOnClickListener = listener;
     }
 
@@ -62,7 +50,7 @@ public class WordAdapter extends RecyclerView.Adapter<WordAdapter.WordViewHolder
     }
 
     public String getWordAtPosition(int position){
-        return relatedWords.get(position);
+        return relatedWords.get(position).getRelatedWord();
     }
 
     @Override
@@ -83,8 +71,8 @@ public class WordAdapter extends RecyclerView.Adapter<WordAdapter.WordViewHolder
         }
 
         void bind(int listIndex){
-            tvDictionary.setText(dictionary.get(listIndex).toJapaneseDictionaryKanji());
-            tvWord.setText(relatedWords.get(listIndex));
+            tvDictionary.setText(relatedWords.get(listIndex).getDictionaryType().toJapaneseDictionaryKanji());
+            tvWord.setText(relatedWords.get(listIndex).getRelatedWord());
         }
 
 
