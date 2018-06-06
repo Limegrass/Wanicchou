@@ -36,6 +36,7 @@ import data.vocab.MatchType;
 import data.vocab.search.RelatedWordEntry;
 import data.vocab.search.SanseidoSearch;
 import data.vocab.search.SanseidoSearchAsyncTaskLoader;
+import data.vocab.search.SanseidoSearchWebView;
 import util.anki.AnkiDroidHelper;
 import util.anki.AnkiDroidConfig;
 import android.support.v4.app.LoaderManager;
@@ -48,7 +49,7 @@ import android.widget.Toast;
 // TODO: Automatically select EJ for English input
 //TODO:  Horizontal UI
 public class SearchActivity extends AppCompatActivity
-        implements LoaderManager.LoaderCallbacks<SanseidoSearch> {
+        implements LoaderManager.LoaderCallbacks<SanseidoSearchWebView> {
     public static final String LOG_TAG = "Wanicchou";
     private static final int ADD_PERM_REQUEST = 0;
     private static final int HOME_ACTIVITY_REQUEST_CODE = 42;
@@ -122,7 +123,7 @@ public class SearchActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
-        Loader<SanseidoSearch> loader =
+        Loader<SanseidoSearchWebView> loader =
                 getSupportLoaderManager().getLoader(SANSEIDO_SEARCH_LOADER);
         if(loader != null){
             switch (loader.getId()){
@@ -185,11 +186,10 @@ public class SearchActivity extends AppCompatActivity
     /* ==================================== +Loader and +Search ================================== */
 
     @Override
-    public Loader<SanseidoSearch> onCreateLoader(int id, final Bundle args) {
-        Context context = SearchActivity.this;
+    public Loader<SanseidoSearchWebView> onCreateLoader(int id, final Bundle args) {
         DictionaryType dictionaryType = getCurrentDictionaryPreference();
         MatchType matchType = getCurrentMatchType();
-        return new SanseidoSearchAsyncTaskLoader(context,
+        return new SanseidoSearchAsyncTaskLoader(this,
                 args.getString(SEARCH_WORD_KEY),
                 dictionaryType,
                 matchType
@@ -198,7 +198,7 @@ public class SearchActivity extends AppCompatActivity
 
     //TODO: Make this stop executing coming back from SettingsActivity/(OnResume?)
     @Override
-    public void onLoadFinished(Loader<SanseidoSearch> loader, SanseidoSearch search) {
+    public void onLoadFinished(Loader<SanseidoSearchWebView> loader, SanseidoSearchWebView search) {
         switch(loader.getId()){
             case SANSEIDO_SEARCH_LOADER:
                 if(mToast != null){
@@ -283,7 +283,7 @@ public class SearchActivity extends AppCompatActivity
 
     // Required override but unused
     @Override
-    public void onLoaderReset(Loader<SanseidoSearch> loader) {
+    public void onLoaderReset(Loader<SanseidoSearchWebView> loader) {
     }
 
 
@@ -429,7 +429,7 @@ public class SearchActivity extends AppCompatActivity
             Bundle searchBundle = new Bundle();
             searchBundle.putString(SEARCH_WORD_KEY, searchWord);
             LoaderManager loaderManager = getSupportLoaderManager();
-            Loader<SanseidoSearch> searchLoader =
+            Loader<SanseidoSearchWebView> searchLoader =
                     loaderManager.getLoader(SANSEIDO_SEARCH_LOADER);
             if (searchLoader == null) {
                 loaderManager.initLoader(SANSEIDO_SEARCH_LOADER,

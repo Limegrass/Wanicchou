@@ -12,7 +12,8 @@ import data.vocab.MatchType;
  * Created by Limegrass on 5/9/2018.
  */
 
-public class SanseidoSearchAsyncTaskLoader extends AsyncTaskLoader<SanseidoSearch>{
+public class SanseidoSearchAsyncTaskLoader extends AsyncTaskLoader<SanseidoSearchWebView>{
+    private Context mContext;
     private String mSearchWord;
     private DictionaryType mDictionaryType;
     private MatchType mMatchType;
@@ -30,6 +31,7 @@ public class SanseidoSearchAsyncTaskLoader extends AsyncTaskLoader<SanseidoSearc
                                          DictionaryType dictionaryType,
                                          MatchType matchType) {
         super(context);
+        mContext = context;
         mSearchWord = searchWord;
         mDictionaryType = dictionaryType;
         mMatchType = matchType;
@@ -73,15 +75,15 @@ public class SanseidoSearchAsyncTaskLoader extends AsyncTaskLoader<SanseidoSearc
      * @return The completed SanseidoSearch object.
      */
     @Override
-    public SanseidoSearch loadInBackground() {
+    public SanseidoSearchWebView loadInBackground() {
 
         if (TextUtils.isEmpty(mSearchWord)) {
             return null;
         }
 
-        SanseidoSearch search = null;
+        SanseidoSearchWebView search = null;
         try{
-            search = new SanseidoSearch(mSearchWord, mDictionaryType, mMatchType);
+            search = new SanseidoSearchWebView(mContext ,mSearchWord, mDictionaryType, mMatchType);
         }
         catch (IOException e){
             e.printStackTrace();
