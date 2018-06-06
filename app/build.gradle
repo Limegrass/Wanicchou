@@ -20,7 +20,7 @@ android {
         }
     }
 
-    configurations.all{
+    configurations.all {
         resolutionStrategy.force 'com.android.support:support-annotations:26.1.0'
     }
 
@@ -44,7 +44,7 @@ android {
         }
     }
 
-    lintOptions{
+    lintOptions {
         checkReleaseBuilds false
     }
 
@@ -52,7 +52,7 @@ android {
         enabled = true
     }
 
-    unMock{
+    unMock {
         keepStartingWith "android.net.Uri"
         keepStartingWith "android.text.TextUtils"
     }

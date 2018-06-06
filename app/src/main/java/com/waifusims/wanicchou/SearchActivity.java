@@ -676,19 +676,16 @@ public class SearchActivity extends AppCompatActivity
     public boolean onOptionsItemSelected(MenuItem item) {
         int itemId = item.getItemId();
 
-        if (itemId == R.id.action_settings) {
-            Context context = this;
-            Class childActivity = SettingsActivity.class;
-
-//            Intent intentChangeSettings =
-//                    new Intent(context, childActivity);
-//            startActivityForResult(intentChangeSettings, HOME_ACTIVITY_REQUEST_CODE);
-
-            Intent startSettingsActivityIntent = new Intent(context, childActivity);
-            startActivity(startSettingsActivityIntent);
-            return true;
+        switch (itemId){
+            case R.id.action_settings:
+                Context context = this;
+                Class childActivity = SettingsActivity.class;
+                Intent startSettingsActivityIntent = new Intent(context, childActivity);
+                startActivity(startSettingsActivityIntent);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
-        return super.onOptionsItemSelected(item);
     }
 
     /**
