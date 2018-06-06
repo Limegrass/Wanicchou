@@ -21,8 +21,9 @@ import data.vocab.MatchType;
 
 public class SanseidoSearchWebView extends SanseidoSearch {
 
+    private static String HTML_PARSER_NAME = "HtmlParser";
+
     WebView mWebView;
-    Document html;
     DictionaryType currentDicType;
     List<String> relatedWordLinks;
 
@@ -35,27 +36,40 @@ public class SanseidoSearchWebView extends SanseidoSearch {
         mWebView = new WebView(context);
         mWebView.getSettings().setJavaScriptEnabled(true);
 
-        mWebView.addJavascriptInterface(new HtmlParserInterface(), "HtmlParser");
+        mWebView.addJavascriptInterface(new HtmlParserInterface(), HTML_PARSER_NAME);
         mWebView.setWebViewClient(new WebViewClient(){
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
+                //Calls parsePage, which calls the parseRelatedWordsPage
                 parsePage();
-                relatedWordLinks = findJSLinks(html);
             }
         });
         mWebView.loadUrl(searchUrl.toString());
     }
 
-    public void navigateRelatedWordLink(int index){
-        currentDicType = getRelatedWords().get(index).getDictionaryType();
-        mWebView.loadUrl(relatedWordLinks.get(index));
-        parsePage();
-        relatedWordLinks = findJSLinks(html);
+    @SuppressLint({"SetJavaScriptEnabled", "AddJavascriptInterface"})
+    public SanseidoSearchWebView(Context context, String baseUrl, String pageSource, DictionaryType dictionaryType){
+        super(pageSource, dictionaryType);
+        mWebView = new WebView(context);
+        mWebView.getSettings().setJavaScriptEnabled(true);
+        mWebView.addJavascriptInterface(new HtmlParserInterface(), HTML_PARSER_NAME);
+        mWebView.setWebViewClient(new WebViewClient(){
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                super.onPageFinished(view, url);
+                parsePage();
+            }
+        });
+
+        String mimeType = "text/html"; //Defaults to text/html if null
+        String encoding = "UTF-8";
+        String historyUrl = null;
+        mWebView.loadDataWithBaseURL(baseUrl, pageSource, mimeType, encoding, historyUrl);
     }
 
     public void parsePage(){
-        mWebView.loadUrl("javascript:window.HtmlParser.parse"+
+        mWebView.loadUrl("javascript:window.HtmlParser.parseRelatedWordsPage"+
                 "('<html>'+document.getElementsByTagName('html')[0].innerHTML+'</html>');");
     }
 
@@ -63,15 +77,23 @@ public class SanseidoSearchWebView extends SanseidoSearch {
         HtmlParserInterface(){
         }
         @JavascriptInterface
-        public void parse(String html){
-            SanseidoSearchWebView.this.html = Jsoup.parse(html);
-            SanseidoSearch relatedWordSearch = new SanseidoSearch(SanseidoSearchWebView.this.html, DictionaryType.EJ);
+        public void parseRelatedWordsPage(String html){
+            Document htmlDoc = Jsoup.parse(html);
+            SanseidoSearch relatedWordSearch = new SanseidoSearch(htmlDoc, DictionaryType.EJ);
             setVocabulary(relatedWordSearch.getVocabulary());
             setRelatedWords(relatedWordSearch.getRelatedWords());
+            relatedWordLinks = findJSLinks(htmlDoc);
         }
     }
 
+    public void navigateRelatedWordLink(int index){
+        currentDicType = getRelatedWords().get(index).getDictionaryType();
+        mWebView.loadUrl(relatedWordLinks.get(index));
+        parsePage();
+    }
+
     private List<String> findJSLinks(Document html){
+
         List<String> jsLinks = new ArrayList<>();
 
         Element table = html.select("table").get(RELATED_WORDS_TABLE_INDEX);
@@ -96,14 +118,6 @@ public class SanseidoSearchWebView extends SanseidoSearch {
 
     public void setmWebView(WebView mWebView) {
         this.mWebView = mWebView;
-    }
-
-    public Document getHtml() {
-        return html;
-    }
-
-    public void setHtml(Document html) {
-        this.html = html;
     }
 
     public DictionaryType getCurrentDicType() {

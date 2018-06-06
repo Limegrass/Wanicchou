@@ -96,12 +96,15 @@ public class SanseidoSearch implements Parcelable {
                 dictionaryType);
     }
 
+    public SanseidoSearch(String html, DictionaryType dictionaryType){
+        this(Jsoup.parse(html), dictionaryType);
+    }
+
     public SanseidoSearch(Document html, DictionaryType dictionaryType){
         relatedWords = findRelatedWords(html);
         vocabulary = new JapaneseVocabulary(findWordSource(html),
                 findDefinitionSource(html),
                 dictionaryType);
-
     }
 
     /**
