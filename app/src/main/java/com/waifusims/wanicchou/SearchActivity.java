@@ -133,22 +133,22 @@ public class SearchActivity extends AppCompatActivity
                     if(ssLoader.isFirstLoadFinished()){
                         ssLoader.changeDictionaryType(getCurrentDictionaryPreference());
                     }
-                    Context context = SearchActivity.this;
-                    String stringIfMissing = "";
-                    SharedPreferences sharedPreferences =
-                            PreferenceManager.getDefaultSharedPreferences(context);
-                    String searchWord = sharedPreferences.getString(getString(R.string.search_word_key),
-                            stringIfMissing);
-                    String dicTypeKey = getString(R.string.dic_type_key);
-                    //Returns null if nothing saved
-                    String dicType = sharedPreferences.getString(dicTypeKey, stringIfMissing);
-                    DictionaryType dictionaryType = DictionaryType.fromString(dicType);
-                    if(!TextUtils.isEmpty(searchWord)){
-                        showWordFromDB(searchWord, dictionaryType);
-                    }
                     break;
                 default:
             }
+        }
+        Context context = SearchActivity.this;
+        String stringIfMissing = "";
+        SharedPreferences sharedPreferences =
+                PreferenceManager.getDefaultSharedPreferences(context);
+        String searchWord = sharedPreferences.getString(getString(R.string.search_word_key),
+                stringIfMissing);
+        String dicTypeKey = getString(R.string.dic_type_key);
+        //Returns null if nothing saved
+        String dicType = sharedPreferences.getString(dicTypeKey, stringIfMissing);
+        DictionaryType dictionaryType = DictionaryType.fromString(dicType);
+        if(!TextUtils.isEmpty(searchWord)){
+            showWordFromDB(searchWord, dictionaryType);
         }
     }
 
