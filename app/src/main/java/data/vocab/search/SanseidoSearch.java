@@ -291,7 +291,7 @@ public class SanseidoSearch implements Parcelable {
      * Constructor from a parcel.
      * @param parcel The parcel to read from.
      */
-    private SanseidoSearch(Parcel parcel) {
+    protected SanseidoSearch(Parcel parcel) {
         final ClassLoader classLoader = getClass().getClassLoader();
         vocabulary = (JapaneseVocabulary) parcel.readValue(classLoader);
         relatedWords = (List<RelatedWordEntry>) parcel.readValue(classLoader);
