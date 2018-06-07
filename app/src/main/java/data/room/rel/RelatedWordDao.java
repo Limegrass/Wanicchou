@@ -22,7 +22,7 @@ public interface RelatedWordDao {
      * Insert the word relation into the database.
      * @param entity the word relation pairing entity
      */
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     public void insert(RelatedWordEntity entity);
 
     /**
