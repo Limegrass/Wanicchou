@@ -150,9 +150,9 @@ public class SanseidoSearch implements Parcelable {
      * @return the Sanseido url created
      * @throws MalformedURLException if a search url cannot be built
      */
-    protected URL buildQueryURL(String word,
-                              DictionaryType dictionaryType,
-                              MatchType matchType)
+    protected static URL buildQueryURL(String word,
+                                       DictionaryType dictionaryType,
+                                       MatchType matchType)
             throws MalformedURLException{
 
         Uri.Builder uriBuilder = Uri.parse(SANSEIDOU_BASE_URL).buildUpon();

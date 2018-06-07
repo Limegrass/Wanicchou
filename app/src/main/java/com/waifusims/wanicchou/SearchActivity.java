@@ -9,7 +9,6 @@ import android.databinding.DataBindingUtil;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -20,6 +19,7 @@ import android.view.View;
 
 import com.waifusims.wanicchou.databinding.ActivitySearchBinding;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -33,13 +33,12 @@ import data.room.voc.VocabularyViewModel;
 import data.vocab.DictionaryType;
 import data.vocab.JapaneseVocabulary;
 import data.vocab.MatchType;
+import data.vocab.search.OnJavaScriptCompleted;
 import data.vocab.search.RelatedWordEntry;
 import data.vocab.search.SanseidoSearch;
-import data.vocab.search.SanseidoSearchAsyncTaskLoader;
 import data.vocab.search.SanseidoSearchWebView;
 import util.anki.AnkiDroidHelper;
 import util.anki.AnkiDroidConfig;
-import android.support.v4.app.LoaderManager;
 
 import android.view.View.OnKeyListener;
 import android.view.KeyEvent;
@@ -49,13 +48,12 @@ import android.widget.Toast;
 // TODO: Automatically select EJ for English input
 //TODO:  Horizontal UI
 public class SearchActivity extends AppCompatActivity
-        implements LoaderManager.LoaderCallbacks<SanseidoSearchWebView> {
+        implements OnJavaScriptCompleted {
     public static final String LOG_TAG = "Wanicchou";
     private static final int ADD_PERM_REQUEST = 0;
     private static final int HOME_ACTIVITY_REQUEST_CODE = 42;
 
     private static final String SEARCH_WORD_KEY = "search";
-    private static final int SANSEIDO_SEARCH_LOADER = 322;
 
     private ActivitySearchBinding mBinding;
     private AnkiDroidHelper mAnkiDroid;
@@ -66,6 +64,7 @@ public class SearchActivity extends AppCompatActivity
     private ContextViewModel mContextViewModel;
 
     private SanseidoSearch mLastSearched;
+    private SanseidoSearchWebView mWebView;
 
     /* ==================================== +Lifecycle ================================== */
 
@@ -99,7 +98,7 @@ public class SearchActivity extends AppCompatActivity
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         mLastSearched = savedInstanceState.getParcelable(getString(R.string.last_searched_key));
-        showVocabOnUI();
+        showWordOnUI();
         showAnkiRelatedUIElements();
     }
 
@@ -123,21 +122,6 @@ public class SearchActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
-        Loader<SanseidoSearchWebView> loader =
-                getSupportLoaderManager().getLoader(SANSEIDO_SEARCH_LOADER);
-        if(loader != null){
-            switch (loader.getId()){
-                case SANSEIDO_SEARCH_LOADER:
-                    SanseidoSearchAsyncTaskLoader ssLoader = (SanseidoSearchAsyncTaskLoader) loader;
-                    //If the first load hasn't completed, we won't change the dictionary type
-                    //so we don't make the loader dictionary type inconsistent with the search type
-                    if(ssLoader.isFirstLoadFinished()){
-                        ssLoader.changeDictionaryType(getCurrentDictionaryPreference());
-                    }
-                    break;
-                default:
-            }
-        }
         Context context = SearchActivity.this;
         String stringIfMissing = "";
         SharedPreferences sharedPreferences =
@@ -183,108 +167,33 @@ public class SearchActivity extends AppCompatActivity
         }
     }
 
-    /* ==================================== +Loader and +Search ================================== */
+    /* ==================================== +Search ================================== */
 
     @Override
-    public Loader<SanseidoSearchWebView> onCreateLoader(int id, final Bundle args) {
-        DictionaryType dictionaryType = getCurrentDictionaryPreference();
-        MatchType matchType = getCurrentMatchType();
-        return new SanseidoSearchAsyncTaskLoader(this,
-                args.getString(SEARCH_WORD_KEY),
-                dictionaryType,
-                matchType
-        );
-    }
+    public void onJavaScriptCompleted() {
+        mLastSearched = mWebView.getmSanseidoSearch();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                handleSearchResult();
+            }
+        });
 
-    //TODO: Make this stop executing coming back from SettingsActivity/(OnResume?)
-    @Override
-    public void onLoadFinished(Loader<SanseidoSearchWebView> loader, SanseidoSearchWebView search) {
-        switch(loader.getId()){
-            case SANSEIDO_SEARCH_LOADER:
-                if(mToast != null){
-                    mToast.cancel();
-                }
-                String message;
-                final Context context = getApplicationContext();
-                final int searchCompleteToastDuration = Toast.LENGTH_SHORT;
-
-                SanseidoSearchAsyncTaskLoader ssLoader = (SanseidoSearchAsyncTaskLoader)loader;
-                if(search != null){
-                    if(ssLoader.isFirstLoadFinished()){
-                        if (!TextUtils.isEmpty(search.getVocabulary().getWord())) {
-                            mLastSearched = search;
-                            message = getString(R.string.word_search_success);
-
-                            showVocabOnUI();
-
-                            VocabularyEntity entity =
-                                    getWordFromDb(search.getVocabulary().getWord(),
-                                            search.getVocabulary().getDictionaryType());
-
-                            if (entity == null) {
-                                if(mVocabViewModel.insert(search.getVocabulary())) {
-                                    addWordsToRelatedWordsDb(search.getVocabulary(),
-                                            search.getRelatedWords());
-
-                                    mNoteViewModel.insertNewNote(search.getVocabulary().getWord());
-                                    mContextViewModel.insertNewContext(search.getVocabulary().getWord());
-                                }
-                            }
-                            else{
-                                String note = mNoteViewModel.getNoteOf(entity.getWord());
-                                mBinding.ankiAdditionalFields.etNotes.setText(note);
-                                mBinding.ankiAdditionalFields.tvNotes.setText(note);
-
-                                String wordContext = mContextViewModel.getContextOf(entity.getWord());
-                                mBinding.ankiAdditionalFields.etContext.setText(wordContext);
-                                mBinding.ankiAdditionalFields.tvContext.setText(wordContext);
-
-                            }
-
-                            showAnkiRelatedUIElements();
-                        }
-                        else{
-                            // TODO: Add empty entry to db for failed searches that aren't network errors.
-                            // TODO: Probably a null somewhere since I do this
-                            DictionaryType dictionaryType = ssLoader.getDictionaryType();
-                            JapaneseVocabulary invalidWord =
-                                    new JapaneseVocabulary(mBinding.wordSearch.etSearchBox
-                                            .getText().toString(), dictionaryType);
-
-                            VocabularyEntity entity =
-                                    getWordFromDb(search.getVocabulary().getWord(), dictionaryType);
-                            if (entity == null) {
-                                mVocabViewModel.insert(invalidWord);
-                            }
-                            // TODO: Maybe a different error message
-                            message = getString(R.string.word_search_failure);
-                        }
-                        ssLoader.setFirstLoadFinished(false);
-                        mToast = Toast.makeText(context, message, searchCompleteToastDuration);
-                        mToast.show();
-                    }
-                }
-                else{
-                    if(ssLoader.isFirstLoadFinished()) {
-                        // TODO: Check for network and http request time outs
-                        message = getString(R.string.word_search_failure);
-                        ssLoader.setFirstLoadFinished(false);
-                        mToast = Toast.makeText(context, message, searchCompleteToastDuration);
-                        mToast.show();
-                    }
-                }
-                break;
-            default:
-                return;
-
+        String message;
+        final Context context = getApplicationContext();
+        final int searchCompleteToastDuration = Toast.LENGTH_SHORT;
+        if (!TextUtils.isEmpty(mLastSearched.getVocabulary().getWord())) {
+            message = getString(R.string.word_search_success);
         }
-
+        else{
+            message = getString(R.string.word_search_failure);
+        }
+//        // TODO: Check for network and http request time outs
+//        message = getString(R.string.word_search_failure);
+        mToast = Toast.makeText(context, message, searchCompleteToastDuration);
+        mToast.show();
     }
 
-    // Required override but unused
-    @Override
-    public void onLoaderReset(Loader<SanseidoSearchWebView> loader) {
-    }
 
 
     /* ==================================== +Databases ================================== */
@@ -326,17 +235,13 @@ public class SearchActivity extends AppCompatActivity
 
 
     // TODO: Redo this method because it doesn't do anything, call it in onFocusChanged for tvDefinition
-    private void updateWordInDb(JapaneseVocabulary vocab){
+    private void updateDefinition(JapaneseVocabulary vocab, String definition){
         //I need the ID, so I have to DB query. Could work around if I save ID
         VocabularyEntity wordInDb = getWordFromDb(vocab.getWord(), vocab.getDictionaryType());
         if (wordInDb == null){
             return;
         }
-        wordInDb.setWord(vocab.getWord());
-        wordInDb.setDefinition(vocab.getDefintion());
-        wordInDb.setReading(vocab.getReading());
-        wordInDb.setPitch(vocab.getPitch());
-        wordInDb.setDictionaryType(vocab.getDictionaryType().toString());
+        wordInDb.setDefinition(definition);
         mVocabViewModel.update(wordInDb);
     }
 
@@ -361,7 +266,7 @@ public class SearchActivity extends AppCompatActivity
 
             mLastSearched = new SanseidoSearch(vocabulary,
                     getExistingRelatedWordsFromDb(vocabulary.getWord()));
-            showVocabOnUI();
+            showWordOnUI();
             showAnkiRelatedUIElements();
             return true;
         }
@@ -408,46 +313,14 @@ public class SearchActivity extends AppCompatActivity
         mBinding.ankiAdditionalFields.viewAnkiFields.setVisibility(View.VISIBLE);
     }
 
-    private void showVocabOnUI(){
-        JapaneseVocabulary vocabulary = mLastSearched.getVocabulary();
-        String definition = vocabulary.getDefintion();
-        mBinding.wordDefinition.tvWord.setText(vocabulary.getWord());
-        mBinding.wordDefinition.tvDefinition.setText(definition);
-        mBinding.wordDefinition.etDefinition.setText(definition);
-    }
 
     private void clearAnkiFields(){
-
         mBinding.ankiAdditionalFields.tvContext.setText("");
         mBinding.ankiAdditionalFields.etContext.setText("");
         mBinding.ankiAdditionalFields.tvNotes.setText("");
         mBinding.ankiAdditionalFields.etNotes.setText("");
     }
 
-    private void startSearchLoader(String searchWord){
-        if(!showWordFromDB(searchWord, getCurrentDictionaryPreference())) {
-            Bundle searchBundle = new Bundle();
-            searchBundle.putString(SEARCH_WORD_KEY, searchWord);
-            LoaderManager loaderManager = getSupportLoaderManager();
-            Loader<SanseidoSearchWebView> searchLoader =
-                    loaderManager.getLoader(SANSEIDO_SEARCH_LOADER);
-            if (searchLoader == null) {
-                loaderManager.initLoader(SANSEIDO_SEARCH_LOADER,
-                        searchBundle, SearchActivity.this);
-            } else {
-                ((SanseidoSearchAsyncTaskLoader) searchLoader).changeDictionaryType(getCurrentDictionaryPreference());
-                loaderManager.restartLoader(SANSEIDO_SEARCH_LOADER,
-                        searchBundle, SearchActivity.this);
-            }
-
-            Context context = SearchActivity.this;
-            final String searchingText = getString(R.string.word_searching);
-            final int searchingToastDuration = Toast.LENGTH_LONG;
-
-            mToast = Toast.makeText(context, searchingText, searchingToastDuration);
-            mToast.show();
-        }
-    }
     //TODO: Change click to expand a menu and add associated UI elements
     //TODO: Maybe implement a clozed type when sentence search is included
     //TODO: Duplicate checking
@@ -494,6 +367,7 @@ public class SearchActivity extends AppCompatActivity
                 if (!hasFocus){
                     String changedText = mBinding.wordDefinition.etDefinition.getText().toString();
                     mBinding.wordDefinition.tvDefinition.setText(changedText);
+                    updateDefinition(mLastSearched.getVocabulary(), changedText);
                     mBinding.wordDefinition.vsDefinition.showNext();
                     InputMethodManager inputMethodManager =
                             (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -653,9 +527,22 @@ public class SearchActivity extends AppCompatActivity
                         case KeyEvent.KEYCODE_ENTER:
                             String searchWord = mBinding.wordSearch.etSearchBox.getText().toString();
                             clearAnkiFields();
-                            // If the word is not in the DB, we need to make a search
-
-                            startSearchLoader(searchWord);
+                            // If the word isn't saved in our DB, start a new search for it.
+                            if(!showWordFromDB(searchWord, getCurrentDictionaryPreference())){
+                                try {
+                                    Context context = SearchActivity.this;
+                                    OnJavaScriptCompleted listener = SearchActivity.this;
+                                    mWebView = new SanseidoSearchWebView(
+                                            context,
+                                            searchWord,
+                                            getCurrentDictionaryPreference(),
+                                            getCurrentMatchType(),
+                                            listener
+                                    );
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                            }
 
                             return true;
                         default:
@@ -666,6 +553,63 @@ public class SearchActivity extends AppCompatActivity
                 return false;
             }
         });
+    }
+
+    private void handleSearchResult(){
+        if(mLastSearched != null){
+            if (!TextUtils.isEmpty(mLastSearched.getVocabulary().getWord())) {
+                VocabularyEntity entity =
+                        getWordFromDb(mLastSearched.getVocabulary().getWord(),
+                                mLastSearched.getVocabulary().getDictionaryType());
+
+                if (entity == null) {
+                    if(mVocabViewModel.insert(mLastSearched.getVocabulary())) {
+                        addWordsToRelatedWordsDb(mLastSearched.getVocabulary(),
+                                mLastSearched.getRelatedWords());
+                        mNoteViewModel.insertNewNote(mLastSearched.getVocabulary().getWord());
+                        mContextViewModel.insertNewContext(mLastSearched.getVocabulary().getWord());
+                    }
+                }
+                showWordOnUI();
+
+                showAnkiRelatedUIElements();
+            }
+            else{
+                addInvalidWord(mLastSearched);
+            }
+        }
+    }
+
+    private void showWordOnUI(){
+        JapaneseVocabulary vocabulary = mLastSearched.getVocabulary();
+        String definition = vocabulary.getDefintion();
+        mBinding.wordDefinition.tvWord.setText(vocabulary.getWord());
+        mBinding.wordDefinition.tvDefinition.setText(definition);
+        mBinding.wordDefinition.etDefinition.setText(definition);
+
+        String note = mNoteViewModel.getNoteOf(mLastSearched.getVocabulary().getWord());
+        mBinding.ankiAdditionalFields.etNotes.setText(note);
+        mBinding.ankiAdditionalFields.tvNotes.setText(note);
+
+        String wordContext = mContextViewModel.getContextOf(mLastSearched.getVocabulary().getWord());
+        mBinding.ankiAdditionalFields.etContext.setText(wordContext);
+        mBinding.ankiAdditionalFields.tvContext.setText(wordContext);
+    }
+
+    private void addInvalidWord(SanseidoSearch search){
+        // TODO: Add empty entry to db for failed searches that aren't network errors.
+        // TODO: Probably a null somewhere since I do this
+        DictionaryType dictionaryType = search.getVocabulary().getDictionaryType();
+        JapaneseVocabulary invalidWord =
+                new JapaneseVocabulary(mBinding.wordSearch.etSearchBox
+                        .getText().toString(), dictionaryType);
+
+        VocabularyEntity entity =
+                getWordFromDb(search.getVocabulary().getWord(), dictionaryType);
+        if (entity == null) {
+            mVocabViewModel.insert(invalidWord);
+        }
+        // TODO: Maybe a different error message
     }
 
     @Override

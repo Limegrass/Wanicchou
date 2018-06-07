@@ -2,8 +2,6 @@ package data.vocab.search;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -21,28 +19,26 @@ import java.util.List;
 import data.vocab.DictionaryType;
 import data.vocab.MatchType;
 
-public class SanseidoSearchWebView extends SanseidoSearch implements Parcelable {
+public class SanseidoSearchWebView extends WebView {
 
     private static String HTML_PARSER_NAME = "HtmlParser";
 
-    Document mHtml;
-    Context mContext;
-    WebView mWebView;
-    DictionaryType currentDicType;
-    List<String> relatedWordLinks;
+    private Document mHtml;
+    private Context mContext;
+    private DictionaryType currentDicType;
+    private List<String> relatedWordLinks;
+    private SanseidoSearch mSanseidoSearch;
 
     @SuppressLint({"SetJavaScriptEnabled", "AddJavascriptInterface"})
-    public SanseidoSearchWebView(Context context, String wordToSearch, DictionaryType dictionaryType, MatchType matchType) throws IOException {
-        super(wordToSearch, dictionaryType, matchType);
+    public SanseidoSearchWebView(final Context context, String wordToSearch, DictionaryType dictionaryType, MatchType matchType, OnJavaScriptCompleted listener) throws IOException {
+        super(context);
         mContext = context;
         currentDicType = dictionaryType;
 
-        URL searchUrl = super.buildQueryURL(wordToSearch, dictionaryType, matchType);
-        mWebView = new WebView(context);
-        mWebView.getSettings().setJavaScriptEnabled(true);
-
-        mWebView.addJavascriptInterface(new HtmlParserInterface(), HTML_PARSER_NAME);
-        mWebView.setWebViewClient(new WebViewClient(){
+        URL searchUrl = SanseidoSearch.buildQueryURL(wordToSearch, dictionaryType, matchType);
+        this.addJavascriptInterface(new HtmlParserInterface(listener), HTML_PARSER_NAME);
+        this.getSettings().setJavaScriptEnabled(true);
+        this.setWebViewClient(new WebViewClient(){
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
@@ -50,18 +46,18 @@ public class SanseidoSearchWebView extends SanseidoSearch implements Parcelable 
                 parsePage();
             }
         });
-        mWebView.loadUrl(searchUrl.toString());
+        this.loadUrl(searchUrl.toString());
     }
 
     @SuppressLint({"SetJavaScriptEnabled", "AddJavascriptInterface"})
-    public SanseidoSearchWebView(Context context, String baseUrl, String pageSource, DictionaryType dictionaryType){
-        super(pageSource, dictionaryType);
+    public SanseidoSearchWebView(Context context, String baseUrl, String pageSource, DictionaryType dictionaryType, OnJavaScriptCompleted listener){
+        super(context);
+        mSanseidoSearch = new SanseidoSearch(pageSource, dictionaryType);
         mContext = context;
-        mWebView = new WebView(context);
-        mWebView.getSettings().setJavaScriptEnabled(true);
-        mWebView.addJavascriptInterface(new HtmlParserInterface(), HTML_PARSER_NAME);
+        this.getSettings().setJavaScriptEnabled(true);
+        this.addJavascriptInterface(new HtmlParserInterface(listener), HTML_PARSER_NAME);
 
-        mWebView.setWebViewClient(new WebViewClient(){
+        this.setWebViewClient(new WebViewClient(){
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
@@ -72,30 +68,31 @@ public class SanseidoSearchWebView extends SanseidoSearch implements Parcelable 
         String mimeType = "text/html"; //Defaults to text/html if null
         String encoding = "UTF-8";
         String historyUrl = null;
-        mWebView.loadDataWithBaseURL(baseUrl, pageSource, mimeType, encoding, historyUrl);
+        this.loadDataWithBaseURL(baseUrl, pageSource, mimeType, encoding, historyUrl);
     }
 
     public void parsePage(){
-        mWebView.loadUrl("javascript:window.HtmlParser.parsePage"+
+        this.loadUrl("javascript:window.HtmlParser.parsePage"+
                 "('<html>'+document.getElementsByTagName('html')[0].innerHTML+'</html>');");
     }
 
-    private class HtmlParserInterface{
-        HtmlParserInterface(){
+    private class HtmlParserInterface {
+        OnJavaScriptCompleted listener;
+        HtmlParserInterface(OnJavaScriptCompleted listener){
+            this.listener = listener;
         }
         @JavascriptInterface
         public void parsePage(String html){
             mHtml = Jsoup.parse(html);
-            SanseidoSearch relatedWordSearch = new SanseidoSearch(mHtml, DictionaryType.EJ);
-            setVocabulary(relatedWordSearch.getVocabulary());
-            setRelatedWords(relatedWordSearch.getRelatedWords());
+            mSanseidoSearch = new SanseidoSearch(mHtml, DictionaryType.EJ);
             relatedWordLinks = findJSLinks(mHtml);
+            listener.onJavaScriptCompleted();
         }
     }
 
     public void navigateRelatedWordLink(int index){
-        currentDicType = getRelatedWords().get(index).getDictionaryType();
-        mWebView.loadUrl(relatedWordLinks.get(index));
+        currentDicType = mSanseidoSearch.getRelatedWords().get(index).getDictionaryType();
+        this.loadUrl(relatedWordLinks.get(index));
         parsePage();
     }
 
@@ -103,7 +100,7 @@ public class SanseidoSearchWebView extends SanseidoSearch implements Parcelable 
 
         List<String> jsLinks = new ArrayList<>();
 
-        Element table = html.select("table").get(RELATED_WORDS_TABLE_INDEX);
+        Element table = html.select("table").get(SanseidoSearch.RELATED_WORDS_TABLE_INDEX);
         Elements rows = table.select("tr");
 
         for (Element row : rows) {
@@ -117,14 +114,6 @@ public class SanseidoSearchWebView extends SanseidoSearch implements Parcelable 
             }
         }
         return jsLinks;
-    }
-
-    public WebView getmWebView() {
-        return mWebView;
-    }
-
-    public void setmWebView(WebView mWebView) {
-        this.mWebView = mWebView;
     }
 
     public DictionaryType getCurrentDicType() {
@@ -143,73 +132,13 @@ public class SanseidoSearchWebView extends SanseidoSearch implements Parcelable 
         this.relatedWordLinks = relatedWordLinks;
     }
 
-    @Override
-    public int describeContents() {
-        return super.describeContents();
+
+    public SanseidoSearch getmSanseidoSearch() {
+        return mSanseidoSearch;
     }
 
-    @Override
-    public void writeToParcel(Parcel parcel, int i) {
-        super.writeToParcel(parcel, i);
-        parcel.writeString(mWebView.getUrl());
-        parcel.writeString(mHtml.toString());
-        parcel.writeString(currentDicType.toString());
-        parcel.writeValue(relatedWordLinks);
-        parcel.writeValue(mContext);
+    public void setmSanseidoSearch(SanseidoSearch mSanseidoSearch) {
+        this.mSanseidoSearch = mSanseidoSearch;
     }
-
-
-
-    /**
-     * Creator for parcelization.
-     */
-    public static final Parcelable.Creator<SanseidoSearchWebView> CREATOR
-            = new Parcelable.Creator<SanseidoSearchWebView>(){
-        @Override
-        public SanseidoSearchWebView createFromParcel(Parcel parcel) {
-            return new SanseidoSearchWebView(parcel);
-        }
-
-        @Override
-        public SanseidoSearchWebView[] newArray(int size) {
-            return new SanseidoSearchWebView[size];
-        }
-    };
-
-    /**
-     * Constructor from a parcel.
-     * @param parcel The parcel to read from.
-     */
-    private SanseidoSearchWebView(Parcel parcel) {
-        super(parcel);
-        final ClassLoader classLoader = getClass().getClassLoader();
-        String url = parcel.readString();
-        String html = parcel.readString();
-
-        currentDicType = DictionaryType.fromString(parcel.readString());
-        relatedWordLinks = (List<String>)parcel.readValue(classLoader);
-        mContext = (Context) parcel.readValue(classLoader);
-
-
-        String mimeType = "text/html"; //Defaults to text/html if null
-        String encoding = "UTF-8";
-        String historyUrl = null;
-
-        mWebView = new WebView(mContext);
-        mWebView.getSettings().setJavaScriptEnabled(true);
-        mWebView.addJavascriptInterface(new HtmlParserInterface(), HTML_PARSER_NAME);
-        mWebView.setWebViewClient(new WebViewClient(){
-            @Override
-            public void onPageFinished(WebView view, String url) {
-                super.onPageFinished(view, url);
-                parsePage();
-            }
-        });
-
-        mWebView.loadDataWithBaseURL(url, html, mimeType, encoding, historyUrl);
-    }
-
-
-
 
 }
