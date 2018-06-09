@@ -85,8 +85,8 @@ public class SanseidoSearchWebView extends WebView implements DictionaryWebPage 
         @JavascriptInterface
         public void parsePage(String html){
             mHtml = Jsoup.parse(html);
-            mSearch = new SanseidoSearch(mHtml, JapaneseDictionaryType.EJ);
             relatedWordLinks = findJSLinks(mHtml);
+            mSearch = new SanseidoSearch(mHtml, currentDictionaryType);
             listener.onJavaScriptCompleted();
         }
     }
