@@ -10,7 +10,8 @@ import android.arch.persistence.room.Update;
 import java.util.List;
 
 import data.room.voc.VocabularyEntity;
-import data.vocab.DictionaryType;
+import data.vocab.jp.JapaneseDictionaryType;
+import data.vocab.models.DictionaryType;
 
 
 /**

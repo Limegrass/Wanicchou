@@ -2,12 +2,10 @@ package data.room.voc;
 
 import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
-import android.arch.lifecycle.LiveData;
 
-import java.util.List;
-
-import data.vocab.DictionaryType;
-import data.vocab.JapaneseVocabulary;
+import data.vocab.jp.JapaneseDictionaryType;
+import data.vocab.models.DictionaryType;
+import data.vocab.models.Vocabulary;
 
 /**
  * Vocab ViewModel
@@ -38,7 +36,7 @@ public class VocabularyViewModel extends AndroidViewModel{
      * @param vocabulary The word to insert into the database.
      * @return True if insert was successful, false if not (already existing).
      */
-    public boolean insert(JapaneseVocabulary vocabulary){
+    public boolean insert(Vocabulary vocabulary){
         if(getWord(vocabulary.getWord(), vocabulary.getDictionaryType()) == null){
             VocabularyEntity vocabularyEntity = new VocabularyEntity(vocabulary);
             mRepo.insert(vocabularyEntity);

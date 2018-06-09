@@ -1,4 +1,4 @@
-package data.vocab.search;
+package data.vocab.jp.search.sanseido;
 
 import android.net.Uri;
 import android.os.Parcel;
@@ -17,16 +17,18 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import data.vocab.DictionaryType;
-import data.vocab.JapaneseVocabulary;
-import data.vocab.MatchType;
+import data.vocab.jp.JapaneseDictionaryType;
+import data.vocab.jp.JapaneseVocabulary;
+import data.vocab.RelatedWordEntry;
+import data.vocab.models.DictionaryType;
+import data.vocab.models.Search;
 
 //TODO: Equals, Hashcode methods
 
 /**
  * Created by Limegrass on 3/19/2018.
  */
-public class SanseidoSearch implements Parcelable {
+public class SanseidoSearch implements Search {
     private final static String TAG = SanseidoSearch.class.getSimpleName();
 
     private final String SANSEIDO_WORD_ID = "word";
@@ -74,7 +76,7 @@ public class SanseidoSearch implements Parcelable {
      */
     public SanseidoSearch(String wordToSearch,
                           DictionaryType dictionaryType,
-                          MatchType matchType)
+                          SanseidoMatchType matchType)
             throws IOException {
         //TODO: Fix relatedWords searching, as it is not working properly for forwards search
         if(TextUtils.isEmpty(wordToSearch)) {
@@ -152,12 +154,12 @@ public class SanseidoSearch implements Parcelable {
      */
     protected static URL buildQueryURL(String word,
                                        DictionaryType dictionaryType,
-                                       MatchType matchType)
+                                       SanseidoMatchType matchType)
             throws MalformedURLException{
 
         Uri.Builder uriBuilder = Uri.parse(SANSEIDOU_BASE_URL).buildUpon();
 
-        uriBuilder.appendQueryParameter(PARAM_ST, matchType.sanseidoKey());
+        uriBuilder.appendQueryParameter(PARAM_ST, matchType.toKey());
         uriBuilder.appendQueryParameter(PARAM_DORDER, DORDER_DEFAULT);
         uriBuilder.appendQueryParameter(PARAM_WORD_QUERY, word);
         uriBuilder.appendQueryParameter(PARAM_DIC_PREFIX + dictionaryType.toString(), SET_LANG);
@@ -200,12 +202,12 @@ public class SanseidoSearch implements Parcelable {
 
             String dictionaryTypeString = columns.get(RELATED_WORDS_TYPE_CLASS_INDEX).text();
 
-            //Essentially using DictionaryType enum by substringing out the brackets 【 】
+            //Essentially using JapaneseDictionaryType enum by substringing out the brackets 【 】
             if (dictionaryTypeString != null){
                 dictionaryTypeString = dictionaryTypeString.substring(1, dictionaryTypeString.length()-1);
 
                 DictionaryType dictionaryType =
-                        DictionaryType.fromJapaneseDictionaryKanji(dictionaryTypeString);
+                        JapaneseDictionaryType.fromJapaneseDictionaryKanji(dictionaryTypeString);
 
                 String tableEntry = columns.get(RELATED_WORDS_VOCAB_INDEX).text();
                 String isolatedWord = JapaneseVocabulary.isolateWord(tableEntry);

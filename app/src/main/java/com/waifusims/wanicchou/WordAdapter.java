@@ -10,7 +10,7 @@ import android.widget.TextView;
 
 import java.util.List;
 
-import data.vocab.search.RelatedWordEntry;
+import data.vocab.RelatedWordEntry;
 
 /**
  * RecyclerView adapter for related words
@@ -71,7 +71,7 @@ public class WordAdapter extends RecyclerView.Adapter<WordAdapter.WordViewHolder
         }
 
         void bind(int listIndex){
-            tvDictionary.setText(relatedWords.get(listIndex).getDictionaryType().toJapaneseDictionaryKanji());
+            tvDictionary.setText(relatedWords.get(listIndex).getDictionaryType().toDisplayText());
             tvWord.setText(relatedWords.get(listIndex).getRelatedWord());
         }
 

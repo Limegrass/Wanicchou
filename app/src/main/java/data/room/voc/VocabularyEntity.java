@@ -6,7 +6,7 @@ import android.arch.persistence.room.Index;
 import android.arch.persistence.room.PrimaryKey;
 import android.support.annotation.NonNull;
 
-import data.vocab.JapaneseVocabulary;
+import data.vocab.models.Vocabulary;
 
 /**
  * Vocabulary Entry for the Room Persistence Library, for Words and their definitions.
@@ -54,9 +54,9 @@ public class VocabularyEntity {
      * Constructor given a vocabulary word, along with notes and context for the vocab.
      * @param vocabulary The vocabulary word to construct the entity from.
      */
-    public VocabularyEntity(JapaneseVocabulary vocabulary){
+    public VocabularyEntity(Vocabulary vocabulary){
         word = vocabulary.getWord();
-        definition = vocabulary.getDefintion();
+        definition = vocabulary.getDefinition();
         reading = vocabulary.getReading();
         dictionaryType = vocabulary.getDictionaryType().toString();
         pitch = vocabulary.getPitch();

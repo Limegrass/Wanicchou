@@ -1,17 +1,19 @@
-package data.vocab;
+package data.vocab.jp.search.sanseido;
+
+import data.vocab.models.MatchType;
 
 /**
  * Created by Limegrass on 5/9/2018.
  */
 
-public enum MatchType {
+public enum SanseidoMatchType implements MatchType {
     FORWARDS, EXACT, BACKWARDS, PARTIAL, FULL_TEXT;
 
     /**
      * Converts the match type to its corresponding key for a Sanseido search.
      * @return A string of the search key for Sanseido Searches.
      */
-    public String sanseidoKey(){
+    public String toKey(){
         switch (this){
             case FORWARDS:
                 return "0";
@@ -30,11 +32,11 @@ public enum MatchType {
 
 
     /**
-     * Converts the Sanseido search key into a MatchType enum object, for clarity.
+     * Converts the Sanseido search key into a SanseidoMatchType enum object, for clarity.
      * @param key The Sanseido search key.
-     * @return The MatchType for the Sanseido key if it is a valid key, else null.
+     * @return The SanseidoMatchType for the Sanseido key if it is a valid key, else null.
      */
-    public static MatchType fromString(String key){
+    public static SanseidoMatchType fromKey(String key){
         switch (key) {
             case "0":
                 return FORWARDS;

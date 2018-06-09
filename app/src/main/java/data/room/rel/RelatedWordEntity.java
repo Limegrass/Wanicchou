@@ -7,7 +7,6 @@ import android.arch.persistence.room.PrimaryKey;
 import android.support.annotation.NonNull;
 
 import data.room.voc.VocabularyEntity;
-import data.vocab.DictionaryType;
 
 /**
  * An entry in the RelatedWords Database showcasing how words are related to each other.

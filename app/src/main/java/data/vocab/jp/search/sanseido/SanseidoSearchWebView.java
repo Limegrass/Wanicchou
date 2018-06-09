@@ -1,4 +1,4 @@
-package data.vocab.search;
+package data.vocab.jp.search.sanseido;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -16,24 +16,26 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import data.vocab.DictionaryType;
-import data.vocab.MatchType;
+import data.vocab.jp.JapaneseDictionaryType;
+import data.vocab.models.DictionaryType;
+import data.vocab.models.DictionaryWebPage;
+import data.vocab.OnJavaScriptCompleted;
+import data.vocab.models.Search;
+import data.vocab.models.Vocabulary;
 
-public class SanseidoSearchWebView extends WebView {
+public class SanseidoSearchWebView extends WebView implements DictionaryWebPage {
 
     private static String HTML_PARSER_NAME = "HtmlParser";
 
     private Document mHtml;
-    private Context mContext;
-    private DictionaryType currentDicType;
+    private DictionaryType currentDictionaryType;
     private List<String> relatedWordLinks;
-    private SanseidoSearch mSanseidoSearch;
+    private Search mSearch;
 
     @SuppressLint({"SetJavaScriptEnabled", "AddJavascriptInterface"})
-    public SanseidoSearchWebView(final Context context, String wordToSearch, DictionaryType dictionaryType, MatchType matchType, OnJavaScriptCompleted listener) throws IOException {
+    public SanseidoSearchWebView(final Context context, String wordToSearch, DictionaryType dictionaryType, SanseidoMatchType matchType, OnJavaScriptCompleted listener) throws IOException {
         super(context);
-        mContext = context;
-        currentDicType = dictionaryType;
+        currentDictionaryType = dictionaryType;
 
         URL searchUrl = SanseidoSearch.buildQueryURL(wordToSearch, dictionaryType, matchType);
         this.addJavascriptInterface(new HtmlParserInterface(listener), HTML_PARSER_NAME);
@@ -52,8 +54,7 @@ public class SanseidoSearchWebView extends WebView {
     @SuppressLint({"SetJavaScriptEnabled", "AddJavascriptInterface"})
     public SanseidoSearchWebView(Context context, String baseUrl, String pageSource, DictionaryType dictionaryType, OnJavaScriptCompleted listener){
         super(context);
-        mSanseidoSearch = new SanseidoSearch(pageSource, dictionaryType);
-        mContext = context;
+        mSearch = new SanseidoSearch(pageSource, dictionaryType);
         this.getSettings().setJavaScriptEnabled(true);
         this.addJavascriptInterface(new HtmlParserInterface(listener), HTML_PARSER_NAME);
 
@@ -84,14 +85,15 @@ public class SanseidoSearchWebView extends WebView {
         @JavascriptInterface
         public void parsePage(String html){
             mHtml = Jsoup.parse(html);
-            mSanseidoSearch = new SanseidoSearch(mHtml, DictionaryType.EJ);
+            mSearch = new SanseidoSearch(mHtml, JapaneseDictionaryType.EJ);
             relatedWordLinks = findJSLinks(mHtml);
             listener.onJavaScriptCompleted();
         }
     }
 
-    public void navigateRelatedWordLink(int index){
-        currentDicType = mSanseidoSearch.getRelatedWords().get(index).getDictionaryType();
+    @Override
+    public void navigateRelatedWordLinks(int index){
+        currentDictionaryType = mSearch.getRelatedWords().get(index).getDictionaryType();
         this.loadUrl(relatedWordLinks.get(index));
         parsePage();
     }
@@ -116,12 +118,12 @@ public class SanseidoSearchWebView extends WebView {
         return jsLinks;
     }
 
-    public DictionaryType getCurrentDicType() {
-        return currentDicType;
+    public DictionaryType getCurrentDictionaryType() {
+        return currentDictionaryType;
     }
 
-    public void setCurrentDicType(DictionaryType currentDicType) {
-        this.currentDicType = currentDicType;
+    public void setCurrentDictionaryType(JapaneseDictionaryType dictionaryType) {
+        this.currentDictionaryType = dictionaryType;
     }
 
     public List<String> getRelatedWordLinks() {
@@ -133,12 +135,13 @@ public class SanseidoSearchWebView extends WebView {
     }
 
 
-    public SanseidoSearch getmSanseidoSearch() {
-        return mSanseidoSearch;
+    @Override
+    public Vocabulary getVocabulary(){
+        return mSearch.getVocabulary();
     }
 
-    public void setmSanseidoSearch(SanseidoSearch mSanseidoSearch) {
-        this.mSanseidoSearch = mSanseidoSearch;
+    @Override
+    public Search getSearch() {
+        return mSearch;
     }
-
 }

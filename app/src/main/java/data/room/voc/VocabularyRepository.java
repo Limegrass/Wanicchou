@@ -1,14 +1,13 @@
 package data.room.voc;
 
 import android.app.Application;
-import android.arch.lifecycle.LiveData;
 import android.os.AsyncTask;
 
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import data.room.WanicchouDatabase;
-import data.vocab.DictionaryType;
+import data.vocab.jp.JapaneseDictionaryType;
+import data.vocab.models.DictionaryType;
 
 /**
  * Repository to abstract the RPM of the Vocabulary Database

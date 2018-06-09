@@ -6,16 +6,20 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.databinding.DataBindingUtil;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.text.TextUtils;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnKeyListener;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.Toast;
 
 import com.waifusims.wanicchou.databinding.ActivitySearchBinding;
 
@@ -30,20 +34,19 @@ import data.room.rel.RelatedWordEntity;
 import data.room.rel.RelatedWordViewModel;
 import data.room.voc.VocabularyEntity;
 import data.room.voc.VocabularyViewModel;
-import data.vocab.DictionaryType;
-import data.vocab.JapaneseVocabulary;
-import data.vocab.MatchType;
-import data.vocab.search.OnJavaScriptCompleted;
-import data.vocab.search.RelatedWordEntry;
-import data.vocab.search.SanseidoSearch;
-import data.vocab.search.SanseidoSearchWebView;
-import util.anki.AnkiDroidHelper;
+import data.vocab.jp.JapaneseDictionaryType;
+import data.vocab.jp.search.sanseido.SanseidoMatchType;
+import data.vocab.models.DictionaryType;
+import data.vocab.models.DictionaryWebPage;
+import data.vocab.jp.JapaneseVocabulary;
+import data.vocab.OnJavaScriptCompleted;
+import data.vocab.RelatedWordEntry;
+import data.vocab.models.Search;
+import data.vocab.models.Vocabulary;
+import data.vocab.jp.search.sanseido.SanseidoSearch;
+import data.vocab.jp.search.sanseido.SanseidoSearchWebView;
 import util.anki.AnkiDroidConfig;
-
-import android.view.View.OnKeyListener;
-import android.view.KeyEvent;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.Toast;
+import util.anki.AnkiDroidHelper;
 
 // TODO: Automatically select EJ for English input
 //TODO:  Horizontal UI
@@ -63,8 +66,8 @@ public class SearchActivity extends AppCompatActivity
     private NoteViewModel mNoteViewModel;
     private ContextViewModel mContextViewModel;
 
-    private SanseidoSearch mLastSearched;
-    private SanseidoSearchWebView mWebView;
+    private Search mLastSearched;
+    private DictionaryWebPage mWebView;
 
     /* ==================================== +Lifecycle ================================== */
 
@@ -131,7 +134,7 @@ public class SearchActivity extends AppCompatActivity
         String dicTypeKey = getString(R.string.dic_type_key);
         //Returns null if nothing saved
         String dicType = sharedPreferences.getString(dicTypeKey, stringIfMissing);
-        DictionaryType dictionaryType = DictionaryType.fromString(dicType);
+        DictionaryType dictionaryType = JapaneseDictionaryType.fromKey(dicType);
         if(!TextUtils.isEmpty(searchWord)){
             showWordFromDB(searchWord, dictionaryType);
         }
@@ -171,7 +174,7 @@ public class SearchActivity extends AppCompatActivity
 
     @Override
     public void onJavaScriptCompleted() {
-        mLastSearched = mWebView.getmSanseidoSearch();
+        mLastSearched = mWebView.getSearch();
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -206,7 +209,7 @@ public class SearchActivity extends AppCompatActivity
 
 
         List<RelatedWordEntry> relatedWords = new ArrayList<>();
-        for (DictionaryType dictionaryType : DictionaryType.values()){
+        for (JapaneseDictionaryType dictionaryType : JapaneseDictionaryType.values()){
             List<RelatedWordEntity> relatedWordEntities =
                     mRelatedWordsViewModel.getRelatedWordList(entity, dictionaryType);
             for(RelatedWordEntity relatedWordEntity : relatedWordEntities){
@@ -216,7 +219,7 @@ public class SearchActivity extends AppCompatActivity
         return relatedWords;
     }
 
-    private void addWordsToRelatedWordsDb(JapaneseVocabulary vocabulary, List<RelatedWordEntry> newRelatedWords){
+    private void addWordsToRelatedWordsDb(Vocabulary vocabulary, List<RelatedWordEntry> newRelatedWords){
         VocabularyEntity entity = getWordFromDb(vocabulary.getWord(), vocabulary.getDictionaryType());
         if (entity == null){
             return;
@@ -235,7 +238,7 @@ public class SearchActivity extends AppCompatActivity
 
 
     // TODO: Redo this method because it doesn't do anything, call it in onFocusChanged for tvDefinition
-    private void updateDefinition(JapaneseVocabulary vocab, String definition){
+    private void updateDefinition(Vocabulary vocab, String definition){
         //I need the ID, so I have to DB query. Could work around if I save ID
         VocabularyEntity wordInDb = getWordFromDb(vocab.getWord(), vocab.getDictionaryType());
         if (wordInDb == null){
@@ -249,7 +252,7 @@ public class SearchActivity extends AppCompatActivity
         VocabularyEntity vocabEntity = getWordFromDb(searchWord, dictionaryType);
         //TODO: Give option of web search
         if(vocabEntity != null){
-            if (DictionaryType.fromString(vocabEntity.getDictionaryType()) != getCurrentDictionaryPreference()){
+            if (JapaneseDictionaryType.fromKey(vocabEntity.getDictionaryType()) != getCurrentDictionaryPreference()){
                 return false;
             }
 
@@ -290,17 +293,17 @@ public class SearchActivity extends AppCompatActivity
                 getString(R.string.pref_dictionary_type_key),
                 getString(R.string.pref_dictionary_type_default)
         );
-        return DictionaryType.fromString(dictionaryTypeString);
+        return JapaneseDictionaryType.fromKey(dictionaryTypeString);
     }
 
-    private MatchType getCurrentMatchType(){
+    private SanseidoMatchType getCurrentMatchType(){
         Context context = this;
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         String matchTypeString = sharedPreferences.getString(
                 getString(R.string.pref_match_type_key),
                 getString(R.string.pref_match_type_default)
         );
-        return MatchType.fromString(matchTypeString);
+        return SanseidoMatchType.fromKey(matchTypeString);
     }
 
     /* ==================================== +UI and +Helpers ================================== */
@@ -340,7 +343,11 @@ public class SearchActivity extends AppCompatActivity
         definition = definition.replaceAll("\n", "<br>");
         fields[AnkiDroidConfig.FIELDS_INDEX_DEFINITION] = definition;
 
-        fields[AnkiDroidConfig.FIELDS_INDEX_FURIGANA] = mLastSearched.getVocabulary().getFurigana();
+        if(mLastSearched.getVocabulary() instanceof JapaneseVocabulary){
+            //TODO: Bandaided after interface implementation, something cleaner
+            fields[AnkiDroidConfig.FIELDS_INDEX_FURIGANA] =
+                    ((JapaneseVocabulary)mLastSearched.getVocabulary()).getFurigana();
+        }
         fields[AnkiDroidConfig.FIELDS_INDEX_PITCH] = mLastSearched.getVocabulary().getPitch();
 
         String notes = mBinding.ankiAdditionalFields.etNotes.getText().toString();
@@ -581,8 +588,8 @@ public class SearchActivity extends AppCompatActivity
     }
 
     private void showWordOnUI(){
-        JapaneseVocabulary vocabulary = mLastSearched.getVocabulary();
-        String definition = vocabulary.getDefintion();
+        Vocabulary vocabulary = mLastSearched.getVocabulary();
+        String definition = vocabulary.getDefinition();
         mBinding.wordDefinition.tvWord.setText(vocabulary.getWord());
         mBinding.wordDefinition.tvDefinition.setText(definition);
         mBinding.wordDefinition.etDefinition.setText(definition);
@@ -596,7 +603,7 @@ public class SearchActivity extends AppCompatActivity
         mBinding.ankiAdditionalFields.tvContext.setText(wordContext);
     }
 
-    private void addInvalidWord(SanseidoSearch search){
+    private void addInvalidWord(Search search){
         // TODO: Add empty entry to db for failed searches that aren't network errors.
         // TODO: Probably a null somewhere since I do this
         DictionaryType dictionaryType = search.getVocabulary().getDictionaryType();

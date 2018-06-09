@@ -1,9 +1,10 @@
-package data.vocab.search;
+package data.vocab;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import data.vocab.DictionaryType;
+import data.vocab.jp.JapaneseDictionaryType;
+import data.vocab.models.DictionaryType;
 
 public class RelatedWordEntry implements Parcelable {
     private String relatedWord;
@@ -16,7 +17,7 @@ public class RelatedWordEntry implements Parcelable {
 
     public RelatedWordEntry(String relatedWord, String dictionaryTypeString) {
         this.relatedWord = relatedWord;
-        this.dictionaryType = DictionaryType.fromString(dictionaryTypeString);
+        this.dictionaryType = JapaneseDictionaryType.fromKey(dictionaryTypeString);
     }
 
 
@@ -32,7 +33,7 @@ public class RelatedWordEntry implements Parcelable {
         return dictionaryType;
     }
 
-    public void setDictionaryType(DictionaryType dictionaryType) {
+    public void setDictionaryType(JapaneseDictionaryType dictionaryType) {
         this.dictionaryType = dictionaryType;
     }
 
@@ -51,7 +52,7 @@ public class RelatedWordEntry implements Parcelable {
 
     private RelatedWordEntry(Parcel in) {
         relatedWord = in.readString();
-        dictionaryType = DictionaryType.fromString(in.readString());
+        dictionaryType = JapaneseDictionaryType.fromKey(in.readString());
     }
 
 

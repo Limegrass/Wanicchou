@@ -2,16 +2,15 @@ package data.room.rel;
 
 import android.app.Application;
 import android.os.AsyncTask;
-import android.sax.RootElement;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import data.room.WanicchouDatabase;
 import data.room.voc.VocabularyEntity;
-import data.vocab.DictionaryType;
+import data.vocab.jp.JapaneseDictionaryType;
+import data.vocab.models.DictionaryType;
 
 /**
  * A repository class to abstract all the Room Persistence Library elements underneath.
@@ -68,7 +67,8 @@ public class RelatedWordRepository {
     public List<RelatedWordEntity> getRelatedWordList(VocabularyEntity vocabularyEntity) {
         List<RelatedWordEntity> ret = new ArrayList<>();
         try {
-            for(DictionaryType type : DictionaryType.values())
+            //TODO: Implement this to interface instead of using JapaneseDictionaryType.values()
+            for(DictionaryType type : JapaneseDictionaryType.values())
             {
                 List<RelatedWordEntity> partial = new queryAsyncTask(mRelatedWordDao, type).
                         execute(vocabularyEntity).get();

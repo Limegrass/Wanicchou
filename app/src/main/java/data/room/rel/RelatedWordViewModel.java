@@ -6,7 +6,8 @@ import android.arch.lifecycle.AndroidViewModel;
 import java.util.List;
 
 import data.room.voc.VocabularyEntity;
-import data.vocab.DictionaryType;
+import data.vocab.jp.JapaneseDictionaryType;
+import data.vocab.models.DictionaryType;
 
 public class RelatedWordViewModel extends AndroidViewModel{
     private RelatedWordRepository mRepo;

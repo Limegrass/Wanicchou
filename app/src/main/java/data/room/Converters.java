@@ -3,17 +3,18 @@ package data.room;
 import android.arch.persistence.room.TypeConverter;
 
 import data.room.voc.VocabularyEntity;
-import data.vocab.DictionaryType;
+import data.vocab.jp.JapaneseDictionaryType;
+import data.vocab.models.DictionaryType;
 
 public class Converters {
     /**
-     * Converter for the Database given a DictionaryType parameter.
+     * Converter for the Database given a JapaneseDictionaryType parameter.
      * @param dictionaryType The dictionary type given to the query.
-     * @return The toString method of the DictionaryType if it exists, else null.
+     * @return The toString method of the JapaneseDictionaryType if it exists, else null.
      */
     @TypeConverter
     public String fromDictionaryType(DictionaryType dictionaryType){
-        return dictionaryType == null ? null : dictionaryType.toString();
+        return dictionaryType == null ? null : dictionaryType.toKey();
     }
 
     @TypeConverter

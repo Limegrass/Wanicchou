@@ -12,7 +12,7 @@ import android.view.MenuItem;
 
 import com.waifusims.wanicchou.databinding.ActivityRelatedWordsBinding;
 
-import data.vocab.search.SanseidoSearch;
+import data.vocab.jp.search.sanseido.SanseidoSearch;
 
 /**
  * Separate activity to display the related words of a SanseidoSearch.

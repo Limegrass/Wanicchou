@@ -1,6 +1,5 @@
-package data.vocab;
+package data.vocab.jp;
 
-import android.database.Cursor;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -8,12 +7,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import data.room.voc.VocabularyEntity;
+import data.vocab.models.DictionaryType;
+import data.vocab.models.Vocabulary;
 
 /**
  * Created by Limegrass on 4/4/2018.
  */
 
-public class JapaneseVocabulary implements Parcelable {
+public class JapaneseVocabulary implements Parcelable, Vocabulary {
 
     // Should these be in the Android Strings file?
     // Regexes, not sure if they should be const static.
@@ -62,7 +63,7 @@ public class JapaneseVocabulary implements Parcelable {
         reading = entity.getReading();
         definition = entity.getDefinition();
         pitch = entity.getPitch();
-        dictionaryType = DictionaryType.fromString(entity.getDictionaryType());
+        dictionaryType = JapaneseDictionaryType.fromKey(entity.getDictionaryType());
     }
 
     /**
@@ -183,7 +184,7 @@ public class JapaneseVocabulary implements Parcelable {
      * Getter for the definition of the word.
      * @return a string of the definition of the word.
      */
-    public String getDefintion() {
+    public String getDefinition() {
         return definition;
     }
 
@@ -281,6 +282,6 @@ public class JapaneseVocabulary implements Parcelable {
         reading = parcel.readString();
         definition = parcel.readString();
         pitch = parcel.readString();
-        dictionaryType = (DictionaryType) parcel.readValue(classLoader);
+        dictionaryType = (JapaneseDictionaryType) parcel.readValue(classLoader);
     }
 }

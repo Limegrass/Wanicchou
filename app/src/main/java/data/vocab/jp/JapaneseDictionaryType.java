@@ -1,17 +1,19 @@
-package data.vocab;
+package data.vocab.jp;
+
+import data.vocab.models.DictionaryType;
 
 /**
  * Created by Limegrass on 5/9/2018.
  */
 
-public enum DictionaryType {
+public enum JapaneseDictionaryType implements DictionaryType {
     JJ, JE, EJ;
 
     /**
-     * Converts to the Japanese name of the DictionaryType.
+     * Converts to the Japanese name of the JapaneseDictionaryType.
      * @return The Japanese names of the dictionary type.
      */
-    public String toJapaneseDictionaryKanji(){
+    public String toDisplayText(){
         String key = this.toString();
         switch (key){
             case "JJ":
@@ -25,10 +27,14 @@ public enum DictionaryType {
         }
     }
 
+    public String toKey(){
+        return this.toString();
+    }
+
     /**
      * Converts from the Japanese dictionary type to the enum type.
      * @param key The Japanese dictionary type key.
-     * @return A DictionaryType corresponding to the key, if it exists. Else, null.
+     * @return A JapaneseDictionaryType corresponding to the key, if it exists. Else, null.
      */
     public static DictionaryType fromJapaneseDictionaryKanji(String key){
         switch (key){
@@ -46,9 +52,9 @@ public enum DictionaryType {
     /**
      * Converts a string representation of the dictionary type if it exists.
      * @param key The string representation of the dictionary type.
-     * @return A DictionaryType corresponding to the key, if it exists. Else, null.
+     * @return A JapaneseDictionaryType corresponding to the key, if it exists. Else, null.
      */
-    public static DictionaryType fromString(String key){
+    public static DictionaryType fromKey(String key){
         switch (key){
             case "JJ":
                 return JJ;
@@ -61,4 +67,8 @@ public enum DictionaryType {
         }
     }
 
+    @Override
+    public DictionaryType[] getAllDictionaryTypes() {
+        return JapaneseDictionaryType.values();
+    }
 }

@@ -66,6 +66,6 @@ public interface VocabularyDao {
      * @return An entry of the word in the database, if it exists. Else, null.
      */
     @Query("SELECT * FROM VocabularyWords " +
-            "WHERE word = :word AND dictionaryType = :dictionaryType LIMIT 1")
+            "WHERE word = :word AND DictionaryType = :dictionaryType LIMIT 1")
     public VocabularyEntity getWord(String word, String dictionaryType);
 }
