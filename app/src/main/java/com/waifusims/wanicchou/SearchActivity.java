@@ -195,10 +195,10 @@ public class SearchActivity extends AppCompatActivity
         final Context context = getApplicationContext();
         final int searchCompleteToastDuration = Toast.LENGTH_SHORT;
         if (!TextUtils.isEmpty(mLastSearched.getVocabulary().getWord())) {
-            message = getString(R.string.word_search_success);
+            message = getString(R.string.word_search_success, mLastSearched.getVocabulary().getWord());
         }
         else{
-            message = getString(R.string.word_search_failure);
+            message = getString(R.string.word_search_failure, mLastSearched.getVocabulary().getWord());
         }
 //        // TODO: Check for network and http request time outs
 //        message = getString(R.string.word_search_failure);

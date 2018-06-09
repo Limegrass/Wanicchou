@@ -11,8 +11,8 @@
     <string name="definition_label" translatable="true">意味</string>
     <string name="definition_hint" translatable="true">単語が見つけませんでした。。。</string>
     <string name="word_searching" translatable="true">検索中。。。</string>
-    <string name="word_search_success" translatable="true">出来ました！</string>
-    <string name="word_search_failure" translatable="true">その単語が見つけませんでした。。。</string>
+    <string name="word_search_success" translatable="true">%1$s出来ました！</string>
+    <string name="word_search_failure" translatable="true">%1$sが見つけませんでした。。。</string>
 
     <!--anki_additional_fields-->
     <string name="context_label" translatable="true">文脈</string>
