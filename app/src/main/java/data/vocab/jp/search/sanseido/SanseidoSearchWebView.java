@@ -8,14 +8,11 @@ import android.webkit.WebViewClient;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 
+import data.vocab.RelatedWordEntry;
 import data.vocab.jp.JapaneseDictionaryType;
 import data.vocab.models.DictionaryType;
 import data.vocab.models.DictionaryWebPage;
@@ -29,7 +26,6 @@ public class SanseidoSearchWebView extends WebView implements DictionaryWebPage 
 
     private Document mHtml;
     private DictionaryType currentDictionaryType;
-    private List<String> relatedWordLinks;
     private Search mSearch;
 
     @SuppressLint({"SetJavaScriptEnabled", "AddJavascriptInterface"})
@@ -51,6 +47,7 @@ public class SanseidoSearchWebView extends WebView implements DictionaryWebPage 
         this.loadUrl(searchUrl.toString());
     }
 
+    //TODO: Maybe don't ned DicType, just grab from page
     @SuppressLint({"SetJavaScriptEnabled", "AddJavascriptInterface"})
     public SanseidoSearchWebView(Context context, String baseUrl, String pageSource, DictionaryType dictionaryType, OnJavaScriptCompleted listener){
         super(context);
@@ -77,6 +74,7 @@ public class SanseidoSearchWebView extends WebView implements DictionaryWebPage 
                 "('<html>'+document.getElementsByTagName('html')[0].innerHTML+'</html>');");
     }
 
+
     private class HtmlParserInterface {
         OnJavaScriptCompleted listener;
         HtmlParserInterface(OnJavaScriptCompleted listener){
@@ -85,38 +83,19 @@ public class SanseidoSearchWebView extends WebView implements DictionaryWebPage 
         @JavascriptInterface
         public void parsePage(String html){
             mHtml = Jsoup.parse(html);
-            relatedWordLinks = findJSLinks(mHtml);
             mSearch = new SanseidoSearch(mHtml, currentDictionaryType);
             listener.onJavaScriptCompleted();
         }
     }
 
     @Override
-    public void navigateRelatedWordLinks(int index){
-        currentDictionaryType = mSearch.getRelatedWords().get(index).getDictionaryType();
-        this.loadUrl(relatedWordLinks.get(index));
+    public void navigateRelatedWord(RelatedWordEntry relatedWord){
+        currentDictionaryType = relatedWord.getDictionaryType();
+        String link = relatedWord.getLink();
+        this.loadUrl(link);
         parsePage();
     }
 
-    private List<String> findJSLinks(Document html){
-
-        List<String> jsLinks = new ArrayList<>();
-
-        Element table = html.select("table").get(SanseidoSearch.RELATED_WORDS_TABLE_INDEX);
-        Elements rows = table.select("tr");
-
-        for (Element row : rows) {
-
-            Elements columns = row.select("td");
-
-            Element entry = columns.select("a").first();
-
-            if(entry != null){
-                jsLinks.add(entry.attr("abs:href").toString());
-            }
-        }
-        return jsLinks;
-    }
 
     public DictionaryType getCurrentDictionaryType() {
         return currentDictionaryType;
@@ -124,14 +103,6 @@ public class SanseidoSearchWebView extends WebView implements DictionaryWebPage 
 
     public void setCurrentDictionaryType(JapaneseDictionaryType dictionaryType) {
         this.currentDictionaryType = dictionaryType;
-    }
-
-    public List<String> getRelatedWordLinks() {
-        return relatedWordLinks;
-    }
-
-    public void setRelatedWordLinks(List<String> relatedWordLinks) {
-        this.relatedWordLinks = relatedWordLinks;
     }
 
 
@@ -144,4 +115,15 @@ public class SanseidoSearchWebView extends WebView implements DictionaryWebPage 
     public Search getSearch() {
         return mSearch;
     }
+
+    @Override
+    public String getUrl() {
+        return super.getUrl();
+    }
+
+    @Override
+    public Document getHtmlDocument() {
+        return mHtml;
+    }
+
 }

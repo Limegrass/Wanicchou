@@ -212,11 +212,22 @@ public class SanseidoSearch implements Search {
                 String tableEntry = columns.get(RELATED_WORDS_VOCAB_INDEX).text();
                 String isolatedWord = JapaneseVocabulary.isolateWord(tableEntry);
 
-                relatedWordEntries.add(new RelatedWordEntry(isolatedWord, dictionaryType));
+                String link = columns.select("a").first().attr("href");
+
+                relatedWordEntries.add(new RelatedWordEntry(isolatedWord, dictionaryType, link));
             }
         }
         return relatedWordEntries;
     }
+
+    //TODO: Add all related words by navigating through the web view and appending.
+    public void addRelatedWords(Document html){
+        if(relatedWords == null){
+            relatedWords = new ArrayList<>();
+        }
+        relatedWords.addAll(findRelatedWords(html));
+    }
+
 
     /**
      * Retrieve the searched word from the html source

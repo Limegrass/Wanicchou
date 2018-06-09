@@ -54,7 +54,7 @@ public class SearchActivity extends AppCompatActivity
         implements OnJavaScriptCompleted {
     public static final String LOG_TAG = "Wanicchou";
     private static final int ADD_PERM_REQUEST = 0;
-    private static final int HOME_ACTIVITY_REQUEST_CODE = 42;
+    private static final int SEARCH_ACTIVITY_REQUEST_CODE = 42;
 
     private static final String SEARCH_WORD_KEY = "search";
 
@@ -67,7 +67,7 @@ public class SearchActivity extends AppCompatActivity
     private ContextViewModel mContextViewModel;
 
     private Search mLastSearched;
-    private DictionaryWebPage mWebView;
+    private DictionaryWebPage mWebPage;
 
     /* ==================================== +Lifecycle ================================== */
 
@@ -118,6 +118,8 @@ public class SearchActivity extends AppCompatActivity
                     mLastSearched.getVocabulary().getWord());
             editor.putString(getString(R.string.dic_type_key),
                     mLastSearched.getVocabulary().getDictionaryType().toString());
+
+
             editor.apply();
         }
     }
@@ -125,34 +127,41 @@ public class SearchActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
-        Context context = SearchActivity.this;
-        String stringIfMissing = "";
-        SharedPreferences sharedPreferences =
-                PreferenceManager.getDefaultSharedPreferences(context);
-        String searchWord = sharedPreferences.getString(getString(R.string.search_word_key),
-                stringIfMissing);
-        String dicTypeKey = getString(R.string.dic_type_key);
-        //Returns null if nothing saved
-        String dicType = sharedPreferences.getString(dicTypeKey, stringIfMissing);
-        DictionaryType dictionaryType = JapaneseDictionaryType.fromKey(dicType);
-        if(!TextUtils.isEmpty(searchWord)){
-            showWordFromDB(searchWord, dictionaryType);
+        if(mWebPage == null){
+            Context context = SearchActivity.this;
+            String stringIfMissing = "";
+            SharedPreferences sharedPreferences =
+                    PreferenceManager.getDefaultSharedPreferences(context);
+            String searchWord = sharedPreferences.getString(getString(R.string.search_word_key),
+                    stringIfMissing);
+            String dicTypeKey = getString(R.string.dic_type_key);
+            //Returns null if nothing saved
+            String dicType = sharedPreferences.getString(dicTypeKey, stringIfMissing);
+            DictionaryType dictionaryType = JapaneseDictionaryType.fromKey(dicType);
+            if(!TextUtils.isEmpty(searchWord)){
+                showWordFromDB(searchWord, dictionaryType);
+            }
         }
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == HOME_ACTIVITY_REQUEST_CODE) {
+        if(requestCode == SEARCH_ACTIVITY_REQUEST_CODE) {
             switch (resultCode) {
                 case RESULT_OK:
-                    String key = getString(R.string.desired_related_word_key);
+                    String key = getString(R.string.desired_word_index_key);
                     if (data.hasExtra(key)) {
-                        String desiredRelatedWord =
-                                data.getExtras().getString(key);
-                        if(!TextUtils.isEmpty(desiredRelatedWord)){
-                            mBinding.wordSearch.etSearchBox.setText(desiredRelatedWord);
-                        }
+                        //TODO: Show readings on Related Words so it makes sense to see multiple words with same def
+                        int desiredRelatedWordIndex =
+                                data.getExtras().getInt(key);
+                        RelatedWordEntry desiredWord =
+                                mLastSearched.getRelatedWords().get(desiredRelatedWordIndex);
+
+                        mWebPage.navigateRelatedWord(desiredWord);
+//                        if(!TextUtils.isEmpty(desiredRelatedWord)){
+//                            mBinding.wordSearch.etSearchBox.setText(desiredRelatedWord);
+//                        }
                     }
                     if(mToast != null){
                         mToast.cancel();
@@ -174,7 +183,7 @@ public class SearchActivity extends AppCompatActivity
 
     @Override
     public void onJavaScriptCompleted() {
-        mLastSearched = mWebView.getSearch();
+        mLastSearched = mWebPage.getSearch();
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -498,10 +507,17 @@ public class SearchActivity extends AppCompatActivity
             public void onClick(View view) {
                 Intent intentStartRelatedWordsActivity =
                         new Intent(getApplicationContext(), WordListActivity.class);
+
                 intentStartRelatedWordsActivity
                         .putExtra(getString(R.string.related_word_key),
                                 mLastSearched);
-                startActivityForResult(intentStartRelatedWordsActivity, HOME_ACTIVITY_REQUEST_CODE);
+                //TODO: Find out if there are cases where mWebPage will be destroyed on going to child
+//                intentStartRelatedWordsActivity.putExtra(getString(R.string.url_key),
+//                        mWebPage.getUrl());
+//                intentStartRelatedWordsActivity.putExtra(getString(R.string.html_key),
+//                        mWebPage.getHtmlDocument().toString());
+
+                startActivityForResult(intentStartRelatedWordsActivity, SEARCH_ACTIVITY_REQUEST_CODE);
 
                 // Unless a new word was selected from the child activity
 
@@ -539,7 +555,7 @@ public class SearchActivity extends AppCompatActivity
                                 try {
                                     Context context = SearchActivity.this;
                                     OnJavaScriptCompleted listener = SearchActivity.this;
-                                    mWebView = new SanseidoSearchWebView(
+                                    mWebPage = new SanseidoSearchWebView(
                                             context,
                                             searchWord,
                                             getCurrentDictionaryPreference(),
