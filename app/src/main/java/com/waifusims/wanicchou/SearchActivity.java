@@ -158,10 +158,16 @@ public class SearchActivity extends AppCompatActivity
                         RelatedWordEntry desiredWord =
                                 mLastSearched.getRelatedWords().get(desiredRelatedWordIndex);
 
-                        mWebPage.navigateRelatedWord(desiredWord);
+                        if(mWebPage != null){
+
+                            mWebPage.navigateRelatedWord(desiredWord);
 //                        if(!TextUtils.isEmpty(desiredRelatedWord)){
 //                            mBinding.wordSearch.etSearchBox.setText(desiredRelatedWord);
 //                        }
+                        }
+                        else if(!TextUtils.isEmpty(desiredWord.getRelatedWord())){
+                            mBinding.wordSearch.etSearchBox.setText(desiredWord.getRelatedWord());
+                        }
                     }
                     if(mToast != null){
                         mToast.cancel();
