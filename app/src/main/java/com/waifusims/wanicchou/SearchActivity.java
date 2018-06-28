@@ -155,11 +155,12 @@ public class SearchActivity extends AppCompatActivity
                         RelatedWordEntry desiredWord =
                                 mLastSearched.getRelatedWords().get(desiredRelatedWordIndex);
 
+                        mBinding.wordSearch.etSearchBox.setText(desiredWord.getRelatedWord());
                         if(mWebPage != null){
                             mWebPage.navigateRelatedWord(desiredWord);
                         }
                         else if(!TextUtils.isEmpty(desiredWord.getRelatedWord())){
-                            mBinding.wordSearch.etSearchBox.setText(desiredWord.getRelatedWord());
+                            searchDbThenOnlineForWord(desiredWord.getRelatedWord());
                         }
                     }
                     if(mToast != null){
@@ -543,6 +544,27 @@ public class SearchActivity extends AppCompatActivity
         });
     }
 
+    private void searchDbThenOnlineForWord(String word){
+        clearAnkiFields();
+        // If the word isn't saved in our DB, start a new search for it.
+        if(!showWordFromDB(word, getCurrentDictionaryPreference())){
+            try {
+                Context context = SearchActivity.this;
+                OnJavaScriptCompleted listener = SearchActivity.this;
+                //TODO: Reuse existing webview if possible
+                mWebPage = new SanseidoSearchWebView(
+                        context,
+                        word,
+                        getCurrentDictionaryPreference(),
+                        getCurrentMatchType(),
+                        listener
+                );
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     private void setUpKeyListeners(){
         mBinding.wordSearch.etSearchBox.setOnKeyListener(new OnKeyListener() {
             @Override
@@ -552,23 +574,7 @@ public class SearchActivity extends AppCompatActivity
                         case KeyEvent.KEYCODE_DPAD_CENTER:
                         case KeyEvent.KEYCODE_ENTER:
                             String searchWord = mBinding.wordSearch.etSearchBox.getText().toString();
-                            clearAnkiFields();
-                            // If the word isn't saved in our DB, start a new search for it.
-                            if(!showWordFromDB(searchWord, getCurrentDictionaryPreference())){
-                                try {
-                                    Context context = SearchActivity.this;
-                                    OnJavaScriptCompleted listener = SearchActivity.this;
-                                    mWebPage = new SanseidoSearchWebView(
-                                            context,
-                                            searchWord,
-                                            getCurrentDictionaryPreference(),
-                                            getCurrentMatchType(),
-                                            listener
-                                    );
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
-                            }
+                            searchDbThenOnlineForWord(searchWord);
 
                             return true;
                         default:

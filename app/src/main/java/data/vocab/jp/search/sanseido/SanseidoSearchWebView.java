@@ -30,7 +30,11 @@ public class SanseidoSearchWebView extends WebView implements DictionaryWebPage 
     private Search mSearch;
 
     @SuppressLint({"SetJavaScriptEnabled", "AddJavascriptInterface"})
-    public SanseidoSearchWebView(final Context context, String wordToSearch, DictionaryType dictionaryType, SanseidoMatchType matchType, OnJavaScriptCompleted listener) throws IOException {
+    public SanseidoSearchWebView(final Context context,
+                                 String wordToSearch,
+                                 DictionaryType dictionaryType,
+                                 SanseidoMatchType matchType,
+                                 OnJavaScriptCompleted listener) throws IOException {
         super(context);
         currentDictionaryType = dictionaryType;
 
@@ -50,7 +54,11 @@ public class SanseidoSearchWebView extends WebView implements DictionaryWebPage 
 
     //TODO: Maybe don't ned DicType, just grab from page
     @SuppressLint({"SetJavaScriptEnabled", "AddJavascriptInterface"})
-    public SanseidoSearchWebView(Context context, String baseUrl, String pageSource, DictionaryType dictionaryType, OnJavaScriptCompleted listener){
+    public SanseidoSearchWebView(Context context,
+                                 String baseUrl,
+                                 String pageSource,
+                                 DictionaryType dictionaryType,
+                                 OnJavaScriptCompleted listener){
         super(context);
         mSearch = new SanseidoSearch(pageSource, dictionaryType);
         this.getSettings().setJavaScriptEnabled(true);
@@ -95,7 +103,6 @@ public class SanseidoSearchWebView extends WebView implements DictionaryWebPage 
         currentDictionaryType = relatedWord.getDictionaryType();
         String link = relatedWord.getLink();
         this.loadUrl(link);
-        parsePage();
     }
 
 
