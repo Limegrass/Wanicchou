@@ -1,19 +1,31 @@
 # 和日帳 （わにっちょう）Wanicchou
-J-J Dictionary drawing definitions from [Sanseido](https://www.sanseido.biz/) interfaced with the AnkiDroid API to quickly add words and their definitions.
+Online dictionary drawing definitions from [Sanseido](https://www.sanseido.biz/) interfaced with the AnkiDroid API to quickly add words and their definitions.
+
+Other languages: [日本語](README.jp.md)
+
+## Table of Contents
+  - [Usage](#usage)
+  - [Potential Development](#potential-development)
+  - [Sources](#sources)
+  - [LICENSE](#license)
+
 
 ![Screenshot](/docs/app-image.png)
 
-## USAGE
-<b>IT WILL CRASH ON FIRST LAUNCH PERMISSION REQUEST. HAVEN'T GOTTEN AROUND TO FIXING IT YET.</b>
+## Usage
 Type a word in the search box, then press enter to conduct a search.
-The floating action button sends the searched word into AnkiDroid
+The floating action button sends the searched word into AnkiDroid.
+Dictionary type (J-J, J-E, E-J) can be changed in the settings.
+If it does not find the word you wanted, change try changing the match type, or checking the related words generated from the search.
 
-## TODO
+## Potential Development
 <s>Save searched words and definitions into an SQLiteDB for offline usage.</s>
 
 <s>SharedPreferences for which language dictionary the search should be conducted.</s>
 
-Add a way to import sentences before Anki import.
+Automatically select the E-J based on input being only in ASCII charset.
+
+Add a way to import sentences before Anki import. (Could scrap from Twitter? or JMDict)
 
 Add clozed type for the sentences.
 
@@ -31,10 +43,10 @@ Furigana definition text after parsing, maybe with JE dict so there's less web r
 
 Maybe try to network DB from queries.
 
-## SOURCES
+## Sources
 ['ankidroid/apisample'](https://github.com/ankidroid/apisample):
     app/java/util.anki/AnkiDroidHelper.java
     app/java/util.anki/AnkiDroidConfig.java
 
-## LICENSE
-Apache 2.0 as per the apisample and Apache 2.0 Redistribution Clause.
+## License
+GNU GPL 3.0
