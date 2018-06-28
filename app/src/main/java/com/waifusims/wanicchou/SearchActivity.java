@@ -198,7 +198,7 @@ public class SearchActivity extends AppCompatActivity
             message = getString(R.string.word_search_success, mLastSearched.getVocabulary().getWord());
         }
         else{
-            message = getString(R.string.word_search_failure, mLastSearched.getVocabulary().getWord());
+            message = getString(R.string.word_search_failure, mBinding.wordSearch.etSearchBox.getText().toString());
         }
 //        // TODO: Check for network and http request time outs
 //        message = getString(R.string.word_search_failure);
