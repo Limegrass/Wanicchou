@@ -2,16 +2,21 @@
     <string name="app_name">和日帳</string>
 
     <!--search activity-->
+    <!--last_searched_key not translatable-->
     <string name="settings_action_label" translatable="true">設定</string>
+
     <!--word_definition related-->
     <string name="search_label" translatable="true">検索</string>
     <string name="search_field_hint" translatable="true">キーボードで入力して</string>
+
     <string name="word_label" translatable="true">単語</string>
     <string name="word_hint" translatable="true">何か調べてみて</string>
+
     <string name="definition_label" translatable="true">意味</string>
     <string name="definition_hint" translatable="true">単語が見つけませんでした。。。</string>
+
     <string name="word_searching" translatable="true">検索中。。。</string>
-    <string name="word_search_success" translatable="true">%1$s出来ました！</string>
+    <string name="word_search_success" translatable="true">%1$sは三省堂から出来ました！</string>
     <string name="word_search_failure" translatable="true">%1$sが見つけませんでした。。。</string>
 
     <!--anki_additional_fields-->
@@ -24,15 +29,35 @@
     <!--fab related-->
     <string name="fab_btn_label" translatable="true">暗記に送る</string>
 
+    <string name="related_words_btn_label" translatable="true">関係ある言葉へ</string>
+
     <!--Toast strings-->
     <string name="permissions_denied_toast" translatable="true">許可もらえませんでした</string>
     <string name="anki_added_toast" translatable="true">暗記に遅れました！</string>
     <string name="searching_related_toast" translatable="true">選択した単語の検索中。。。</string>
+    <string name="searched_from_db_toast" translatable="true">%1$sはデータベースから出来ました！</string>
 
-
-    <string name="related_words_btn_label" translatable="true">関係ある言葉へ</string>
 
     <!--related words activity-->
     <string name="activity_related_words_title" translatable="true">関係ある言葉</string>
 
+    <!--<string name="related_word_key" translatable="false">relatedWords</string>-->
+    <!--<string name="desired_word_index_key" translatable="false">desiredRelatedWord</string>-->
+
+    <!--shared preferences keys-->
+    <!--<string name="search_word_key" translatable="false">searchWord</string>-->
+    <!--<string name="dic_type_key" translatable="false">dicType</string>-->
+    <!--<string name="url_key" translatable="false">pageUrl</string>-->
+    <!--<string name="html_key" translatable="false">pageHtml</string>-->
+    <!--<string name="page_key" translatable="false">webPage</string>-->
+
+
+    <!--settings strings-->
+    <string name="search_settings_category_title" translatable="true">検索設定</string>
+    <string name="pref_dictionary_type_title" translatable="true">辞書型</string>
+    <!--<string name="pref_dictionary_type_key" translatable="false">listPrefDicType</string>-->
+    <!--<string name="pref_dictionary_type_default" translatable="false">JJ</string>-->
+    <string name="pref_match_type_title" translatable="true">マッチ型</string>
+    <!--<string name="pref_match_type_key" translatable="false">listPrefSearchDir</string>-->
+    <!--<string name="pref_match_type_default" translatable="false">1</string>-->
 </resources>

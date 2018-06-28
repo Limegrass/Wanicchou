@@ -563,6 +563,13 @@ public class SearchActivity extends AppCompatActivity
                 e.printStackTrace();
             }
         }
+        else {
+            Context context = this;
+            String msg = getString(R.string.searched_from_db_toast, word);
+            int duration = Toast.LENGTH_SHORT;
+            mToast = Toast.makeText(context, msg, duration);
+            mToast.show();
+        }
     }
 
     private void setUpKeyListeners(){

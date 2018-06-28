@@ -4,6 +4,7 @@
     <!--search activity-->
     <string name="last_searched_key" translatable="false">lastSearched</string>
     <string name="settings_action_label" translatable="true">Settings</string>
+
     <!--word_definition related-->
     <string name="search_label" translatable="true">Search</string>
     <string name="search_field_hint" translatable="true">Enter a word</string>
@@ -28,7 +29,7 @@
     <!--fab related-->
     <string name="fab_btn_label" translatable="true">Send to Anki</string>
 
-    <string name="related_words_btn_label">Go to related words</string>
+    <string name="related_words_btn_label" translatable="true">Go to related words</string>
 
     <!--Toast strings-->
     <string name="permissions_denied_toast" translatable="true">Permissions denied.</string>
@@ -59,6 +60,4 @@
     <string name="pref_match_type_title" translatable="true">Match Type</string>
     <string name="pref_match_type_key" translatable="false">listPrefSearchDir</string>
     <string name="pref_match_type_default" translatable="false">1</string>
-
-
 </resources>
