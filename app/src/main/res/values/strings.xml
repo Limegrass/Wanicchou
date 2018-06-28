@@ -12,11 +12,11 @@
     <string name="word_hint" translatable="true">Search for something!</string>
 
     <string name="definition_label" translatable="true">Definition</string>
-    <string name="definition_hint" translatable="true">No word found</string>
+    <string name="definition_hint" translatable="true">Nothing searched yet!</string>
 
     <string name="word_searching" translatable="true">Searching...</string>
-    <string name="word_search_success" translatable="true">Word found!</string>
-    <string name="word_search_failure" translatable="true">Word not found!</string>
+    <string name="word_search_success" translatable="true">%1$s found on Sanseido!</string>
+    <string name="word_search_failure" translatable="true">%1$s not found on Sanseido!</string>
 
     <!--anki_additional_fields-->
     <string name="context_label" translatable="true">Context</string>
@@ -34,16 +34,22 @@
     <string name="permissions_denied_toast" translatable="true">Permissions denied.</string>
     <string name="anki_added_toast" translatable="true">Card added to Anki!</string>
     <string name="searching_related_toast" translatable="true">Searching for selected word...</string>
+    <string name="searched_from_db_toast" translatable="true">%1$s found in DB!</string>
+
 
     <!--related words activity-->
     <string name="activity_related_words_title" translatable="true">Related Words</string>
 
     <string name="related_word_key" translatable="false">relatedWords</string>
-    <string name="desired_related_word_key" translatable="false">desiredRelatedWord</string>
+    <string name="desired_word_index_key" translatable="false">desiredRelatedWord</string>
 
     <!--shared preferences keys-->
     <string name="search_word_key" translatable="false">searchWord</string>
     <string name="dic_type_key" translatable="false">dicType</string>
+    <string name="url_key" translatable="false">pageUrl</string>
+    <string name="html_key" translatable="false">pageHtml</string>
+    <string name="page_key" translatable="false">webPage</string>
+
 
     <!--settings strings-->
     <string name="search_settings_category_title" translatable="true">Search Settings</string>

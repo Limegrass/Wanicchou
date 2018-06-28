@@ -12,12 +12,12 @@ import java.util.Set;
 final public class AnkiDroidConfig {
 
     // Name of deck which will be created in AnkiDroid
-    public static final String DECK_NAME = "J-J Learner's Dictionary";
+    public static final String DECK_NAME = "Wanicchou";
     // Name of model which will be created in AnkiDroid
-    public static final String MODEL_NAME = "jjld";
+    public static final String MODEL_NAME = "wanicchou";
 
     // Optional space separated list of tags to add to every note
-    public static final Set<String> TAGS = new HashSet<>(Collections.singletonList("JJLD"));
+    public static final Set<String> TAGS = new HashSet<>(Collections.singletonList("Wanicchou"));
     // List of field names that will be used in AnkiDroid model
     //Many fields will be unused at first
     public static final String[] FIELDS =

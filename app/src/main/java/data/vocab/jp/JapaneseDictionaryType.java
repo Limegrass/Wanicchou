@@ -66,9 +66,4 @@ public enum JapaneseDictionaryType implements DictionaryType {
                 return null;
         }
     }
-
-    @Override
-    public DictionaryType[] getAllDictionaryTypes() {
-        return JapaneseDictionaryType.values();
-    }
 }

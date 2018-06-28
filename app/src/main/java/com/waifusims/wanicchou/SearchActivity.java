@@ -50,11 +50,13 @@ import util.anki.AnkiDroidHelper;
 
 // TODO: Automatically select EJ for English input
 //TODO:  Horizontal UI
+// TODO: Toasts for DB searches
+//TODO : Add click listener for Def label
 public class SearchActivity extends AppCompatActivity
         implements OnJavaScriptCompleted {
     public static final String LOG_TAG = "Wanicchou";
     private static final int ADD_PERM_REQUEST = 0;
-    private static final int HOME_ACTIVITY_REQUEST_CODE = 42;
+    private static final int SEARCH_ACTIVITY_REQUEST_CODE = 42;
 
     private static final String SEARCH_WORD_KEY = "search";
 
@@ -62,12 +64,12 @@ public class SearchActivity extends AppCompatActivity
     private AnkiDroidHelper mAnkiDroid;
     private Toast mToast;
     private VocabularyViewModel mVocabViewModel;
-    private RelatedWordViewModel mRelatedWordsViewModel;
+    private RelatedWordViewModel mRelatedWordViewModel;
     private NoteViewModel mNoteViewModel;
     private ContextViewModel mContextViewModel;
 
     private Search mLastSearched;
-    private DictionaryWebPage mWebView;
+    private DictionaryWebPage mWebPage;
 
     /* ==================================== +Lifecycle ================================== */
 
@@ -75,20 +77,16 @@ public class SearchActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mAnkiDroid = new AnkiDroidHelper(this);
         setContentView(R.layout.activity_search);
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_search);
 
         setUpClickListeners();
         setUpOnFocusChangeListeners();
         setUpKeyListeners();
-
-
         mVocabViewModel = ViewModelProviders.of(this).get(VocabularyViewModel.class);
-        mRelatedWordsViewModel = ViewModelProviders.of(this).get(RelatedWordViewModel.class);
+        mRelatedWordViewModel = ViewModelProviders.of(this).get(RelatedWordViewModel.class);
         mNoteViewModel = ViewModelProviders.of(this).get(NoteViewModel.class);
         mContextViewModel = ViewModelProviders.of(this).get(ContextViewModel.class);
-
     }
 
     @Override
@@ -125,33 +123,44 @@ public class SearchActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
-        Context context = SearchActivity.this;
-        String stringIfMissing = "";
-        SharedPreferences sharedPreferences =
-                PreferenceManager.getDefaultSharedPreferences(context);
-        String searchWord = sharedPreferences.getString(getString(R.string.search_word_key),
-                stringIfMissing);
-        String dicTypeKey = getString(R.string.dic_type_key);
-        //Returns null if nothing saved
-        String dicType = sharedPreferences.getString(dicTypeKey, stringIfMissing);
-        DictionaryType dictionaryType = JapaneseDictionaryType.fromKey(dicType);
-        if(!TextUtils.isEmpty(searchWord)){
-            showWordFromDB(searchWord, dictionaryType);
+        //TODO: Move this away from onResume to reduce startup time
+        if(mWebPage == null){
+            Context context = SearchActivity.this;
+            String stringIfMissing = "";
+            SharedPreferences sharedPreferences =
+                    PreferenceManager.getDefaultSharedPreferences(context);
+            String searchWord = sharedPreferences.getString(getString(R.string.search_word_key),
+                    stringIfMissing);
+            String dicTypeKey = getString(R.string.dic_type_key);
+            //Returns null if nothing saved
+            String dicType = sharedPreferences.getString(dicTypeKey, stringIfMissing);
+            DictionaryType dictionaryType = JapaneseDictionaryType.fromKey(dicType);
+            if(!TextUtils.isEmpty(searchWord)){
+                showWordFromDB(searchWord, dictionaryType);
+            }
         }
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == HOME_ACTIVITY_REQUEST_CODE) {
+        if(requestCode == SEARCH_ACTIVITY_REQUEST_CODE) {
             switch (resultCode) {
                 case RESULT_OK:
-                    String key = getString(R.string.desired_related_word_key);
+                    String key = getString(R.string.desired_word_index_key);
                     if (data.hasExtra(key)) {
-                        String desiredRelatedWord =
-                                data.getExtras().getString(key);
-                        if(!TextUtils.isEmpty(desiredRelatedWord)){
-                            mBinding.wordSearch.etSearchBox.setText(desiredRelatedWord);
+                        //TODO: Show readings on Related Words so it makes sense to see multiple words with same def
+                        int desiredRelatedWordIndex =
+                                data.getExtras().getInt(key);
+                        RelatedWordEntry desiredWord =
+                                mLastSearched.getRelatedWords().get(desiredRelatedWordIndex);
+
+                        mBinding.wordSearch.etSearchBox.setText(desiredWord.getRelatedWord());
+                        if(mWebPage != null){
+                            mWebPage.navigateRelatedWord(desiredWord);
+                        }
+                        else if(!TextUtils.isEmpty(desiredWord.getRelatedWord())){
+                            searchDbThenOnlineForWord(desiredWord.getRelatedWord());
                         }
                     }
                     if(mToast != null){
@@ -174,7 +183,7 @@ public class SearchActivity extends AppCompatActivity
 
     @Override
     public void onJavaScriptCompleted() {
-        mLastSearched = mWebView.getSearch();
+        mLastSearched = mWebPage.getSearch();
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -186,10 +195,10 @@ public class SearchActivity extends AppCompatActivity
         final Context context = getApplicationContext();
         final int searchCompleteToastDuration = Toast.LENGTH_SHORT;
         if (!TextUtils.isEmpty(mLastSearched.getVocabulary().getWord())) {
-            message = getString(R.string.word_search_success);
+            message = getString(R.string.word_search_success, mLastSearched.getVocabulary().getWord());
         }
         else{
-            message = getString(R.string.word_search_failure);
+            message = getString(R.string.word_search_failure, mLastSearched.getVocabulary().getWord());
         }
 //        // TODO: Check for network and http request time outs
 //        message = getString(R.string.word_search_failure);
@@ -207,11 +216,10 @@ public class SearchActivity extends AppCompatActivity
             return null;
         }
 
-
         List<RelatedWordEntry> relatedWords = new ArrayList<>();
         for (JapaneseDictionaryType dictionaryType : JapaneseDictionaryType.values()){
             List<RelatedWordEntity> relatedWordEntities =
-                    mRelatedWordsViewModel.getRelatedWordList(entity, dictionaryType);
+                    mRelatedWordViewModel.getRelatedWordList(entity, dictionaryType);
             for(RelatedWordEntity relatedWordEntity : relatedWordEntities){
                 relatedWords.add(new RelatedWordEntry(relatedWordEntity.getRelatedWord(), relatedWordEntity.getDictionaryType()));
             }
@@ -228,7 +236,7 @@ public class SearchActivity extends AppCompatActivity
             RelatedWordEntity relatedWordToAdd =
                     new RelatedWordEntity(entity, entry.getRelatedWord(),
                             entry.getDictionaryType().toString());
-            mRelatedWordsViewModel.insert(relatedWordToAdd);
+            mRelatedWordViewModel.insert(relatedWordToAdd);
         }
     }
 
@@ -359,7 +367,9 @@ public class SearchActivity extends AppCompatActivity
         Set<String> tags = AnkiDroidConfig.TAGS;
         mAnkiDroid.getApi().addNote(modelId, deckId, fields, tags);
 
-        mToast.cancel();
+        if(mToast != null){
+            mToast.cancel();
+        }
         Context context = SearchActivity.this;
         String message = getString(R.string.anki_added_toast);
         int duration = Toast.LENGTH_SHORT;
@@ -498,10 +508,17 @@ public class SearchActivity extends AppCompatActivity
             public void onClick(View view) {
                 Intent intentStartRelatedWordsActivity =
                         new Intent(getApplicationContext(), WordListActivity.class);
+
                 intentStartRelatedWordsActivity
                         .putExtra(getString(R.string.related_word_key),
                                 mLastSearched);
-                startActivityForResult(intentStartRelatedWordsActivity, HOME_ACTIVITY_REQUEST_CODE);
+                //TODO: Find out if there are cases where mWebPage will be destroyed on going to child
+//                intentStartRelatedWordsActivity.putExtra(getString(R.string.url_key),
+//                        mWebPage.getUrl());
+//                intentStartRelatedWordsActivity.putExtra(getString(R.string.html_key),
+//                        mWebPage.getHtmlDocument().toString());
+
+                startActivityForResult(intentStartRelatedWordsActivity, SEARCH_ACTIVITY_REQUEST_CODE);
 
                 // Unless a new word was selected from the child activity
 
@@ -515,6 +532,9 @@ public class SearchActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view) {
+                if(mAnkiDroid == null){
+                    mAnkiDroid = new AnkiDroidHelper(SearchActivity.this);
+                }
                 if (mAnkiDroid.shouldRequestPermission()) {
                     mAnkiDroid.requestPermission(SearchActivity.this, ADD_PERM_REQUEST);
                     return;
@@ -522,6 +542,27 @@ public class SearchActivity extends AppCompatActivity
                 addWordToAnki();
             }
         });
+    }
+
+    private void searchDbThenOnlineForWord(String word){
+        clearAnkiFields();
+        // If the word isn't saved in our DB, start a new search for it.
+        if(!showWordFromDB(word, getCurrentDictionaryPreference())){
+            try {
+                Context context = SearchActivity.this;
+                OnJavaScriptCompleted listener = SearchActivity.this;
+                //TODO: Reuse existing webview if possible
+                mWebPage = new SanseidoSearchWebView(
+                        context,
+                        word,
+                        getCurrentDictionaryPreference(),
+                        getCurrentMatchType(),
+                        listener
+                );
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private void setUpKeyListeners(){
@@ -533,23 +574,7 @@ public class SearchActivity extends AppCompatActivity
                         case KeyEvent.KEYCODE_DPAD_CENTER:
                         case KeyEvent.KEYCODE_ENTER:
                             String searchWord = mBinding.wordSearch.etSearchBox.getText().toString();
-                            clearAnkiFields();
-                            // If the word isn't saved in our DB, start a new search for it.
-                            if(!showWordFromDB(searchWord, getCurrentDictionaryPreference())){
-                                try {
-                                    Context context = SearchActivity.this;
-                                    OnJavaScriptCompleted listener = SearchActivity.this;
-                                    mWebView = new SanseidoSearchWebView(
-                                            context,
-                                            searchWord,
-                                            getCurrentDictionaryPreference(),
-                                            getCurrentMatchType(),
-                                            listener
-                                    );
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
-                            }
+                            searchDbThenOnlineForWord(searchWord);
 
                             return true;
                         default:
