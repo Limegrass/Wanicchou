@@ -22,6 +22,7 @@ import data.vocab.models.Vocabulary;
 
 public class SanseidoSearchWebView extends WebView implements DictionaryWebPage {
 
+    private static String RELATED_WORDS_PAGER_ID = "_ctl0_ContentPlaceHolder1_ibtGoNext";
     private static String HTML_PARSER_NAME = "HtmlParser";
 
     private Document mHtml;
@@ -90,6 +91,7 @@ public class SanseidoSearchWebView extends WebView implements DictionaryWebPage 
 
     @Override
     public void navigateRelatedWord(RelatedWordEntry relatedWord){
+        //TODO: When navigating to Related Word, the related words doesn't change.
         currentDictionaryType = relatedWord.getDictionaryType();
         String link = relatedWord.getLink();
         this.loadUrl(link);

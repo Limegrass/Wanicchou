@@ -50,6 +50,8 @@ import util.anki.AnkiDroidHelper;
 
 // TODO: Automatically select EJ for English input
 //TODO:  Horizontal UI
+// TODO: Toasts for DB searches
+//TODO : Add click listener for Def label
 public class SearchActivity extends AppCompatActivity
         implements OnJavaScriptCompleted {
     public static final String LOG_TAG = "Wanicchou";
@@ -62,7 +64,7 @@ public class SearchActivity extends AppCompatActivity
     private AnkiDroidHelper mAnkiDroid;
     private Toast mToast;
     private VocabularyViewModel mVocabViewModel;
-    private RelatedWordViewModel mRelatedWordsViewModel;
+    private RelatedWordViewModel mRelatedWordViewModel;
     private NoteViewModel mNoteViewModel;
     private ContextViewModel mContextViewModel;
 
@@ -75,20 +77,16 @@ public class SearchActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mAnkiDroid = new AnkiDroidHelper(this);
         setContentView(R.layout.activity_search);
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_search);
 
         setUpClickListeners();
         setUpOnFocusChangeListeners();
         setUpKeyListeners();
-
-
         mVocabViewModel = ViewModelProviders.of(this).get(VocabularyViewModel.class);
-        mRelatedWordsViewModel = ViewModelProviders.of(this).get(RelatedWordViewModel.class);
+        mRelatedWordViewModel = ViewModelProviders.of(this).get(RelatedWordViewModel.class);
         mNoteViewModel = ViewModelProviders.of(this).get(NoteViewModel.class);
         mContextViewModel = ViewModelProviders.of(this).get(ContextViewModel.class);
-
     }
 
     @Override
@@ -118,8 +116,6 @@ public class SearchActivity extends AppCompatActivity
                     mLastSearched.getVocabulary().getWord());
             editor.putString(getString(R.string.dic_type_key),
                     mLastSearched.getVocabulary().getDictionaryType().toString());
-
-
             editor.apply();
         }
     }
@@ -127,6 +123,7 @@ public class SearchActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
+        //TODO: Move this away from onResume to reduce startup time
         if(mWebPage == null){
             Context context = SearchActivity.this;
             String stringIfMissing = "";
@@ -159,11 +156,7 @@ public class SearchActivity extends AppCompatActivity
                                 mLastSearched.getRelatedWords().get(desiredRelatedWordIndex);
 
                         if(mWebPage != null){
-
                             mWebPage.navigateRelatedWord(desiredWord);
-//                        if(!TextUtils.isEmpty(desiredRelatedWord)){
-//                            mBinding.wordSearch.etSearchBox.setText(desiredRelatedWord);
-//                        }
                         }
                         else if(!TextUtils.isEmpty(desiredWord.getRelatedWord())){
                             mBinding.wordSearch.etSearchBox.setText(desiredWord.getRelatedWord());
@@ -222,11 +215,10 @@ public class SearchActivity extends AppCompatActivity
             return null;
         }
 
-
         List<RelatedWordEntry> relatedWords = new ArrayList<>();
         for (JapaneseDictionaryType dictionaryType : JapaneseDictionaryType.values()){
             List<RelatedWordEntity> relatedWordEntities =
-                    mRelatedWordsViewModel.getRelatedWordList(entity, dictionaryType);
+                    mRelatedWordViewModel.getRelatedWordList(entity, dictionaryType);
             for(RelatedWordEntity relatedWordEntity : relatedWordEntities){
                 relatedWords.add(new RelatedWordEntry(relatedWordEntity.getRelatedWord(), relatedWordEntity.getDictionaryType()));
             }
@@ -243,7 +235,7 @@ public class SearchActivity extends AppCompatActivity
             RelatedWordEntity relatedWordToAdd =
                     new RelatedWordEntity(entity, entry.getRelatedWord(),
                             entry.getDictionaryType().toString());
-            mRelatedWordsViewModel.insert(relatedWordToAdd);
+            mRelatedWordViewModel.insert(relatedWordToAdd);
         }
     }
 
@@ -374,7 +366,9 @@ public class SearchActivity extends AppCompatActivity
         Set<String> tags = AnkiDroidConfig.TAGS;
         mAnkiDroid.getApi().addNote(modelId, deckId, fields, tags);
 
-        mToast.cancel();
+        if(mToast != null){
+            mToast.cancel();
+        }
         Context context = SearchActivity.this;
         String message = getString(R.string.anki_added_toast);
         int duration = Toast.LENGTH_SHORT;
@@ -537,6 +531,9 @@ public class SearchActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view) {
+                if(mAnkiDroid == null){
+                    mAnkiDroid = new AnkiDroidHelper(SearchActivity.this);
+                }
                 if (mAnkiDroid.shouldRequestPermission()) {
                     mAnkiDroid.requestPermission(SearchActivity.this, ADD_PERM_REQUEST);
                     return;
