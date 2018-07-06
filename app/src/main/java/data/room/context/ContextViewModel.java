@@ -11,7 +11,7 @@ public class ContextViewModel extends AndroidViewModel{
      * Constructor for the ViewModel.
      * @param application The application the database exists in.
      */
-    ContextViewModel(Application application){
+    public ContextViewModel(Application application){
         super(application);
         mRepo = new ContextRepository(application);
     }

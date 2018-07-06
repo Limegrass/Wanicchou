@@ -10,7 +10,7 @@ public class NoteViewModel extends AndroidViewModel{
      * Constructor for the ViewModel.
      * @param application The application the database exists in.
      */
-    NoteViewModel(Application application){
+    public NoteViewModel(Application application){
         super(application);
         mRepo = new NoteRepository(application);
     }
