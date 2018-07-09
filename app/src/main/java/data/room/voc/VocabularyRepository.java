@@ -67,7 +67,6 @@ public class VocabularyRepository {
             @Override
             protected Void doInBackground(Void... voids) {
                 mVocabDao.deleteAll();
-                mVocabDao.vacuum();
                 return null;
             }
         }.execute();
@@ -114,7 +113,6 @@ public class VocabularyRepository {
                     break;
                 case ACTION_DELETE:
                     mAsyncTaskDao.deleteWord(vocabularyEntities[0]);
-                    mAsyncTaskDao.vacuum();
                     break;
                 default:
             }

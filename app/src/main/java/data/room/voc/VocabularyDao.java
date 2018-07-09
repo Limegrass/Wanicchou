@@ -43,9 +43,6 @@ public interface VocabularyDao {
     @Query("DELETE FROM VocabularyWords")
     public void deleteAll();
 
-    @Query("VACUUM")
-    public void vacuum();
-
     /**
      * Gets all words saved in the database.
      * @return A LiveData list of words saved in the database.

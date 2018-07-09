@@ -38,8 +38,6 @@ public interface ContextDao {
     @Query("DELETE FROM WordContext")
     public void deleteAll();
 
-    @Query("VACUUM")
-    public void vacuum();
     /**
 
 

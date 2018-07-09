@@ -144,8 +144,7 @@ public class SearchActivity extends AppCompatActivity
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
+    protected void onDestroy() {
         Context context = this;
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         boolean autoDeleteOnClose = sharedPreferences.getString(getString(R.string.pref_auto_delete_key),
@@ -161,6 +160,7 @@ public class SearchActivity extends AppCompatActivity
                 }
             }.execute();
         }
+        super.onDestroy();
     }
 
     @Override

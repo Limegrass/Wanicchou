@@ -37,8 +37,6 @@ public interface NoteDao {
     @Query("DELETE FROM Notes")
     public void deleteAll();
 
-    @Query("VACUUM")
-    public void vacuum();
     /**
 
     /**
