@@ -60,4 +60,11 @@
     <string name="pref_match_type_title" translatable="true">Match Type</string>
     <string name="pref_match_type_key" translatable="false">listPrefSearchDir</string>
     <string name="pref_match_type_default" translatable="false">1</string>
+
+    <string name="pref_auto_delete_title" translatable="true">Auto-Deletion</string>
+    <string name="pref_auto_delete_key" translatable="false">listPrefAutoDelete</string>
+    <string name="pref_auto_delete_default" translatable="false">never</string>
+    <string name="pref_auto_save_title" translatable="true">Auto-Save</string>
+    <string name="pref_auto_save_key" translatable="false">listPrefAutoSave</string>
+    <string name="pref_auto_save_default" translatable="false">none</string>
 </resources>

@@ -142,6 +142,21 @@ public class SearchActivity extends AppCompatActivity
     }
 
     @Override
+    protected void onStop() {
+        super.onStop();
+        Context context = this;
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        boolean autoDeleteOnClose = sharedPreferences.getString(getString(R.string.pref_auto_delete_key),
+                getString(R.string.pref_auto_delete_default)).equals("close");
+        if(autoDeleteOnClose){
+            mVocabViewModel.deleteAll();
+            mRelatedWordViewModel.deleteAll();
+            mContextViewModel.deleteAll();
+            mNoteViewModel.deleteAll();
+        }
+    }
+
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if(requestCode == SEARCH_ACTIVITY_REQUEST_CODE) {
@@ -285,13 +300,68 @@ public class SearchActivity extends AppCompatActivity
     }
 
     private void updateNote(){
-        mNoteViewModel.updateNote(mLastSearched.getVocabulary().getWord(),
-                mBinding.ankiAdditionalFields.tvNotes.getText().toString());
+        String note =  mNoteViewModel.getNoteOf(mLastSearched.getVocabulary().getWord());
+        if(note != null){
+            mNoteViewModel.updateNote(mLastSearched.getVocabulary().getWord(),
+                    mBinding.ankiAdditionalFields.tvNotes.getText().toString());
+        }
+        else{
+            String event = "info";
+            if(shouldSaveSearch(event)){
+                saveSearch();
+            }
+        }
+    }
+
+    private void saveSearch(){
+        if(mVocabViewModel.insert(mLastSearched.getVocabulary())) {
+            addWordsToRelatedWordsDb(mLastSearched.getVocabulary(),
+                    mLastSearched.getRelatedWords());
+            mNoteViewModel.insertNewNote(mLastSearched.getVocabulary().getWord());
+            mContextViewModel.insertNewContext(mLastSearched.getVocabulary().getWord());
+        }
+    }
+
+    private boolean shouldSaveSearch(String event){
+        Vocabulary vocab = mLastSearched.getVocabulary();
+        VocabularyEntity wordInDb = getWordFromDb(vocab.getWord(), vocab.getDictionaryType());
+        if (wordInDb != null){
+            return false;
+        }
+
+        Context context = this;
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        String autoSaveOption = sharedPreferences.getString(getString(R.string.pref_auto_save_key),
+                    getString(R.string.pref_auto_save_default));
+        switch (autoSaveOption){
+            //Catches failure event only
+            case "all":
+                return true;
+            case "success":
+                if(event.equals("success")){
+                    return true;
+                }
+            case "info":
+                if(event.equals("info")){
+                    return true;
+                }
+            default:
+                return false;
+        }
     }
 
     private void updateContext(){
-        mContextViewModel.updateContext(mLastSearched.getVocabulary().getWord(),
-                mBinding.ankiAdditionalFields.tvContext.getText().toString());
+        String wordContext =  mContextViewModel.getContextOf(mLastSearched.getVocabulary().getWord());
+        if(wordContext != null){
+            mContextViewModel.updateContext(mLastSearched.getVocabulary().getWord(),
+                    mBinding.ankiAdditionalFields.tvContext.getText().toString());
+        }
+        else{
+            String event = "info";
+            if(shouldSaveSearch(event)){
+                saveSearch();
+            }
+        }
     }
 
     private DictionaryType getCurrentDictionaryPreference(){
@@ -320,8 +390,13 @@ public class SearchActivity extends AppCompatActivity
      */
     private void showAnkiRelatedUIElements(){
         mBinding.btnRelatedWords.setVisibility(View.VISIBLE);
-        mBinding.fab.setVisibility(View.VISIBLE);
         mBinding.ankiAdditionalFields.viewAnkiFields.setVisibility(View.VISIBLE);
+        if (AnkiDroidHelper.isApiAvailable(this)){
+            mBinding.fab.setVisibility(View.VISIBLE);
+        }
+        else {
+            mBinding.fab.setVisibility(View.INVISIBLE);
+        }
     }
 
 
@@ -540,6 +615,20 @@ public class SearchActivity extends AppCompatActivity
                     return;
                 }
                 addWordToAnki();
+                Context context = SearchActivity.this;
+                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+                boolean autoDeleteOnImport = sharedPreferences
+                        .getString(getString(R.string.pref_auto_delete_key),
+                                getString(R.string.pref_auto_delete_default))
+                        .equals("import");
+                if(autoDeleteOnImport){
+                    mNoteViewModel.delete(mLastSearched.getVocabulary().getWord());
+                    mContextViewModel.delete(mLastSearched.getVocabulary().getWord());
+                    mRelatedWordViewModel.deleteWordsRelatedTo(mLastSearched.getVocabulary().getWord());
+                    mVocabViewModel.delete(mLastSearched.getVocabulary().getWord(),
+                            mLastSearched.getVocabulary().getDictionaryType());
+                }
+
             }
         });
     }
@@ -595,26 +684,24 @@ public class SearchActivity extends AppCompatActivity
     }
 
     private void handleSearchResult(){
+        Context context = this;
+
+        String event;
         if(mLastSearched != null){
             if (!TextUtils.isEmpty(mLastSearched.getVocabulary().getWord())) {
-                VocabularyEntity entity =
-                        getWordFromDb(mLastSearched.getVocabulary().getWord(),
-                                mLastSearched.getVocabulary().getDictionaryType());
-
-                if (entity == null) {
-                    if(mVocabViewModel.insert(mLastSearched.getVocabulary())) {
-                        addWordsToRelatedWordsDb(mLastSearched.getVocabulary(),
-                                mLastSearched.getRelatedWords());
-                        mNoteViewModel.insertNewNote(mLastSearched.getVocabulary().getWord());
-                        mContextViewModel.insertNewContext(mLastSearched.getVocabulary().getWord());
-                    }
+                event = "success";
+                if (shouldSaveSearch(event)) {
+                    saveSearch();
                 }
                 showWordOnUI();
 
                 showAnkiRelatedUIElements();
             }
             else{
-                addInvalidWord(mLastSearched);
+                event = "failure";
+                if(shouldSaveSearch(event)){
+                    addInvalidWord(mLastSearched);
+                }
             }
         }
     }

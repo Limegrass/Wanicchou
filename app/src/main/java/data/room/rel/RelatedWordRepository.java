@@ -57,6 +57,28 @@ public class RelatedWordRepository {
         new entryModificationAsyncTask(mRelatedWordDao, ACTION_DELETE).execute(relatedWordEntity);
     }
 
+    public void deleteAll(){
+        new AsyncTask<Void, Void, Void>(){
+
+            @Override
+            protected Void doInBackground(Void... voids) {
+                mRelatedWordDao.deleteAll();
+                return null;
+            }
+        }.execute();
+    }
+
+    public void deleteWordsRelatedTo(String word){
+        new AsyncTask<String, Void, Void>(){
+            @Override
+            protected Void doInBackground(String... strings) {
+                String word = strings[0];
+                mRelatedWordDao.deleteWordsRelatedTo(word);
+                return null;
+            }
+        }.execute(word);
+    }
+
     /**
      * Generates a list of related words given a VocabularyEntity's id key.
      * Checks all dictionary types.

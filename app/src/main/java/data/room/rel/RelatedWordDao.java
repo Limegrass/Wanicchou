@@ -43,8 +43,12 @@ public interface RelatedWordDao {
     /**
      * Query to clear the database
      */
-    @Query("DELETE FROM VOCABULARYWORDS")
+    @Query("DELETE FROM RelatedWords")
     public void deleteAll();
+
+    @Query("DELETE FROM RelatedWords WHERE FKBaseWordId = " +
+            "(SELECT VocabularyId FROM VocabularyWords WHERE Word = :word)")
+    public void deleteWordsRelatedTo(String word);
 
     /**
      * Query to request a list of entities relations for a particular word in the database.

@@ -53,6 +53,10 @@ public class VocabularyViewModel extends AndroidViewModel{
         mRepo.delete(vocab);
     }
 
+    public void delete(String vocab, DictionaryType dictionaryType) {
+        delete(getWord(vocab, dictionaryType));
+    }
+
     /**
      * Queries for the word in the database in the given dictionary type.
      * @param word The word to search for in the database.
@@ -63,5 +67,9 @@ public class VocabularyViewModel extends AndroidViewModel{
         return mRepo.getWord(word, dictionaryType);
     }
 
+
+    public void deleteAll(){
+        mRepo.deleteAll();
+    }
 
 }

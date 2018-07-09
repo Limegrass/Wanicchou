@@ -2,11 +2,13 @@ package data.room.rel;
 
 import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
+import android.os.AsyncTask;
 
 import java.util.List;
 
 import data.room.voc.VocabularyEntity;
-import data.vocab.jp.JapaneseDictionaryType;
+
+import data.room.voc.VocabularyRepository;
 import data.vocab.models.DictionaryType;
 
 public class RelatedWordViewModel extends AndroidViewModel{
@@ -27,6 +29,16 @@ public class RelatedWordViewModel extends AndroidViewModel{
 
     public void delete(RelatedWordEntity relatedWordEntity){
         mRepo.delete(relatedWordEntity);
+    }
+
+
+    public void deleteWordsRelatedTo(String word){
+        mRepo.deleteWordsRelatedTo(word);
+
+    }
+
+    public void deleteAll(){
+        mRepo.deleteAll();
     }
 
     /**

@@ -54,4 +54,8 @@ public class NoteViewModel extends AndroidViewModel{
     public String getNoteOf(String word){
         return mRepo.getNoteOf(word);
     }
+
+    public void deleteAll(){
+        mRepo.deleteAll();
+    }
 }

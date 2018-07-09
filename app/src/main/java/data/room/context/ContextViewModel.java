@@ -53,4 +53,8 @@ public class ContextViewModel extends AndroidViewModel{
     public String getContextOf(String word){
         return mRepo.getContextOf(word);
     }
+
+    public void deleteAll(){
+        mRepo.deleteAll();
+    }
 }
