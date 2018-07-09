@@ -58,6 +58,8 @@
     <!--<string name="pref_dictionary_type_key" translatable="false">listPrefDicType</string>-->
     <!--<string name="pref_dictionary_type_default" translatable="false">JJ</string>-->
     <string name="pref_match_type_title" translatable="true">マッチ型</string>
+    <string name="pref_auto_save_title">オートセーブ</string>
+    <string name="pref_auto_delete_title">オートデリート</string>
     <!--<string name="pref_match_type_key" translatable="false">listPrefSearchDir</string>-->
     <!--<string name="pref_match_type_default" translatable="false">1</string>-->
 </resources>
