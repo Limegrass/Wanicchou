@@ -39,6 +39,9 @@ public interface ContextDao {
     public void deleteAll();
 
     /**
+
+
+    /**
      * Gets the linguistic context for a particular word
      * @param word The word to search for.
      * @return The saved linguistic context of the word searched.

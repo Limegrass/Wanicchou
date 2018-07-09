@@ -32,4 +32,33 @@
         <item>3</item>
         <item>5</item>
     </string-array>
+
+    <string-array
+        name="pref_auto_delete_entries">
+        <item>Never Delete</item>
+        <item>Delete on Anki Import</item>
+        <item>Delete All on App Close</item>
+    </string-array>
+
+    <string-array
+        name="pref_auto_delete_values">
+        <item>never</item>
+        <item>import</item>
+        <item>close</item>
+    </string-array>
+
+    <string-array
+        name="pref_auto_save_entries">
+        <item>Don\'t Save</item>
+        <item>Save All Searches</item>
+        <item>Save Successful Searches</item>
+        <item>Save on Notes/Context added</item>
+    </string-array>
+    <string-array
+        name="pref_auto_save_values">
+        <item>none</item>
+        <item>all</item>
+        <item>success</item>
+        <item>info</item>
+    </string-array>
 </resources>

@@ -47,6 +47,16 @@ public class ContextRepository {
         new entryModificationAsyncTask(mContextDao, ACTION_DELETE).execute(note);
     }
 
+    public void deleteAll(){
+        new AsyncTask<Void, Void, Void>(){
+            @Override
+            protected Void doInBackground(Void... voids) {
+                mContextDao.deleteAll();
+                return null;
+            }
+        }.execute();
+    }
+
     /**
      * Queries the database for the notes related to a certain word.
      * @param word The word to search for.
@@ -116,7 +126,7 @@ public class ContextRepository {
     }
 
     /**
-     * Async task to request for notes
+     * Async task to request for the word context
      */
     private static class contextQueryTask extends AsyncTask<String, Void, String> {
         private ContextDao mAsyncTaskDao;

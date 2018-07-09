@@ -17,6 +17,7 @@ Type a word in the search box, then press enter to conduct a search.
 The floating action button sends the searched word into AnkiDroid.
 Dictionary type (J-J, J-E, E-J) can be changed in the settings.
 If it does not find the word you wanted, change try changing the match type, or checking the related words generated from the search.
+Autodeletion and Autosave settings are turned off by default. Change it in the settings to generate and manage an offline database on search.
 
 ## Potential Development
 <s>Save searched words and definitions into an SQLiteDB for offline usage.</s>

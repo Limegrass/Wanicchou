@@ -46,6 +46,16 @@ public class NoteRepository {
         new entryModificationAsyncTask(mNoteDao, ACTION_DELETE).execute(note);
     }
 
+    public void deleteAll(){
+        new AsyncTask<Void, Void, Void>(){
+            @Override
+            protected Void doInBackground(Void... voids) {
+                mNoteDao.deleteAll();
+                return null;
+            }
+        }.execute();
+    }
+
     /**
      * Queries the database for the notes related to a certain word.
      * @param word The word to search for.

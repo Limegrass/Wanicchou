@@ -38,6 +38,8 @@ public interface NoteDao {
     public void deleteAll();
 
     /**
+
+    /**
      * Gets the note for a particular word
      * @param word The word to search for.
      * @return The note related to the word.

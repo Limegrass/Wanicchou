@@ -10,7 +10,6 @@ import android.arch.persistence.room.Update;
 import java.util.List;
 
 import data.room.voc.VocabularyEntity;
-import data.vocab.jp.JapaneseDictionaryType;
 import data.vocab.models.DictionaryType;
 
 
@@ -43,8 +42,12 @@ public interface RelatedWordDao {
     /**
      * Query to clear the database
      */
-    @Query("DELETE FROM VOCABULARYWORDS")
+    @Query("DELETE FROM RelatedWords")
     public void deleteAll();
+
+    @Query("DELETE FROM RelatedWords WHERE FKBaseWordId = " +
+            "(SELECT VocabularyId FROM VocabularyWords WHERE Word = :word LIMIT 1)")
+    public void deleteWordsRelatedTo(String word);
 
     /**
      * Query to request a list of entities relations for a particular word in the database.

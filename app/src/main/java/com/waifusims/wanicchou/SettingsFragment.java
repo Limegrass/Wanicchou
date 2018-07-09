@@ -11,6 +11,8 @@ public class SettingsFragment extends PreferenceFragmentCompat
 
     private ListPreference mDicTypeListPref;
     private ListPreference mMatchTypeListPref;
+    private ListPreference mAutoSaveListPref;
+    private ListPreference mAutoDeleteListPref;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -20,14 +22,19 @@ public class SettingsFragment extends PreferenceFragmentCompat
                 .findPreference(getContext().getString(R.string.pref_dictionary_type_key));
         mMatchTypeListPref = (ListPreference) getPreferenceScreen()
                 .findPreference(getContext().getString(R.string.pref_match_type_key));
+        mAutoSaveListPref = (ListPreference) getPreferenceScreen()
+                .findPreference(getContext().getString(R.string.pref_auto_save_key));
+        mAutoDeleteListPref = (ListPreference) getPreferenceScreen()
+                .findPreference(getContext().getString(R.string.pref_auto_delete_key));
     }
 
     @Override
     public void onResume() {
         super.onResume();
         mDicTypeListPref.setSummary(mDicTypeListPref.getEntry().toString());
-        getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
         mMatchTypeListPref.setSummary(mMatchTypeListPref.getEntry().toString());
+        mAutoDeleteListPref.setSummary(mAutoDeleteListPref.getEntry().toString());
+        mAutoSaveListPref.setSummary(mAutoSaveListPref.getEntry().toString());
         getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
     }
 
@@ -47,9 +54,14 @@ public class SettingsFragment extends PreferenceFragmentCompat
         if (key.equals(getContext().getString(R.string.pref_dictionary_type_key))){
             mDicTypeListPref.setSummary(mDicTypeListPref.getEntry().toString());
         }
-        if (key.equals(getContext().getString(R.string.pref_match_type_key))){
+        else if (key.equals(getContext().getString(R.string.pref_match_type_key))){
             mMatchTypeListPref.setSummary(mMatchTypeListPref.getEntry().toString());
         }
-
+        else if (key.equals(getContext().getString(R.string.pref_auto_delete_key))){
+            mAutoDeleteListPref.setSummary(mAutoDeleteListPref.getEntry().toString());
+        }
+        else if (key.equals(getContext().getString(R.string.pref_auto_save_key))){
+            mAutoSaveListPref.setSummary(mAutoSaveListPref.getEntry().toString());
+        }
     }
 }
