@@ -54,8 +54,14 @@ public class SettingsFragment extends PreferenceFragmentCompat
         if (key.equals(getContext().getString(R.string.pref_dictionary_type_key))){
             mDicTypeListPref.setSummary(mDicTypeListPref.getEntry().toString());
         }
-        if (key.equals(getContext().getString(R.string.pref_match_type_key))){
+        else if (key.equals(getContext().getString(R.string.pref_match_type_key))){
             mMatchTypeListPref.setSummary(mMatchTypeListPref.getEntry().toString());
+        }
+        else if (key.equals(getContext().getString(R.string.pref_auto_delete_key))){
+            mAutoDeleteListPref.setSummary(mAutoDeleteListPref.getEntry().toString());
+        }
+        else if (key.equals(getContext().getString(R.string.pref_auto_save_key))){
+            mAutoSaveListPref.setSummary(mAutoSaveListPref.getEntry().toString());
         }
     }
 }

@@ -47,8 +47,11 @@ public interface RelatedWordDao {
     public void deleteAll();
 
     @Query("DELETE FROM RelatedWords WHERE FKBaseWordId = " +
-            "(SELECT VocabularyId FROM VocabularyWords WHERE Word = :word)")
+            "(SELECT VocabularyId FROM VocabularyWords WHERE Word = :word LIMIT 1)")
     public void deleteWordsRelatedTo(String word);
+
+    @Query("VACUUM")
+    public void vacuum();
 
     /**
      * Query to request a list of entities relations for a particular word in the database.

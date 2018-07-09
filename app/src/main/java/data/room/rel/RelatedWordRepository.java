@@ -63,6 +63,7 @@ public class RelatedWordRepository {
             @Override
             protected Void doInBackground(Void... voids) {
                 mRelatedWordDao.deleteAll();
+                mRelatedWordDao.vacuum();
                 return null;
             }
         }.execute();
@@ -74,6 +75,7 @@ public class RelatedWordRepository {
             protected Void doInBackground(String... strings) {
                 String word = strings[0];
                 mRelatedWordDao.deleteWordsRelatedTo(word);
+                mRelatedWordDao.vacuum();
                 return null;
             }
         }.execute(word);
@@ -150,6 +152,7 @@ public class RelatedWordRepository {
                     break;
                 case ACTION_DELETE:
                     mAsyncTaskDao.delete(relatedWordEntities[0]);
+                    mAsyncTaskDao.vacuum();
                     break;
                 default:
             }

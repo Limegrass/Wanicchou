@@ -52,6 +52,7 @@ public class ContextRepository {
             @Override
             protected Void doInBackground(Void... voids) {
                 mContextDao.deleteAll();
+                mContextDao.vacuum();
                 return null;
             }
         }.execute();
@@ -118,6 +119,7 @@ public class ContextRepository {
                     break;
                 case ACTION_DELETE:
                     mAsyncTaskDao.delete(contextEntities[0]);
+                    mAsyncTaskDao.vacuum();
                     break;
                 default:
             }

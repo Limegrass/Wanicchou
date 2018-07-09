@@ -38,6 +38,11 @@ public interface ContextDao {
     @Query("DELETE FROM WordContext")
     public void deleteAll();
 
+    @Query("VACUUM")
+    public void vacuum();
+    /**
+
+
     /**
      * Gets the linguistic context for a particular word
      * @param word The word to search for.

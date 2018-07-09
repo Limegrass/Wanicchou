@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.databinding.DataBindingUtil;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -28,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import data.room.WanicchouDatabase;
 import data.room.context.ContextViewModel;
 import data.room.notes.NoteViewModel;
 import data.room.rel.RelatedWordEntity;
@@ -149,10 +151,15 @@ public class SearchActivity extends AppCompatActivity
         boolean autoDeleteOnClose = sharedPreferences.getString(getString(R.string.pref_auto_delete_key),
                 getString(R.string.pref_auto_delete_default)).equals("close");
         if(autoDeleteOnClose){
-            mVocabViewModel.deleteAll();
-            mRelatedWordViewModel.deleteAll();
-            mContextViewModel.deleteAll();
-            mNoteViewModel.deleteAll();
+            new AsyncTask<Void, Void, Void>(){
+
+                @Override
+                protected Void doInBackground(Void... voids) {
+                    WanicchouDatabase database = WanicchouDatabase.getDatabase(SearchActivity.this);
+                    database.clearAllTables();
+                    return null;
+                }
+            }.execute();
         }
     }
 
@@ -684,8 +691,6 @@ public class SearchActivity extends AppCompatActivity
     }
 
     private void handleSearchResult(){
-        Context context = this;
-
         String event;
         if(mLastSearched != null){
             if (!TextUtils.isEmpty(mLastSearched.getVocabulary().getWord())) {

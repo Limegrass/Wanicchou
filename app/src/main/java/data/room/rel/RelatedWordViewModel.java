@@ -34,7 +34,6 @@ public class RelatedWordViewModel extends AndroidViewModel{
 
     public void deleteWordsRelatedTo(String word){
         mRepo.deleteWordsRelatedTo(word);
-
     }
 
     public void deleteAll(){

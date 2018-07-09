@@ -51,6 +51,7 @@ public class NoteRepository {
             @Override
             protected Void doInBackground(Void... voids) {
                 mNoteDao.deleteAll();
+                mNoteDao.vacuum();
                 return null;
             }
         }.execute();
@@ -117,6 +118,7 @@ public class NoteRepository {
                     break;
                 case ACTION_DELETE:
                     mAsyncTaskDao.delete(noteEntities[0]);
+                    mAsyncTaskDao.vacuum();
                     break;
                 default:
             }
