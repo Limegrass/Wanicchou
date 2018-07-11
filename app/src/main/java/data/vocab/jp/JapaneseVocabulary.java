@@ -15,11 +15,13 @@ import data.vocab.models.Vocabulary;
  */
 
 public class JapaneseVocabulary implements Parcelable, Vocabulary {
+    // Words to test: 計る, アニメ、animation, 雪害
 
     // Should these be in the Android Strings file?
     // Regexes, not sure if they should be const static.
     // Most vocab are enclosed in the braces.
     private static final String EXACT_WORD_REGEX = "(?<=［).*(?=］)";
+    private static final String EXACT_EJ_REGEX = ".*(?=［.*］)";
 
     // Try to find a word beginning with or enclosed with Kanji
     private static final String WORD_WITH_KANJI_REGEX =
@@ -29,11 +31,11 @@ public class JapaneseVocabulary implements Parcelable, Vocabulary {
     private static final String KANA_REGEX = "[\\p{script=Hiragana}|\\p{script=Katakana}]+";
 
     private static final String READING_REGEX =
-            "[\\p{script=Hiragana}|\\p{script=Katakana}]+(?=($|[\\p{script=Han}０-９]|\\d|\\s))";
+            "[\\p{script=Hiragana}|\\p{script=Katakana}]+($|[\\p{script=Han}０-９]|\\d|\\s)*?";
     private static final String TONE_REGEX = "[\\d０-９]+";
 
     // Some messy dictionary entries have triangles in 
-    private static final String TRIANGLES_REGEX = "[△▲]";
+    private static final String SEPARATOR_FRAGMENTS_REGEX = "[△▲･・]";
 
     private String word;
     private String reading;
@@ -47,9 +49,12 @@ public class JapaneseVocabulary implements Parcelable, Vocabulary {
      * @param definitionSource a string containing the definition of the word.
      */
     public JapaneseVocabulary(String wordSource, String definitionSource, DictionaryType dictionaryType){
+        wordSource = wordSource.trim();
+        definitionSource = definitionSource.trim();
+
         definition = definitionSource;
-        word = isolateWord(wordSource);
-        reading = isolateReading(wordSource);
+        word = isolateWord(wordSource, dictionaryType);
+        reading = isolateReading(wordSource, dictionaryType);
         pitch = isolatePitch(wordSource);
         this.dictionaryType = dictionaryType;
     }
@@ -124,8 +129,14 @@ public class JapaneseVocabulary implements Parcelable, Vocabulary {
      * @param wordSource the raw string from the html source
      * @return The full word isolated from any furigana readings or tones
      */
-    public static String isolateWord(String wordSource){
-        wordSource = wordSource.replaceAll(TRIANGLES_REGEX, "");
+    public static String isolateWord(String wordSource, DictionaryType dictionaryType){
+        wordSource = wordSource.replaceAll(SEPARATOR_FRAGMENTS_REGEX, "");
+        if(dictionaryType == JapaneseDictionaryType.EJ){
+            Matcher ejMatcher = Pattern.compile(EXACT_EJ_REGEX).matcher(wordSource);
+            if(ejMatcher.find()){
+                return ejMatcher.group(0).toString();
+            }
+        }
         Matcher exactMatcher = Pattern.compile(EXACT_WORD_REGEX).matcher(wordSource);
         Matcher kanjiMatcher = Pattern.compile(WORD_WITH_KANJI_REGEX).matcher(wordSource);
         Matcher kanaMatcher = Pattern.compile(KANA_REGEX).matcher(wordSource);
@@ -219,11 +230,24 @@ public class JapaneseVocabulary implements Parcelable, Vocabulary {
      * @param wordSource the raw string containing the vocabulary word.
      * @return a string with the isolated kana reading of the word.
      */
-    private String isolateReading(String wordSource){
+    private String isolateReading(String wordSource, DictionaryType dictionaryType){
         if(wordSource == null || wordSource.equals("")){
             return "";
         }
+        // Dic uses images to show pronunciations in the International Phonetic Alphabet
+        // Maybe work around some other time
+        if(dictionaryType == JapaneseDictionaryType.EJ){
+            int splitPos = wordSource.indexOf('[');
+            if (splitPos < 0){
+                splitPos = wordSource.indexOf('［');
+            }
+            if (splitPos > 0){
+                return wordSource.substring(0, splitPos);
+            }
+        }
 
+
+        wordSource = wordSource.replaceAll(SEPARATOR_FRAGMENTS_REGEX, "");
         Matcher readingMatcher = Pattern.compile(READING_REGEX).matcher(wordSource);
         if(readingMatcher.find()){
             return readingMatcher.group(0).toString();

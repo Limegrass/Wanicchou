@@ -642,16 +642,29 @@ public class SearchActivity extends AppCompatActivity
 
     private void searchDbThenOnlineForWord(String word){
         clearAnkiFields();
+        word = word.trim();
         // If the word isn't saved in our DB, start a new search for it.
         if(!showWordFromDB(word, getCurrentDictionaryPreference())){
             try {
                 Context context = SearchActivity.this;
                 OnJavaScriptCompleted listener = SearchActivity.this;
+
+
+                //Automatically search EJ if English input
+                DictionaryType dicPref = getCurrentDictionaryPreference();
+                if (dicPref != JapaneseDictionaryType.EJ){
+                    // < Extended ASCII so likely English
+                    if (word.charAt(0) < 255){
+                        dicPref = JapaneseDictionaryType.EJ;
+                    }
+                }
+
+
                 //TODO: Reuse existing webview if possible
                 mWebPage = new SanseidoSearchWebView(
                         context,
                         word,
-                        getCurrentDictionaryPreference(),
+                        dicPref,
                         getCurrentMatchType(),
                         listener
                 );

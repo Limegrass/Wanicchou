@@ -210,7 +210,7 @@ public class SanseidoSearch implements Search {
                         JapaneseDictionaryType.fromJapaneseDictionaryKanji(dictionaryTypeString);
 
                 String tableEntry = columns.get(RELATED_WORDS_VOCAB_INDEX).text();
-                String isolatedWord = JapaneseVocabulary.isolateWord(tableEntry);
+                String isolatedWord = JapaneseVocabulary.isolateWord(tableEntry, dictionaryType);
 
                 String link = columns.select("a").first().attr("href");
 
