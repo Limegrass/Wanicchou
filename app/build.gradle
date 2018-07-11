@@ -8,8 +8,8 @@ android {
         applicationId "com.waifusims.wanicchou"
         minSdkVersion 15
         targetSdkVersion 26
-        versionCode 6
-        versionName "v0.1.2-beta"
+        versionCode 7
+        versionName "v0.2.1-beta"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 
