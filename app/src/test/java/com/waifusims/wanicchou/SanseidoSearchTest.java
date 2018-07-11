@@ -6,13 +6,13 @@ import org.junit.Test;
 
 import data.vocab.jp.JapaneseDictionaryType;
 import data.vocab.jp.search.sanseido.SanseidoMatchType;
-import data.vocab.jp.search.search.search.SanseidoSearch;
+import data.vocab.jp.search.sanseido.SanseidoSearch;
 
 import static junit.framework.Assert.assertEquals;
 
 /**
  * Test for Sanseido Search
- * Also somehwat indirectly Japanese Vocabulary
+ * Also somewhat indirectly Japanese Vocabulary
  */
 public class SanseidoSearchTest {
 
@@ -22,7 +22,7 @@ public class SanseidoSearchTest {
                 new SanseidoSearch("アニメ", JapaneseDictionaryType.JJ, SanseidoMatchType.EXACT);
         assertEquals(sanseidoSearch.getVocabulary().getWord(), "アニメ");
         assertEquals(sanseidoSearch.getVocabulary().getDictionaryType(), JapaneseDictionaryType.JJ);
-        assertEquals(sanseidoSearch.getVocabulary().getDefintion(), "アニメーションの略．");
+        assertEquals(sanseidoSearch.getVocabulary().getDefinition(), "アニメーションの略．");
         assertEquals(sanseidoSearch.getVocabulary().getPitch(), "1");
         assertEquals(sanseidoSearch.getRelatedWords().size(), 1);
     }
@@ -33,12 +33,9 @@ public class SanseidoSearchTest {
                 new SanseidoSearch("雪", JapaneseDictionaryType.JE, SanseidoMatchType.FORWARDS);
         assertEquals(sanseidoSearch.getVocabulary().getWord(), "雪害");
         assertEquals(sanseidoSearch.getVocabulary().getDictionaryType(), JapaneseDictionaryType.JE);
-        assertEquals(sanseidoSearch.getVocabulary().getDefintion(), "snow damage．");
+        assertEquals(sanseidoSearch.getVocabulary().getDefinition(), "snow damage．");
         assertEquals(sanseidoSearch.getVocabulary().getPitch(), "");
-        int size = 0;
-        for (JapaneseDictionaryType dictionaryType : sanseidoSearch.getRelatedWords().keySet()){
-            size += sanseidoSearch.getRelatedWords().get(dictionaryType).size();
-        }
+        int size = sanseidoSearch.getRelatedWords().size();
         assertEquals(size, 20);
     }
 

@@ -55,6 +55,11 @@ android {
     unMock {
         keepStartingWith "android.net.Uri"
         keepStartingWith "android.text.TextUtils"
+        keepStartingWith "android.os.Parcel"
+        keepStartingWith "android.os.Parcelable"
+        keepStartingWith "android.text.Spannable"
+        keepStartingWith "android.text.Spanned"
+        keepStartingWith "android.util.Log"
     }
 }
 
