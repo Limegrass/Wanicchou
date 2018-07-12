@@ -6,7 +6,6 @@ import android.os.AsyncTask;
 import java.util.concurrent.ExecutionException;
 
 import data.room.WanicchouDatabase;
-import data.vocab.jp.JapaneseDictionaryType;
 import data.vocab.models.DictionaryType;
 
 /**
@@ -14,7 +13,6 @@ import data.vocab.models.DictionaryType;
  */
 public class VocabularyRepository {
     private VocabularyDao mVocabDao;
-//    private LiveData< List<VocabularyEntity> > mAllVocab;
     private static final int ACTION_DELETE = 0;
     private static final int ACTION_UPDATE = 1;
     private static final int ACTION_INSERT = 2;
@@ -27,15 +25,10 @@ public class VocabularyRepository {
         WanicchouDatabase database = WanicchouDatabase.getDatabase(application);
 
         mVocabDao = database.vocabularyDao();
-//        mAllVocab = mVocabDao.getAllSavedWords();
     }
 
 
-//    public LiveData<List<VocabularyEntity>> getAllWords() {
-//        return mAllVocab;
-//    }
-
-    //TODO: If I can keeping the JapaneseVocabulary object,
+    //TODO: Keep the JapaneseVocabulary object,
     // pass that in and let this construct the vocab entity.
     /**
      * Inserts The vocabulary word into the database.
@@ -62,14 +55,15 @@ public class VocabularyRepository {
     }
 
     public void deleteAll(){
-        new AsyncTask<Void, Void, Void>(){
+        new deleteAllTask().execute();
+    }
 
-            @Override
-            protected Void doInBackground(Void... voids) {
-                mVocabDao.deleteAll();
-                return null;
-            }
-        }.execute();
+    protected static class deleteAllTask extends AsyncTask<VocabularyDao, Void, Void>{
+        @Override
+        protected Void doInBackground(VocabularyDao... daos) {
+            daos[0].deleteAll();
+            return null;
+        }
     }
 
     /**

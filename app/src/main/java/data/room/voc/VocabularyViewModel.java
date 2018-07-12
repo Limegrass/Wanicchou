@@ -3,7 +3,6 @@ package data.room.voc;
 import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
 
-import data.vocab.jp.JapaneseDictionaryType;
 import data.vocab.models.DictionaryType;
 import data.vocab.models.Vocabulary;
 

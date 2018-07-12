@@ -85,14 +85,14 @@ public class WanicchouSharedPreferencesHelper {
 
     public String autoDeleteOption(){
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        return sharedPreferences.getString(getString(R.string.pref_auto_delete_key),
-                getString(R.string.pref_auto_delete_default));
+        return sharedPreferences.getString(context.getString(R.string.pref_auto_delete_key),
+                context.getString(R.string.pref_auto_delete_default));
     }
 
     public String autoSaveOption(){
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         return sharedPreferences.getString(context.getString(R.string.pref_auto_save_key),
-                getString(R.string.pref_auto_save_default));
+                context.getString(R.string.pref_auto_save_default));
     }
 
     public DictionaryType getDictionaryPreference(){
@@ -109,8 +109,11 @@ public class WanicchouSharedPreferencesHelper {
     public SearchProvider getSearchProvider(){
         String providerKey = getString(R.string.pref_provider_key, R.string.pref_provider_default);
         try {
-            Constructor<?> constructor = SearchProviders.getClassByKey(providerKey).getConstructor();
-            return (SearchProvider) constructor.newInstance();
+            Class providerClass = SearchProviders.getClassByKey(providerKey);
+            if(providerClass != null){
+                Constructor<?> constructor = providerClass.getConstructor();
+                return (SearchProvider) constructor.newInstance();
+            }
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
         } catch (IllegalAccessException e) {

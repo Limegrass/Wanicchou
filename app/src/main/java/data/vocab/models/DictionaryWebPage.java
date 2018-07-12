@@ -6,6 +6,9 @@ import org.jsoup.nodes.Document;
 import data.vocab.RelatedWordEntry;
 import data.vocab.jp.JapaneseDictionaryType;
 
+/**
+ * Interface for WebViews of a SearchProvider
+ */
 public interface DictionaryWebPage {
 
     Vocabulary getVocabulary();

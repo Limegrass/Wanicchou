@@ -3,7 +3,6 @@ package data.room;
 import android.arch.persistence.room.TypeConverter;
 
 import data.room.voc.VocabularyEntity;
-import data.vocab.jp.JapaneseDictionaryType;
 import data.vocab.models.DictionaryType;
 
 public class Converters {

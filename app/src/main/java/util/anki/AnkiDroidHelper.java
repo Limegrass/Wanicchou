@@ -226,6 +226,12 @@ public class AnkiDroidHelper {
         return mid;
     }
 
+    /**
+     * Add a search result to Anki
+     * @param searchResult the result of the search
+     * @param notes user saved notes
+     * @param wordContext the linguistic context the word was found
+     */
     public void addWordToAnki(SearchResult searchResult, String notes, String wordContext){
         long deckId = getDeckId();
         long modelId = getModelId();
@@ -254,7 +260,4 @@ public class AnkiDroidHelper {
     //TODO: Change click to expand a menu and add associated UI elements
     //TODO: Maybe implement a clozed type when sentence search is included
     //TODO: Duplicate checking
-
-
-
 }

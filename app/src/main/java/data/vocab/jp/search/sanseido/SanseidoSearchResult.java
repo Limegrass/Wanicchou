@@ -56,9 +56,9 @@ public class SanseidoSearchResult implements SearchResult {
     private final static String PARAM_DIC_PREFIX = "Daily";
     private final static String SET_LANG = "checkbox";
 
-    protected final static int RELATED_WORDS_TYPE_CLASS_INDEX = 0;
-    protected final static int RELATED_WORDS_VOCAB_INDEX = 1;
-    protected final static int RELATED_WORDS_TABLE_INDEX = 0;
+    private final static int RELATED_WORDS_TYPE_CLASS_INDEX = 0;
+    private final static int RELATED_WORDS_VOCAB_INDEX = 1;
+    private final static int RELATED_WORDS_TABLE_INDEX = 0;
 
     //TODO: Refactor to it uses the enum type
     private List<RelatedWordEntry> relatedWords;
@@ -304,7 +304,7 @@ public class SanseidoSearchResult implements SearchResult {
      * Constructor from a parcel.
      * @param parcel The parcel to read from.
      */
-    protected SanseidoSearchResult(Parcel parcel) {
+    private SanseidoSearchResult(Parcel parcel) {
         final ClassLoader classLoader = getClass().getClassLoader();
         vocabulary = (JapaneseVocabulary) parcel.readValue(classLoader);
         relatedWords = (List<RelatedWordEntry>) parcel.readValue(classLoader);

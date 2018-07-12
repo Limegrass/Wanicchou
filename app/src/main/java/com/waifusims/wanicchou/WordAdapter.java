@@ -33,10 +33,8 @@ public class WordAdapter extends RecyclerView.Adapter<WordAdapter.WordViewHolder
         Context context = parent.getContext();
         int wordLayoutId = R.layout.word_list_item;
         LayoutInflater inflater = LayoutInflater.from(context);
-        boolean attachToParent = false;
-        View view = inflater.inflate(wordLayoutId, parent, attachToParent);
-        WordViewHolder wordViewHolder = new WordViewHolder(view);
-        return wordViewHolder;
+        View view = inflater.inflate(wordLayoutId, parent, false);
+        return new WordViewHolder(view);
     }
 
     public interface ListItemClickListener{

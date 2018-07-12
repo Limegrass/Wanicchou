@@ -218,6 +218,9 @@ public class SearchActivity extends AppCompatActivity
 
         List<RelatedWordEntry> relatedWords = new ArrayList<>();
         SearchProvider provider = sharedPreferencesHelper.getSearchProvider();
+        if(provider == null){
+            return null;
+        }
         for (DictionaryType dictionaryType :
                 DictionaryTypes.getAllDictionaryTypeForLanguage(provider.LANGUAGE)){
             List<RelatedWordEntity> relatedWordEntities =
@@ -536,7 +539,8 @@ public class SearchActivity extends AppCompatActivity
                 showToast(message, duration);
 
 
-                if(sharedPreferencesHelper.autoDeleteOption().equals("import")){
+                String autoDeleteOption = sharedPreferencesHelper.autoDeleteOption();
+                if(autoDeleteOption.equals("import")){
                     mNoteViewModel.delete(mLastSearched.getVocabulary().getWord());
                     mContextViewModel.delete(mLastSearched.getVocabulary().getWord());
                     mRelatedWordViewModel.deleteWordsRelatedTo(mLastSearched.getVocabulary().getWord());
@@ -567,15 +571,6 @@ public class SearchActivity extends AppCompatActivity
         if(dicPref == null){
             dicPref = sharedPreferencesHelper.getDictionaryPreference();
         }
-
-
-//        //TODO: Generalize
-//        if(isEnglishInput(word)){
-//            dicPref = JapaneseDictionaryType.EJ;
-//        }
-//        else{
-//            dicPref = sharedPreferencesHelper.getDictionaryPreference();
-//        }
 
         if(showWordFromDB(word, dicPref)) {
             return true;
@@ -633,10 +628,7 @@ public class SearchActivity extends AppCompatActivity
                                 showToast(message, duration);
                             }
                             //Web search handled by handleSearchResult
-
-                            return true;
                         default:
-                            //TODO: Would returning true do anything undesired? Find out
                             return false;
                     }
                 }

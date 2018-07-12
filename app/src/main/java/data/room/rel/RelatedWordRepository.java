@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import data.room.WanicchouDatabase;
+import data.room.voc.VocabularyDao;
 import data.room.voc.VocabularyEntity;
 import data.vocab.jp.JapaneseDictionaryType;
 import data.vocab.models.DictionaryType;
@@ -58,25 +59,32 @@ public class RelatedWordRepository {
     }
 
     public void deleteAll(){
-        new AsyncTask<Void, Void, Void>(){
-
-            @Override
-            protected Void doInBackground(Void... voids) {
-                mRelatedWordDao.deleteAll();
-                return null;
-            }
-        }.execute();
+        new deleteAllTask().execute(mRelatedWordDao);
+    }
+    protected static class deleteAllTask extends AsyncTask<RelatedWordDao, Void, Void>{
+        @Override
+        protected Void doInBackground(RelatedWordDao... daos) {
+            daos[0].deleteAll();
+            return null;
+        }
     }
 
+
     public void deleteWordsRelatedTo(String word){
-        new AsyncTask<String, Void, Void>(){
-            @Override
-            protected Void doInBackground(String... strings) {
-                String word = strings[0];
-                mRelatedWordDao.deleteWordsRelatedTo(word);
-                return null;
-            }
-        }.execute(word);
+        new deleteRelatedWordsTask(mRelatedWordDao).execute(word);
+    }
+
+    protected static class deleteRelatedWordsTask extends AsyncTask<String, Void, Void>{
+        RelatedWordDao mDao;
+        deleteRelatedWordsTask(RelatedWordDao dao){
+            mDao = dao;
+        }
+
+        @Override
+        protected Void doInBackground(String... strings) {
+            mDao.deleteWordsRelatedTo(strings[0]);
+            return null;
+        }
     }
 
     /**

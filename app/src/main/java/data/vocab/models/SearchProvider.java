@@ -1,5 +1,9 @@
 package data.vocab.models;
 
+/**
+ * Definition of components for a search provider
+ * See Sanseido.java as an example
+ */
 public abstract class SearchProvider {
     public static Language LANGUAGE;
     public static Class DICTIONARY_TYPE_CLASS;

@@ -134,7 +134,7 @@ public class JapaneseVocabulary implements Parcelable, Vocabulary {
         if(dictionaryType == JapaneseDictionaryType.EJ){
             Matcher ejMatcher = Pattern.compile(EXACT_EJ_REGEX).matcher(wordSource);
             if(ejMatcher.find()){
-                return ejMatcher.group(0).toString();
+                return ejMatcher.group(0);
             }
         }
         Matcher exactMatcher = Pattern.compile(EXACT_WORD_REGEX).matcher(wordSource);
@@ -142,13 +142,13 @@ public class JapaneseVocabulary implements Parcelable, Vocabulary {
         Matcher kanaMatcher = Pattern.compile(KANA_REGEX).matcher(wordSource);
 
         if(exactMatcher.find()){
-            return exactMatcher.group(0).toString();
+            return exactMatcher.group(0);
         }
         else if (kanjiMatcher.find()){
-            return kanjiMatcher.group(0).toString();
+            return kanjiMatcher.group(0);
         }
         else if (kanaMatcher.find()){
-            return kanaMatcher.group(0).toString();
+            return kanaMatcher.group(0);
         }
         else {
             return wordSource;
@@ -245,7 +245,7 @@ public class JapaneseVocabulary implements Parcelable, Vocabulary {
         String tone = "";
         Matcher toneMatcher = Pattern.compile(TONE_REGEX).matcher(wordSource);
         if (toneMatcher.find()){
-            tone = toneMatcher.group(0).toString();
+            tone = toneMatcher.group(0);
         }
         return tone;
     }
@@ -275,7 +275,7 @@ public class JapaneseVocabulary implements Parcelable, Vocabulary {
         wordSource = wordSource.replaceAll(SEPARATOR_FRAGMENTS_REGEX, "");
         Matcher readingMatcher = Pattern.compile(READING_REGEX).matcher(wordSource);
         if(readingMatcher.find()){
-            return readingMatcher.group(0).toString();
+            return readingMatcher.group(0);
         }
         return wordSource;
     }

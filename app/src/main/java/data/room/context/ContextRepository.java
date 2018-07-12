@@ -48,13 +48,14 @@ public class ContextRepository {
     }
 
     public void deleteAll(){
-        new AsyncTask<Void, Void, Void>(){
-            @Override
-            protected Void doInBackground(Void... voids) {
-                mContextDao.deleteAll();
-                return null;
-            }
-        }.execute();
+        new deleteAllTask().execute(mContextDao);
+    }
+    protected static class deleteAllTask extends AsyncTask<ContextDao, Void, Void>{
+        @Override
+        protected Void doInBackground(ContextDao... daos) {
+            daos[0].deleteAll();
+            return null;
+        }
     }
 
     /**

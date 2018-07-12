@@ -3,7 +3,6 @@ package data.room;
 import android.arch.persistence.room.Database;
 import android.arch.persistence.room.Room;
 import android.arch.persistence.room.RoomDatabase;
-import android.arch.persistence.room.TypeConverter;
 import android.arch.persistence.room.TypeConverters;
 import android.content.Context;
 
@@ -17,6 +16,11 @@ import data.room.voc.VocabularyDao;
 import data.room.voc.VocabularyEntity;
 
 // TODO: What's a schema export for?
+/**
+ * Database object using the Room Persistence Library.
+ * Singleton design to avoid multiple instances of database
+ * connection when it is not needed.
+ */
 @Database(
         entities = {
                 VocabularyEntity.class,
@@ -30,11 +34,6 @@ import data.room.voc.VocabularyEntity;
 @TypeConverters(
         {Converters.class}
 )
-/**
- * Database object using the Room Persistence Library.
- * Singleton design to avoid multiple instances of database
- * connection when it is not needed.
- */
 public abstract class WanicchouDatabase extends RoomDatabase {
     public abstract VocabularyDao vocabularyDao();
     public abstract RelatedWordDao relatedWordDao();

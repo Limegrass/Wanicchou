@@ -16,27 +16,27 @@ public interface ContextDao {
      * @param entity The entity consisting of a word and it's linguistic context.
      */
     @Insert
-    public void insert(ContextEntity entity);
+    void insert(ContextEntity entity);
 
     /**
      * Updates a row in the database, if it exists.
      * @param entity The entity to updateNote.
      */
     @Update(onConflict = OnConflictStrategy.REPLACE)
-    public void update(ContextEntity entity);
+    void update(ContextEntity entity);
 
     /**
      * Deletes a row, if it exists.
      * @param entity The row to delete.
      */
     @Delete
-    public void delete(ContextEntity entity);
+    void delete(ContextEntity entity);
 
     /**
      * Clears the database.
      */
     @Query("DELETE FROM WordContext")
-    public void deleteAll();
+    void deleteAll();
 
     /**
 
@@ -47,7 +47,7 @@ public interface ContextDao {
      * @return The saved linguistic context of the word searched.
      */
     @Query("SELECT Context FROM WordContext WHERE Word = :word")
-    public String getContextOf(String word);
+    String getContextOf(String word);
 
     /**
      * Gets the linguistic context entity for a particular word
@@ -55,5 +55,5 @@ public interface ContextDao {
      * @return The saved linguistic context of the word searched.
      */
     @Query("SELECT * FROM WordContext WHERE Word = :word")
-    public ContextEntity getContextEntityOf(String word);
+    ContextEntity getContextEntityOf(String word);
 }

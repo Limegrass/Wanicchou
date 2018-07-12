@@ -63,13 +63,20 @@ public enum JapaneseDictionaryType implements DictionaryType {
         }
     }
 
+    /**
+     * Helper to determine if the input language is English.
+     * @param input The inputted word to search
+     * @return true if the word is typed extended ASCII
+     */
     private static boolean isEnglishInput(String input){
-        if (input.charAt(0) < 255){
-            return true;
-        }
-        return false;
+        return input.charAt(0) < 255;
     }
 
+    /**
+     * Assigns the dictionary preference of a search by it's input
+     * @param input the inputted word to search
+     * @return A dictionary type if it should be assigned automatically
+     */
     public static DictionaryType assignTypeByInput(String input){
         if(isEnglishInput(input)){
             return EJ;

@@ -1,5 +1,8 @@
 package data.vocab.models;
 
+/**
+ * Interface to program a language's vocabulary entry to
+ */
 public interface Vocabulary {
     String getWord();
     String getReading();
