@@ -19,6 +19,9 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
+import data.vocab.jp.JapaneseVocabulary;
+import data.vocab.models.SearchResult;
+
 import static com.ichi2.anki.api.AddContentApi.READ_WRITE_PERMISSION;
 /**
  * Originally from 'ankidroid/apisample'
@@ -223,6 +226,34 @@ public class AnkiDroidHelper {
         return mid;
     }
 
+    public void addWordToAnki(SearchResult searchResult, String notes, String wordContext){
+        long deckId = getDeckId();
+        long modelId = getModelId();
+        String[] fieldNames = getApi().getFieldList(modelId);
+        String[] fields = new String[fieldNames.length];
+        fields[AnkiDroidConfig.FIELDS_INDEX_WORD] = searchResult.getVocabulary().getWord();
+        fields[AnkiDroidConfig.FIELDS_INDEX_READING] = searchResult.getVocabulary().getReading();
+
+        String definition = searchResult.getVocabulary().getDefinition();
+        definition = definition.replaceAll("\n", "<br>");
+        fields[AnkiDroidConfig.FIELDS_INDEX_DEFINITION] = definition;
+
+        if(searchResult.getVocabulary() instanceof JapaneseVocabulary){
+            //TODO: Bandaided after interface implementation, something cleaner
+            fields[AnkiDroidConfig.FIELDS_INDEX_FURIGANA] =
+                    ((JapaneseVocabulary) searchResult.getVocabulary()).getFurigana();
+        }
+        fields[AnkiDroidConfig.FIELDS_INDEX_PITCH] = searchResult.getVocabulary().getPitch();
+        fields[AnkiDroidConfig.FIELDS_INDEX_NOTES] = notes;
+        fields[AnkiDroidConfig.FIELDS_INDEX_CONTEXT] = wordContext;
+        fields[AnkiDroidConfig.FIELDS_INDEX_DICTIONARY_TYPE] =
+                searchResult.getVocabulary().getDictionaryType().toString();
+        Set<String> tags = AnkiDroidConfig.TAGS;
+        getApi().addNote(modelId, deckId, fields, tags);
+    }
+    //TODO: Change click to expand a menu and add associated UI elements
+    //TODO: Maybe implement a clozed type when sentence search is included
+    //TODO: Duplicate checking
 
 
 

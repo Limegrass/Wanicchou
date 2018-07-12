@@ -9,7 +9,7 @@ import data.vocab.jp.JapaneseDictionaryType;
 public interface DictionaryWebPage {
 
     Vocabulary getVocabulary();
-    Search getSearch();
+    SearchResult getSearch();
     DictionaryType getCurrentDictionaryType();
     void setCurrentDictionaryType(JapaneseDictionaryType dictionaryType);
     void navigateRelatedWord(RelatedWordEntry relatedWord);

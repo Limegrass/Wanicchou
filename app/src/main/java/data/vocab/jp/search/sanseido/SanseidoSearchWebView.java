@@ -17,7 +17,7 @@ import data.vocab.jp.JapaneseDictionaryType;
 import data.vocab.models.DictionaryType;
 import data.vocab.models.DictionaryWebPage;
 import data.vocab.OnJavaScriptCompleted;
-import data.vocab.models.Search;
+import data.vocab.models.SearchResult;
 import data.vocab.models.Vocabulary;
 
 public class SanseidoSearchWebView extends WebView implements DictionaryWebPage {
@@ -27,7 +27,7 @@ public class SanseidoSearchWebView extends WebView implements DictionaryWebPage 
 
     private Document mHtml;
     private DictionaryType currentDictionaryType;
-    private Search mSearch;
+    private SearchResult mSearchResult;
 
     @SuppressLint({"SetJavaScriptEnabled", "AddJavascriptInterface"})
     public SanseidoSearchWebView(final Context context,
@@ -38,7 +38,7 @@ public class SanseidoSearchWebView extends WebView implements DictionaryWebPage 
         super(context);
         currentDictionaryType = dictionaryType;
 
-        URL searchUrl = SanseidoSearch.buildQueryURL(wordToSearch, dictionaryType, matchType);
+        URL searchUrl = SanseidoSearchResult.buildQueryURL(wordToSearch, dictionaryType, matchType);
         this.addJavascriptInterface(new HtmlParserInterface(listener), HTML_PARSER_NAME);
         this.getSettings().setJavaScriptEnabled(true);
         this.setWebViewClient(new WebViewClient(){
@@ -60,7 +60,7 @@ public class SanseidoSearchWebView extends WebView implements DictionaryWebPage 
                                  DictionaryType dictionaryType,
                                  OnJavaScriptCompleted listener){
         super(context);
-        mSearch = new SanseidoSearch(pageSource, dictionaryType);
+        mSearchResult = new SanseidoSearchResult(pageSource, dictionaryType);
         this.getSettings().setJavaScriptEnabled(true);
         this.addJavascriptInterface(new HtmlParserInterface(listener), HTML_PARSER_NAME);
 
@@ -92,7 +92,7 @@ public class SanseidoSearchWebView extends WebView implements DictionaryWebPage 
         @JavascriptInterface
         public void parsePage(String html){
             mHtml = Jsoup.parse(html);
-            mSearch = new SanseidoSearch(mHtml, currentDictionaryType);
+            mSearchResult = new SanseidoSearchResult(mHtml, currentDictionaryType);
             listener.onJavaScriptCompleted();
         }
     }
@@ -117,12 +117,12 @@ public class SanseidoSearchWebView extends WebView implements DictionaryWebPage 
 
     @Override
     public Vocabulary getVocabulary(){
-        return mSearch.getVocabulary();
+        return mSearchResult.getVocabulary();
     }
 
     @Override
-    public Search getSearch() {
-        return mSearch;
+    public SearchResult getSearch() {
+        return mSearchResult;
     }
 
     @Override

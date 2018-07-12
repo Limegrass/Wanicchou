@@ -171,6 +171,31 @@ public class JapaneseVocabulary implements Parcelable, Vocabulary {
         return dictionaryType;
     }
 
+    @Override
+    public void setWord(String word) {
+        this.word = word;
+    }
+
+    @Override
+    public void setReading(String reading) {
+        this.reading = reading;
+    }
+
+    @Override
+    public void setDefinition(String definition) {
+        this.definition = definition;
+    }
+
+    @Override
+    public void setPitch(String pitch) {
+        this.pitch = pitch;
+    }
+
+    @Override
+    public void setDictionaryType(DictionaryType dictionaryType) {
+        this.dictionaryType = dictionaryType;
+    }
+
     /**
      * Generates an Anki format furigana string from the word and reading saved.
      * @return a string for Anki's furigana display.

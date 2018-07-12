@@ -67,4 +67,9 @@
     <string name="pref_auto_save_title" translatable="true">Auto-Save</string>
     <string name="pref_auto_save_key" translatable="false">listPrefAutoSave</string>
     <string name="pref_auto_save_default" translatable="false">none</string>
+
+    <string name="pref_provider_title" translatable="true">Definition Source</string>
+    <string name="pref_provider_key" translatable="true">provider</string>
+    <string name="pref_provider_default" translatable="true">data.vocab.jp.search.sanseido.Sanseido</string>
+
 </resources>

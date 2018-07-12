@@ -3,6 +3,12 @@
     <PreferenceCategory
         android:title="@string/search_settings_category_title" />
     <ListPreference
+        android:title="@string/pref_provider_title"
+        android:key="@string/pref_provider_key"
+        android:defaultValue="@string/pref_provider_default"
+        android:entries="@array/pref_search_provider_entries"
+        android:entryValues="@array/pref_search_provider_values"/>
+    <ListPreference
         android:title="@string/pref_dictionary_type_title"
         android:key="@string/pref_dictionary_type_key"
         android:defaultValue="@string/pref_dictionary_type_default"

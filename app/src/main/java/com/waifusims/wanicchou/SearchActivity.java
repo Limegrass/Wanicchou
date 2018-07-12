@@ -3,12 +3,10 @@ package com.waifusims.wanicchou;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.databinding.DataBindingUtil;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -24,10 +22,11 @@ import android.widget.Toast;
 
 import com.waifusims.wanicchou.databinding.ActivitySearchBinding;
 
-import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import data.room.WanicchouDatabase;
 import data.room.context.ContextViewModel;
@@ -36,18 +35,16 @@ import data.room.rel.RelatedWordEntity;
 import data.room.rel.RelatedWordViewModel;
 import data.room.voc.VocabularyEntity;
 import data.room.voc.VocabularyViewModel;
-import data.vocab.jp.JapaneseDictionaryType;
-import data.vocab.jp.search.sanseido.SanseidoMatchType;
+import data.vocab.jp.search.sanseido.SanseidoSearchResult;
 import data.vocab.models.DictionaryType;
+import data.vocab.models.DictionaryTypes;
 import data.vocab.models.DictionaryWebPage;
 import data.vocab.jp.JapaneseVocabulary;
 import data.vocab.OnJavaScriptCompleted;
 import data.vocab.RelatedWordEntry;
-import data.vocab.models.Search;
+import data.vocab.models.SearchProvider;
+import data.vocab.models.SearchResult;
 import data.vocab.models.Vocabulary;
-import data.vocab.jp.search.sanseido.SanseidoSearch;
-import data.vocab.jp.search.sanseido.SanseidoSearchWebView;
-import util.anki.AnkiDroidConfig;
 import util.anki.AnkiDroidHelper;
 
 // TODO: Automatically select EJ for English input
@@ -60,8 +57,6 @@ public class SearchActivity extends AppCompatActivity
     private static final int ADD_PERM_REQUEST = 0;
     private static final int SEARCH_ACTIVITY_REQUEST_CODE = 42;
 
-    private static final String SEARCH_WORD_KEY = "search";
-
     private ActivitySearchBinding mBinding;
     private AnkiDroidHelper mAnkiDroid;
     private Toast mToast;
@@ -69,8 +64,9 @@ public class SearchActivity extends AppCompatActivity
     private RelatedWordViewModel mRelatedWordViewModel;
     private NoteViewModel mNoteViewModel;
     private ContextViewModel mContextViewModel;
+    private WanicchouSharedPreferencesHelper sharedPreferencesHelper;
 
-    private Search mLastSearched;
+    private SearchResult mLastSearched;
     private DictionaryWebPage mWebPage;
 
     /* ==================================== +Lifecycle ================================== */
@@ -80,6 +76,8 @@ public class SearchActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_search);
+        Context context = SearchActivity.this;
+        sharedPreferencesHelper = new WanicchouSharedPreferencesHelper(context);
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_search);
 
         setUpClickListeners();
@@ -110,15 +108,12 @@ public class SearchActivity extends AppCompatActivity
         super.onPause();
         if(mLastSearched != null){
             // Save the word so it can be retrieved and researched when the activity is returned.
-            Context context = this;
-            SharedPreferences sharedPreferences =
-                    PreferenceManager.getDefaultSharedPreferences(context);
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putString(getString(R.string.search_word_key),
-                    mLastSearched.getVocabulary().getWord());
-            editor.putString(getString(R.string.dic_type_key),
-                    mLastSearched.getVocabulary().getDictionaryType().toString());
-            editor.apply();
+            sharedPreferencesHelper
+                    .putString(R.string.search_word_key,
+                            mLastSearched.getVocabulary().getWord() );
+            sharedPreferencesHelper
+                    .putString( R.string.dic_type_key,
+                            mLastSearched.getVocabulary().getDictionaryType().toString() );
         }
     }
 
@@ -127,40 +122,30 @@ public class SearchActivity extends AppCompatActivity
         super.onResume();
         //TODO: Move this away from onResume to reduce startup time
         if(mWebPage == null){
-            Context context = SearchActivity.this;
-            String stringIfMissing = "";
-            SharedPreferences sharedPreferences =
-                    PreferenceManager.getDefaultSharedPreferences(context);
-            String searchWord = sharedPreferences.getString(getString(R.string.search_word_key),
-                    stringIfMissing);
-            String dicTypeKey = getString(R.string.dic_type_key);
-            //Returns null if nothing saved
-            String dicType = sharedPreferences.getString(dicTypeKey, stringIfMissing);
-            DictionaryType dictionaryType = JapaneseDictionaryType.fromKey(dicType);
-            if(!TextUtils.isEmpty(searchWord)){
-                showWordFromDB(searchWord, dictionaryType);
+            String lastSearchedWord = sharedPreferencesHelper.getString(R.string.search_word_key);
+            String dicType = sharedPreferencesHelper.getString(R.string.dic_type_key);
+            DictionaryType dictionaryType = DictionaryTypes.getDictionaryType(dicType);
+            if(!TextUtils.isEmpty(lastSearchedWord)){
+                showWordFromDB(lastSearchedWord, dictionaryType);
             }
         }
     }
 
     @Override
     protected void onDestroy() {
-        Context context = this;
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        boolean autoDeleteOnClose = sharedPreferences.getString(getString(R.string.pref_auto_delete_key),
-                getString(R.string.pref_auto_delete_default)).equals("close");
-        if(autoDeleteOnClose){
-            new AsyncTask<Void, Void, Void>(){
-
-                @Override
-                protected Void doInBackground(Void... voids) {
-                    WanicchouDatabase database = WanicchouDatabase.getDatabase(SearchActivity.this);
-                    database.clearAllTables();
-                    return null;
-                }
-            }.execute();
+        if(sharedPreferencesHelper.autoDeleteOption().equals("close")){
+            new clearDBAsyncTask().execute(SearchActivity.this);
         }
         super.onDestroy();
+    }
+
+    protected static class clearDBAsyncTask extends AsyncTask<Context, Void, Void>{
+        @Override
+        protected Void doInBackground(Context... contexts) {
+            WanicchouDatabase database = WanicchouDatabase.getDatabase(contexts[0]);
+            database.clearAllTables();
+            return null;
+        }
     }
 
     @Override
@@ -185,15 +170,9 @@ public class SearchActivity extends AppCompatActivity
                             searchDbThenOnlineForWord(desiredWord.getRelatedWord());
                         }
                     }
-                    if(mToast != null){
-                        mToast.cancel();
-                    }
-                    // TODO: It's not actually doing the search right now
-                    Context context = this;
-                    String msg = getString(R.string.searching_related_toast);
+                    String message = getString(R.string.searching_related_toast);
                     int duration = Toast.LENGTH_SHORT;
-                    mToast = Toast.makeText(context, msg, duration);
-                    mToast.show();
+                    showToast(message, duration);
                     break;
                 default:
                     onResume();
@@ -214,8 +193,7 @@ public class SearchActivity extends AppCompatActivity
         });
 
         String message;
-        final Context context = getApplicationContext();
-        final int searchCompleteToastDuration = Toast.LENGTH_SHORT;
+        final int duration = Toast.LENGTH_SHORT;
         if (!TextUtils.isEmpty(mLastSearched.getVocabulary().getWord())) {
             message = getString(R.string.word_search_success, mLastSearched.getVocabulary().getWord());
         }
@@ -224,8 +202,7 @@ public class SearchActivity extends AppCompatActivity
         }
 //        // TODO: Check for network and http request time outs
 //        message = getString(R.string.word_search_failure);
-        mToast = Toast.makeText(context, message, searchCompleteToastDuration);
-        mToast.show();
+        showToast(message, duration);
     }
 
 
@@ -233,13 +210,16 @@ public class SearchActivity extends AppCompatActivity
     /* ==================================== +Databases ================================== */
 
     private List<RelatedWordEntry> getExistingRelatedWordsFromDb(String word){
-        VocabularyEntity entity = mVocabViewModel.getWord(word, getCurrentDictionaryPreference());
+        VocabularyEntity entity = mVocabViewModel.getWord(word,
+                sharedPreferencesHelper.getDictionaryPreference());
         if (entity == null){
             return null;
         }
 
         List<RelatedWordEntry> relatedWords = new ArrayList<>();
-        for (JapaneseDictionaryType dictionaryType : JapaneseDictionaryType.values()){
+        SearchProvider provider = sharedPreferencesHelper.getSearchProvider();
+        for (DictionaryType dictionaryType :
+                DictionaryTypes.getAllDictionaryTypeForLanguage(provider.LANGUAGE)){
             List<RelatedWordEntity> relatedWordEntities =
                     mRelatedWordViewModel.getRelatedWordList(entity, dictionaryType);
             for(RelatedWordEntity relatedWordEntity : relatedWordEntities){
@@ -282,7 +262,8 @@ public class SearchActivity extends AppCompatActivity
         VocabularyEntity vocabEntity = getWordFromDb(searchWord, dictionaryType);
         //TODO: Give option of web search
         if(vocabEntity != null){
-            if (JapaneseDictionaryType.fromKey(vocabEntity.getDictionaryType()) != getCurrentDictionaryPreference()){
+            if (DictionaryTypes.getDictionaryType(vocabEntity.getDictionaryType())
+                    != sharedPreferencesHelper.getDictionaryPreference()){
                 return false;
             }
 
@@ -297,7 +278,7 @@ public class SearchActivity extends AppCompatActivity
             mBinding.ankiAdditionalFields.tvContext.setText(wordContext);
             mBinding.ankiAdditionalFields.etContext.setText(wordContext);
 
-            mLastSearched = new SanseidoSearch(vocabulary,
+            mLastSearched = new SanseidoSearchResult(vocabulary,
                     getExistingRelatedWordsFromDb(vocabulary.getWord()));
             showWordOnUI();
             showAnkiRelatedUIElements();
@@ -336,11 +317,7 @@ public class SearchActivity extends AppCompatActivity
             return false;
         }
 
-        Context context = this;
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        String autoSaveOption = sharedPreferences.getString(getString(R.string.pref_auto_save_key),
-                    getString(R.string.pref_auto_save_default));
-        switch (autoSaveOption){
+        switch (sharedPreferencesHelper.autoSaveOption()){
             //Catches failure event only
             case "all":
                 return true;
@@ -371,25 +348,6 @@ public class SearchActivity extends AppCompatActivity
         }
     }
 
-    private DictionaryType getCurrentDictionaryPreference(){
-        Context context = this;
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        String dictionaryTypeString = sharedPreferences.getString(
-                getString(R.string.pref_dictionary_type_key),
-                getString(R.string.pref_dictionary_type_default)
-        );
-        return JapaneseDictionaryType.fromKey(dictionaryTypeString);
-    }
-
-    private SanseidoMatchType getCurrentMatchType(){
-        Context context = this;
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        String matchTypeString = sharedPreferences.getString(
-                getString(R.string.pref_match_type_key),
-                getString(R.string.pref_match_type_default)
-        );
-        return SanseidoMatchType.fromKey(matchTypeString);
-    }
 
     /* ==================================== +UI and +Helpers ================================== */
     /**
@@ -406,57 +364,11 @@ public class SearchActivity extends AppCompatActivity
         }
     }
 
-
     private void clearAnkiFields(){
         mBinding.ankiAdditionalFields.tvContext.setText("");
         mBinding.ankiAdditionalFields.etContext.setText("");
         mBinding.ankiAdditionalFields.tvNotes.setText("");
         mBinding.ankiAdditionalFields.etNotes.setText("");
-    }
-
-    //TODO: Change click to expand a menu and add associated UI elements
-    //TODO: Maybe implement a clozed type when sentence search is included
-    //TODO: Duplicate checking
-    /**
-     * Use the instant-add API to add flashcards directly to AnkiDroid.
-     */
-    private void addWordToAnki(){
-        long deckId = mAnkiDroid.getDeckId();
-        long modelId = mAnkiDroid.getModelId();
-        String[] fieldNames = mAnkiDroid.getApi().getFieldList(modelId);
-        String[] fields = new String[fieldNames.length];
-        fields[AnkiDroidConfig.FIELDS_INDEX_WORD] = mLastSearched.getVocabulary().getWord();
-        fields[AnkiDroidConfig.FIELDS_INDEX_READING] = mLastSearched.getVocabulary().getReading();
-
-        // Anki uses HTML, so the newlines are not displayed without a double newline or a break
-        String definition = mBinding.wordDefinition.tvDefinition.getText().toString();
-        definition = definition.replaceAll("\n", "<br>");
-        fields[AnkiDroidConfig.FIELDS_INDEX_DEFINITION] = definition;
-
-        if(mLastSearched.getVocabulary() instanceof JapaneseVocabulary){
-            //TODO: Bandaided after interface implementation, something cleaner
-            fields[AnkiDroidConfig.FIELDS_INDEX_FURIGANA] =
-                    ((JapaneseVocabulary)mLastSearched.getVocabulary()).getFurigana();
-        }
-        fields[AnkiDroidConfig.FIELDS_INDEX_PITCH] = mLastSearched.getVocabulary().getPitch();
-
-        String notes = mBinding.ankiAdditionalFields.etNotes.getText().toString();
-        fields[AnkiDroidConfig.FIELDS_INDEX_NOTES] = notes;
-        String wordContext = mBinding.ankiAdditionalFields.etContext.getText().toString();
-        fields[AnkiDroidConfig.FIELDS_INDEX_CONTEXT] = wordContext;
-        fields[AnkiDroidConfig.FIELDS_INDEX_DICTIONARY_TYPE] =
-                mLastSearched.getVocabulary().getDictionaryType().toString();
-        Set<String> tags = AnkiDroidConfig.TAGS;
-        mAnkiDroid.getApi().addNote(modelId, deckId, fields, tags);
-
-        if(mToast != null){
-            mToast.cancel();
-        }
-        Context context = SearchActivity.this;
-        String message = getString(R.string.anki_added_toast);
-        int duration = Toast.LENGTH_SHORT;
-        mToast = Toast.makeText(context, message, duration);
-        mToast.show();
     }
 
     private void setUpOnFocusChangeListeners(){
@@ -466,6 +378,7 @@ public class SearchActivity extends AppCompatActivity
                 if (!hasFocus){
                     String changedText = mBinding.wordDefinition.etDefinition.getText().toString();
                     mBinding.wordDefinition.tvDefinition.setText(changedText);
+                    mLastSearched.getVocabulary().setDefinition(changedText);
                     updateDefinition(mLastSearched.getVocabulary(), changedText);
                     mBinding.wordDefinition.vsDefinition.showNext();
                     InputMethodManager inputMethodManager =
@@ -594,15 +507,8 @@ public class SearchActivity extends AppCompatActivity
                 intentStartRelatedWordsActivity
                         .putExtra(getString(R.string.related_word_key),
                                 mLastSearched);
-                //TODO: Find out if there are cases where mWebPage will be destroyed on going to child
-//                intentStartRelatedWordsActivity.putExtra(getString(R.string.url_key),
-//                        mWebPage.getUrl());
-//                intentStartRelatedWordsActivity.putExtra(getString(R.string.html_key),
-//                        mWebPage.getHtmlDocument().toString());
 
                 startActivityForResult(intentStartRelatedWordsActivity, SEARCH_ACTIVITY_REQUEST_CODE);
-
-                // Unless a new word was selected from the child activity
 
             }
         });
@@ -621,14 +527,16 @@ public class SearchActivity extends AppCompatActivity
                     mAnkiDroid.requestPermission(SearchActivity.this, ADD_PERM_REQUEST);
                     return;
                 }
-                addWordToAnki();
-                Context context = SearchActivity.this;
-                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-                boolean autoDeleteOnImport = sharedPreferences
-                        .getString(getString(R.string.pref_auto_delete_key),
-                                getString(R.string.pref_auto_delete_default))
-                        .equals("import");
-                if(autoDeleteOnImport){
+
+                String notes = mBinding.ankiAdditionalFields.etNotes.getText().toString();
+                String wordContext = mBinding.ankiAdditionalFields.etContext.getText().toString();
+                mAnkiDroid.addWordToAnki(mLastSearched, notes, wordContext);
+                String message = getString(R.string.anki_added_toast);
+                int duration = Toast.LENGTH_SHORT;
+                showToast(message, duration);
+
+
+                if(sharedPreferencesHelper.autoDeleteOption().equals("import")){
                     mNoteViewModel.delete(mLastSearched.getVocabulary().getWord());
                     mContextViewModel.delete(mLastSearched.getVocabulary().getWord());
                     mRelatedWordViewModel.deleteWordsRelatedTo(mLastSearched.getVocabulary().getWord());
@@ -640,45 +548,70 @@ public class SearchActivity extends AppCompatActivity
         });
     }
 
-    private void searchDbThenOnlineForWord(String word){
+    private boolean searchDbThenOnlineForWord(String word){
         clearAnkiFields();
         word = word.trim();
-        // If the word isn't saved in our DB, start a new search for it.
-        if(!showWordFromDB(word, getCurrentDictionaryPreference())){
-            try {
-                Context context = SearchActivity.this;
-                OnJavaScriptCompleted listener = SearchActivity.this;
+        SearchProvider provider = sharedPreferencesHelper.getSearchProvider();
 
-
-                //Automatically search EJ if English input
-                DictionaryType dicPref = getCurrentDictionaryPreference();
-                if (dicPref != JapaneseDictionaryType.EJ){
-                    // < Extended ASCII so likely English
-                    if (word.charAt(0) < 255){
-                        dicPref = JapaneseDictionaryType.EJ;
-                    }
-                }
-
-
-                //TODO: Reuse existing webview if possible
-                mWebPage = new SanseidoSearchWebView(
-                        context,
-                        word,
-                        dicPref,
-                        getCurrentMatchType(),
-                        listener
-                );
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        DictionaryType dicPref = null;
+        try {
+            Method autoAssigner = provider.DICTIONARY_TYPE_CLASS.getMethod("assignTypeByInput", String.class);
+            dicPref = (DictionaryType) autoAssigner.invoke(null, word);
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
         }
-        else {
-            Context context = this;
-            String msg = getString(R.string.searched_from_db_toast, word);
-            int duration = Toast.LENGTH_SHORT;
-            mToast = Toast.makeText(context, msg, duration);
-            mToast.show();
+        if(dicPref == null){
+            dicPref = sharedPreferencesHelper.getDictionaryPreference();
         }
+
+
+//        //TODO: Generalize
+//        if(isEnglishInput(word)){
+//            dicPref = JapaneseDictionaryType.EJ;
+//        }
+//        else{
+//            dicPref = sharedPreferencesHelper.getDictionaryPreference();
+//        }
+
+        if(showWordFromDB(word, dicPref)) {
+            return true;
+        }
+
+        Context context = SearchActivity.this;
+        OnJavaScriptCompleted listener = SearchActivity.this;
+
+        //TODO: Reuse existing webview if possible
+
+        try {
+            Constructor<?> webViewContructor = provider.WEB_VIEW_CLASS.getConstructor(
+                    Context.class,
+                    String.class,
+                    DictionaryType.class,
+                    provider.MATCH_TYPE_CLASS,
+                    OnJavaScriptCompleted.class
+            );
+            mWebPage = (DictionaryWebPage) webViewContructor.newInstance(
+                    context,
+                    word,
+                    dicPref,
+                    provider.MATCH_TYPE_CLASS.cast(sharedPreferencesHelper.getMatchType()),
+                    listener
+            );
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
+
+        return false;
     }
 
     private void setUpKeyListeners(){
@@ -689,8 +622,17 @@ public class SearchActivity extends AppCompatActivity
                     switch (keyCode){
                         case KeyEvent.KEYCODE_DPAD_CENTER:
                         case KeyEvent.KEYCODE_ENTER:
-                            String searchWord = mBinding.wordSearch.etSearchBox.getText().toString();
-                            searchDbThenOnlineForWord(searchWord);
+
+                            String message = getString(R.string.word_searching);
+                            int duration = Toast.LENGTH_SHORT;
+                            showToast(message, duration);
+
+                            String word = mBinding.wordSearch.etSearchBox.getText().toString();
+                            if(searchDbThenOnlineForWord(word)) {
+                                message = getString(R.string.searched_from_db_toast, word);
+                                showToast(message, duration);
+                            }
+                            //Web search handled by handleSearchResult
 
                             return true;
                         default:
@@ -740,16 +682,16 @@ public class SearchActivity extends AppCompatActivity
         mBinding.ankiAdditionalFields.tvContext.setText(wordContext);
     }
 
-    private void addInvalidWord(Search search){
+    private void addInvalidWord(SearchResult searchResult){
         // TODO: Add empty entry to db for failed searches that aren't network errors.
         // TODO: Probably a null somewhere since I do this
-        DictionaryType dictionaryType = search.getVocabulary().getDictionaryType();
+        DictionaryType dictionaryType = searchResult.getVocabulary().getDictionaryType();
         JapaneseVocabulary invalidWord =
                 new JapaneseVocabulary(mBinding.wordSearch.etSearchBox
                         .getText().toString(), dictionaryType);
 
         VocabularyEntity entity =
-                getWordFromDb(search.getVocabulary().getWord(), dictionaryType);
+                getWordFromDb(searchResult.getVocabulary().getWord(), dictionaryType);
         if (entity == null) {
             mVocabViewModel.insert(invalidWord);
         }
@@ -787,17 +729,26 @@ public class SearchActivity extends AppCompatActivity
      */
     public void onRequestPermissionsResult (int requestCode, @NonNull String[] permissions,
                                             @NonNull int[] grantResults) {
+        String message;
+        int duration = Toast.LENGTH_SHORT;
         if (requestCode==ADD_PERM_REQUEST && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            addWordToAnki();
+            String notes = mBinding.ankiAdditionalFields.etNotes.getText().toString();
+            String wordContext = mBinding.ankiAdditionalFields.etContext.getText().toString();
+            mAnkiDroid.addWordToAnki(mLastSearched, notes, wordContext);
+            message = getString(R.string.anki_added_toast);
+            showToast(message, duration);
         } else {
-            if (mToast != null){
-                mToast.cancel();
-            }
-            Context context = SearchActivity.this;
-            String message = getString(R.string.permissions_denied_toast);
-            int duration = Toast.LENGTH_SHORT;
-            mToast = Toast.makeText(context, message, duration);
-            mToast.show();
+            message = getString(R.string.permissions_denied_toast);
         }
+        showToast(message, duration);
+    }
+
+    private void showToast(String message, int duration){
+        if (mToast != null){
+            mToast.cancel();
+        }
+        Context context = SearchActivity.this;
+        mToast = Toast.makeText(context, message, duration);
+        mToast.show();
     }
 }

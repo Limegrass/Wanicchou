@@ -1,7 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array
-        name="pref_dictionary_type_entries">
+        name="pref_search_provider_entries">
+        <item>Sanseido.biz</item>
+
+    </string-array>
+
+    <string-array
+        name="pref_search_provider_values">
+        <item>data.vocab.jp.search.sanseido.Sanseido</item>
+    </string-array>
+
+    <string-array name="pref_dictionary_type_entries">
         <item>Japanese to Japanese</item>
         <item>Japanese to English</item>
         <!--<item>English to Japanese</item>-->

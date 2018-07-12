@@ -55,15 +55,25 @@ public enum JapaneseDictionaryType implements DictionaryType {
      * @return A JapaneseDictionaryType corresponding to the key, if it exists. Else, null.
      */
     public static DictionaryType fromKey(String key){
-        switch (key){
-            case "JJ":
-                return JJ;
-            case "JE":
-                return JE;
-            case "EJ":
-                return EJ;
-            default:
-                return null;
+        try{
+            return JapaneseDictionaryType.valueOf(key);
         }
+        catch (IllegalArgumentException ex){
+            return null;
+        }
+    }
+
+    private static boolean isEnglishInput(String input){
+        if (input.charAt(0) < 255){
+            return true;
+        }
+        return false;
+    }
+
+    public static DictionaryType assignTypeByInput(String input){
+        if(isEnglishInput(input)){
+            return EJ;
+        }
+        return null;
     }
 }

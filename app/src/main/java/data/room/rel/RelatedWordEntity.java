@@ -11,7 +11,7 @@ import data.room.voc.VocabularyEntity;
 /**
  * An entry in the RelatedWords Database showcasing how words are related to each other.
  * One entry has a key in the main vocab database, which points towards words that a
- * SanseidoSearch said were related to the search.
+ * SanseidoSearchResult said were related to the search.
  */
 @Entity(
         tableName = "RelatedWords",

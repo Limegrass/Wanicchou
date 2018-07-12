@@ -12,16 +12,16 @@ import android.view.MenuItem;
 
 import com.waifusims.wanicchou.databinding.ActivityRelatedWordsBinding;
 
-import data.vocab.jp.search.sanseido.SanseidoSearch;
+import data.vocab.jp.search.sanseido.SanseidoSearchResult;
 
 /**
- * Separate activity to display the related words of a SanseidoSearch.
+ * Separate activity to display the related words of a SanseidoSearchResult.
  * If a word is long pressed, it will be searched and brought back to the home activity.
  */
 public class WordListActivity extends AppCompatActivity
         implements WordAdapter.ListItemClickListener{
 
-    private SanseidoSearch searchData;
+    private SanseidoSearchResult searchData;
     private ActivityRelatedWordsBinding mBinding;
 
     private WordAdapter mAdapter;
@@ -51,7 +51,7 @@ public class WordListActivity extends AppCompatActivity
         mWordList.setHasFixedSize(true);
 
         Bundle extras = intentThatStartedThis.getExtras();
-        searchData = (SanseidoSearch)extras.get(getString(R.string.related_word_key));
+        searchData = (SanseidoSearchResult)extras.get(getString(R.string.related_word_key));
 
         mAdapter = new WordAdapter(searchData.getRelatedWords(),
                 this);

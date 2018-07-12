@@ -6,9 +6,12 @@ import android.os.Bundle;
 import android.support.v7.preference.ListPreference;
 import android.support.v7.preference.PreferenceFragmentCompat;
 
+import java.util.List;
+
 public class SettingsFragment extends PreferenceFragmentCompat
         implements SharedPreferences.OnSharedPreferenceChangeListener {
 
+    private ListPreference mProviderListPref;
     private ListPreference mDicTypeListPref;
     private ListPreference mMatchTypeListPref;
     private ListPreference mAutoSaveListPref;
@@ -18,6 +21,8 @@ public class SettingsFragment extends PreferenceFragmentCompat
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        mProviderListPref = (ListPreference)  getPreferenceScreen()
+                .findPreference(getContext().getString(R.string.pref_provider_key));
         mDicTypeListPref = (ListPreference) getPreferenceScreen()
                 .findPreference(getContext().getString(R.string.pref_dictionary_type_key));
         mMatchTypeListPref = (ListPreference) getPreferenceScreen()
@@ -31,6 +36,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
     @Override
     public void onResume() {
         super.onResume();
+        mProviderListPref.setSummary(mProviderListPref.getEntry().toString());
         mDicTypeListPref.setSummary(mDicTypeListPref.getEntry().toString());
         mMatchTypeListPref.setSummary(mMatchTypeListPref.getEntry().toString());
         mAutoDeleteListPref.setSummary(mAutoDeleteListPref.getEntry().toString());
@@ -62,6 +68,9 @@ public class SettingsFragment extends PreferenceFragmentCompat
         }
         else if (key.equals(getContext().getString(R.string.pref_auto_save_key))){
             mAutoSaveListPref.setSummary(mAutoSaveListPref.getEntry().toString());
+        }
+        else if(key.equals(getContext().getString(R.string.pref_provider_key))){
+            mProviderListPref.setSummary(mProviderListPref.getEntry().toString());
         }
     }
 }

@@ -6,7 +6,7 @@ import java.util.List;
 
 import data.vocab.RelatedWordEntry;
 
-public interface Search extends Parcelable {
+public interface SearchResult extends Parcelable {
     Vocabulary getVocabulary();
     List<RelatedWordEntry> getRelatedWords();
 }

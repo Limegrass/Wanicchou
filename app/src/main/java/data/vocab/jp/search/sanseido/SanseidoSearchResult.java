@@ -21,15 +21,15 @@ import data.vocab.jp.JapaneseDictionaryType;
 import data.vocab.jp.JapaneseVocabulary;
 import data.vocab.RelatedWordEntry;
 import data.vocab.models.DictionaryType;
-import data.vocab.models.Search;
+import data.vocab.models.SearchResult;
 
 //TODO: Equals, Hashcode methods
 
 /**
  * Created by Limegrass on 3/19/2018.
  */
-public class SanseidoSearch implements Search {
-    private final static String TAG = SanseidoSearch.class.getSimpleName();
+public class SanseidoSearchResult implements SearchResult {
+    private final static String TAG = SanseidoSearchResult.class.getSimpleName();
 
     private final String SANSEIDO_WORD_ID = "word";
     private final String SANSEIDO_WORD_DEFINITION_ID = "wordBody";
@@ -74,13 +74,13 @@ public class SanseidoSearch implements Search {
      * @param wordToSearch the desired word to search.
      * @throws IOException if the search cannot be completed
      */
-    public SanseidoSearch(String wordToSearch,
-                          DictionaryType dictionaryType,
-                          SanseidoMatchType matchType)
+    public SanseidoSearchResult(String wordToSearch,
+                                DictionaryType dictionaryType,
+                                SanseidoMatchType matchType)
             throws IOException {
         //TODO: Fix relatedWords searching, as it is not working properly for forwards search
         if(TextUtils.isEmpty(wordToSearch)) {
-            throw new IllegalArgumentException("Search term cannot be empty!");
+            throw new IllegalArgumentException("SearchResult term cannot be empty!");
         }
         if(dictionaryType == null){
             throw new IllegalArgumentException("Dictionary Type cannot be null!");
@@ -98,11 +98,11 @@ public class SanseidoSearch implements Search {
                 dictionaryType);
     }
 
-    public SanseidoSearch(String html, DictionaryType dictionaryType){
+    public SanseidoSearchResult(String html, DictionaryType dictionaryType){
         this(Jsoup.parse(html), dictionaryType);
     }
 
-    public SanseidoSearch(Document html, DictionaryType dictionaryType){
+    public SanseidoSearchResult(Document html, DictionaryType dictionaryType){
         relatedWords = findRelatedWords(html);
         vocabulary = new JapaneseVocabulary(findWordSource(html),
                 findDefinitionSource(html),
@@ -114,7 +114,7 @@ public class SanseidoSearch implements Search {
      * @param japaneseVocabulary The vocabulary with it's word-definition pair
      * @param relatedWords Words related to the vocabulary specific to it's search type.
      */
-    public SanseidoSearch(JapaneseVocabulary japaneseVocabulary, List<RelatedWordEntry> relatedWords){
+    public SanseidoSearchResult(JapaneseVocabulary japaneseVocabulary, List<RelatedWordEntry> relatedWords){
         this.vocabulary = japaneseVocabulary;
         this.relatedWords = relatedWords;
     }
@@ -287,16 +287,16 @@ public class SanseidoSearch implements Search {
     /**
      * Creator for parcelization.
      */
-    public static final Parcelable.Creator<SanseidoSearch> CREATOR
-            = new Parcelable.Creator<SanseidoSearch>(){
+    public static final Parcelable.Creator<SanseidoSearchResult> CREATOR
+            = new Parcelable.Creator<SanseidoSearchResult>(){
         @Override
-        public SanseidoSearch createFromParcel(Parcel parcel) {
-            return new SanseidoSearch(parcel);
+        public SanseidoSearchResult createFromParcel(Parcel parcel) {
+            return new SanseidoSearchResult(parcel);
         }
 
         @Override
-        public SanseidoSearch[] newArray(int size) {
-            return new SanseidoSearch[size];
+        public SanseidoSearchResult[] newArray(int size) {
+            return new SanseidoSearchResult[size];
         }
     };
 
@@ -304,7 +304,7 @@ public class SanseidoSearch implements Search {
      * Constructor from a parcel.
      * @param parcel The parcel to read from.
      */
-    protected SanseidoSearch(Parcel parcel) {
+    protected SanseidoSearchResult(Parcel parcel) {
         final ClassLoader classLoader = getClass().getClassLoader();
         vocabulary = (JapaneseVocabulary) parcel.readValue(classLoader);
         relatedWords = (List<RelatedWordEntry>) parcel.readValue(classLoader);
