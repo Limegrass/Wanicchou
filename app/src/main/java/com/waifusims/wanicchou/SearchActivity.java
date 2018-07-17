@@ -9,6 +9,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.KeyEvent;
@@ -87,6 +88,19 @@ public class SearchActivity extends AppCompatActivity
         mRelatedWordViewModel = ViewModelProviders.of(this).get(RelatedWordViewModel.class);
         mNoteViewModel = ViewModelProviders.of(this).get(NoteViewModel.class);
         mContextViewModel = ViewModelProviders.of(this).get(ContextViewModel.class);
+
+        mBinding.swipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                String word = getSearchWord();
+                if(!TextUtils.isEmpty(word)){
+                    searchOnline(word);
+                }
+                else{
+                    mBinding.swipeRefresh.setRefreshing(false);
+                }
+            }
+        });
     }
 
     @Override
@@ -147,6 +161,7 @@ public class SearchActivity extends AppCompatActivity
             return null;
         }
     }
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -679,7 +694,7 @@ public class SearchActivity extends AppCompatActivity
                 }
             }
         }
-//        mBinding.swipeRefresh.setRefreshing(false);
+        mBinding.swipeRefresh.setRefreshing(false);
     }
 
     private void showWordOnUI(){
@@ -699,7 +714,6 @@ public class SearchActivity extends AppCompatActivity
         }
 
         mBinding.vocabularyInformation.tvDictionary.setText(vocabulary.getDictionaryType().toDisplayText());
-        mBinding.vocabularyInformation.tvDictionary.setVisibility(View.VISIBLE);
 
         String note = mNoteViewModel.getNoteOf(mLastSearched.getVocabulary().getWord());
         mBinding.ankiAdditionalFields.etNotes.setText(note);

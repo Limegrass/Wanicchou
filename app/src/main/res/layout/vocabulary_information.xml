@@ -47,11 +47,10 @@
 
         <TextView
             android:id="@+id/tv_pitch"
-            tools:text="1"
-            android:text=""
-            android:visibility="invisible"
+            tools:text="@string/pitch_hint"
+            android:text="@string/pitch_hint"
             android:textAlignment="center"
-            android:background="@drawable/oval"
+            android:background="@drawable/border"
             app:layout_constraintTop_toTopOf="@id/tv_reading"
             app:layout_constraintBottom_toBottomOf="@id/tv_reading"
             app:layout_constraintLeft_toLeftOf="@id/tv_word"
@@ -63,9 +62,8 @@
 
         <TextView
             android:id="@+id/tv_dictionary"
-            tools:text="国語"
-            android:text=""
-            android:visibility="invisible"
+            tools:text="@string/dictionary_hint"
+            android:text="@string/dictionary_hint"
             android:textAlignment="center"
             android:background="@drawable/border"
             app:layout_constraintTop_toTopOf="@id/tv_reading"

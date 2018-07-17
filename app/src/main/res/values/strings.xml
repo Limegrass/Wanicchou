@@ -73,5 +73,7 @@
     <string name="pref_provider_default" translatable="true">data.vocab.jp.search.sanseido.Sanseido</string>
 
     <string name="reading_hint">読み方</string>
+    <string name="pitch_hint">ピッチ</string>
+    <string name="dictionary_hint">辞典型</string>
 
 </resources>
