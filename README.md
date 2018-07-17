@@ -18,6 +18,7 @@ The floating action button sends the searched word into AnkiDroid.
 J-J and J-E preference can be changed in the settings. If English is entered, it will automatically search for an E-J definition entry.
 If it does not find the word you wanted, change try changing the match type, or checking the related words generated from the search.
 Autodeletion and Autosave settings are turned off by default. Change it in the settings to generate and manage an offline database on search.
+Drag the top to force an online reload.
 
 ## Potential Development
 <s>Save searched words and definitions into an SQLiteDB for offline usage.</s>
