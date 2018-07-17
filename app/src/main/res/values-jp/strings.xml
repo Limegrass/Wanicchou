@@ -5,7 +5,7 @@
     <!--last_searched_key not translatable-->
     <string name="settings_action_label" translatable="true">設定</string>
 
-    <!--word_definition related-->
+    <!--vocabulary_information related-->
     <string name="search_label" translatable="true">検索</string>
     <string name="search_field_hint" translatable="true">キーボードで入力して</string>
 

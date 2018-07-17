@@ -162,12 +162,19 @@ public class SearchActivity extends AppCompatActivity
                         RelatedWordEntry desiredWord =
                                 mLastSearched.getRelatedWords().get(desiredRelatedWordIndex);
 
-                        mBinding.wordSearch.etSearchBox.setText(desiredWord.getRelatedWord());
+                        mBinding.searchBox.etSearchBox.setText(desiredWord.getRelatedWord());
                         if(mWebPage != null){
                             mWebPage.navigateRelatedWord(desiredWord);
                         }
                         else if(!TextUtils.isEmpty(desiredWord.getRelatedWord())){
-                            searchDbThenOnlineForWord(desiredWord.getRelatedWord());
+                            String word = desiredWord.getRelatedWord();
+                            if(searchDatabase(word)){
+                                String message = getString(R.string.searched_from_db_toast, word);
+                                int duration = Toast.LENGTH_SHORT;
+                                showToast(message, duration);
+                            }
+                            else if(searchOnline(word)){
+                            }
                         }
                     }
                     String message = getString(R.string.searching_related_toast);
@@ -198,7 +205,7 @@ public class SearchActivity extends AppCompatActivity
             message = getString(R.string.word_search_success, mLastSearched.getVocabulary().getWord());
         }
         else{
-            message = getString(R.string.word_search_failure, mBinding.wordSearch.etSearchBox.getText().toString());
+            message = getString(R.string.word_search_failure, mBinding.searchBox.etSearchBox.getText().toString());
         }
 //        // TODO: Check for network and http request time outs
 //        message = getString(R.string.word_search_failure);
@@ -375,15 +382,15 @@ public class SearchActivity extends AppCompatActivity
     }
 
     private void setUpOnFocusChangeListeners(){
-        mBinding.wordDefinition.etDefinition.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+        mBinding.vocabularyInformation.etDefinition.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View view, boolean hasFocus) {
-                if (!hasFocus){
-                    String changedText = mBinding.wordDefinition.etDefinition.getText().toString();
-                    mBinding.wordDefinition.tvDefinition.setText(changedText);
+                if (!hasFocus && mLastSearched != null){
+                    String changedText = mBinding.vocabularyInformation.etDefinition.getText().toString();
+                    mBinding.vocabularyInformation.tvDefinition.setText(changedText);
                     mLastSearched.getVocabulary().setDefinition(changedText);
                     updateDefinition(mLastSearched.getVocabulary(), changedText);
-                    mBinding.wordDefinition.vsDefinition.showNext();
+                    mBinding.vocabularyInformation.vsDefinition.showNext();
                     InputMethodManager inputMethodManager =
                             (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                     inputMethodManager.hideSoftInputFromWindow(
@@ -435,14 +442,14 @@ public class SearchActivity extends AppCompatActivity
 
     private void setUpClickListeners(){
         // Definition TV/ET
-        mBinding.wordDefinition.tvDefinition.setOnClickListener(new View.OnClickListener() {
+        mBinding.vocabularyInformation.tvDefinition.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mBinding.wordDefinition.vsDefinition.showNext();
-                mBinding.wordDefinition.etDefinition.requestFocus();
+                mBinding.vocabularyInformation.vsDefinition.showNext();
+                mBinding.vocabularyInformation.etDefinition.requestFocus();
                 InputMethodManager inputMethodManager =
                         (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                inputMethodManager.showSoftInput(mBinding.wordDefinition.etDefinition,
+                inputMethodManager.showSoftInput(mBinding.vocabularyInformation.etDefinition,
                         InputMethodManager.SHOW_IMPLICIT);
             }
         });
@@ -552,7 +559,7 @@ public class SearchActivity extends AppCompatActivity
         });
     }
 
-    private boolean searchDbThenOnlineForWord(String word){
+    private boolean searchDatabase(String word){
         clearAnkiFields();
         word = word.trim();
         SearchProvider provider = sharedPreferencesHelper.getSearchProvider();
@@ -568,20 +575,30 @@ public class SearchActivity extends AppCompatActivity
         } catch (InvocationTargetException e) {
             e.printStackTrace();
         }
+
         if(dicPref == null){
             dicPref = sharedPreferencesHelper.getDictionaryPreference();
         }
 
-        if(showWordFromDB(word, dicPref)) {
-            return true;
-        }
+        return showWordFromDB(word, dicPref);
+    }
 
-        Context context = SearchActivity.this;
-        OnJavaScriptCompleted listener = SearchActivity.this;
+    private boolean searchOnline(String word){
+        try{
+            SearchProvider provider = sharedPreferencesHelper.getSearchProvider();
+            DictionaryType dicPref = null;
 
-        //TODO: Reuse existing webview if possible
+            Method autoAssigner = provider.DICTIONARY_TYPE_CLASS.getMethod("assignTypeByInput", String.class);
+            dicPref = (DictionaryType) autoAssigner.invoke(null, word);
+            if(dicPref == null){
+                dicPref = sharedPreferencesHelper.getDictionaryPreference();
+            }
 
-        try {
+            Context context = SearchActivity.this;
+            OnJavaScriptCompleted listener = SearchActivity.this;
+
+            //TODO: Reuse existing webview if possible
+
             Constructor<?> webViewContructor = provider.WEB_VIEW_CLASS.getConstructor(
                     Context.class,
                     String.class,
@@ -596,21 +613,21 @@ public class SearchActivity extends AppCompatActivity
                     provider.MATCH_TYPE_CLASS.cast(sharedPreferencesHelper.getMatchType()),
                     listener
             );
+            return true;
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
         } catch (IllegalAccessException e) {
             e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
         } catch (InvocationTargetException e) {
             e.printStackTrace();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
         }
-
         return false;
     }
 
     private void setUpKeyListeners(){
-        mBinding.wordSearch.etSearchBox.setOnKeyListener(new OnKeyListener() {
+        mBinding.searchBox.etSearchBox.setOnKeyListener(new OnKeyListener() {
             @Override
             public boolean onKey(View searchBox, int keyCode, KeyEvent keyEvent) {
                 if(keyEvent.getAction() == KeyEvent.ACTION_DOWN){
@@ -622,12 +639,14 @@ public class SearchActivity extends AppCompatActivity
                             int duration = Toast.LENGTH_SHORT;
                             showToast(message, duration);
 
-                            String word = mBinding.wordSearch.etSearchBox.getText().toString();
-                            if(searchDbThenOnlineForWord(word)) {
+                            String word = getSearchWord();
+                            if(searchDatabase(word)) {
                                 message = getString(R.string.searched_from_db_toast, word);
                                 showToast(message, duration);
                             }
-                            //Web search handled by handleSearchResult
+                            else if(searchOnline(word)){
+                                //Handled by handleSearchResult for now
+                            }
                         default:
                             return false;
                     }
@@ -635,6 +654,10 @@ public class SearchActivity extends AppCompatActivity
                 return false;
             }
         });
+    }
+
+    private String getSearchWord(){
+        return mBinding.searchBox.etSearchBox.getText().toString();
     }
 
     private void handleSearchResult(){
@@ -656,14 +679,27 @@ public class SearchActivity extends AppCompatActivity
                 }
             }
         }
+//        mBinding.swipeRefresh.setRefreshing(false);
     }
 
     private void showWordOnUI(){
+        assert mLastSearched != null;
         Vocabulary vocabulary = mLastSearched.getVocabulary();
         String definition = vocabulary.getDefinition();
-        mBinding.wordDefinition.tvWord.setText(vocabulary.getWord());
-        mBinding.wordDefinition.tvDefinition.setText(definition);
-        mBinding.wordDefinition.etDefinition.setText(definition);
+        mBinding.vocabularyInformation.tvWord.setText(vocabulary.getWord());
+        mBinding.vocabularyInformation.tvDefinition.setText(definition);
+        mBinding.vocabularyInformation.etDefinition.setText(definition);
+        mBinding.vocabularyInformation.tvReading.setText(vocabulary.getReading());
+        if(!TextUtils.isEmpty(vocabulary.getPitch())){
+            mBinding.vocabularyInformation.tvPitch.setText(vocabulary.getPitch());
+            mBinding.vocabularyInformation.tvPitch.setVisibility(View.VISIBLE);
+        }
+        else{
+            mBinding.vocabularyInformation.tvPitch.setVisibility(View.INVISIBLE);
+        }
+
+        mBinding.vocabularyInformation.tvDictionary.setText(vocabulary.getDictionaryType().toDisplayText());
+        mBinding.vocabularyInformation.tvDictionary.setVisibility(View.VISIBLE);
 
         String note = mNoteViewModel.getNoteOf(mLastSearched.getVocabulary().getWord());
         mBinding.ankiAdditionalFields.etNotes.setText(note);
@@ -672,6 +708,8 @@ public class SearchActivity extends AppCompatActivity
         String wordContext = mContextViewModel.getContextOf(mLastSearched.getVocabulary().getWord());
         mBinding.ankiAdditionalFields.etContext.setText(wordContext);
         mBinding.ankiAdditionalFields.tvContext.setText(wordContext);
+
+
     }
 
     private void addInvalidWord(SearchResult searchResult){
@@ -679,7 +717,7 @@ public class SearchActivity extends AppCompatActivity
         // TODO: Probably a null somewhere since I do this
         DictionaryType dictionaryType = searchResult.getVocabulary().getDictionaryType();
         JapaneseVocabulary invalidWord =
-                new JapaneseVocabulary(mBinding.wordSearch.etSearchBox
+                new JapaneseVocabulary(mBinding.searchBox.etSearchBox
                         .getText().toString(), dictionaryType);
 
         VocabularyEntity entity =

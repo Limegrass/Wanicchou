@@ -8,38 +8,44 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <ScrollView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <LinearLayout
-                android:id="@+id/home_main"
+        <!--<android.support.v4.widget.SwipeRefreshLayout-->
+            <!--android:id="@+id/swipe_refresh"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content">-->
+            <ScrollView
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:layout_height="wrap_content">
 
-                <include
-                    android:id="@+id/word_search"
-                    layout="@layout/word_search" />
-
-                <include
-                    android:id="@+id/word_definition"
-                    layout="@layout/word_definition"/>
-
-                <include
-                    android:id="@+id/anki_additional_fields"
-                    layout="@layout/anki_additional_fields" />
-
-                <Button
-                    android:id="@+id/btn_related_words"
-                    tools:text="@string/related_words_btn_label"
-                    android:text="@string/related_words_btn_label"
-                    android:visibility="invisible"
+                <LinearLayout
+                    android:id="@+id/home_main"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
 
-            </LinearLayout>
-        </ScrollView>
+                    <include
+                        android:id="@+id/search_box"
+                        layout="@layout/search_box" />
+
+                    <include
+                        android:id="@+id/vocabulary_information"
+                        layout="@layout/vocabulary_information"/>
+
+                    <include
+                        android:id="@+id/anki_additional_fields"
+                        layout="@layout/anki_additional_fields" />
+
+                    <Button
+                        android:id="@+id/btn_related_words"
+                        tools:text="@string/related_words_btn_label"
+                        android:text="@string/related_words_btn_label"
+                        android:visibility="invisible"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+
+                </LinearLayout>
+            </ScrollView>
+        <!--</android.support.v4.widget.SwipeRefreshLayout>-->
+
         <!--TODO: Change FAB to be a menu, -->
         <!--where you can set the set visiblity of anki_additional fields to be on-->
         <!--before sending, or just send the card if they do not want to edit the fields.-->
