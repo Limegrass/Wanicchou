@@ -10,26 +10,26 @@ import android.widget.TextView;
 
 import java.util.List;
 
-import data.vocab.RelatedWordEntry;
+import data.vocab.WordListEntry;
 
 /**
  * RecyclerView adapter for related words
  * Created by Limegrass on 4/4/2018.
  */
-public class WordAdapter extends RecyclerView.Adapter<WordAdapter.WordViewHolder>{
-    private static final String TAG = WordAdapter.class.getSimpleName();
+public class WordListAdapter extends RecyclerView.Adapter<WordListAdapter.WordViewHolder>{
+    private static final String TAG = WordListAdapter.class.getSimpleName();
     private final ListItemClickListener mOnClickListener;
 
-    private List<RelatedWordEntry> relatedWords;
+    private List<WordListEntry> wordList;
 
-    public WordAdapter(List<RelatedWordEntry> words, ListItemClickListener listener){
-        relatedWords = words;
+    public WordListAdapter(List<WordListEntry> words, ListItemClickListener listener){
+        wordList = words;
         mOnClickListener = listener;
     }
 
     @Override
-    public WordAdapter.WordViewHolder onCreateViewHolder(ViewGroup parent,
-                                                     int viewType){
+    public WordListAdapter.WordViewHolder onCreateViewHolder(ViewGroup parent,
+                                                             int viewType){
         Context context = parent.getContext();
         int wordLayoutId = R.layout.word_list_item;
         LayoutInflater inflater = LayoutInflater.from(context);
@@ -48,12 +48,12 @@ public class WordAdapter extends RecyclerView.Adapter<WordAdapter.WordViewHolder
     }
 
     public String getWordAtPosition(int position){
-        return relatedWords.get(position).getRelatedWord();
+        return wordList.get(position).getRelatedWord();
     }
 
     @Override
     public int getItemCount() {
-        return relatedWords.size();
+        return wordList.size();
     }
 
     class WordViewHolder extends RecyclerView.ViewHolder implements View.OnLongClickListener{
@@ -69,8 +69,8 @@ public class WordAdapter extends RecyclerView.Adapter<WordAdapter.WordViewHolder
         }
 
         void bind(int listIndex){
-            tvDictionary.setText(relatedWords.get(listIndex).getDictionaryType().toDisplayText());
-            tvWord.setText(relatedWords.get(listIndex).getRelatedWord());
+            tvDictionary.setText(wordList.get(listIndex).getDictionaryType().toDisplayText());
+            tvWord.setText(wordList.get(listIndex).getRelatedWord());
         }
 
 

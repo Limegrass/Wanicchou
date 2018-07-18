@@ -3,7 +3,7 @@ package data.vocab.models;
 
 import org.jsoup.nodes.Document;
 
-import data.vocab.RelatedWordEntry;
+import data.vocab.WordListEntry;
 import data.vocab.jp.JapaneseDictionaryType;
 
 /**
@@ -15,7 +15,7 @@ public interface DictionaryWebPage {
     SearchResult getSearch();
     DictionaryType getCurrentDictionaryType();
     void setCurrentDictionaryType(JapaneseDictionaryType dictionaryType);
-    void navigateRelatedWord(RelatedWordEntry relatedWord);
+    void navigateRelatedWord(WordListEntry relatedWord);
     String getUrl();
 
     Document getHtmlDocument();

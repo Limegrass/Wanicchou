@@ -7,4 +7,9 @@
         android:title="@string/settings_action_label"
         app:showAsAction="never"/>
 
+    <item
+        android:id="@+id/action_db"
+        android:orderInCategory="101"
+        android:title="Saved Searches"
+        app:showAsAction="never"/>
 </menu>

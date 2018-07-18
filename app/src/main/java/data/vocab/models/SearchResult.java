@@ -4,12 +4,12 @@ import android.os.Parcelable;
 
 import java.util.List;
 
-import data.vocab.RelatedWordEntry;
+import data.vocab.WordListEntry;
 
 /**
  * Interface for the necessary components to return from a search.
  */
 public interface SearchResult extends Parcelable {
     Vocabulary getVocabulary();
-    List<RelatedWordEntry> getRelatedWords();
+    List<WordListEntry> getRelatedWords();
 }

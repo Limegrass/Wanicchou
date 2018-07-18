@@ -48,7 +48,14 @@ public interface VocabularyDao {
      * @return A LiveData list of words saved in the database.
      */
     @Query("SELECT * FROM VocabularyWords")
-    LiveData<List<VocabularyEntity>> getAllSavedWords();
+    LiveData<List<VocabularyEntity>> getAllSavedWordsLive();
+
+    /**
+     * Gets all words saved in the database.
+     * @return A LiveData list of words saved in the database.
+     */
+    @Query("SELECT * FROM VocabularyWords")
+    List<VocabularyEntity> getAllSavedWords();
 
     /**
      * Gets a certain number of words saved in the database,

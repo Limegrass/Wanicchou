@@ -19,7 +19,7 @@ import java.util.List;
 
 import data.vocab.jp.JapaneseDictionaryType;
 import data.vocab.jp.JapaneseVocabulary;
-import data.vocab.RelatedWordEntry;
+import data.vocab.WordListEntry;
 import data.vocab.models.DictionaryType;
 import data.vocab.models.SearchResult;
 
@@ -61,7 +61,7 @@ public class SanseidoSearchResult implements SearchResult {
     private final static int RELATED_WORDS_TABLE_INDEX = 0;
 
     //TODO: Refactor to it uses the enum type
-    private List<RelatedWordEntry> relatedWords;
+    private List<WordListEntry> relatedWords;
     private JapaneseVocabulary vocabulary;
 
 
@@ -114,7 +114,7 @@ public class SanseidoSearchResult implements SearchResult {
      * @param japaneseVocabulary The vocabulary with it's word-definition pair
      * @param relatedWords Words related to the vocabulary specific to it's search type.
      */
-    public SanseidoSearchResult(JapaneseVocabulary japaneseVocabulary, List<RelatedWordEntry> relatedWords){
+    public SanseidoSearchResult(JapaneseVocabulary japaneseVocabulary, List<WordListEntry> relatedWords){
         this.vocabulary = japaneseVocabulary;
         this.relatedWords = relatedWords;
     }
@@ -133,11 +133,11 @@ public class SanseidoSearchResult implements SearchResult {
         this.vocabulary = vocabulary;
     }
 
-    public List<RelatedWordEntry> getRelatedWords() {
+    public List<WordListEntry> getRelatedWords() {
         return relatedWords;
     }
 
-    protected void setRelatedWords(List<RelatedWordEntry> relatedWords) {
+    protected void setRelatedWords(List<WordListEntry> relatedWords) {
         this.relatedWords = relatedWords;
     }
 
@@ -183,8 +183,8 @@ public class SanseidoSearchResult implements SearchResult {
      * @param html the raw html jsoup document tree.
      * @return a map of related words in a set with the key being the dictionary they exist in.
      */
-    private List<RelatedWordEntry> findRelatedWords(Document html){
-        List<RelatedWordEntry> relatedWordEntries = new ArrayList<>();
+    private List<WordListEntry> findRelatedWords(Document html){
+        List<WordListEntry> relatedWordEntries = new ArrayList<>();
 
         // The related words table is the first table in the HTML
         Element table = html.select("table").get(RELATED_WORDS_TABLE_INDEX);
@@ -214,7 +214,7 @@ public class SanseidoSearchResult implements SearchResult {
 
                 String link = columns.select("a").first().attr("href");
 
-                relatedWordEntries.add(new RelatedWordEntry(isolatedWord, dictionaryType, link));
+                relatedWordEntries.add(new WordListEntry(isolatedWord, dictionaryType, link));
             }
         }
         return relatedWordEntries;
@@ -307,7 +307,7 @@ public class SanseidoSearchResult implements SearchResult {
     private SanseidoSearchResult(Parcel parcel) {
         final ClassLoader classLoader = getClass().getClassLoader();
         vocabulary = (JapaneseVocabulary) parcel.readValue(classLoader);
-        relatedWords = (List<RelatedWordEntry>) parcel.readValue(classLoader);
+        relatedWords = (List<WordListEntry>) parcel.readValue(classLoader);
     }
 
 

@@ -3,6 +3,7 @@ package data.room.voc;
 import android.app.Application;
 import android.os.AsyncTask;
 
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import data.room.WanicchouDatabase;
@@ -46,6 +47,8 @@ public class VocabularyRepository {
         new entryModificationAsyncTask(mVocabDao, ACTION_UPDATE).execute(vocab);
     }
 
+
+
     /**
      * Deletes the vocab from the database, if it exists.
      * @param vocab The vocab entry to delete from the database.
@@ -54,7 +57,7 @@ public class VocabularyRepository {
         new entryModificationAsyncTask(mVocabDao, ACTION_DELETE).execute(vocab);
     }
 
-    public void deleteAll(){
+        public void deleteAll(){
         new deleteAllTask().execute();
     }
 
@@ -131,6 +134,29 @@ public class VocabularyRepository {
             return mAsyncTaskDao.getWord(words[0], mDictionaryType.toString());
         }
 
+    }
+
+    public List<VocabularyEntity> getAllSavedWords(){
+        try {
+            return new getAllWordsTask(mVocabDao).execute().get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private static class getAllWordsTask extends AsyncTask<Void, Void, List<VocabularyEntity>>{
+        private VocabularyDao mDao;
+        protected getAllWordsTask(VocabularyDao dao){
+            mDao = dao;
+        }
+
+        @Override
+        protected List<VocabularyEntity> doInBackground(Void... voids) {
+            return mDao.getAllSavedWords();
+        }
     }
 
 }

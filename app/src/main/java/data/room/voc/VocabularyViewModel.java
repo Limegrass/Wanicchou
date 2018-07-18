@@ -3,6 +3,10 @@ package data.room.voc;
 import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import data.vocab.WordListEntry;
 import data.vocab.models.DictionaryType;
 import data.vocab.models.Vocabulary;
 
@@ -69,6 +73,17 @@ public class VocabularyViewModel extends AndroidViewModel{
 
     public void deleteAll(){
         mRepo.deleteAll();
+    }
+
+    public List<WordListEntry> getAllSavedWords(){
+        List<VocabularyEntity> entities = mRepo.getAllSavedWords();
+        List<WordListEntry> dbWords = new ArrayList<>();
+        for (VocabularyEntity entity : entities) {
+            WordListEntry word = new WordListEntry(entity.getWord(), entity.getDictionaryType());
+            dbWords.add(word);
+        }
+        return dbWords;
+
     }
 
 }

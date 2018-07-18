@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.databinding.DataBindingUtil;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -42,7 +43,7 @@ import data.vocab.models.DictionaryTypes;
 import data.vocab.models.DictionaryWebPage;
 import data.vocab.jp.JapaneseVocabulary;
 import data.vocab.OnJavaScriptCompleted;
-import data.vocab.RelatedWordEntry;
+import data.vocab.WordListEntry;
 import data.vocab.models.SearchProvider;
 import data.vocab.models.SearchResult;
 import data.vocab.models.Vocabulary;
@@ -174,11 +175,11 @@ public class SearchActivity extends AppCompatActivity
                         //TODO: Show readings on Related Words so it makes sense to see multiple words with same def
                         int desiredRelatedWordIndex =
                                 data.getExtras().getInt(key);
-                        RelatedWordEntry desiredWord =
+                        WordListEntry desiredWord =
                                 mLastSearched.getRelatedWords().get(desiredRelatedWordIndex);
 
                         mBinding.searchBox.etSearchBox.setText(desiredWord.getRelatedWord());
-                        if(mWebPage != null){
+                        if(mWebPage != null && !TextUtils.isEmpty(desiredWord.getRelatedWord())){
                             mWebPage.navigateRelatedWord(desiredWord);
                         }
                         else if(!TextUtils.isEmpty(desiredWord.getRelatedWord())){
@@ -231,14 +232,14 @@ public class SearchActivity extends AppCompatActivity
 
     /* ==================================== +Databases ================================== */
 
-    private List<RelatedWordEntry> getExistingRelatedWordsFromDb(String word){
+    private List<WordListEntry> getExistingRelatedWordsFromDb(String word){
         VocabularyEntity entity = mVocabViewModel.getWord(word,
                 sharedPreferencesHelper.getDictionaryPreference());
         if (entity == null){
             return null;
         }
 
-        List<RelatedWordEntry> relatedWords = new ArrayList<>();
+        List<WordListEntry> relatedWords = new ArrayList<>();
         SearchProvider provider = sharedPreferencesHelper.getSearchProvider();
         if(provider == null){
             return null;
@@ -248,18 +249,18 @@ public class SearchActivity extends AppCompatActivity
             List<RelatedWordEntity> relatedWordEntities =
                     mRelatedWordViewModel.getRelatedWordList(entity, dictionaryType);
             for(RelatedWordEntity relatedWordEntity : relatedWordEntities){
-                relatedWords.add(new RelatedWordEntry(relatedWordEntity.getRelatedWord(), relatedWordEntity.getDictionaryType()));
+                relatedWords.add(new WordListEntry(relatedWordEntity.getRelatedWord(), relatedWordEntity.getDictionaryType()));
             }
         }
         return relatedWords;
     }
 
-    private void addWordsToRelatedWordsDb(Vocabulary vocabulary, List<RelatedWordEntry> newRelatedWords){
+    private void addWordsToRelatedWordsDb(Vocabulary vocabulary, List<WordListEntry> newRelatedWords){
         VocabularyEntity entity = getWordFromDb(vocabulary.getWord(), vocabulary.getDictionaryType());
         if (entity == null){
             return;
         }
-        for (RelatedWordEntry entry : newRelatedWords){
+        for (WordListEntry entry : newRelatedWords){
             RelatedWordEntity relatedWordToAdd =
                     new RelatedWordEntity(entity, entry.getRelatedWord(),
                             entry.getDictionaryType().toString());
@@ -530,8 +531,8 @@ public class SearchActivity extends AppCompatActivity
                         new Intent(getApplicationContext(), WordListActivity.class);
 
                 intentStartRelatedWordsActivity
-                        .putExtra(getString(R.string.related_word_key),
-                                mLastSearched);
+                        .putParcelableArrayListExtra(getString(R.string.related_word_key),
+                                (ArrayList<? extends Parcelable>) mLastSearched.getRelatedWords());
 
                 startActivityForResult(intentStartRelatedWordsActivity, SEARCH_ACTIVITY_REQUEST_CODE);
 
@@ -760,6 +761,10 @@ public class SearchActivity extends AppCompatActivity
                 Intent startSettingsActivityIntent = new Intent(context, childActivity);
                 startActivity(startSettingsActivityIntent);
                 return true;
+            case R.id.action_db:
+                Intent startDbActviity = getDatabaseActivityIntent();
+                startActivityForResult(startDbActviity, SEARCH_ACTIVITY_REQUEST_CODE);
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -795,4 +800,21 @@ public class SearchActivity extends AppCompatActivity
         mToast = Toast.makeText(context, message, duration);
         mToast.show();
     }
+
+    private Intent getDatabaseActivityIntent(){
+        Intent databaseActivityIntent =
+                new Intent(getApplicationContext(), WordListActivity.class);
+
+        List<WordListEntry> dbWords = mVocabViewModel.getAllSavedWords();
+
+        databaseActivityIntent
+                .putParcelableArrayListExtra(getString(R.string.related_word_key),
+                        (ArrayList<? extends Parcelable>) dbWords);
+
+        return databaseActivityIntent;
+    }
+
+    //TODO: Change the context/notes/def to be live data objects
+
+
 }

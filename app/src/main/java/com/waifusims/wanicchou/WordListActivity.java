@@ -9,22 +9,20 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.MenuItem;
-
-import com.waifusims.wanicchou.databinding.ActivityRelatedWordsBinding;
-
-import data.vocab.jp.search.sanseido.SanseidoSearchResult;
+import java.util.List;
+import data.vocab.WordListEntry;
 
 /**
  * Separate activity to display the related words of a SanseidoSearchResult.
  * If a word is long pressed, it will be searched and brought back to the home activity.
  */
 public class WordListActivity extends AppCompatActivity
-        implements WordAdapter.ListItemClickListener{
+        implements WordListAdapter.ListItemClickListener{
 
-    private SanseidoSearchResult searchData;
-    private ActivityRelatedWordsBinding mBinding;
-
-    private WordAdapter mAdapter;
+    //TODO: Long press to open menu, option to delete, search
+    //TODO: Options menu to input all words in the related word list if it doesn't exist
+    private List<WordListEntry> wordList;
+    private WordListAdapter mAdapter;
     private RecyclerView mWordList;
 
     // TODO: Long press word selection
@@ -39,8 +37,6 @@ public class WordListActivity extends AppCompatActivity
             actionbar.setDisplayHomeAsUpEnabled(true);
         }
 
-        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_related_words);
-
         Intent intentThatStartedThis = getIntent();
 
 //        RELATED WORDS GARBAGE SET ONCLICK LISTENER TO MOVE TO OTHER ACTIVITY
@@ -51,9 +47,9 @@ public class WordListActivity extends AppCompatActivity
         mWordList.setHasFixedSize(true);
 
         Bundle extras = intentThatStartedThis.getExtras();
-        searchData = (SanseidoSearchResult)extras.get(getString(R.string.related_word_key));
+        wordList = (List<WordListEntry>) extras.get(getString(R.string.related_word_key));
 
-        mAdapter = new WordAdapter(searchData.getRelatedWords(),
+        mAdapter = new WordListAdapter(wordList,
                 this);
         mWordList.setAdapter(mAdapter);
     }

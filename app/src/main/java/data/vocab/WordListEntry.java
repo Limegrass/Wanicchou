@@ -8,37 +8,37 @@ import java.net.URL;
 import data.vocab.jp.JapaneseDictionaryType;
 import data.vocab.models.DictionaryType;
 
-public class RelatedWordEntry implements Parcelable {
+public class WordListEntry implements Parcelable {
     private String relatedWord;
     private DictionaryType dictionaryType;
     private String link;
 
-    public RelatedWordEntry(String relatedWord, String dictionaryTypeString) {
+    public WordListEntry(String relatedWord, String dictionaryTypeString) {
         this.relatedWord = relatedWord;
         this.dictionaryType = JapaneseDictionaryType.fromKey(dictionaryTypeString);
         //TODO: Handle no links for DB searches
         this.link = "#";
     }
 
-    public RelatedWordEntry(String relatedWord, DictionaryType dictionaryType, String link) {
+    public WordListEntry(String relatedWord, DictionaryType dictionaryType, String link) {
         this.relatedWord = relatedWord;
         this.dictionaryType = dictionaryType;
         this.link = link;
     }
 
-    public RelatedWordEntry(String relatedWord, String dictionaryTypeString, String link) {
+    public WordListEntry(String relatedWord, String dictionaryTypeString, String link) {
         this.relatedWord = relatedWord;
         this.dictionaryType = JapaneseDictionaryType.fromKey(dictionaryTypeString);
         this.link = link;
     }
 
-    public RelatedWordEntry(String relatedWord, DictionaryType dictionaryType, URL link) {
+    public WordListEntry(String relatedWord, DictionaryType dictionaryType, URL link) {
         this.relatedWord = relatedWord;
         this.dictionaryType = dictionaryType;
         this.link = link.toString();
     }
 
-    public RelatedWordEntry(String relatedWord, String dictionaryTypeString, URL link) {
+    public WordListEntry(String relatedWord, String dictionaryTypeString, URL link) {
         this.relatedWord = relatedWord;
         this.dictionaryType = JapaneseDictionaryType.fromKey(dictionaryTypeString);
         this.link = link.toString();
@@ -82,22 +82,22 @@ public class RelatedWordEntry implements Parcelable {
         parcel.writeString(link);
     }
 
-    private RelatedWordEntry(Parcel in) {
+    private WordListEntry(Parcel in) {
         relatedWord = in.readString();
         dictionaryType = JapaneseDictionaryType.fromKey(in.readString());
         link = in.readString();
     }
 
 
-    public static final Creator<RelatedWordEntry> CREATOR = new Creator<RelatedWordEntry>() {
+    public static final Creator<WordListEntry> CREATOR = new Creator<WordListEntry>() {
         @Override
-        public RelatedWordEntry createFromParcel(Parcel in) {
-            return new RelatedWordEntry(in);
+        public WordListEntry createFromParcel(Parcel in) {
+            return new WordListEntry(in);
         }
 
         @Override
-        public RelatedWordEntry[] newArray(int size) {
-            return new RelatedWordEntry[size];
+        public WordListEntry[] newArray(int size) {
+            return new WordListEntry[size];
         }
     };
 }

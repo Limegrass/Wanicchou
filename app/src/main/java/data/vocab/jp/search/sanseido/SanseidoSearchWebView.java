@@ -12,7 +12,7 @@ import org.jsoup.nodes.Document;
 import java.io.IOException;
 import java.net.URL;
 
-import data.vocab.RelatedWordEntry;
+import data.vocab.WordListEntry;
 import data.vocab.jp.JapaneseDictionaryType;
 import data.vocab.models.DictionaryType;
 import data.vocab.models.DictionaryWebPage;
@@ -98,7 +98,7 @@ public class SanseidoSearchWebView extends WebView implements DictionaryWebPage 
     }
 
     @Override
-    public void navigateRelatedWord(RelatedWordEntry relatedWord){
+    public void navigateRelatedWord(WordListEntry relatedWord){
         //TODO: When navigating to Related Word, the related words doesn't change.
         currentDictionaryType = relatedWord.getDictionaryType();
         String link = relatedWord.getLink();
