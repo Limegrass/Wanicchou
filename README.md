@@ -3,6 +3,10 @@ Online dictionary drawing definitions from [Sanseido](https://www.sanseido.biz/)
 
 Other languages: [日本語](README.jp.md)
 
+[<img src="https://f-droid.org/badge/get-it-on.png"
+     alt="Get it on F-Droid"
+     height="90">](https://f-droid.org/packages/com.waifusims.wanicchou/)
+
 ## Table of Contents
   - [Usage](#usage)
   - [Potential Development](#potential-development)

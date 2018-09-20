@@ -1,6 +1,10 @@
 # 和日帳 （わにっちょう）Wanicchou
 [三省堂](https://www.sanseido.biz)から定義を検索して、暗記ドロイドへ送られるオンライン辞書アプリです。
 
+[<img src="https://gitlab.com/fdroid/artwork/raw/master/badge/get-it-on-jp.png"
+     alt="Get it on F-Droid"
+     height="90">](https://f-droid.org/packages/com.waifusims.wanicchou/)
+
 他の言語: [English](README.md)
 
 ## 目次
