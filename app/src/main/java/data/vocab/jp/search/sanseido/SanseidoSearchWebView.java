@@ -2,6 +2,7 @@ package data.vocab.jp.search.sanseido;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.text.TextUtils;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -10,6 +11,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 import data.vocab.WordListEntry;
@@ -17,6 +19,7 @@ import data.vocab.jp.JapaneseDictionaryType;
 import data.vocab.models.DictionaryType;
 import data.vocab.models.DictionaryWebPage;
 import data.vocab.OnJavaScriptCompleted;
+import data.vocab.models.MatchType;
 import data.vocab.models.SearchResult;
 import data.vocab.models.Vocabulary;
 
@@ -98,11 +101,25 @@ public class SanseidoSearchWebView extends WebView implements DictionaryWebPage 
     }
 
     @Override
-    public void navigateRelatedWord(WordListEntry relatedWord){
+    public void navigateRelatedWord(WordListEntry relatedWord, MatchType matchType){
         //TODO: When navigating to Related Word, the related words doesn't change.
         currentDictionaryType = relatedWord.getDictionaryType();
         String link = relatedWord.getLink();
-        this.loadUrl(link);
+        if (!TextUtils.isEmpty(link.trim())){
+            this.loadUrl(link);
+        } else {
+            try{
+                URL webURL = SanseidoSearchResult.buildQueryURL(
+                        relatedWord.getRelatedWord(),
+                        relatedWord.getDictionaryType(),
+                        (SanseidoMatchType) matchType);
+                this.loadUrl(webURL.toString());
+            } catch (ClassCastException cce){
+                cce.printStackTrace();
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 

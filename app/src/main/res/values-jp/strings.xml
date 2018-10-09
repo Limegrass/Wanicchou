@@ -39,7 +39,7 @@
 
 
     <!--related words activity-->
-    <string name="activity_related_words_title" translatable="true">関係ある言葉</string>
+    <string name="activity_word_list_title" translatable="true">関係ある言葉</string>
 
     <!--<string name="related_word_key" translatable="false">relatedWords</string>-->
     <!--<string name="desired_word_index_key" translatable="false">desiredRelatedWord</string>-->

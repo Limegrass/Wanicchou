@@ -15,7 +15,7 @@ public interface DictionaryWebPage {
     SearchResult getSearch();
     DictionaryType getCurrentDictionaryType();
     void setCurrentDictionaryType(JapaneseDictionaryType dictionaryType);
-    void navigateRelatedWord(WordListEntry relatedWord);
+    void navigateRelatedWord(WordListEntry relatedWord, MatchType matchType);
     String getUrl();
 
     Document getHtmlDocument();

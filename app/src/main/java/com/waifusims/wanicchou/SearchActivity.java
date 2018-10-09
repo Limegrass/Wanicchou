@@ -180,7 +180,8 @@ public class SearchActivity extends AppCompatActivity
 
                         mBinding.searchBox.etSearchBox.setText(desiredWord.getRelatedWord());
                         if(mWebPage != null && !TextUtils.isEmpty(desiredWord.getRelatedWord())){
-                            mWebPage.navigateRelatedWord(desiredWord);
+                            mWebPage.navigateRelatedWord( desiredWord,
+                                    sharedPreferencesHelper.getMatchType());
                         }
                         else if(!TextUtils.isEmpty(desiredWord.getRelatedWord())){
                             String word = desiredWord.getRelatedWord();
@@ -801,9 +802,10 @@ public class SearchActivity extends AppCompatActivity
         mToast.show();
     }
 
+    //TODO: REfactor this to use a proper view model
     private Intent getDatabaseActivityIntent(){
         Intent databaseActivityIntent =
-                new Intent(getApplicationContext(), WordListActivity.class);
+                new Intent(getApplicationContext(), DatabaseActivity.class);
 
         List<WordListEntry> dbWords = mVocabViewModel.getAllSavedWords();
 
