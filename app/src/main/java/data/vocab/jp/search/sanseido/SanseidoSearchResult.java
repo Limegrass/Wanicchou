@@ -154,8 +154,7 @@ public class SanseidoSearchResult implements SearchResult {
      */
     protected static URL buildQueryURL(String word,
                                        DictionaryType dictionaryType,
-                                       SanseidoMatchType matchType)
-            throws MalformedURLException{
+                                       SanseidoMatchType matchType) throws MalformedURLException {
 
         Uri.Builder uriBuilder = Uri.parse(SANSEIDOU_BASE_URL).buildUpon();
 
@@ -164,7 +163,18 @@ public class SanseidoSearchResult implements SearchResult {
         uriBuilder.appendQueryParameter(PARAM_WORD_QUERY, word);
         uriBuilder.appendQueryParameter(PARAM_DIC_PREFIX + dictionaryType.toString(), SET_LANG);
 
-        return new URL(uriBuilder.build().toString());
+
+        try {
+            return new URL(uriBuilder.build().toString());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+            throw new MalformedURLException(
+                    "Word: " + word
+                    + " MatchType " + matchType.toString()
+                    + " DictionaryType " + dictionaryType.toString()
+                    + "%n"
+                    + e);
+        }
     }
 
 

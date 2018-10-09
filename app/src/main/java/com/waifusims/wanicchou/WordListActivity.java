@@ -9,6 +9,9 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.MenuItem;
+
+import com.waifusims.wanicchou.widgets.WordListAdapter;
+
 import java.util.List;
 import data.vocab.WordListEntry;
 
@@ -17,7 +20,7 @@ import data.vocab.WordListEntry;
  * If a word is long pressed, it will be searched and brought back to the home activity.
  */
 public class WordListActivity extends AppCompatActivity
-        implements WordListAdapter.ListItemClickListener{
+        implements WordListAdapter.WordViewHolder.ListItemClickListener{
 
     //TODO: Long press to open menu, option to delete, search
     //TODO: Options menu to input all words in the related word list if it doesn't exist
@@ -64,12 +67,16 @@ public class WordListActivity extends AppCompatActivity
     }
 
     @Override
-    public void onListItemClick(int clickedItemIndex) {
-
+    public void onItemLongClick(int clickedItemIndex) {
         Intent data = new Intent();
         data.putExtra(getString(R.string.desired_word_index_key), clickedItemIndex);
         setResult(RESULT_OK, data);
         finish();
+    }
+
+    @Override
+    public void onItemClick(int position) {
+
     }
 
     @Override

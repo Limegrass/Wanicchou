@@ -39,7 +39,7 @@
 
 
     <!--related words activity-->
-    <string name="activity_related_words_title" translatable="true">Related Words</string>
+    <string name="activity_word_list_title" translatable="true">Results</string>
 
     <string name="related_word_key" translatable="false">relatedWords</string>
     <string name="desired_word_index_key" translatable="false">desiredRelatedWord</string>
@@ -50,6 +50,7 @@
     <string name="url_key" translatable="false">pageUrl</string>
     <string name="html_key" translatable="false">pageHtml</string>
     <string name="page_key" translatable="false">webPage</string>
+
 
 
     <!--settings strings-->
@@ -75,5 +76,9 @@
     <string name="reading_hint">読み方</string>
     <string name="pitch_hint">ピッチ</string>
     <string name="dictionary_hint">辞典型</string>
+
+    <string name="title_selected">%1$d words selected</string>
+    <string name="action_db_delete">Delete</string>
+    <string name="action_db_import">Import</string>
 
 </resources>

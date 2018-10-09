@@ -13,11 +13,13 @@ public class WordListEntry implements Parcelable {
     private DictionaryType dictionaryType;
     private String link;
 
+    private static String NULL = null;
+
     public WordListEntry(String relatedWord, String dictionaryTypeString) {
         this.relatedWord = relatedWord;
         this.dictionaryType = JapaneseDictionaryType.fromKey(dictionaryTypeString);
         //TODO: Handle no links for DB searches
-        this.link = "#";
+        this.link = "";
     }
 
     public WordListEntry(String relatedWord, DictionaryType dictionaryType, String link) {

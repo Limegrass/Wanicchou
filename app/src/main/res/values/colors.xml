@@ -1,14 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3E50B4</color>
-    <color name="colorPrimaryLight">#000000</color>
-    <color name="colorPrimaryDark">#000000</color>
-    <color name="colorPrimaryText">#FFFFFF</color>
-    <color name="colorAccent">#FF3F80</color>
+    <color name="color_primary">#3E50B4</color>
+    <color name="color_primary_light">#000000</color>
+    <color name="color_primary_dark">#000000</color>
+    <color name="color_primary_text">#FFFFFF</color>
+    <color name="color_accent">#90FF3F80</color>
+    <color name="color_overlay">#209999FF</color>
 
-    <color name="colorRelatedWord">#101010</color>
-    <color name="colorRelatedWordAlt">#202020</color>
 
-    <color name="colorSecondaryText">#FFFFFF</color>
+    <color name="color_related_word">#101010</color>
+    <color name="color_related_word_alt">#202020</color>
+
+    <color name="color_secondary_text">#FFFFFF</color>
 
 </resources>

@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools">
     <FrameLayout
         android:id="@+id/frame_words"
+        android:foreground="?android:selectableItemBackground"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <android.support.constraint.ConstraintLayout
@@ -16,7 +17,7 @@
                 android:textSize="18dp"
                 android:text="【国語】"
                 android:gravity="center"
-                android:background="@color/colorRelatedWord"
+                android:background="@color/color_related_word"
                 app:layout_constraintLeft_toLeftOf="parent" />
             <TextView
                 android:id="@+id/tv_word_item"
@@ -25,9 +26,17 @@
                 android:textSize="18dp"
                 tools:text="Test"
                 android:gravity="center_vertical"
-                android:background="@color/colorRelatedWord"
+                android:background="@color/color_related_word"
                 app:layout_constraintLeft_toRightOf="@+id/tv_word_dic_type"
                 app:layout_constraintRight_toRightOf="parent"/>
         </android.support.constraint.ConstraintLayout>
+
+        <View
+            android:id="@+id/view_selected_overlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/color_overlay"
+            android:visibility="invisible" />
+
     </FrameLayout>
 </layout>
