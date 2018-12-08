@@ -10,4 +10,9 @@
 *.swp
 *~
 /app/release/*
+/app/.idea/*
+/app/local.properties
+/app/gradle/*
+/app/gradlew
+/app/gradlew.bat
 *.vim
