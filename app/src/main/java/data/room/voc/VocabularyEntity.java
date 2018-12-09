@@ -6,68 +6,58 @@ import android.arch.persistence.room.Index;
 import android.arch.persistence.room.PrimaryKey;
 import android.support.annotation.NonNull;
 
-import data.vocab.models.Vocabulary;
-
 /**
  * Vocabulary Entry for the Room Persistence Library, for Words and their definitions.
  */
 @Entity(
-        tableName = "VocabularyWords",
-        indices = {@Index(value = {"Word", "DictionaryType"}, unique = true)}
+        tableName = "Vocabulary",
+        indices = {@Index(value = {"VocabularyID"}, unique = true)}
 )
 public class VocabularyEntity {
     @PrimaryKey(autoGenerate = true)
-    @ColumnInfo(name = "VocabularyId")
-    @NonNull
-    private int id;
+    @ColumnInfo(name = "VocabularyID")
+    private int vocabularyID;
 
     @ColumnInfo(name = "Word")
     @NonNull
     private String word;
 
-    @ColumnInfo(name = "DictionaryType")
+    @ColumnInfo(name = "Pronunciation")
     @NonNull
-    private String dictionaryType;
-
-    @ColumnInfo(name = "Reading")
-    @NonNull
-    private String reading;
-
-    @ColumnInfo(name = "Definition")
-    @NonNull
-    private String definition;
+    private String pronunciation;
 
     @ColumnInfo(name = "Pitch")
     @NonNull
     private String pitch;
 
+    @ColumnInfo(name = "LanguageID")
+    private int languageID;
 
-    /**
-     * Empty constructor for the RPM.
-     */
-    public VocabularyEntity(){}
-
-    // TODO?: Maybe consolidate this and the JapaneseVocab class
-    // Having everything in one class vs having a class that cleans
-    // and this entity class
-    /**
-     * Constructor given a vocabulary word, along with notes and context for the vocab.
-     * @param vocabulary The vocabulary word to construct the entity from.
-     */
-    public VocabularyEntity(Vocabulary vocabulary){
-        word = vocabulary.getWord();
-        definition = vocabulary.getDefinition();
-        reading = vocabulary.getReading();
-        dictionaryType = vocabulary.getDictionaryType().toString();
-        pitch = vocabulary.getPitch();
+    public VocabularyEntity() {
+        this.pitch = "";
+        this.pronunciation = "";
+        this.word = "";
     }
 
-    public int getId() {
-        return id;
+
+    public VocabularyEntity(int vocabularyID,
+                            @NonNull String word,
+                            @NonNull String pronunciation,
+                            @NonNull String pitch,
+                            int languageID) {
+        this.vocabularyID = vocabularyID;
+        this.word = word;
+        this.pronunciation = pronunciation;
+        this.pitch = pitch;
+        this.languageID = languageID;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public int getVocabularyID() {
+        return vocabularyID;
+    }
+
+    public void setVocabularyID(int vocabularyID) {
+        this.vocabularyID = vocabularyID;
     }
 
     @NonNull
@@ -80,30 +70,12 @@ public class VocabularyEntity {
     }
 
     @NonNull
-    public String getDictionaryType() {
-        return dictionaryType;
+    public String getPronunciation() {
+        return pronunciation;
     }
 
-    public void setDictionaryType(@NonNull String dictionaryType) {
-        this.dictionaryType = dictionaryType;
-    }
-
-    @NonNull
-    public String getReading() {
-        return reading;
-    }
-
-    public void setReading(@NonNull String reading) {
-        this.reading = reading;
-    }
-
-    @NonNull
-    public String getDefinition() {
-        return definition;
-    }
-
-    public void setDefinition(@NonNull String definition) {
-        this.definition = definition;
+    public void setPronunciation(@NonNull String pronunciation) {
+        this.pronunciation = pronunciation;
     }
 
     @NonNull
@@ -115,5 +87,12 @@ public class VocabularyEntity {
         this.pitch = pitch;
     }
 
+    public int getLanguageID() {
+        return languageID;
+    }
+
+    public void setLanguageID(int languageID) {
+        this.languageID = languageID;
+    }
 }
 

@@ -10,49 +10,59 @@ graph TD;
 # DB Diagram
 ```mermaid
 classDiagram
-Translation --> Language : (W/D)LanguageID
-DefinitionTag --> Tag : TagID
-
 Definition --> Dictionary : DictionaryID
-Definition --> Word : WordID
-RelatedWord --> Word : (S/Res)WordID
-DefinitionTag --> Definition : DefinitionID
+Definition --> Language : LanguageID
+Definition --> Vocabulary : VocabularyID
+Vocabulary --> Language : LanguageID
 
-Definition --> Translation : TranslationID
+DefinitionNote --> Definition : DefinitionID
+VocabularyNote --> Vocabulary : VocabularyID
 
-Note --> Definition : DefinitionID
 
-Note : INT NoteID
-Note : INT DefinitionID
-Note : NVARCHAR(MAX) NoteText
+
+VocabularyRelation --> Vocabulary : VocabularyID
+VocabularyTag --> Vocabulary : VocabularyID
+
+VocabularyTag --> Tag : TagID
+
+
+
+DefinitionNote : INT DefinitionNoteID
+DefinitionNote : INT DefinitionID
+DefinitionNote : NVARCHAR(MAX) NoteText
+
+VocabularyNote : INT VocabularyNoteID
+VocabularyNote : INT VocabularyID
+VocabularyNote : NVARCHAR(MAX) NoteText
 
 Tag : INT TagID
 Tag : NVARCHAR(100) TagText
 
-DefinitionTag : INT DefinitionID
-DefinitionTag : INT TagID
-
-Translation : INT TranslationID
-Translation : INT WordLanguageID
-Translation : INT DefinitionLanguageID
+VocabularyTag : INT VocabularyTagID
+VocabularyTag : INT VocabularyID
+VocabularyTag : INT TagID
 
 
 Dictionary : INT DictionaryID
 Dictionary : NVARCHAR(322) DictionaryName
 Dictionary : VARCHAR(100) EnumName
 
-RelatedWord : INT SearchWordID
-RelatedWord : INT ResultWordID
+VocabularyRelation : INT VocabularyRelationID
+VocabularyRelation : INT SearchVocabularyID
+VocabularyRelation : INT ResultVocabularyID
 
-Definition : NVARCHAR(MAX) Definition
+Definition : NVARCHAR(MAX) DefinitionText
 Definition : INT DefinitionID
-Definition : INT TranslationID
-Definition : INT WordID
+Definition : INT VocabularyID
+Definition : INT LanguageID
 
-Word : INT WordID
-Word : NVARCHAR(420) Word
-Word : NVARCHAR(4) Pitch
+Vocabulary : INT VocabularyID
+Vocabulary : NVARCHAR(420) Word
+Vocabulary : NVARCHAR(420) Pronunciation
+Vocabulary : NVARCHAR(4) Pitch
+Vocabulary : INT LanguageID
 
 Language : INT LanguageID
 Language : VARCHAR(5) CultureCode
 ```
+> Note: VocabularyRelationID and VocabularyTagID can be used for sorting later
