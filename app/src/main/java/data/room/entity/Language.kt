@@ -2,7 +2,7 @@ package data.room.entity
 
 import android.arch.persistence.room.*
 
-@Entity(tableName = "Language")
+@Entity(tableName = "Translation")
 data class Language (
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "LanguageID")

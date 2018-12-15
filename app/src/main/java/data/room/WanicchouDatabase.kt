@@ -2,7 +2,7 @@ package data.room
 
 import android.content.Context
 import android.arch.persistence.room.*
-import data.SingletonHolder
+import data.core.SingletonHolder
 import data.room.dao.*
 import data.room.entity.*
 
@@ -36,7 +36,7 @@ abstract class WanicchouDatabase : RoomDatabase() {
     abstract fun vocabularyRelationDao(): VocabularyRelationDao
     abstract fun vocabularyTagDao(): VocabularyTagDao
 
-    companion object : SingletonHolder<WanicchouDatabase, Context> ({
+    companion object : SingletonHolder<WanicchouDatabase, Context>({
         Room.databaseBuilder<WanicchouDatabase>(it.applicationContext,
                 WanicchouDatabase::class.java, "WanicchouDatabase")
                 .build()
