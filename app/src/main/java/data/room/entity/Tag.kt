@@ -4,11 +4,11 @@ import android.arch.persistence.room.*
 
 @Entity(tableName = "Tag")
 data class Tag (
+    @ColumnInfo(name = "TagText")
+    val tagText: String,
+
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "TagID")
-    var tagID: Int = 0,
-
-    @ColumnInfo(name = "TagText")
-    var tagText: String
+    val tagID: Int = 0
 )
 

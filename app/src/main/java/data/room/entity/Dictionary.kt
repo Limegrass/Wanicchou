@@ -4,11 +4,10 @@ import android.arch.persistence.room.*
 
 @Entity(tableName = "Dictionary")
 data class Dictionary (
+    @ColumnInfo(name = "DictionaryName")
+    val dictionaryName: String,
+
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "DictionaryID")
-    var dictionaryID: Int = 0,
-
-    @ColumnInfo(name = "DictionaryName")
-    var dictionaryName: String
+    val dictionaryID: Int = 0
 )
-

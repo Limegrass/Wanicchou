@@ -5,19 +5,19 @@ import android.arch.persistence.room.*
 @Entity(tableName = "Vocabulary")
 
 data class Vocabulary (
-    @PrimaryKey(autoGenerate = true)
-    @ColumnInfo(name = "VocabularyID")
-    var vocabularyID: Int = 0,
-
     @ColumnInfo(name = "Word")
-    var word: String = "",
+    val word: String = "",
 
     @ColumnInfo(name = "Pronunciation")
-    var pronunciation: String = "",
+    val pronunciation: String = "",
 
     @ColumnInfo(name = "Pitch")
-    var pitch: String = "",
+    val pitch: String = "",
 
     @ColumnInfo(name = "LanguageCode")
-    var languageCode: String = ""
+    val languageCode: String = "",
+
+    @PrimaryKey(autoGenerate = true)
+    @ColumnInfo(name = "VocabularyID")
+    val vocabularyID: Int = 0
 )

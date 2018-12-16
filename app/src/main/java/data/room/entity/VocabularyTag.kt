@@ -12,14 +12,13 @@ import android.arch.persistence.room.*
 )
 
 data class VocabularyTag (
-    @PrimaryKey(autoGenerate = true)
-    @ColumnInfo(name = "VocabularyTagID")
-    var vocabularyTagID: Int,
-
     @ColumnInfo(name = "TagID")
-    var tagID: Int,
+    val tagID: Int,
 
     @ColumnInfo(name = "VocabularyID")
-    var vocabularyID: Int
-)
+    val vocabularyID: Int,
 
+    @PrimaryKey(autoGenerate = true)
+    @ColumnInfo(name = "VocabularyTagID")
+    val vocabularyTagID: Int = 0
+)
