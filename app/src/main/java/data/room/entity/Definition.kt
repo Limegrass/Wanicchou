@@ -5,9 +5,9 @@ import android.arch.persistence.room.*
 @Entity(tableName = "Definition",
         foreignKeys = [
             ForeignKey(
-                    entity = Language::class,
-                    parentColumns = ["LanguageID"],
-                    childColumns = ["LanguageID"]),
+                    entity = Dictionary::class,
+                    parentColumns = ["DictionaryID"],
+                    childColumns = ["DictionaryID"] ),
             ForeignKey(
                     entity = Vocabulary::class,
                     parentColumns = ["VocabularyID"],
@@ -19,12 +19,15 @@ data class Definition (
     @ColumnInfo(name = "DefinitionID")
     var definitionID: Int,
 
+    @ColumnInfo(name = "DictionaryID")
+    var dictionaryID: Int,
+
     @ColumnInfo(name = "DefinitionText")
     var definitionText: String = "",
 
-    @ColumnInfo(name = "LanguageID")
-    var languageID: Int,
-
     @ColumnInfo(name = "VocabularyID")
-    var vocabularyID: Int
+    var vocabularyID: Int,
+
+    @ColumnInfo(name = "LanguageCode")
+    var languageCode: String = ""
 )

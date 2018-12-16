@@ -5,12 +5,12 @@ import android.arch.persistence.room.*
 @Entity(tableName = "VocabularyRelation",
         foreignKeys = [
             ForeignKey(
-                    entity = Language::class,
-                    parentColumns = ["SearchVocabularyID"],
+                    entity = Vocabulary::class,
+                    parentColumns = ["VocabularyID"],
                     childColumns = ["SearchVocabularyID"]),
             ForeignKey(
-                    entity = Language::class,
-                    parentColumns = ["ResultVocabularyID"],
+                    entity = Vocabulary::class,
+                    parentColumns = ["VocabularyID"],
                     childColumns = ["ResultVocabularyID"])
         ]
 )

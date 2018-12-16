@@ -17,7 +17,6 @@ import data.room.entity.*
             Definition::class,
             DefinitionNote::class,
             Dictionary::class,
-            Language::class,
             Tag::class,
             VocabularyRelation::class,
             VocabularyTag::class
@@ -29,7 +28,6 @@ abstract class WanicchouDatabase : RoomDatabase() {
     abstract fun definitionDao(): DefinitionDao
     abstract fun definitionNoteDao(): DefinitionNoteDao
     abstract fun dictionaryDao(): DictionaryDao
-    abstract fun languageDao(): LanguageDao
     abstract fun tagDao(): TagDao
     abstract fun vocabularyDao(): VocabularyDao
     abstract fun vocabularyNoteDao(): VocabularyNoteDao

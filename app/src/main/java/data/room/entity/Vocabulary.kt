@@ -2,14 +2,7 @@ package data.room.entity
 
 import android.arch.persistence.room.*
 
-@Entity(tableName = "Vocabulary",
-        foreignKeys = [
-            ForeignKey(
-                entity = Language::class,
-                parentColumns = ["LanguageID"],
-                childColumns = ["LanguageID"])
-        ]
-)
+@Entity(tableName = "Vocabulary")
 
 data class Vocabulary (
     @PrimaryKey(autoGenerate = true)
@@ -25,6 +18,6 @@ data class Vocabulary (
     @ColumnInfo(name = "Pitch")
     var pitch: String = "",
 
-    @ColumnInfo(name = "LanguageID")
-    var languageID: Int = 0
+    @ColumnInfo(name = "LanguageCode")
+    var languageCode: String = ""
 )

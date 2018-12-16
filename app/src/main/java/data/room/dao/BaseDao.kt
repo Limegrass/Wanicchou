@@ -8,7 +8,7 @@ interface BaseDao<T> {
      * Inserts the object into the database.
      * @param obj the object to insert into the database
      */
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.ROLLBACK)
     fun insert(obj: T)
 
     /**
