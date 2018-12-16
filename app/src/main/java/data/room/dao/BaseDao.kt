@@ -5,10 +5,10 @@ import android.arch.persistence.room.*
 @Dao
 interface BaseDao<T> {
     /**
-     * Inserts the object into the database.
+     * Inserts the object into the database. Replaces on conflict
      * @param obj the object to insert into the database
      */
-    @Insert(onConflict = OnConflictStrategy.ROLLBACK)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(obj: T)
 
     /**
