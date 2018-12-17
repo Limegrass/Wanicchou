@@ -1,10 +1,12 @@
 package data.vocab.model
 
+import data.room.entity.Vocabulary
 import data.vocab.shared.WordListEntry
-import org.jsoup.nodes.Document
 
 interface RelatedWordFactory{
-    fun getRelatedWords(html: Document,
+    fun getRelatedWords(html: String,
                         wordLanguageCode: String,
-                        definitionLanguageCode: String): Array<WordListEntry>
+                        definitionLanguageCode: String): List<WordListEntry>
+    fun getRelatedWords(databaseList: List<Vocabulary>,
+                        definitionLanguageCode: String) : List<WordListEntry>
 }

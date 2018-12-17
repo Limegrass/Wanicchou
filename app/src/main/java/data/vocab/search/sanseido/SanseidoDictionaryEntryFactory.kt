@@ -6,6 +6,8 @@ import data.vocab.model.lang.EnglishVocabulary
 import data.vocab.model.lang.JapaneseVocabulary
 import data.vocab.model.DictionaryEntry
 import data.vocab.model.DictionaryEntryFactory
+import org.jsoup.Jsoup
+import org.jsoup.nodes.Document
 import java.lang.IllegalArgumentException
 import java.util.regex.Pattern
 
@@ -23,6 +25,33 @@ object SanseidoDictionaryEntryFactory: DictionaryEntryFactory {
     private const val PRONUNCIATION_REGEX = "[\\p{script=Hiragana}|\\p{script=Katakana}]+" +
             "($|[\\p{script=Han}０-９]|\\d|\\s)*?"
     private const val DICTIONARY_NAME = "Sanseido"
+
+    private const val SANSEIDO_WORD_ID = "word"
+    private const val SANSEIDO_WORD_DEFINITION_ID = "wordBody"
+    private const val MULTIPLE_DEFINITION_REGEX = "▼"
+    private const val MULTIPLE_DEFINITION_SEPARATOR = "\n▼"
+
+    override fun getDictionaryEntry(html: String,
+                                    wordLanguageCode: String,
+                                    definitionLanguageCode: String): DictionaryEntry {
+        val document = Jsoup.parse(html)
+        val wordSource = findWordSource(document)
+        val definitionSource = findDefinitionSource(document)
+        return if (definitionSource.isNullOrBlank()) {
+            SanseidoDictionaryEntryFactory.getInvalidDictionaryEntry(
+                    wordSource,
+                    wordLanguageCode,
+                    definitionLanguageCode
+            )
+        } else{
+            SanseidoDictionaryEntryFactory.getDictionaryEntry(
+                    wordSource,
+                    wordLanguageCode,
+                    definitionSource,
+                    definitionLanguageCode
+            )
+        }
+    }
 
     /**
      * Constructor given a string containing the word and a string containing the definition.
@@ -161,5 +190,38 @@ object SanseidoDictionaryEntryFactory: DictionaryEntryFactory {
             pitch = toneMatcher.group(0)
         }
         return pitch
+    }
+
+
+
+    /**
+     * Retrieve the searched word from the html source
+     * @param html the html source
+     * @return the word searched for
+     */
+    private fun findWordSource(html: Document): String {
+        return html.getElementById(SANSEIDO_WORD_ID).text()
+    }
+
+    /**
+     * A helper method to isolate the source text of the definition of the word searched.
+     * @param html the jsoup html document tree.
+     * @return the raw definition source
+     */
+    private fun findDefinitionSource(html: Document): String? {
+        val definitionParentElement = html.getElementById(SANSEIDO_WORD_DEFINITION_ID)
+        // The definition is in a further div, single child
+        var definitionSource : String? = null
+
+        if (definitionParentElement.children().size > 0) {
+            definitionSource = definitionParentElement.child(0).text()
+            //TODO: FIX REGEX
+            definitionSource = definitionSource.replace(MULTIPLE_DEFINITION_REGEX.toRegex(),
+                                                        MULTIPLE_DEFINITION_SEPARATOR)
+            definitionSource = definitionSource.replaceFirst(MULTIPLE_DEFINITION_REGEX.toRegex(),
+                                                        MULTIPLE_DEFINITION_SEPARATOR)
+        }
+
+        return definitionSource
     }
 }

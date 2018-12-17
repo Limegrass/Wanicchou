@@ -11,7 +11,7 @@ interface VocabularyDao : BaseDao<Vocabulary> {
         FROM Vocabulary v
         ORDER BY v.VocabularyID
         LIMIT 1""")
-    fun getLatest(): Vocabulary
+    fun getLatest(): LiveData<List<Vocabulary>>
 
 
     @Query("""

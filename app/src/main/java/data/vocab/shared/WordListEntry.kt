@@ -7,6 +7,5 @@ import kotlinx.android.parcel.Parcelize
 @Suppress("PLUGIN_WARNING")
 @Parcelize
 class WordListEntry(val relatedWord: String = "",
-                    val wordLanguageCode: String = "",
-                    val definitionLanguageCode: String = "",
+                    val languageCode: String = "",
                     val link: String = "") : Parcelable

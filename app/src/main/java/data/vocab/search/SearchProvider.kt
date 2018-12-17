@@ -15,10 +15,9 @@ import java.lang.IllegalArgumentException
 // Is this a factory or a provider la
 object SearchProvider {
 
-    fun getWebPage(listener: OnJavaScriptCompleted,
-               dictionary: String): DictionaryWebPage {
+    fun getWebPage(dictionary: String): DictionaryWebPage {
         return when (dictionary) {
-            "Sanseido" -> SanseidoWebPage(listener)
+            "Sanseido" -> SanseidoWebPage()
             else -> throw IllegalArgumentException("Dictionary $dictionary not available.")
         }
     }

@@ -1,5 +1,6 @@
 package data.room.dao
 
+import android.arch.lifecycle.LiveData
 import android.arch.persistence.room.Query
 import data.room.entity.Definition
 
@@ -17,4 +18,12 @@ interface DefinitionDao : BaseDao<Definition> {
         WHERE DefinitionText LIKE '%' + :searchTerm + '%'
     """)
     fun definitionContains(searchTerm: String): Definition
+
+    @Query("""
+        SELECT d.*
+        FROM Definition d
+        WHERE d.VocabularyID = :vocabularyID
+    """)
+    fun getVocabularyDefinitions(vocabularyID: Int, definitionLanguageCode: String): LiveData<List<Definition>>
+
 }

@@ -7,6 +7,10 @@ import data.room.entity.Vocabulary
  * Interface for creating a factory responsible for generating DictionaryEntries
  */
 interface DictionaryEntryFactory {
+    fun getDictionaryEntry(html: String,
+                           wordLanguageCode: String,
+                           definitionLanguageCode: String) : DictionaryEntry
+
     fun getDictionaryEntry(wordSource: String,
                            wordLanguageCode: String,
                            definitionSource: String,

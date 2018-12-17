@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import data.core.OnDatabaseQuery
 import data.core.OnJavaScriptCompleted
 import data.vocab.shared.MatchType
 
@@ -11,8 +12,8 @@ import data.vocab.shared.WordListEntry
 import java.io.IOException
 import java.net.URL
 
-abstract class DictionaryWebPage(val listener: OnJavaScriptCompleted,
-                                 private val searchFactory: SearchFactory) {
+abstract class DictionaryWebPage(val dictionaryEntryFactory: DictionaryEntryFactory,
+                                 val relatedWordFactory: RelatedWordFactory) {
     companion object {
         private const val HTML_PARSER_NAME = "HtmlParser"
         private const val PAGE_PARSE_URL = "javascript:window.HtmlParser.parsePage" +
@@ -22,7 +23,7 @@ abstract class DictionaryWebPage(val listener: OnJavaScriptCompleted,
     // ====================== ABSTRACT ======================
     abstract fun getSupportedMatchType(): Set<MatchType>
 
-    protected abstract fun buildQueryURL(searchTerm: String,
+    abstract fun buildQueryURL(searchTerm: String,
                                          wordLanguageCode: String,
                                          definitionLanguageCode: String,
                                          matchType: MatchType): URL
@@ -34,13 +35,19 @@ abstract class DictionaryWebPage(val listener: OnJavaScriptCompleted,
     @SuppressLint("AddJavascriptInterface", "SetJavaScriptEnabled")
     @Throws(IOException::class)
     fun search(webView: WebView,
+               javaScriptCompleted: OnJavaScriptCompleted,
+               onDatabaseQuery: OnDatabaseQuery,
                searchTerm: String,
                wordLanguageCode: String,
                definitionLanguageCode: String,
                matchType: MatchType) {
 
         val searchUrl = buildQueryURL(searchTerm, wordLanguageCode, definitionLanguageCode, matchType)
-        webView.addJavascriptInterface(HtmlParserInterface(listener, searchFactory), HTML_PARSER_NAME)
+        webView.addJavascriptInterface(HtmlParserInterface(javaScriptCompleted,
+                                                           onDatabaseQuery,
+                                                           wordLanguageCode,
+                                                           definitionLanguageCode),
+                                       HTML_PARSER_NAME)
         webView.settings.javaScriptEnabled = true
         webView.webViewClient = object : WebViewClient() {
             override fun onPageFinished(view: WebView, url: String) {
@@ -71,10 +78,18 @@ abstract class DictionaryWebPage(val listener: OnJavaScriptCompleted,
 
     // ============= PRIVATE ==============
     //TODO: maybe i need to change OnJSComplete to work properly
-    private inner class HtmlParserInterface internal constructor(internal val listener: OnJavaScriptCompleted, val searchFactory: SearchFactory) {
+    private inner class HtmlParserInterface (
+            private val javaScriptCompleted: OnJavaScriptCompleted,
+            private val onDatabaseQuery: OnDatabaseQuery,
+            private val wordLanguageCode: String,
+            private val definitionLanguageCode: String) {
         @JavascriptInterface
         fun parsePage(html: String) {
-            listener.onJavaScriptCompleted(html)
+            val dictionaryEntry = dictionaryEntryFactory
+                    .getDictionaryEntry(html, wordLanguageCode, definitionLanguageCode)
+            val relatedWords = relatedWordFactory
+                    .getRelatedWords(html, wordLanguageCode, definitionLanguageCode)
+            javaScriptCompleted.onJavaScriptCompleted(dictionaryEntry, relatedWords, definitionLanguageCode, onDatabaseQuery)
         }
     }
     private fun parsePage(webView: WebView) {
