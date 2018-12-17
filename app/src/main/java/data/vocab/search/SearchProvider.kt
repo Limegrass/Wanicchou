@@ -1,6 +1,5 @@
 package data.vocab.search
 
-import android.webkit.WebView
 import data.core.OnJavaScriptCompleted
 import data.vocab.model.DictionaryWebPage
 import data.vocab.model.lang.EnglishVocabulary
@@ -16,11 +15,10 @@ import java.lang.IllegalArgumentException
 // Is this a factory or a provider la
 object SearchProvider {
 
-    fun search(webView: WebView,
-               listener: OnJavaScriptCompleted,
+    fun getWebPage(listener: OnJavaScriptCompleted,
                dictionary: String): DictionaryWebPage {
         return when (dictionary) {
-            "Sanseido" -> SanseidoWebPage(webView, listener)
+            "Sanseido" -> SanseidoWebPage(listener)
             else -> throw IllegalArgumentException("Dictionary $dictionary not available.")
         }
     }

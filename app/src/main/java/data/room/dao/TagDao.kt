@@ -1,5 +1,6 @@
 package data.room.dao
 
+import android.arch.lifecycle.LiveData
 import android.arch.persistence.room.Query
 import data.room.entity.Tag
 
@@ -22,4 +23,12 @@ interface TagDao : BaseDao<Tag> {
         FROM Tag t
         WHERE t.TagText = :tag""")
     fun tagExists(tag: String) : Boolean
+
+    @Query("""
+        SELECT t.*
+        FROM Tag t
+        JOIN VocabularyTag vt
+            ON vt.TagID = t.TagID
+        WHERE vt.VocabularyID = :vocabularyID""")
+    fun getTagsForVocabularyID(vocabularyID: Int) : LiveData<List<Tag>>
 }

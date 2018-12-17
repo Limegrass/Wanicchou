@@ -1,7 +1,9 @@
 package data.vocab.search.sanseido
 
+import data.vocab.model.DictionaryEntry
 import data.vocab.model.Search
 import data.vocab.model.SearchFactory
+import data.vocab.shared.WordListEntry
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 
@@ -41,7 +43,48 @@ object SanseidoSearchFactory : SearchFactory {
         val relatedWords = SanseidoRelatedWordFactory
                 .getRelatedWords(document, wordLanguageCode, definitionLanguageCode)
         return Search(dictionaryEntry, relatedWords)
+    }
 
+    override fun getDictionaryEntry(html: String,
+                                   wordLanguageCode: String,
+                                    definitionLanguageCode: String): DictionaryEntry {
+        val document = Jsoup.parse(html)
+        return getDictionaryEntry(document, wordLanguageCode, definitionLanguageCode)
+    }
+
+    private fun getDictionaryEntry(document: Document,
+                                   wordLanguageCode: String,
+                                   definitionLanguageCode: String): DictionaryEntry {
+        val wordSource = findWordSource(document)
+        val definitionSource = findDefinitionSource(document)
+        return if (definitionSource.isNullOrBlank()) {
+            SanseidoDictionaryEntryFactory.getInvalidDictionaryEntry(
+                    wordSource,
+                    wordLanguageCode,
+                    definitionLanguageCode
+            )
+        } else{
+            SanseidoDictionaryEntryFactory.getDictionaryEntry(
+                    wordSource,
+                    wordLanguageCode,
+                    definitionSource,
+                    definitionLanguageCode
+            )
+        }
+    }
+
+    override fun getRelatedWords(html: String,
+                                wordLanguageCode: String,
+                                 definitionLanguageCode: String): Array<WordListEntry> {
+        val document = Jsoup.parse(html)
+        return getRelatedWords(document, wordLanguageCode, definitionLanguageCode)
+    }
+
+    private fun getRelatedWords(document: Document,
+                                wordLanguageCode: String,
+                                definitionLanguageCode: String): Array<WordListEntry> {
+        return SanseidoRelatedWordFactory
+                .getRelatedWords(document, wordLanguageCode, definitionLanguageCode)
     }
 
     /**

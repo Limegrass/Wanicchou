@@ -11,8 +11,7 @@ import data.vocab.shared.WordListEntry
 import java.io.IOException
 import java.net.URL
 
-abstract class DictionaryWebPage(private val webView: WebView,
-                                 val listener: OnJavaScriptCompleted,
+abstract class DictionaryWebPage(val listener: OnJavaScriptCompleted,
                                  private val searchFactory: SearchFactory) {
     companion object {
         private const val HTML_PARSER_NAME = "HtmlParser"
@@ -34,10 +33,11 @@ abstract class DictionaryWebPage(private val webView: WebView,
     //TODO: Try to find another alternative to page parsing again
     @SuppressLint("AddJavascriptInterface", "SetJavaScriptEnabled")
     @Throws(IOException::class)
-    fun search(searchTerm: String,
-                    wordLanguageCode: String,
-                    definitionLanguageCode: String,
-                    matchType: MatchType) {
+    fun search(webView: WebView,
+               searchTerm: String,
+               wordLanguageCode: String,
+               definitionLanguageCode: String,
+               matchType: MatchType) {
 
         val searchUrl = buildQueryURL(searchTerm, wordLanguageCode, definitionLanguageCode, matchType)
         webView.addJavascriptInterface(HtmlParserInterface(listener, searchFactory), HTML_PARSER_NAME)

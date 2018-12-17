@@ -1,5 +1,6 @@
 package data.vocab.model
 
+import android.arch.lifecycle.ViewModel
 import android.os.Parcelable
 
 import data.vocab.shared.WordListEntry
@@ -10,7 +11,7 @@ import kotlinx.android.parcel.Parcelize
  */
 @Parcelize
 class Search(val dictionaryEntry: DictionaryEntry,
-             val relatedWords: Array<WordListEntry>) : Parcelable {
+             val relatedWords: Array<WordListEntry>) : Parcelable, ViewModel() {
 //    override fun getRelatedWords(): List<WordListEntry>? {
 //        return relatedWords
 //    }

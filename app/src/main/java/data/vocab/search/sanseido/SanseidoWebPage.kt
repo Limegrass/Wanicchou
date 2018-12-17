@@ -8,9 +8,8 @@ import data.vocab.shared.MatchType
 import java.net.MalformedURLException
 import java.net.URL
 
-class SanseidoWebPage(webView: WebView,
-                      listener: OnJavaScriptCompleted)
-    : DictionaryWebPage(webView, listener, SanseidoSearchFactory) {
+class SanseidoWebPage(listener: OnJavaScriptCompleted)
+    : DictionaryWebPage(listener, SanseidoSearchFactory) {
 
     companion object {
         val SUPPORTED_MATCH_TYPES = hashMapOf(
