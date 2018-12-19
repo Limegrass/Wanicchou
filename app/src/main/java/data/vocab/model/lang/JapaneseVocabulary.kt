@@ -19,13 +19,12 @@ class JapaneseVocabulary {
             } else "$vocabulary.word[${vocabulary.pronunciation}]"
         }
 
-
         // Kanji followed by Kana
-        const val WORD_WITH_KANJI_REGEX = "\\p{script=Han}+[\\p{script=Hiragana}|\\p{script=Katakana}]*\\p{script=Han}*"
+        private const val WORD_WITH_KANJI_REGEX = "\\p{script=Han}+[\\p{script=Hiragana}|\\p{script=Katakana}]*\\p{script=Han}*"
         // Pure Kana
-        const val KANA_REGEX = "[\\p{script=Hiragana}|\\p{script=Katakana}]+"
+        private const val KANA_REGEX = "[\\p{script=Hiragana}|\\p{script=Katakana}]+"
         // Tone, accounting for full-width numbers
-        const val TONE_REGEX = "[\\d０-９]+"
+        private const val TONE_REGEX = "[\\d０-９]+"
 
         const val LANGUAGE_CODE = "jp" // Japanese, assuming I populate the DB
 
@@ -42,5 +41,19 @@ class JapaneseVocabulary {
                 else -> wordSource
             }
         }
+
+        fun isolatePitch(wordSource: String): String {
+            if (wordSource.isBlank()) {
+                return ""
+            }
+
+            var pitch = ""
+            val toneMatcher = Pattern.compile(JapaneseVocabulary.TONE_REGEX).matcher(wordSource)
+            if (toneMatcher.find()) {
+                pitch = toneMatcher.group(0)
+            }
+            return pitch
+        }
+
     }
 }

@@ -1,6 +1,5 @@
 package data.vocab.search
 
-import data.core.OnJavaScriptCompleted
 import data.vocab.model.DictionaryWebPage
 import data.vocab.model.lang.EnglishVocabulary
 import data.vocab.model.lang.JapaneseVocabulary
@@ -17,7 +16,7 @@ object SearchProvider {
 
     fun getWebPage(dictionary: String): DictionaryWebPage {
         return when (dictionary) {
-            "Sanseido" -> SanseidoWebPage()
+            "Sanseido" -> SanseidoWebPage
             else -> throw IllegalArgumentException("Dictionary $dictionary not available.")
         }
     }

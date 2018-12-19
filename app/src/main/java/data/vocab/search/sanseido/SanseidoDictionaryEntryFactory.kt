@@ -67,7 +67,7 @@ object SanseidoDictionaryEntryFactory: DictionaryEntryFactory {
         val definition = definitionSource.trim { it <= ' ' }
         val word = isolateWord(wordStripped, wordLanguageCode)
         val pronunciation = isolateReading(wordStripped, wordLanguageCode)
-        val pitch = isolatePitch(wordStripped)
+        val pitch = JapaneseVocabulary.isolatePitch(wordStripped)
 
         return DictionaryEntry(DICTIONARY_NAME,
                 wordLanguageCode,
@@ -177,19 +177,6 @@ object SanseidoDictionaryEntryFactory: DictionaryEntryFactory {
         return if (readingMatcher.find()) {
             readingMatcher.group(0)
         } else strippedWordSource
-    }
-
-    private fun isolatePitch(wordSource: String): String {
-        if (wordSource.isBlank()) {
-            return ""
-        }
-
-        var pitch = ""
-        val toneMatcher = Pattern.compile(JapaneseVocabulary.TONE_REGEX).matcher(wordSource)
-        if (toneMatcher.find()) {
-            pitch = toneMatcher.group(0)
-        }
-        return pitch
     }
 
 

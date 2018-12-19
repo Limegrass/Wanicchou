@@ -1,19 +1,15 @@
 package data.vocab.model
 
-import android.os.Parcelable
-import kotlinx.android.parcel.Parcelize
-
 /**
  * Interface to program a language's dictionaryEntry entry to
  */
-@Parcelize
 class DictionaryEntry(val dictionary: String,
                       val wordLanguageCode: String,
                       val word: String,
                       val pronunciation: String,
                       val pitch: String,
                       val definitionLanguageCode: String,
-                      val definition: String) : Parcelable {
+                      val definition: String) {
 
     /**
      * Compares by word, pronunciation, definition, and pitch

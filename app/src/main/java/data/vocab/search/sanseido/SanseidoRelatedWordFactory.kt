@@ -66,7 +66,7 @@ object SanseidoRelatedWordFactory : RelatedWordFactory{
 
     override fun getRelatedWords(databaseList: List<Vocabulary>, definitionLanguageCode: String): List<WordListEntry> {
         //TODO: I don't like making buildQueryUrl public or having this instanced here.
-        val webPage = SanseidoWebPage()
+        val webPage = SanseidoWebPage
         return databaseList.map {
             val word = if (it.word != it.pronunciation){
                 it.word + "+" + it.pronunciation

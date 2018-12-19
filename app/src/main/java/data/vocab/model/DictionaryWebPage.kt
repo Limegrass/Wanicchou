@@ -12,6 +12,7 @@ import data.vocab.shared.WordListEntry
 import java.io.IOException
 import java.net.URL
 
+//TODO: Change lazy public vals to private and use the SearchProvider
 abstract class DictionaryWebPage(val dictionaryEntryFactory: DictionaryEntryFactory,
                                  val relatedWordFactory: RelatedWordFactory) {
     companion object {
