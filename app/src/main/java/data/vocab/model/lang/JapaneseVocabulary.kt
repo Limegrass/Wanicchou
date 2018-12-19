@@ -9,16 +9,6 @@ import java.util.regex.Pattern
 
 class JapaneseVocabulary {
     companion object {
-        /**
-         * Generates an Anki format furigana string if word is not its pronunciation
-         * @return a string for Anki's furigana display.
-         */
-        fun getFurigana(vocabulary: DictionaryEntry): String {
-            return if (vocabulary.word == vocabulary.pronunciation) {
-                vocabulary.pronunciation
-            } else "$vocabulary.word[${vocabulary.pronunciation}]"
-        }
-
         // Kanji followed by Kana
         private const val WORD_WITH_KANJI_REGEX = "\\p{script=Han}+[\\p{script=Hiragana}|\\p{script=Katakana}]*\\p{script=Han}*"
         // Pure Kana

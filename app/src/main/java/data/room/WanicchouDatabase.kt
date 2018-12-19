@@ -19,7 +19,8 @@ import data.room.entity.*
             Dictionary::class,
             Tag::class,
             VocabularyRelation::class,
-            VocabularyTag::class
+            VocabularyTag::class,
+            AnkiNote::class
         ],
         version = 2
 )
@@ -33,6 +34,7 @@ abstract class WanicchouDatabase : RoomDatabase() {
     abstract fun vocabularyNoteDao(): VocabularyNoteDao
     abstract fun vocabularyRelationDao(): VocabularyRelationDao
     abstract fun vocabularyTagDao(): VocabularyTagDao
+    abstract fun ankiNoteDao() : AnkiNoteDao
 
     companion object : SingletonHolder<WanicchouDatabase, Context>({
         Room.databaseBuilder<WanicchouDatabase>(it.applicationContext,

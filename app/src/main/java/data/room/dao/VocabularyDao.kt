@@ -55,6 +55,14 @@ interface VocabularyDao : BaseDao<Vocabulary> {
     @Query("""
         SELECT v.*
         FROM Vocabulary v
+        WHERE  v.LanguageCode = :wordLanguageCode
+            AND v.Word LIKE :searchTerm""")
+    fun searchWithWildcards(searchTerm: String,
+               wordLanguageCode: String): LiveData<List<Vocabulary>>
+
+    @Query("""
+        SELECT v.*
+        FROM Vocabulary v
         WHERE v.LanguageCode = :wordLanguageCode
             AND v.Word LIKE :searchTerm+'%' """)
     fun searchStartsWith(searchTerm: String,

@@ -20,8 +20,10 @@ class VocabularyRepository(application: Application) : OnJavaScriptCompleted {
     private val dictionaryDao : DictionaryDao
     private val tagDao : TagDao
     private val vocabularyNoteDao : VocabularyNoteDao
+    private val definitionNoteDao : DefinitionNoteDao
     private val vocabularyRelationDao : VocabularyRelationDao
     private val vocabularyTagDao : VocabularyTagDao
+    private val ankiNoteDao : AnkiNoteDao
 
     init {
         val database: WanicchouDatabase = WanicchouDatabase.getInstance(application)
@@ -30,8 +32,10 @@ class VocabularyRepository(application: Application) : OnJavaScriptCompleted {
         dictionaryDao = database.dictionaryDao()
         tagDao = database.tagDao()
         vocabularyNoteDao = database.vocabularyNoteDao()
+        definitionNoteDao = database.definitionNoteDao()
         vocabularyRelationDao = database.vocabularyRelationDao()
         vocabularyTagDao = database.vocabularyTagDao()
+        ankiNoteDao = database.ankiNoteDao()
     }
 
 
@@ -139,6 +143,7 @@ class VocabularyRepository(application: Application) : OnJavaScriptCompleted {
                                          definitionLanguageCode: String): LiveData<List<Vocabulary>> {
         return when (matchType) {
             MatchType.WORD_EQUALS -> vocabularyDao.search(searchTerm, wordLanguageCode)
+            MatchType.WORD_WILDCARDS -> vocabularyDao.searchWithWildcards(searchTerm, wordLanguageCode)
             MatchType.WORD_STARTS_WITH -> vocabularyDao.searchStartsWith(searchTerm, wordLanguageCode)
             MatchType.WORD_ENDS_WITH -> vocabularyDao.searchEndsWith(searchTerm, wordLanguageCode)
             MatchType.WORD_CONTAINS -> vocabularyDao.searchContains(searchTerm, wordLanguageCode)
