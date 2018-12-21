@@ -10,7 +10,7 @@ import java.util.*
 object AnkiDroidConfig {
 
     // Name of deck which will be created in AnkiDroid
-    const val DECK_NAME = "和日帳"
+    const val DECK_NAME = "Wanicchou"
     // Name of model which will be created in AnkiDroid
     const val MODEL_NAME = "wanicchou"
 
