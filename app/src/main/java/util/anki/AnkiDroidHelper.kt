@@ -209,7 +209,7 @@ class AnkiDroidHelper(context: Context) {
         val deckList = api.deckList
         val ignoreCase = true
         for ((key, value) in deckList) {
-            if (value.equals(deckName, ignoreCase)) {
+            if (value.contains(deckName, ignoreCase)) {
                 return key
             }
         }

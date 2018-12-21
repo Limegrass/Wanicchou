@@ -23,7 +23,6 @@ class VocabularyRepository(application: Application) : OnJavaScriptCompleted {
     private val definitionNoteDao : DefinitionNoteDao
     private val vocabularyRelationDao : VocabularyRelationDao
     private val vocabularyTagDao : VocabularyTagDao
-    private val ankiNoteDao : AnkiNoteDao
 
     init {
         val database: WanicchouDatabase = WanicchouDatabase.getInstance(application)
@@ -35,7 +34,6 @@ class VocabularyRepository(application: Application) : OnJavaScriptCompleted {
         definitionNoteDao = database.definitionNoteDao()
         vocabularyRelationDao = database.vocabularyRelationDao()
         vocabularyTagDao = database.vocabularyTagDao()
-        ankiNoteDao = database.ankiNoteDao()
     }
 
 
