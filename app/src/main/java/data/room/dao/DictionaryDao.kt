@@ -9,4 +9,11 @@ interface DictionaryDao : BaseDao<Dictionary> {
         FROM Dictionary d
         WHERE d.DictionaryName = :dictionary""")
     fun getDictionaryByName(dictionary: String) : Dictionary
+
+    @Query("""
+        SELECT d.*
+        FROM Dictionary d
+        WHERE d.DictionaryID = :dictionaryID
+    """)
+    fun getDictionaryByID(dictionaryID : Int) : Dictionary
 }

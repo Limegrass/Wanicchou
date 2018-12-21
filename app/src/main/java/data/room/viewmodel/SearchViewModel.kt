@@ -1,49 +1,35 @@
 package data.room.viewmodel
 
-import android.app.Application
-import android.arch.lifecycle.AndroidViewModel
-import android.arch.lifecycle.LiveData
+import android.arch.lifecycle.MutableLiveData
 import android.webkit.WebView
 import data.core.OnDatabaseQuery
 import data.room.entity.Definition
 import data.room.entity.Vocabulary
-import data.room.repository.VocabularyRepository
+import data.room.repository.IVocabularyRepository
 import data.vocab.shared.MatchType
 import data.vocab.shared.WordListEntry
 
 
-class SearchViewModel(application: Application,
-                      definitionLanguageCode: String,
-                      dictionary: String) : AndroidViewModel(application), OnDatabaseQuery {
-    override fun onQueryFinish(vocabularyList: LiveData<List<Vocabulary>>,
-                               definitionList: List<LiveData<List<Definition>>>,
+class SearchViewModel(private val vocabularyRepository: IVocabularyRepository)
+    : OnDatabaseQuery {
+
+    override fun onQueryFinish(vocabularyList: List<MutableLiveData<Vocabulary>>,
+                               definitionList: List<List<MutableLiveData<Definition>>>,
                                relatedWords: List<WordListEntry>) {
         this.vocabularyList = vocabularyList
         this.definitionList = definitionList
+        this.relatedWords = relatedWords
     }
 
 
     //AUtomatically display the first entry, and related definitions/tags/etc for it
-    private val vocabularyRepository = VocabularyRepository(application)
-    private var relatedWords: List<WordListEntry>
-    private var vocabularyList : LiveData<List<Vocabulary>>
-    private var definitionList : List<LiveData<List<Definition>>>
+    private var relatedWords: List<WordListEntry> = listOf()
+    private var vocabularyList : List<MutableLiveData<Vocabulary>> = listOf()
+    private var definitionList : List<List<MutableLiveData<Definition>>> = listOf()
 
     init {
-        vocabularyList = vocabularyRepository.getLatest()
-        if (vocabularyList.value.isNullOrEmpty()){
-            relatedWords = arrayListOf()
-            definitionList = arrayListOf()
-        }
-        else {
-            val vocabularyID = vocabularyList.value!![0].vocabularyID
-            relatedWords = vocabularyRepository.getRelatedWords(vocabularyID,
-                    definitionLanguageCode,
-                    dictionary)
-            definitionList = vocabularyRepository.getDefinitions(vocabularyID, definitionLanguageCode)
-        }
+        vocabularyRepository.getLatest(this)
     }
-
 
 //    var tags : LiveData<List<Tag>> = vocabularyRepository.
 //    var vocabularyNotes : LiveData<List<VocabularyNote>>
