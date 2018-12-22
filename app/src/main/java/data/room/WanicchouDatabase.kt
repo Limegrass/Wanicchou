@@ -20,6 +20,7 @@ import data.room.entity.*
             DefinitionNote::class,
             Dictionary::class,
             Tag::class,
+            VocabularyNote::class,
             VocabularyRelation::class,
             VocabularyTag::class
         ],

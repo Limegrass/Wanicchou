@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:id="@+id/search_bar"
+        android:title="@string/search_field_hint"
+        android:icon="@drawable/ic_search_white_24dp"
+        app:showAsAction="collapseActionView|ifRoom"
+        app:actionViewClass="android.widget.SearchView" />
     <item
         android:id="@+id/action_settings"
         android:orderInCategory="100"
@@ -10,6 +15,6 @@
     <item
         android:id="@+id/action_db"
         android:orderInCategory="101"
-        android:title="Saved Searches"
+        android:title="@string/database_title"
         app:showAsAction="never"/>
 </menu>

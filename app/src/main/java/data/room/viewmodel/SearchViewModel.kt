@@ -1,6 +1,6 @@
 package data.room.viewmodel
 
-import android.arch.lifecycle.MutableLiveData
+import android.arch.lifecycle.LiveData
 import android.webkit.WebView
 import data.core.OnDatabaseQuery
 import data.room.entity.Definition
@@ -10,11 +10,12 @@ import data.vocab.shared.MatchType
 import data.vocab.shared.WordListEntry
 
 
+// TODO: Remove related words completely and just use the new scheme for queries to find same words
 class SearchViewModel(private val vocabularyRepository: IVocabularyRepository)
     : OnDatabaseQuery {
 
-    override fun onQueryFinish(vocabularyList: List<MutableLiveData<Vocabulary>>,
-                               definitionList: List<List<MutableLiveData<Definition>>>,
+    override fun onQueryFinish(vocabularyList: LiveData<List<Vocabulary>>,
+                               definitionList: List<LiveData<List<Definition>>>,
                                relatedWords: List<WordListEntry>) {
         this.vocabularyList = vocabularyList
         this.definitionList = definitionList
@@ -24,8 +25,8 @@ class SearchViewModel(private val vocabularyRepository: IVocabularyRepository)
 
     //AUtomatically display the first entry, and related definitions/tags/etc for it
     private var relatedWords: List<WordListEntry> = listOf()
-    private var vocabularyList : List<MutableLiveData<Vocabulary>> = listOf()
-    private var definitionList : List<List<MutableLiveData<Definition>>> = listOf()
+    private var vocabularyList : LiveData<List<Vocabulary>> = object : LiveData<List<Vocabulary>>(){}
+    private var definitionList : List<LiveData<List<Definition>>> = listOf()
 
     init {
         vocabularyRepository.getLatest(this)

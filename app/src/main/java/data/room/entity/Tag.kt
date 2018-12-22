@@ -5,10 +5,10 @@ import android.arch.persistence.room.*
 @Entity(tableName = "Tag")
 data class Tag (
     @ColumnInfo(name = "TagText")
-    val tagText: String,
+    var tagText: String,
 
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "TagID")
-    val tagID: Int = 0
+    var tagID: Int = 0
 )
 

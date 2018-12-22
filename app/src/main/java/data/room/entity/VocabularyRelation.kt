@@ -16,12 +16,12 @@ import android.arch.persistence.room.*
 )
 data class VocabularyRelation (
     @ColumnInfo(name = "SearchVocabularyID")
-    val searchVocabularyID: Int,
+    var searchVocabularyID: Int,
 
     @ColumnInfo(name = "ResultVocabularyID")
-    val resultVocabularyID: Int,
+    var resultVocabularyID: Int,
 
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "VocabularyRelationID")
-    val vocabularyRelationID: Int = 0
+    var vocabularyRelationID: Int = 0
 )

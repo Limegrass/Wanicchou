@@ -1,9 +1,12 @@
 package data.room.dao
 
+import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
+import android.arch.persistence.room.Dao
 import android.arch.persistence.room.Query
 import data.room.entity.Vocabulary
 
+@Dao
 interface VocabularyDao : BaseDao<Vocabulary> {
 
     @Query("""
@@ -11,14 +14,14 @@ interface VocabularyDao : BaseDao<Vocabulary> {
         FROM Vocabulary v
         ORDER BY v.VocabularyID
         LIMIT 1""")
-    fun getLatest(): MutableLiveData<Vocabulary>
+    fun getLatest(): LiveData<List<Vocabulary>>
 
 
     @Query("""
         SELECT v.*
         FROM Vocabulary v
     """)
-    fun getAll(): List<MutableLiveData<Vocabulary>>
+    fun getAll(): LiveData<List<Vocabulary>>
 
     @Query("""
         SELECT v.VocabularyID
@@ -40,7 +43,7 @@ interface VocabularyDao : BaseDao<Vocabulary> {
         SELECT v.*
         FROM Vocabulary v
         WHERE v.Word = :word""")
-    fun getVocabulary(word: String) : MutableLiveData<Vocabulary>
+    fun getVocabulary(word: String) : LiveData<Vocabulary>
 
 
     // =========================== Searches =========================
@@ -50,7 +53,7 @@ interface VocabularyDao : BaseDao<Vocabulary> {
         WHERE  v.LanguageCode = :wordLanguageCode
             AND v.Word = :searchTerm""")
     fun search(searchTerm: String,
-               wordLanguageCode: String): List<MutableLiveData<Vocabulary>>
+               wordLanguageCode: String): LiveData<List<Vocabulary>>
 
     @Query("""
         SELECT v.*
@@ -58,7 +61,7 @@ interface VocabularyDao : BaseDao<Vocabulary> {
         WHERE  v.LanguageCode = :wordLanguageCode
             AND v.Word LIKE :searchTerm""")
     fun searchWithWildcards(searchTerm: String,
-               wordLanguageCode: String): List<MutableLiveData<Vocabulary>>
+               wordLanguageCode: String): LiveData<List<Vocabulary>>
 
     @Query("""
         SELECT v.*
@@ -66,7 +69,7 @@ interface VocabularyDao : BaseDao<Vocabulary> {
         WHERE v.LanguageCode = :wordLanguageCode
             AND v.Word LIKE :searchTerm+'%' """)
     fun searchStartsWith(searchTerm: String,
-                         wordLanguageCode: String): List<MutableLiveData<Vocabulary>>
+                         wordLanguageCode: String): LiveData<List<Vocabulary>>
 
     @Query("""
         SELECT v.*
@@ -74,7 +77,7 @@ interface VocabularyDao : BaseDao<Vocabulary> {
         WHERE v.LanguageCode = :wordLanguageCode
             AND v.Word LIKE '%'+:searchTerm""")
     fun searchEndsWith(searchTerm: String,
-                       wordLanguageCode: String): List<MutableLiveData<Vocabulary>>
+                       wordLanguageCode: String): LiveData<List<Vocabulary>>
 
     @Query("""
         SELECT v.*
@@ -82,7 +85,7 @@ interface VocabularyDao : BaseDao<Vocabulary> {
         WHERE v.LanguageCode = :wordLanguageCode
             AND v.Word LIKE '%'+:searchTerm+'%' """)
     fun searchContains(searchTerm: String,
-                       wordLanguageCode: String): List<MutableLiveData<Vocabulary>>
+                       wordLanguageCode: String): LiveData<List<Vocabulary>>
 
     @Query("""
         SELECT v.*
@@ -92,7 +95,7 @@ interface VocabularyDao : BaseDao<Vocabulary> {
         WHERE d.LanguageCode = :definitionLanguageCode
             AND d.DefinitionText LIKE '%'+:searchTerm+'%' """)
     fun searchDefinitionContains(searchTerm: String,
-                                 definitionLanguageCode: String): List<MutableLiveData<Vocabulary>>
+                                 definitionLanguageCode: String): LiveData<List<Vocabulary>>
 
     @Query("""
         SELECT v.*
@@ -103,7 +106,7 @@ interface VocabularyDao : BaseDao<Vocabulary> {
             OR (d.LanguageCode = :definitionLanguageCode AND d.DefinitionText LIKE '%'+:searchTerm+'%') """)
     fun searchWordOrDefinitionContains(searchTerm: String,
                                        wordLanguageCode: String,
-                                       definitionLanguageCode: String): List<MutableLiveData<Vocabulary>>
+                                       definitionLanguageCode: String): LiveData<List<Vocabulary>>
     //TODO: Fuzzy
 //  http://randomrumenations.blogspot.com/2009/06/improved-t-sql-levenshtein-distance.html
 //    @Query("""

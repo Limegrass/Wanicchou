@@ -6,18 +6,18 @@ import android.arch.persistence.room.*
 
 data class Vocabulary (
     @ColumnInfo(name = "Word")
-    val word: String = "",
+    var word: String = "",
 
     @ColumnInfo(name = "Pronunciation")
-    val pronunciation: String = "",
+    var pronunciation: String = "",
 
     @ColumnInfo(name = "Pitch")
-    val pitch: String = "",
+    var pitch: String = "",
 
     @ColumnInfo(name = "LanguageCode")
-    val languageCode: String = "",
+    var languageCode: String = "",
 
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "VocabularyID")
-    val vocabularyID: Int = 0
+    var vocabularyID: Int = 0
 )

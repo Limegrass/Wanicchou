@@ -1,9 +1,11 @@
 package data.room.dao
 
 import android.arch.lifecycle.LiveData
+import android.arch.persistence.room.Dao
 import android.arch.persistence.room.Query
 import data.room.entity.Tag
 
+@Dao
 interface TagDao : BaseDao<Tag> {
     @Query("""
         SELECT t.TagText

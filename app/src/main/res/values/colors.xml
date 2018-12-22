@@ -4,7 +4,7 @@
     <color name="color_primary_light">#000000</color>
     <color name="color_primary_dark">#000000</color>
     <color name="color_primary_text">#FFFFFF</color>
-    <color name="color_accent">#90FF3F80</color>
+    <color name="color_accent">#247E80</color>
     <color name="color_overlay">#209999FF</color>
 
 
@@ -12,5 +12,8 @@
     <color name="color_related_word_alt">#202020</color>
 
     <color name="color_secondary_text">#FFFFFF</color>
+    <color name="color_grey_transparent">#D8D8D8CC</color>
+    <color name="color_deep_purple">#530879</color>
+    <color name="color_aqua">#247E80</color>
 
 </resources>

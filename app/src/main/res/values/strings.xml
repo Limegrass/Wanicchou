@@ -15,7 +15,7 @@
     <string name="definition_label" translatable="true">Definition</string>
     <string name="definition_hint" translatable="true">Nothing searched yet!</string>
 
-    <string name="word_searching" translatable="true">Searching...</string>
+    <string name="word_searching" translatable="true">Searching…</string>
     <string name="word_search_success" translatable="true">%1$s found on Sanseido!</string>
     <string name="word_search_failure" translatable="true">%1$s not found on Sanseido!</string>
 
@@ -34,7 +34,7 @@
     <!--Toast strings-->
     <string name="permissions_denied_toast" translatable="true">Permissions denied.</string>
     <string name="anki_added_toast" translatable="true">Card added to Anki!</string>
-    <string name="searching_related_toast" translatable="true">Searching for selected word...</string>
+    <string name="searching_related_toast" translatable="true">Searching for selected word…</string>
     <string name="searched_from_db_toast" translatable="true">%1$s found in DB!</string>
 
 
@@ -57,10 +57,10 @@
     <string name="search_settings_category_title" translatable="true">Search Settings</string>
     <string name="pref_dictionary_type_title" translatable="true">Dictionary Type</string>
     <string name="pref_dictionary_type_key" translatable="false">listPrefDicType</string>
-    <string name="pref_dictionary_type_default" translatable="false">JJ</string>
+    <string name="pref_dictionary_type_default" translatable="false">JPJP</string>
     <string name="pref_match_type_title" translatable="true">Match Type</string>
-    <string name="pref_match_type_key" translatable="false">listPrefSearchDir</string>
-    <string name="pref_match_type_default" translatable="false">1</string>
+    <string name="pref_match_type_key" translatable="false">listPrefMatchType</string>
+    <string name="pref_match_type_default" translatable="false">WORD_EQUALS</string>
 
     <string name="pref_auto_delete_title" translatable="true">Auto-Deletion</string>
     <string name="pref_auto_delete_key" translatable="false">listPrefAutoDelete</string>
@@ -69,16 +69,17 @@
     <string name="pref_auto_save_key" translatable="false">listPrefAutoSave</string>
     <string name="pref_auto_save_default" translatable="false">none</string>
 
-    <string name="pref_provider_title" translatable="true">Definition Source</string>
-    <string name="pref_provider_key" translatable="true">provider</string>
-    <string name="pref_provider_default" translatable="true">data.vocab.jp.search.sanseido.Sanseido</string>
+    <string name="pref_dictionary_title" translatable="true">Dictionary</string>
+    <string name="pref_dictionary_key" translatable="false">listPrefDictionary</string>
+    <string name="pref_dictionary_default" translatable="false">Sanseido</string>
 
-    <string name="reading_hint">読み方</string>
-    <string name="pitch_hint">ピッチ</string>
-    <string name="dictionary_hint">辞典型</string>
+    <string name="pronunciation_hint">Pronunciation</string>
+    <string name="pitch_hint">Pitch</string>
+    <string name="dictionary_hint">Dictionary</string>
 
     <string name="title_selected">%1$d words selected</string>
     <string name="action_db_delete">Delete</string>
     <string name="action_db_import">Import</string>
+    <string name="database_title">Database</string>
 
 </resources>

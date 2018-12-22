@@ -60,6 +60,14 @@
     <string name="pref_match_type_title" translatable="true">マッチ型</string>
     <string name="pref_auto_save_title">オートセーブ</string>
     <string name="pref_auto_delete_title">オートデリート</string>
+    <string name="pitch_hint">ピッチ</string>
+    <string name="dictionary_hint">辞典型</string>
+    <string name="pronunciation_hint">読み方</string>
+    <string name="pref_dictionary_title">辞典</string>
+    <string name="action_db_import">" インポート "</string>
+    <string name="action_db_delete">削除</string>
+    <string name="title_selected">%1$d 単語をセレクトしています。</string>
+    <string name="database_title">データベース</string>
     <!--<string name="pref_match_type_key" translatable="false">listPrefSearchDir</string>-->
     <!--<string name="pref_match_type_default" translatable="false">1</string>-->
 </resources>

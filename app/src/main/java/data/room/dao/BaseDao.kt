@@ -2,7 +2,6 @@ package data.room.dao
 
 import android.arch.persistence.room.*
 
-@Dao
 interface BaseDao<T> {
     /**
      * Inserts the object into the database. Replaces on conflict

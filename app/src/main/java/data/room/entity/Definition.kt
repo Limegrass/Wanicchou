@@ -16,18 +16,18 @@ import android.arch.persistence.room.*
 )
 data class Definition (
     @ColumnInfo(name = "DictionaryID")
-    val dictionaryID: Int,
+    var dictionaryID: Int,
 
     @ColumnInfo(name = "DefinitionText")
-    val definitionText: String = "",
+    var definitionText: String = "",
 
     @ColumnInfo(name = "VocabularyID")
-    val vocabularyID: Int,
+    var vocabularyID: Int,
 
     @ColumnInfo(name = "LanguageCode")
-    val languageCode: String = "",
+    var languageCode: String = "",
 
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "DefinitionID")
-    val definitionID: Int = 0
+    var definitionID: Int = 0
 )

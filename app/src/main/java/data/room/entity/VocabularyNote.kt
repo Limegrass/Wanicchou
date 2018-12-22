@@ -13,12 +13,12 @@ import android.arch.persistence.room.*
 
 data class VocabularyNote (
     @ColumnInfo(name = "NoteText")
-    private val noteText: String = "",
+    var noteText: String = "",
 
     @ColumnInfo(name = "VocabularyID")
-    private val vocabularyID: Int,
+    var vocabularyID: Int,
 
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "VocabularyNoteID")
-    private val vocabularyNoteID: Int
+    var vocabularyNoteID: Int
 )

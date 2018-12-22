@@ -3,7 +3,7 @@ package data.room
 
 object WanicchouMigration {
     val MIGRATION_1_2_QUERY =
-        """
+"""
 BEGIN TRAN
     CREATE TABLE Dictionary
     (
@@ -128,6 +128,6 @@ BEGIN TRAN
     DROP TABLE WordContext;
     DROP TABLE RelatedWords;
 COMMIT TRAN
-                """.trimIndent()
+""".trimIndent()
 
 }

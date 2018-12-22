@@ -12,12 +12,12 @@ import android.arch.persistence.room.*
 )
 data class DefinitionNote (
     @ColumnInfo(name = "NoteText")
-    val noteText: String = "",
+    var noteText: String = "",
 
     @ColumnInfo(name = "DefinitionID")
-    val definitionID: Int,
+    var definitionID: Int,
 
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "DefinitionNoteID")
-    val definitionNoteID: Int = 0
+    var definitionNoteID: Int = 0
 )
