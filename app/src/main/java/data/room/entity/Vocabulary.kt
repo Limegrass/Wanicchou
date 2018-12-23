@@ -19,5 +19,8 @@ data class Vocabulary (
 
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "VocabularyID")
-    var vocabularyID: Int = 0
-)
+    var vocabularyID: Int = 0 ) {
+    override fun toString(): String {
+        return word
+    }
+}

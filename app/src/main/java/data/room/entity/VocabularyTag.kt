@@ -20,5 +20,4 @@ data class VocabularyTag (
 
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "VocabularyTagID")
-    var vocabularyTagID: Int = 0
-)
+    var vocabularyTagID: Int = 0 )

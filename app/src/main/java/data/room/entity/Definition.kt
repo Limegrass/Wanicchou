@@ -29,5 +29,8 @@ data class Definition (
 
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "DefinitionID")
-    var definitionID: Int = 0
-)
+    var definitionID: Int = 0 ) {
+    override fun toString(): String {
+        return definitionText
+    }
+}

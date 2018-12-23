@@ -9,6 +9,10 @@ data class Tag (
 
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "TagID")
-    var tagID: Int = 0
-)
+    var tagID: Int = 0){
+    override fun toString(): String {
+        return tagText
+    }
+}
+
 

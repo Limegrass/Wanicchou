@@ -23,5 +23,4 @@ data class VocabularyRelation (
 
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "VocabularyRelationID")
-    var vocabularyRelationID: Int = 0
-)
+    var vocabularyRelationID: Int = 0 )

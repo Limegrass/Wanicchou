@@ -1,5 +1,8 @@
 package com.waifusims.wanicchou
 
+import android.app.SearchManager
+import android.arch.lifecycle.Observer
+import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
 import android.content.Intent
@@ -8,7 +11,9 @@ import android.os.AsyncTask
 import android.os.Bundle
 import android.os.Parcelable
 import android.support.design.widget.FloatingActionButton
+import android.support.v4.view.MenuItemCompat
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.SearchView
 import android.text.TextUtils
 import android.view.KeyEvent
 import android.view.Menu
@@ -16,7 +21,8 @@ import android.view.MenuItem
 import android.view.View
 import android.view.View.OnKeyListener
 import android.view.inputmethod.InputMethodManager
-import android.widget.SearchView
+import android.webkit.WebView
+import android.widget.TextView
 import android.widget.Toast
 
 import com.waifusims.wanicchou.databinding.ActivitySearchBinding
@@ -28,28 +34,97 @@ import data.room.WanicchouDatabase
 import data.room.entity.Vocabulary
 import data.vocab.model.lang.JapaneseVocabulary
 import data.core.OnJavaScriptCompleted
+import data.room.entity.Definition
+import data.room.repository.VocabularyRepository
 import data.room.viewmodel.SearchViewModel
 import data.vocab.search.SearchProvider
+import data.vocab.shared.MatchType
 import data.vocab.shared.WordListEntry
 import util.anki.AnkiDroidHelper
 
+//TODO: AutoImport to AnkiDroid if it exists
+//TODO: Link related words by words that appear in definition
 // TODO: Automatically select EJ for English input
 //TODO:  Horizontal UI
 // TODO: Toasts for DB searches
 //TODO : Add click listener for Def label
 class SearchActivity : AppCompatActivity() {
     //TODO: Search Suggestions
-//    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-//        val inflater = menuInflater
-//        inflater.inflate(R.menu.search_menu, menu)
-//        return true
-//    }
+    private lateinit var searchViewModel: SearchViewModel
+    private lateinit var sharedPreferences : WanicchouSharedPreferenceHelper
+    private lateinit var ankiDroidHelper : AnkiDroidHelper
+    //TODO: Make sure that webviews are automatically recycled but I'm pretty sure
+    private lateinit var webView : WebView
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        val inflater = menuInflater
+        inflater.inflate(R.menu.search_menu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.menu_search -> {
+                (item.actionView as SearchView).onActionViewExpanded()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_wanicchou)
+//        val vocabularyRepository = VocabularyRepository(this.application)
+        searchViewModel = ViewModelProviders.of(this).get(SearchViewModel::class.java)
+        sharedPreferences = WanicchouSharedPreferenceHelper(this)
+        webView = WebView(this)
+        ankiDroidHelper = AnkiDroidHelper(this)
+        setWordObserver()
+        setDefinitionObserver()
+
+        handleSearchIntent()
+    }
+
+    private fun handleSearchIntent() {
+        if(intent.action == Intent.ACTION_SEARCH){
+            val searchTerm = intent.getStringExtra(SearchManager.QUERY)
+            search(searchTerm)
+        }
+    }
+    private fun search(searchTerm: String){
+        searchViewModel.search(webView,
+                               sharedPreferences.dictionary,
+                               searchTerm,
+                               sharedPreferences.wordLanguageCode,
+                               sharedPreferences.definitionLanguageCode,
+                               sharedPreferences.matchType)
+    }
+
+    private fun setWordObserver(){
+        val tvWord = findViewById<TextView>(R.id.tv_word)
+        val wordObserver = Observer<List<Vocabulary>>{
+             it -> tvWord.text = it!![0].word
+        }
+        searchViewModel.vocabularyList.observe(this, wordObserver)
+    }
+    private fun setDefinitionObserver() {
+        val tvWord = findViewById<TextView>(R.id.tv_definition)
+        val definitionObserver = Observer<List<Definition>>{
+            it -> tvWord.text = it!![0].definitionText
+        }
+
+        if (searchViewModel.definitionList.count() > 0) {
+            searchViewModel.definitionList[0].observe(this, definitionObserver)
+        }
+
+    }
 //
 //    private var mBinding: ActivitySearchBinding? = null
 //    private var mAnkiDroid: AnkiDroidHelper? = null
 //    private var mToast: Toast? = null
 //    private var mSearchViewModel : SearchViewModel = null
-//    private var sharedPreferencesHelper: WanicchouSharedPreferencesHelper? = null
+//    private var sharedPreferencesHelper: WanicchouSharedPreferenceHelper? = null
 //
 //    // Results screen and Search screen could be separate?
 //    private val searchWord: String
@@ -75,7 +150,7 @@ class SearchActivity : AppCompatActivity() {
 //        super.onCreate(savedInstanceState)
 //        setContentView(R.layout.activity_search)
 //        val context = this@SearchActivity
-//        sharedPreferencesHelper = WanicchouSharedPreferencesHelper(context)
+//        sharedPreferencesHelper = WanicchouSharedPreferenceHelper(context)
 ////        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_search)
 //        mSearchViewModel = ViewModelProviders.of(this).get(SearchViewModel::class.java)
 //        setUpUI()

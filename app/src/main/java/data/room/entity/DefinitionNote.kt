@@ -19,5 +19,8 @@ data class DefinitionNote (
 
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "DefinitionNoteID")
-    var definitionNoteID: Int = 0
-)
+    var definitionNoteID: Int = 0 ) {
+    override fun toString(): String {
+        return noteText
+    }
+}

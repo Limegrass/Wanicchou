@@ -20,5 +20,8 @@ data class VocabularyNote (
 
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "VocabularyNoteID")
-    var vocabularyNoteID: Int
-)
+    var vocabularyNoteID: Int ) {
+    override fun toString(): String {
+        return noteText
+    }
+}

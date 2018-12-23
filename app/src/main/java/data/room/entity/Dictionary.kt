@@ -9,5 +9,8 @@ data class Dictionary (
 
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "DictionaryID")
-    var dictionaryID: Int = 0
-)
+    var dictionaryID: Int = 0 ) {
+    override fun toString(): String {
+        return dictionaryName
+    }
+}
