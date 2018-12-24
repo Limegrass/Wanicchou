@@ -4,17 +4,16 @@ import android.annotation.SuppressLint
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import data.core.OnDatabaseQuery
-import data.core.OnJavaScriptCompleted
 import data.vocab.shared.MatchType
 
 import data.vocab.shared.WordListEntry
+import org.jsoup.Jsoup
 import java.io.IOException
 import java.net.URL
 
 //TODO: Change lazy public vals to private and use the SearchProvider
-abstract class DictionaryWebPage(val dictionaryEntryFactory: DictionaryEntryFactory,
-                                 val relatedWordFactory: RelatedWordFactory) {
+abstract class DictionaryWebPage(val IDictionaryEntryFactory: IDictionaryEntryFactory,
+                                 val relatedWordFactory: IRelatedWordFactory) {
     companion object {
         private const val HTML_PARSER_NAME = "HtmlParser"
         private const val PAGE_PARSE_URL = "javascript:window.HtmlParser.parsePage" +
@@ -22,7 +21,7 @@ abstract class DictionaryWebPage(val dictionaryEntryFactory: DictionaryEntryFact
     }
 
     // ====================== ABSTRACT ======================
-    abstract fun getSupportedMatchType(): Set<MatchType>
+    abstract fun getSupportedMatchTypes(): Set<MatchType>
 
     abstract fun buildQueryURL(searchTerm: String,
                                          wordLanguageCode: String,
@@ -35,17 +34,15 @@ abstract class DictionaryWebPage(val dictionaryEntryFactory: DictionaryEntryFact
     //TODO: Try to find another alternative to page parsing again
     @SuppressLint("AddJavascriptInterface", "SetJavaScriptEnabled")
     @Throws(IOException::class)
-    fun search(webView: WebView,
-               javaScriptCompleted: OnJavaScriptCompleted,
-               onDatabaseQuery: OnDatabaseQuery,
-               searchTerm: String,
+    fun search(searchTerm: String,
                wordLanguageCode: String,
                definitionLanguageCode: String,
-               matchType: MatchType) {
+               matchType: MatchType,
+               webView: WebView,
+               pageParsed: OnPageParsed) {
 
         val searchUrl = buildQueryURL(searchTerm, wordLanguageCode, definitionLanguageCode, matchType)
-        webView.addJavascriptInterface(HtmlParserInterface(javaScriptCompleted,
-                                                           onDatabaseQuery,
+        webView.addJavascriptInterface(HtmlParserInterface(pageParsed,
                                                            wordLanguageCode,
                                                            definitionLanguageCode),
                                        HTML_PARSER_NAME)
@@ -66,7 +63,7 @@ abstract class DictionaryWebPage(val dictionaryEntryFactory: DictionaryEntryFact
                             relatedWord: WordListEntry): Boolean {
         //TODO: When navigating to Related Word, the related words doesn't change.
         val link = relatedWord.link
-        if (link.trim().isBlank()) {
+        if (!link.trim().isBlank()) {
             webView.loadUrl(link)
             return true
         }
@@ -78,26 +75,32 @@ abstract class DictionaryWebPage(val dictionaryEntryFactory: DictionaryEntryFact
 //    }
 
     // ============= PRIVATE ==============
-    //TODO: maybe i need to change OnJSComplete to work properly
+    //TODO: Potentially refactor this into just passing the string back to the listener, but I'd have to
+    // guarantee that the definition language code and search provider does not change in the mean time.
     private inner class HtmlParserInterface (
-            private val javaScriptCompleted: OnJavaScriptCompleted,
-            private val onDatabaseQuery: OnDatabaseQuery,
+            private val pageParsed: OnPageParsed,
             private val wordLanguageCode: String,
             private val definitionLanguageCode: String) {
         @JavascriptInterface
         fun parsePage(html: String) {
-            val dictionaryEntry = dictionaryEntryFactory
-                    .getDictionaryEntry(html, wordLanguageCode, definitionLanguageCode)
+            val document = Jsoup.parse(html)
+            val dictionaryEntry = IDictionaryEntryFactory
+                    .getDictionaryEntry(document, wordLanguageCode, definitionLanguageCode)
             val relatedWords = relatedWordFactory
-                    .getRelatedWords(html, wordLanguageCode, definitionLanguageCode)
-            javaScriptCompleted.onJavaScriptCompleted(dictionaryEntry, relatedWords, definitionLanguageCode, onDatabaseQuery)
+                    .getRelatedWords(document, wordLanguageCode, definitionLanguageCode)
+            pageParsed.onPageParsed(dictionaryEntry, relatedWords)
         }
     }
+
     private fun parsePage(webView: WebView) {
         webView.loadUrl(PAGE_PARSE_URL)
     }
 
 
+    interface OnPageParsed {
+        fun onPageParsed(dictionaryEntry: DictionaryEntry,
+                         relatedWords: List<WordListEntry>)
+    }
 
 
 
@@ -115,18 +118,13 @@ abstract class DictionaryWebPage(val dictionaryEntryFactory: DictionaryEntryFact
 //            }
 
 
-    // Maybe I don't need this and just let people implement search however they want
-//    interface MatchTypeSupport {
-//        val SUPPORTED_MATCH_TYPES: HashMap<MatchType, Int>
-
-//    }
 //    //TODO: Maybe don't ned DicType, just grab from page
 //    @SuppressLint("SetJavaScriptEnabled", "AddJavascriptInterface")
 //    constructor(context: Context,
 //                baseUrl: String,
 //                pageSource: String,
 //                dictionaryType: DictionaryType,
-//                listener: OnJavaScriptCompleted) : super(context) {
+//                listener: OnPageParsed) : super(context) {
 //        search = SanseidoSearch(pageSource, dictionaryType)
 //        this.settings.javaScriptEnabled = true
 //        this.addJavascriptInterface(HtmlParserInterface(listener), HTML_PARSER_NAME)

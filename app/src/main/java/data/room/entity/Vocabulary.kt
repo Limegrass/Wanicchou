@@ -2,7 +2,13 @@ package data.room.entity
 
 import android.arch.persistence.room.*
 
-@Entity(tableName = "Vocabulary")
+@Entity(tableName = "Vocabulary",
+        indices = [Index(
+                value = arrayOf("Word",
+                                "Pronunciation",
+                                "LanguageCode"),
+                unique = true)]
+)
 
 data class Vocabulary (
     @ColumnInfo(name = "Word")

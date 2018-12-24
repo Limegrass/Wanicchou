@@ -42,7 +42,7 @@ object SanseidoWebPage
 
 
 
-    override fun getSupportedMatchType(): Set<MatchType> {
+    override fun getSupportedMatchTypes(): Set<MatchType> {
         return SUPPORTED_MATCH_TYPES.keys
     }
 

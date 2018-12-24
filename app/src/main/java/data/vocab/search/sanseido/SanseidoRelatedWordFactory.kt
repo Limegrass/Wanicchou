@@ -1,24 +1,24 @@
 package data.vocab.search.sanseido
 
 import data.room.entity.Vocabulary
-import data.vocab.model.RelatedWordFactory
+import data.vocab.model.IRelatedWordFactory
 import data.vocab.model.lang.JapaneseVocabulary
 import data.vocab.shared.MatchType
 import data.vocab.shared.WordListEntry
 import org.jsoup.Jsoup
+import org.jsoup.nodes.Document
 import java.util.regex.Pattern
 
 //TODO: Lazy instanitation since potentially not Sanseido.
-object SanseidoRelatedWordFactory : RelatedWordFactory{
+object SanseidoRelatedWordFactory : IRelatedWordFactory{
     private const val EXACT_WORD_REGEX = "(?<=［).*(?=］)"
 //    private const val RELATED_WORDS_TYPE_CLASS_INDEX = 0
     private const val RELATED_WORDS_VOCAB_INDEX = 1
     private const val RELATED_WORDS_TABLE_INDEX = 0
 
-    override fun getRelatedWords(html: String,
+    override fun getRelatedWords(document: Document,
                                  wordLanguageCode: String,
                                  definitionLanguageCode: String): List<WordListEntry> {
-        val document = Jsoup.parse(html)
         val relatedWordEntries = ArrayList<WordListEntry>()
 
         // The related words table is the first table in the HTML
@@ -64,7 +64,9 @@ object SanseidoRelatedWordFactory : RelatedWordFactory{
         return relatedWordEntries
     }
 
-    override fun getRelatedWords(databaseList: List<Vocabulary>, definitionLanguageCode: String): List<WordListEntry> {
+    override fun getRelatedWords(databaseList: List<Vocabulary>,
+                                 definitionLanguageCode: String)
+            : List<WordListEntry> {
         //TODO: I don't like making buildQueryUrl public or having this instanced here.
         val webPage = SanseidoWebPage
         return databaseList.map {

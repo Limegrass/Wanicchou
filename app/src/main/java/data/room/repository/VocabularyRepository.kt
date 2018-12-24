@@ -2,56 +2,116 @@ package data.room.repository
 
 import android.app.Application
 import android.arch.lifecycle.LiveData
+import android.os.AsyncTask
 import android.webkit.WebView
-import data.core.OnDatabaseQuery
 import data.room.WanicchouDatabase
+import data.room.dao.BaseDao
 import data.room.entity.*
 import data.vocab.model.DictionaryEntry
+import data.vocab.model.DictionaryWebPage
 import data.vocab.search.SearchProvider
 import data.vocab.shared.MatchType
 import data.vocab.shared.WordListEntry
+import java.lang.ref.WeakReference
 
 // TODO: Decision to search DB or online should occur here
 // TODO: Make things nullable and do appropriate logic when null for everything
-class VocabularyRepository(application: Application) : IVocabularyRepository {
+class VocabularyRepository(application: Application,
+                           private val onQueryFinish : IVocabularyRepository.OnQueryFinish)
+    : IVocabularyRepository {
+    open class InsertEntryAsyncTask<T>(dao : BaseDao<T>)
+        : AsyncTask<T, Void, Void>() {
+        private val dao = WeakReference(dao)
+        override fun doInBackground(vararg params: T?): Void? {
+            dao.get()?.insert(params[0]!!)
+            return null
+        }
+    }
+
+    private class InsertDictionaryEntryAsyncTask(database : WanicchouDatabase,
+                                                 onQueryFinish: IVocabularyRepository.OnQueryFinish,
+                                                 val dictionaryEntry: DictionaryEntry,
+                                                 val relatedWords: List<WordListEntry>) :
+            AsyncTask<Void, Void, Void>() {
+        val dbReference = WeakReference(database)
+        val onQueryFinish = WeakReference(onQueryFinish)
+        override fun doInBackground(vararg params: Void?): Void? {
+            val database = dbReference.get()
+            if (database != null){
+                var vocabulary = Vocabulary(dictionaryEntry.word,
+                        dictionaryEntry.pronunciation,
+                        dictionaryEntry.pitch,
+                        dictionaryEntry.wordLanguageCode)
+                database.vocabularyDao().insert(vocabulary)
+                val vocabularyList = database.vocabularyDao()
+                        .getLatest()
+                vocabulary = vocabularyList.value!![0]
+                val dictionaryID = database.dictionaryDao()
+                        .getDictionaryByName(dictionaryEntry.dictionary).value!!.dictionaryID
+                val definition = Definition(dictionaryEntry.definition,
+                                            dictionaryEntry.definitionLanguageCode,
+                                            dictionaryID,
+                                            vocabulary.vocabularyID)
+                database.definitionDao().insert(definition)
+                val definitionLists = mutableListOf<LiveData<List<Definition>>>()
+                for (voc in vocabularyList.value!!){
+                    val definitionList = database.definitionDao()
+                            .getVocabularyDefinitions(voc.vocabularyID,
+                                                      dictionaryEntry.definitionLanguageCode)
+                    definitionLists.add(definitionList)
+                }
+                for (word in relatedWords){
+                    //What's my plan here? Since I have a uniqueness constraint, I can insert
+                    // Blanks and then if they happen to
+                    // search again they'll itll reinsert and replace.
+                    // But there's probably a better way that involves refactoring...
+
+                }
+                onQueryFinish.get()?.onQueryFinish(vocabularyList, definitionLists, relatedWords)
+            }
+            return null
+        }
+    }
+
+    override fun saveResults(dictionaryEntry: DictionaryEntry,
+                             relatedWords: List<WordListEntry>) {
+        //Insert Vocabulary, Get Vocabulary ID, Get Dictionary ID, After both => Insert Definition
+        InsertDictionaryEntryAsyncTask(database, onQueryFinish, dictionaryEntry, relatedWords)
+    }
 
     val database = WanicchouDatabase.getInstance(application)
 
-    override fun search(webView: WebView,
-                        databaseCallback: OnDatabaseQuery,
-                        dictionary: String,
-                        searchTerm: String,
+    override fun search(searchTerm: String,
                         wordLanguageCode: String,
                         definitionLanguageCode: String,
-                        matchType: MatchType) {
+                        matchType: MatchType,
+                        dictionary: String,
+                        webView: WebView,
+                        onPageParsed: DictionaryWebPage.OnPageParsed) {
         // Do whatever, then use the callback
         val vocabularyList = searchVocabularyDatabase(searchTerm,
                                                       matchType,
                                                       wordLanguageCode,
                                                       definitionLanguageCode)
-
         // search online
         if (vocabularyList.value!!.isEmpty()){
-            val javascriptCallback = this
             val webPage = SearchProvider.getWebPage(dictionary)
-            webPage.search(webView,
-                           javascriptCallback,
-                           databaseCallback,
-                           searchTerm,
+            webPage.search(searchTerm,
                            wordLanguageCode,
                            definitionLanguageCode,
-                           matchType)
+                           matchType,
+                           webView,
+                           onPageParsed)
         }
         else {
             val definitionList = getDefinitionList(vocabularyList, definitionLanguageCode)
-
             val firstMatch = vocabularyList.value!![0]
             val relatedWords = getRelatedWords(firstMatch.vocabularyID,
                                                definitionLanguageCode,
                                                dictionary)
 
 
-            databaseCallback.onQueryFinish(vocabularyList, definitionList, relatedWords)
+            onQueryFinish.onQueryFinish(vocabularyList, definitionList, relatedWords)
         }
     }
     private fun getDefinitionList(vocabularyList: LiveData<List<Vocabulary>>,
@@ -66,7 +126,7 @@ class VocabularyRepository(application: Application) : IVocabularyRepository {
         return definitionList
     }
 
-    override fun getLatest(onDatabaseQuery: OnDatabaseQuery) {
+    override fun getLatest(onQueryFinish: IVocabularyRepository.OnQueryFinish) {
         val vocabularyList = database.vocabularyDao().getLatest()
         val latestDefinition = database.definitionDao()
                 .getLatestDefinition(vocabularyList.value!![0].vocabularyID)
@@ -78,7 +138,7 @@ class VocabularyRepository(application: Application) : IVocabularyRepository {
 
         val relatedWords = SearchProvider.getWebPage(dictionary)
                 .relatedWordFactory.getRelatedWords(offlineList, definitionLanguageCode)
-        onDatabaseQuery.onQueryFinish(vocabularyList, definitionList, relatedWords)
+        onQueryFinish.onQueryFinish(vocabularyList, definitionList, relatedWords)
     }
 
     private fun getDictionaryName(dictionaryID: Int): String {
@@ -101,40 +161,6 @@ class VocabularyRepository(application: Application) : IVocabularyRepository {
                 .getRelatedWords(relatedVocabularyList, definitionLanguageCode)
     }
 
-    override fun onJavaScriptCompleted(dictionaryEntry: DictionaryEntry,
-                                       relatedWords: List<WordListEntry>,
-                                       definitionLanguageCode: String,
-                                       onDatabaseQuery: OnDatabaseQuery) {
-        val vocabularyEntity = Vocabulary(dictionaryEntry.word,
-                dictionaryEntry.pronunciation,
-                dictionaryEntry.pitch,
-                dictionaryEntry.wordLanguageCode)
-        database.vocabularyDao().insert(vocabularyEntity)
-
-        val vocabularyList = searchVocabularyDatabase(dictionaryEntry.word,
-                MatchType.WORD_EQUALS,
-                dictionaryEntry.wordLanguageCode,
-                dictionaryEntry.definitionLanguageCode)
-
-        val dictionaryID = database.dictionaryDao()
-                .getDictionaryByName(dictionaryEntry.dictionary).value!!.dictionaryID
-
-        val vocabularyID = vocabularyList.value!![0].vocabularyID
-        val definitionEntity = Definition(dictionaryID,
-                dictionaryEntry.definition,
-                vocabularyID,
-                dictionaryEntry.wordLanguageCode)
-        database.definitionDao().insert(definitionEntity)
-
-        val definitionList = listOf(database.definitionDao().getVocabularyDefinitions(vocabularyID, definitionLanguageCode))
-        onDatabaseQuery.onQueryFinish(vocabularyList, definitionList, relatedWords)
-        //Add the entry to the database
-        //Query the DB the added items
-        // After, query the DB for the LiveData
-        // I either need to maintain the list of related words somewhere
-        // or generate it on going to an activity
-        // Second option might be best, and don't even populate related words unless the user goes
-    }
 
     private fun searchVocabularyDatabase(searchTerm: String,
                                          matchType: MatchType,

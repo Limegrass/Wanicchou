@@ -1,44 +1,24 @@
 package com.waifusims.wanicchou
 
 import android.app.SearchManager
+import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
-import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.os.AsyncTask
 import android.os.Bundle
-import android.os.Parcelable
-import android.support.design.widget.FloatingActionButton
-import android.support.v4.view.MenuItemCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.SearchView
-import android.text.TextUtils
-import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
-import android.view.View.OnKeyListener
-import android.view.inputmethod.InputMethodManager
 import android.webkit.WebView
 import android.widget.TextView
-import android.widget.Toast
-
-import com.waifusims.wanicchou.databinding.ActivitySearchBinding
-
-import java.lang.reflect.InvocationTargetException
-import java.util.ArrayList
-
-import data.room.WanicchouDatabase
-import data.room.entity.Vocabulary
-import data.vocab.model.lang.JapaneseVocabulary
-import data.core.OnJavaScriptCompleted
 import data.room.entity.Definition
+import data.room.entity.Vocabulary
+import data.room.repository.IVocabularyRepository
 import data.room.repository.VocabularyRepository
 import data.room.viewmodel.SearchViewModel
-import data.vocab.search.SearchProvider
-import data.vocab.shared.MatchType
+import data.vocab.model.DictionaryEntry
+import data.vocab.model.DictionaryWebPage
 import data.vocab.shared.WordListEntry
 import util.anki.AnkiDroidHelper
 
@@ -49,12 +29,60 @@ import util.anki.AnkiDroidHelper
 // TODO: Toasts for DB searches
 //TODO : Add click listener for Def label
 class SearchActivity : AppCompatActivity() {
+
+    //TODO: Loader or another Async Framework
+
     //TODO: Search Suggestions
+    private lateinit var repository : IVocabularyRepository
     private lateinit var searchViewModel: SearchViewModel
     private lateinit var sharedPreferences : WanicchouSharedPreferenceHelper
     private lateinit var ankiDroidHelper : AnkiDroidHelper
     //TODO: Make sure that webviews are automatically recycled but I'm pretty sure
     private lateinit var webView : WebView
+
+    private val onQueryFinish = object : IVocabularyRepository.OnQueryFinish {
+        override fun onQueryFinish(vocabularyList: LiveData<List<Vocabulary>>,
+                                   definitionList: List<LiveData<List<Definition>>>,
+                                   relatedWords: List<WordListEntry>) {
+            searchViewModel.vocabularyList = vocabularyList
+            searchViewModel.definitionList = definitionList
+            searchViewModel.relatedWords = relatedWords
+        }
+    }
+
+    private val onPageParsed = object : DictionaryWebPage.OnPageParsed {
+
+        override fun onPageParsed(dictionaryEntry: DictionaryEntry,
+                                  relatedWords: List<WordListEntry>) {
+            repository.saveResults(dictionaryEntry, relatedWords)
+        }
+    }
+
+//            val vocabularyList = searchVocabularyDatabase(dictionaryEntry.word,
+//                    MatchType.WORD_EQUALS,
+//                    dictionaryEntry.wordLanguageCode,
+//                    dictionaryEntry.definitionLanguageCode)
+//
+//            val dictionaryID = repository.dictionaryDao()
+//                    .getDictionaryByName(dictionaryEntry.dictionary).value!!.dictionaryID
+//
+//            val vocabularyID = vocabularyList.value!![0].vocabularyID
+//            val definitionEntity = Definition(dictionaryID,
+//                    dictionaryEntry.definition,
+//                    vocabularyID,
+//                    dictionaryEntry.wordLanguageCode)
+//            repository.definitionDao().insert(definitionEntity)
+//
+//            val definitionList = listOf(repository.definitionDao().getVocabularyDefinitions(vocabularyID, definitionLanguageCode))
+//            onDatabaseQuery.onQueryFinish(vocabularyList, definitionList, relatedWords)
+//            //Add the entry to the repository
+//            //Query the DB the added items
+//            // After, query the DB for the LiveData
+//            // I either need to maintain the list of related words somewhere
+//            // or generate it on going to an activity
+//            // Second option might be best, and don't even populate related words unless the user goes
+
+    // TODO: Figure out some way to handle requesting the search without passing webViews around
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         val inflater = menuInflater
@@ -75,11 +103,12 @@ class SearchActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_wanicchou)
-//        val vocabularyRepository = VocabularyRepository(this.application)
+        repository = VocabularyRepository(this.application, onQueryFinish)
         searchViewModel = ViewModelProviders.of(this).get(SearchViewModel::class.java)
         sharedPreferences = WanicchouSharedPreferenceHelper(this)
         webView = WebView(this)
         ankiDroidHelper = AnkiDroidHelper(this)
+
         setWordObserver()
         setDefinitionObserver()
 
@@ -93,12 +122,13 @@ class SearchActivity : AppCompatActivity() {
         }
     }
     private fun search(searchTerm: String){
-        searchViewModel.search(webView,
-                               sharedPreferences.dictionary,
-                               searchTerm,
-                               sharedPreferences.wordLanguageCode,
-                               sharedPreferences.definitionLanguageCode,
-                               sharedPreferences.matchType)
+        repository.search(searchTerm,
+                          sharedPreferences.wordLanguageCode,
+                          sharedPreferences.definitionLanguageCode,
+                          sharedPreferences.matchType,
+                          sharedPreferences.dictionary,
+                          webView,
+                          onPageParsed)
     }
 
     private fun setWordObserver(){
@@ -119,6 +149,8 @@ class SearchActivity : AppCompatActivity() {
         }
 
     }
+
+
 //
 //    private var mBinding: ActivitySearchBinding? = null
 //    private var mAnkiDroid: AnkiDroidHelper? = null
@@ -218,8 +250,8 @@ class SearchActivity : AppCompatActivity() {
 //
 //    protected class clearDBAsyncTask : AsyncTask<Context, Void, Void>() {
 //        override fun doInBackground(vararg contexts: Context): Void? {
-//            val database = WanicchouDatabase.getDatabase(contexts[0])
-//            database.clearAllTables()
+//            val repository = WanicchouDatabase.getDatabase(contexts[0])
+//            repository.clearAllTables()
 //            return null
 //        }
 //    }
@@ -261,7 +293,7 @@ class SearchActivity : AppCompatActivity() {
 //
 //    /* ==================================== +Search ================================== */
 //
-//    override fun onJavaScriptCompleted() {
+//    override fun onPageParsed() {
 //        mLastSearched = mWebPage!!.search
 //        runOnUiThread { handleSearchResult() }
 //
@@ -610,7 +642,7 @@ class SearchActivity : AppCompatActivity() {
 //                    String::class.java,
 //                    DictionaryType::class.java,
 //                    provider.MATCH_TYPE_CLASS,
-//                    OnJavaScriptCompleted::class.java
+//                    OnPageParsed::class.java
 //            )
 //            mWebPage = webViewContructor.newInstance(
 //                    context,

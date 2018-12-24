@@ -5,7 +5,7 @@ import data.room.entity.Vocabulary
 import data.vocab.model.lang.EnglishVocabulary
 import data.vocab.model.lang.JapaneseVocabulary
 import data.vocab.model.DictionaryEntry
-import data.vocab.model.DictionaryEntryFactory
+import data.vocab.model.IDictionaryEntryFactory
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import java.lang.IllegalArgumentException
@@ -17,66 +17,61 @@ import java.util.regex.Pattern
 // Should these be in the Android Strings file?
 // Regexes, not sure if they should be const static.
 // Most vocab are enclosed in the braces.
-object SanseidoDictionaryEntryFactory: DictionaryEntryFactory {
+object SanseidoDictionaryEntryFactory: IDictionaryEntryFactory {
 
     private const val EXACT_WORD_REGEX = "(?<=［).*(?=］)"
     private const val EXACT_EJ_REGEX = ".*(?=［.*］)"
     private const val SEPARATOR_FRAGMENTS_REGEX = "[△▲･・]"
     private const val PRONUNCIATION_REGEX = "[\\p{script=Hiragana}|\\p{script=Katakana}]+" +
             "($|[\\p{script=Han}０-９]|\\d|\\s)*?"
-    private const val DICTIONARY_NAME = "Sanseido"
-
     private const val SANSEIDO_WORD_ID = "word"
+
+    private const val DICTIONARY_NAME = "Sanseido"
     private const val SANSEIDO_WORD_DEFINITION_ID = "wordBody"
     private const val MULTIPLE_DEFINITION_REGEX = "▼"
     private const val MULTIPLE_DEFINITION_SEPARATOR = "\n▼"
 
-    override fun getDictionaryEntry(html: String,
+    override fun getDictionaryEntry(document: Document,
                                     wordLanguageCode: String,
                                     definitionLanguageCode: String): DictionaryEntry {
-        val document = Jsoup.parse(html)
-        val wordSource = findWordSource(document)
-        val definitionSource = findDefinitionSource(document)
-        return if (definitionSource.isNullOrBlank()) {
-            SanseidoDictionaryEntryFactory.getInvalidDictionaryEntry(
-                    wordSource,
-                    wordLanguageCode,
-                    definitionLanguageCode
-            )
-        } else{
-            SanseidoDictionaryEntryFactory.getDictionaryEntry(
-                    wordSource,
-                    wordLanguageCode,
-                    definitionSource,
-                    definitionLanguageCode
-            )
-        }
-    }
-
-    /**
-     * Constructor given a string containing the word and a string containing the definition.
-     * @param wordSource a string that contains the source of the word.
-     * @param definitionSource a string containing the definition of the word.
-     */
-    override fun getDictionaryEntry(wordSource: String,
-                                    wordLanguageCode: String,
-                                    definitionSource: String,
-                                    definitionLanguageCode: String) : DictionaryEntry {
-//        TODO("Get dictionaryID from dictionary name instead of passing it in?")
-        val wordStripped = wordSource.trim { it <= ' ' }
-        val definition = definitionSource.trim { it <= ' ' }
-        val word = isolateWord(wordStripped, wordLanguageCode)
-        val pronunciation = isolateReading(wordStripped, wordLanguageCode)
-        val pitch = JapaneseVocabulary.isolatePitch(wordStripped)
-
+        val wordSource = findWordSource(document).trim()
+        val definition = findDefinitionSource(document)?.trim() ?: ""
+        val word = isolateWord(wordSource, wordLanguageCode)
+        val pronunciation = isolateReading(wordSource, wordLanguageCode)
+        val pitch = JapaneseVocabulary.isolatePitch(wordSource)
         return DictionaryEntry(DICTIONARY_NAME,
-                wordLanguageCode,
-                word,
-                pronunciation,
-                pitch,
-                definitionLanguageCode,
-                definition)
+                               wordLanguageCode,
+                               word,
+                               pronunciation,
+                               pitch,
+                               definitionLanguageCode,
+                               definition)
     }
+
+//    /**
+//     * Constructor given a string containing the word and a string containing the definition.
+//     * @param wordSource a string that contains the source of the word.
+//     * @param definitionSource a string containing the definition of the word.
+//     */
+//    override fun getDictionaryEntry(wordSource: String,
+//                                    wordLanguageCode: String,
+//                                    definitionSource: String,
+//                                    definitionLanguageCode: String) : DictionaryEntry {
+////        TODO("Get dictionaryID from dictionary name instead of passing it in?")
+//        val wordStripped = wordSource.trim { it <= ' ' }
+//        val definition = definitionSource.trim { it <= ' ' }
+//        val word = isolateWord(wordStripped, wordLanguageCode)
+//        val pronunciation = isolateReading(wordStripped, wordLanguageCode)
+//        val pitch = JapaneseVocabulary.isolatePitch(wordStripped)
+//
+//        return DictionaryEntry(DICTIONARY_NAME,
+//                wordLanguageCode,
+//                word,
+//                pronunciation,
+//                pitch,
+//                definitionLanguageCode,
+//                definition)
+//    }
 
 
     /**
@@ -90,34 +85,34 @@ object SanseidoDictionaryEntryFactory: DictionaryEntryFactory {
         val definitionLanguageCode = def.languageCode
         val definition = def.definitionText
         return DictionaryEntry(DICTIONARY_NAME,
-                wordLanguageCode,
-                word,
-                pronunciation,
-                pitch,
-                definitionLanguageCode,
-                definition)
+                               wordLanguageCode,
+                               word,
+                               pronunciation,
+                               pitch,
+                               definitionLanguageCode,
+                               definition)
     }
 
-    /**
-     * Constructor for invalid word searches, to avoid repeatedly requesting invalid searches.
-     * @param invalidWord The word whose search completed but failed.
-     */
-    override fun getInvalidDictionaryEntry(invalidWord: String,
-                                           wordLanguageCode: String,
-                                           definitionLanguageCode: String): DictionaryEntry {
-        val word = invalidWord
-        val pronunciation = "N/A"
-        val pitch = "N/A"
-        val definition = "N/A"
-
-        return DictionaryEntry(DICTIONARY_NAME,
-                wordLanguageCode,
-                word,
-                pronunciation,
-                pitch,
-                definitionLanguageCode,
-                definition)
-    }
+//    /**
+//     * Constructor for invalid word searches, to avoid repeatedly requesting invalid searches.
+//     * @param invalidWord The word whose search completed but failed.
+//     */
+//    override fun getInvalidDictionaryEntry(invalidWord: String,
+//                                           wordLanguageCode: String,
+//                                           definitionLanguageCode: String): DictionaryEntry {
+//        val word = invalidWord
+//        val pronunciation = "N/A"
+//        val pitch = "N/A"
+//        val definition = "N/A"
+//
+//        return DictionaryEntry(DICTIONARY_NAME,
+//                wordLanguageCode,
+//                word,
+//                pronunciation,
+//                pitch,
+//                definitionLanguageCode,
+//                definition)
+//    }
 
 
     /**
