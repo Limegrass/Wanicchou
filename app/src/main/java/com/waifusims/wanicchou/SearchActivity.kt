@@ -14,13 +14,15 @@ import android.webkit.WebView
 import android.widget.TextView
 import data.room.entity.Definition
 import data.room.entity.Vocabulary
-import data.room.repository.IVocabularyRepository
-import data.room.repository.VocabularyRepository
+import data.arch.vocab.IVocabularyRepository
+import data.room.VocabularyRepository
 import data.room.viewmodel.SearchViewModel
-import data.vocab.model.DictionaryEntry
-import data.vocab.model.DictionaryWebPage
-import data.vocab.shared.WordListEntry
-import util.anki.AnkiDroidHelper
+import data.graveyard.DictionaryEntry
+import data.arch.search.WebViewDictionaryWebPage
+import data.arch.vocab.WordListEntry
+import data.arch.anki.AnkiDroidHelper
+import data.arch.search.IDictionaryWebPage
+import org.jsoup.nodes.Document
 
 //TODO: AutoImport to AnkiDroid if it exists
 //TODO: Link related words by words that appear in definition
@@ -50,11 +52,11 @@ class SearchActivity : AppCompatActivity() {
         }
     }
 
-    private val onPageParsed = object : DictionaryWebPage.OnPageParsed {
+    private val onPageParsed = object : IDictionaryWebPage.OnPageParsed {
 
-        override fun onPageParsed(dictionaryEntry: DictionaryEntry,
-                                  relatedWords: List<WordListEntry>) {
-            repository.saveResults(dictionaryEntry, relatedWords)
+
+        override fun onPageParsed(document: Document, wordLanguageCode: String, definitionLanguageCode: String) {
+//            repository.saveResults(dictionaryEntry, relatedWords)
         }
     }
 
@@ -127,7 +129,6 @@ class SearchActivity : AppCompatActivity() {
                           sharedPreferences.definitionLanguageCode,
                           sharedPreferences.matchType,
                           sharedPreferences.dictionary,
-                          webView,
                           onPageParsed)
     }
 
@@ -308,7 +309,6 @@ class SearchActivity : AppCompatActivity() {
 //        //        message = getString(R.string.word_search_failure);
 //        showToast(message, duration)
 //    }
-//
 //
 //    /* ==================================== +Databases ================================== */
 //

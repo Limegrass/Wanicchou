@@ -9,7 +9,7 @@
 //import android.view.MenuItem
 //
 //import com.waifusims.wanicchou.widgets.WordListAdapter
-//import data.vocab.shared.WordListEntry
+//import data.arch.vocab.WordListEntry
 //
 ///**
 // * Separate activity to display the related words of a SanseidoSearch.

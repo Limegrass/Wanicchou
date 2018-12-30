@@ -9,7 +9,7 @@
 //
 //import com.waifusims.wanicchou.R
 //
-//import data.vocab.shared.WordListEntry
+//import data.arch.vocab.WordListEntry
 //
 ///**
 // * RecyclerView adapter for related words

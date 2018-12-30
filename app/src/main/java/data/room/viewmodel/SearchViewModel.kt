@@ -5,7 +5,7 @@ import android.arch.lifecycle.AndroidViewModel
 import android.arch.lifecycle.LiveData
 import data.room.entity.Definition
 import data.room.entity.Vocabulary
-import data.vocab.shared.WordListEntry
+import data.arch.vocab.WordListEntry
 
 
 // TODO: Remove related words completely and just use the new scheme for queries to find same words

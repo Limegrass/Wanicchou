@@ -4,7 +4,7 @@ import android.arch.persistence.db.SupportSQLiteDatabase
 import android.content.Context
 import android.arch.persistence.room.*
 import android.arch.persistence.room.migration.Migration
-import data.core.SingletonHolder
+import data.arch.util.SingletonHolder
 import data.room.dao.*
 import data.room.entity.*
 

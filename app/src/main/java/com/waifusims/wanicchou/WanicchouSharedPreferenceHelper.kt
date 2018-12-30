@@ -2,9 +2,9 @@ package com.waifusims.wanicchou
 
 import android.content.Context
 import android.preference.PreferenceManager
-import data.vocab.shared.AutoDelete
-import data.vocab.shared.AutoSave
-import data.vocab.shared.MatchType
+import data.enums.AutoDelete
+import data.enums.AutoSave
+import data.enums.MatchType
 
 class WanicchouSharedPreferenceHelper(val context: Context) {
 
