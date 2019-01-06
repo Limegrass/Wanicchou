@@ -20,13 +20,17 @@ interface IDictionaryWebPage {
     fun loadUrl(url : String,
                 wordLanguageCode: String,
                 definitionLanguageCode: String,
-                pageLoadedCallback: OnPageParsed)
+                onPageParsed: OnPageParsed)
 
     fun search(searchTerm: String,
                wordLanguageCode: String,
                definitionLanguageCode: String,
                matchType: MatchType,
-               pageLoadedCallback: OnPageParsed)
+               onPageParsed: OnPageParsed)
+
+    fun getSupportedMatchTypes(): Set<MatchType>
+
+    fun getDictionaryName(): String
 
     interface OnPageParsed {
         fun onPageParsed(document: Document,

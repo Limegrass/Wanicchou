@@ -1,4 +1,4 @@
-package com.waifusims.wanicchou.widgets
+package com.waifusims.wanicchou.adapter
 
 import android.support.v7.widget.RecyclerView
 import android.util.SparseBooleanArray

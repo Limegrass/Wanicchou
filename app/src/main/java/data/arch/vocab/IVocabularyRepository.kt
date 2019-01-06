@@ -1,5 +1,6 @@
 package data.arch.vocab
 
+import android.arch.lifecycle.LifecycleOwner
 import android.arch.lifecycle.LiveData
 import android.webkit.WebView
 import data.arch.search.IDictionaryWebPage
@@ -18,12 +19,12 @@ interface IVocabularyRepository {
                wordLanguageCode: String,
                definitionLanguageCode: String,
                matchType: MatchType = MatchType.WORD_EQUALS,
-               dictionary: String,
-               onPageParsed: IDictionaryWebPage.OnPageParsed)
+               onPageParsed: IDictionaryWebPage.OnPageParsed,
+               lifecycleOwner: LifecycleOwner)
 
     interface OnQueryFinish{
-        fun onQueryFinish(vocabularyList: LiveData<List<Vocabulary>>,
-                          definitionList: List<LiveData<List<Definition>>>,
+        fun onQueryFinish(vocabularyList: List<Vocabulary>,
+                          definitionList: List<Definition>,
                           relatedWords: List<WordListEntry>)
     }
 }

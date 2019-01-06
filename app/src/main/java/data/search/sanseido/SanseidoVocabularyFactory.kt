@@ -22,9 +22,9 @@ object SanseidoVocabularyFactory : IVocabularyFactory {
         val pronunciation = isolateReading(wordSource, wordLanguageCode)
         val pitch = JapaneseVocabulary.isolatePitch(wordSource)
         return Vocabulary(word,
+                wordLanguageCode,
                 pronunciation,
-                pitch,
-                wordLanguageCode)
+                pitch)
     }
 
     /**

@@ -13,14 +13,15 @@ interface DefinitionDao : BaseDao<Definition> {
         FROM Definition
         ORDER BY DefinitionID DESC
         LIMIT 1""")
-    fun getLatest(): LiveData<Definition>
+    fun getLatest(): Definition
+//    fun getLatest(): LiveData<Definition>
 
     @Query("""
         SELECT *
         FROM Definition
         WHERE DefinitionText LIKE '%' + :searchTerm + '%'
     """)
-    fun definitionContains(searchTerm: String): LiveData<Definition>
+    fun definitionContains(searchTerm: String): Definition
 
     @Query("""
         SELECT d.*
@@ -28,7 +29,7 @@ interface DefinitionDao : BaseDao<Definition> {
         WHERE d.VocabularyID = :vocabularyID
             AND d.LanguageCode = :definitionLanguageCode
     """)
-    fun getVocabularyDefinitions(vocabularyID: Int, definitionLanguageCode: String): LiveData<List<Definition>>
+    fun getVocabularyDefinitions(vocabularyID: Int, definitionLanguageCode: String): List<Definition>
 
     @Query("""
         SELECT d.*
@@ -38,5 +39,5 @@ interface DefinitionDao : BaseDao<Definition> {
         LIMIT 1
     """
     )
-    fun getLatestDefinition(vocabularyID: Int): LiveData<List<Definition>>
+    fun getLatestDefinition(vocabularyID: Int): List<Definition>
 }

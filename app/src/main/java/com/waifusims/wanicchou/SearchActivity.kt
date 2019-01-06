@@ -4,24 +4,32 @@ import android.app.SearchManager
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.SearchView
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import android.webkit.WebView
+import android.view.SearchEvent
 import android.widget.TextView
+import android.widget.Toast
+import com.waifusims.wanicchou.adapter.DefinitionAdapter
+import com.waifusims.wanicchou.util.WanicchouSharedPreferenceHelper
 import data.room.entity.Definition
 import data.room.entity.Vocabulary
 import data.arch.vocab.IVocabularyRepository
 import data.room.VocabularyRepository
-import data.room.viewmodel.SearchViewModel
-import data.graveyard.DictionaryEntry
-import data.arch.search.WebViewDictionaryWebPage
+import com.waifusims.wanicchou.viewmodel.SearchViewModel
 import data.arch.vocab.WordListEntry
 import data.arch.anki.AnkiDroidHelper
 import data.arch.search.IDictionaryWebPage
+import data.arch.vocab.DefinitionLiveData
+import data.arch.vocab.VocabularyLiveData
+import data.search.SearchProvider
 import org.jsoup.nodes.Document
 
 //TODO: AutoImport to AnkiDroid if it exists
@@ -30,7 +38,12 @@ import org.jsoup.nodes.Document
 //TODO:  Horizontal UI
 // TODO: Toasts for DB searches
 //TODO : Add click listener for Def label
+//TODO: Figure out how to use UI fragments properly and split initialization up
 class SearchActivity : AppCompatActivity() {
+
+    companion object {
+        private val TAG : String = SearchActivity::class.java.simpleName
+    }
 
     //TODO: Loader or another Async Framework
 
@@ -40,23 +53,35 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var sharedPreferences : WanicchouSharedPreferenceHelper
     private lateinit var ankiDroidHelper : AnkiDroidHelper
     //TODO: Make sure that webviews are automatically recycled but I'm pretty sure
-    private lateinit var webView : WebView
+    private lateinit var webPage : IDictionaryWebPage
+    private var toast : Toast? = null
+
 
     private val onQueryFinish = object : IVocabularyRepository.OnQueryFinish {
-        override fun onQueryFinish(vocabularyList: LiveData<List<Vocabulary>>,
-                                   definitionList: List<LiveData<List<Definition>>>,
+        override fun onQueryFinish(vocabularyList: List<Vocabulary>,
+                                   definitionList: List<Definition>,
                                    relatedWords: List<WordListEntry>) {
-            searchViewModel.vocabularyList = vocabularyList
-            searchViewModel.definitionList = definitionList
+            Log.d(TAG, "onQueryFinished")
+            searchViewModel.vocabularyList.value = vocabularyList
+            searchViewModel.definitionList.value = definitionList
             searchViewModel.relatedWords = relatedWords
         }
     }
 
     private val onPageParsed = object : IDictionaryWebPage.OnPageParsed {
+        override fun onPageParsed(document: Document,
+                                  wordLanguageCode: String,
+                                  definitionLanguageCode: String) {
+            val vocabularyList = listOf(webPage.getVocabulary(document, wordLanguageCode))
 
+            val definitionList = listOf(webPage.getDefinition(document, definitionLanguageCode))
 
-        override fun onPageParsed(document: Document, wordLanguageCode: String, definitionLanguageCode: String) {
-//            repository.saveResults(dictionaryEntry, relatedWords)
+            val relatedWords = webPage.getRelatedWords(document, wordLanguageCode, definitionLanguageCode)
+
+            searchViewModel.vocabularyList.value = vocabularyList
+            searchViewModel.definitionList.value = definitionList
+            searchViewModel.relatedWords = relatedWords
+
         }
     }
 
@@ -86,16 +111,24 @@ class SearchActivity : AppCompatActivity() {
 
     // TODO: Figure out some way to handle requesting the search without passing webViews around
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
         val inflater = menuInflater
         inflater.inflate(R.menu.search_menu, menu)
+        val searchManager = getSystemService(Context.SEARCH_SERVICE) as SearchManager
+        val searchableInfo = searchManager.getSearchableInfo(componentName)
+        val searchView = menu.findItem(R.id.menu_search).actionView as SearchView
+        searchView.apply {
+            Log.i(TAG, "SearchableInfo: $searchableInfo")
+            setSearchableInfo(searchableInfo)
+        }
         return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.menu_search -> {
-                (item.actionView as SearchView).onActionViewExpanded()
+                onSearchRequested()
+//                (item.actionView as SearchView).onActionViewExpanded()
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -105,31 +138,51 @@ class SearchActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_wanicchou)
-        repository = VocabularyRepository(this.application, onQueryFinish)
-        searchViewModel = ViewModelProviders.of(this).get(SearchViewModel::class.java)
         sharedPreferences = WanicchouSharedPreferenceHelper(this)
-        webView = WebView(this)
-        ankiDroidHelper = AnkiDroidHelper(this)
+
+        webPage = SearchProvider.getWebPage(sharedPreferences.dictionary)
+        repository = VocabularyRepository(this.application, webPage, onQueryFinish)
+        searchViewModel = ViewModelProviders.of(this).get(SearchViewModel::class.java)
 
         setWordObserver()
         setDefinitionObserver()
 
-        handleSearchIntent()
+        handleIntent(this.intent)
+        //TODO: Don't initialize this until they request for a card
+        ankiDroidHelper = AnkiDroidHelper(this)
     }
 
-    private fun handleSearchIntent() {
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        handleIntent(intent)
+    }
+
+    private fun handleIntent(intent: Intent) {
+        Log.i(TAG, "Handling Intent: " + intent.action)
+        // This was recommended, but the search button caused Intent.ACTION_MAIN instead
         if(intent.action == Intent.ACTION_SEARCH){
             val searchTerm = intent.getStringExtra(SearchManager.QUERY)
             search(searchTerm)
         }
+
     }
+
+
+    override fun onSearchRequested(searchEvent: SearchEvent?): Boolean {
+        Log.i(TAG, "SearchRequested: $searchEvent")
+        return super.onSearchRequested(searchEvent)
+    }
+
     private fun search(searchTerm: String){
+        Log.i(TAG, "Search Initiated: $searchTerm")
+        val lifecycleOwner = this
         repository.search(searchTerm,
-                          sharedPreferences.wordLanguageCode,
-                          sharedPreferences.definitionLanguageCode,
-                          sharedPreferences.matchType,
-                          sharedPreferences.dictionary,
-                          onPageParsed)
+                sharedPreferences.wordLanguageCode,
+                sharedPreferences.definitionLanguageCode,
+                sharedPreferences.matchType,
+                onPageParsed,
+                lifecycleOwner)
     }
 
     private fun setWordObserver(){
@@ -139,16 +192,17 @@ class SearchActivity : AppCompatActivity() {
         }
         searchViewModel.vocabularyList.observe(this, wordObserver)
     }
+
     private fun setDefinitionObserver() {
-        val tvWord = findViewById<TextView>(R.id.tv_definition)
+        val recyclerView = findViewById<RecyclerView>(R.id.rv_definitions)
+        val context = this@SearchActivity
         val definitionObserver = Observer<List<Definition>>{
-            it -> tvWord.text = it!![0].definitionText
+            it ->
+            recyclerView.layoutManager = LinearLayoutManager(context)
+            recyclerView.adapter = DefinitionAdapter(it!!)
         }
 
-        if (searchViewModel.definitionList.count() > 0) {
-            searchViewModel.definitionList[0].observe(this, definitionObserver)
-        }
-
+        searchViewModel.definitionList.observe(this, definitionObserver)
     }
 
 

@@ -5,7 +5,6 @@ import data.arch.vocab.IDefinitionFactory
 import org.jsoup.nodes.Document
 
 object SanseidoDefinitionFactory : IDefinitionFactory {
-    private const val DICTIONARY_NAME = "Sanseido"
     private const val SANSEIDO_WORD_DEFINITION_ID = "wordBody"
     private const val MULTIPLE_DEFINITION_REGEX = "▼"
     private const val MULTIPLE_DEFINITION_SEPARATOR = "\n▼"

@@ -7,6 +7,9 @@ import data.search.sanseido.SanseidoWebPage
 import data.enums.MatchType
 import java.lang.IllegalArgumentException
 
+//TODO: Make this somehow take into account some pages possibly needing JSwith webview.
+// Maybe the builder pattern could be used?
+
 object SearchProvider {
     private lateinit var webPage : IDictionaryWebPage
 
@@ -33,11 +36,8 @@ object SearchProvider {
     }
 
     //TODO: I hate how this is implemented, need some way of forcing abstract static members/fun
-    fun getSupportedMatchTypes(dictionary: String) : Set<MatchType> {
-        return when (dictionary) {
-            "Sanseido" -> SanseidoWebPage.SUPPORTED_MATCH_TYPES.keys
-            else -> throw IllegalArgumentException("Dictionary $dictionary not available.")
-        }
+    fun getCurrentDictionarySupportedMatchTypes() : Set<MatchType> {
+        return webPage.getSupportedMatchTypes()
     }
 
 //    fun getSearch(webPage: WebViewDictionaryWebPage,

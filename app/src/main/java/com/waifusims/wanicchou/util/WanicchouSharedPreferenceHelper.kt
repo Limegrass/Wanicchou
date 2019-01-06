@@ -1,7 +1,8 @@
-package com.waifusims.wanicchou
+package com.waifusims.wanicchou.util
 
 import android.content.Context
 import android.preference.PreferenceManager
+import com.waifusims.wanicchou.R
 import data.enums.AutoDelete
 import data.enums.AutoSave
 import data.enums.MatchType
@@ -13,7 +14,7 @@ class WanicchouSharedPreferenceHelper(val context: Context) {
     var matchType: MatchType
         get() {
             val pref = getString(R.string.pref_match_type_key,
-                                       R.string.pref_match_type_default)!!
+                    R.string.pref_match_type_default)!!
             return MatchType.valueOf(pref)
         }
         set(value) {
@@ -41,7 +42,7 @@ class WanicchouSharedPreferenceHelper(val context: Context) {
     var autoSave: AutoSave
         get() {
             val pref = getString(R.string.pref_auto_save_key,
-                                 R.string.pref_auto_save_default)!!
+                    R.string.pref_auto_save_default)!!
             return AutoSave.valueOf(pref)
         }
         set(value) {

@@ -39,15 +39,23 @@ class SanseidoWebPage
         private const val PARAM_DIC_PREFIX = "Daily"
         private const val SET_LANG = "checkbox"
 
-        val SUPPORTED_MATCH_TYPES = hashMapOf(
+        private val SUPPORTED_MATCH_TYPES = hashMapOf(
                 MatchType.WORD_STARTS_WITH to 0,
                 MatchType.WORD_EQUALS to 1,
                 MatchType.WORD_ENDS_WITH to 2,
                 MatchType.DEFINITION_CONTAINS to 3,
                 MatchType.WORD_CONTAINS to 5)
+        private const val DICTIONARY_NAME = "Sanseido"
     }
 
 
+    override fun getSupportedMatchTypes(): Set<MatchType> {
+        return SUPPORTED_MATCH_TYPES.keys
+    }
+
+    override fun getDictionaryName(): String {
+        return DICTIONARY_NAME
+    }
 
 
 

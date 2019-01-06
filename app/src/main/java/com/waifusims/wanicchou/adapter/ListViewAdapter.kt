@@ -1,10 +1,9 @@
-package com.waifusims.wanicchou.widgets
+package com.waifusims.wanicchou.adapter
 
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import data.room.entity.Definition
 
 abstract class ListViewAdapter<T, VH : ListViewAdapter.ViewHolder<T>>(private val list : List<T>,
                                                              private val viewHolderConstructor: (View) -> VH,
@@ -13,9 +12,9 @@ abstract class ListViewAdapter<T, VH : ListViewAdapter.ViewHolder<T>>(private va
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
         val context = parent.context
-        val wordLayoutId = layoutID
         val inflater = LayoutInflater.from(context)
-        val view = inflater.inflate(wordLayoutId, parent, false)
+        val attachToRoot = false
+        val view = inflater.inflate(layoutID, parent, attachToRoot)
         return viewHolderConstructor(view)
     }
 

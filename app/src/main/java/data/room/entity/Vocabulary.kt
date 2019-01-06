@@ -14,14 +14,14 @@ data class Vocabulary (
     @ColumnInfo(name = "Word")
     var word: String = "",
 
+    @ColumnInfo(name = "LanguageCode")
+    var languageCode: String = "",
+
     @ColumnInfo(name = "Pronunciation")
     var pronunciation: String = "",
 
     @ColumnInfo(name = "Pitch")
     var pitch: String = "",
-
-    @ColumnInfo(name = "LanguageCode")
-    var languageCode: String = "",
 
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "VocabularyID")

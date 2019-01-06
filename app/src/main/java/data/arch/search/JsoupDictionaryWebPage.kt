@@ -1,5 +1,6 @@
 package data.arch.search
 
+import android.os.AsyncTask
 import data.arch.vocab.IDefinitionFactory
 import data.arch.vocab.IRelatedWordFactory
 import data.arch.vocab.IVocabularyFactory
@@ -13,15 +14,19 @@ import org.jsoup.nodes.Document
 import java.net.URL
 
 //TODO: Change lazy public vals to private and use the SearchProvider
-abstract class JsoupDictionaryWebPage(val vocabularyFactory: IVocabularyFactory,
-                                      val definitionFactory: IDefinitionFactory,
-                                      val relatedWordFactory: IRelatedWordFactory)
+abstract class JsoupDictionaryWebPage(private val vocabularyFactory: IVocabularyFactory,
+                                      private val definitionFactory: IDefinitionFactory,
+                                      private val relatedWordFactory: IRelatedWordFactory)
     : IDictionaryWebPage {
     // ====================== ABSTRACT ======================
     abstract fun buildQueryURL(searchTerm: String,
                                         wordLanguageCode: String,
                                         definitionLanguageCode: String,
                                         matchType: MatchType): URL
+
+    abstract override fun getSupportedMatchTypes(): Set<MatchType>
+
+    abstract override fun getDictionaryName(): String
 
     // ====================== PUBLIC =====================
 
@@ -46,10 +51,9 @@ abstract class JsoupDictionaryWebPage(val vocabularyFactory: IVocabularyFactory,
     override fun loadUrl(url: String,
                          wordLanguageCode: String,
                          definitionLanguageCode: String,
-                         pageLoadedCallback: IDictionaryWebPage.OnPageParsed) {
+                         onPageParsed: IDictionaryWebPage.OnPageParsed) {
         val userAgent = "Mozilla"
-        val document = Jsoup.connect(url).userAgent(userAgent).data().get()
-        pageLoadedCallback.onPageParsed(document, wordLanguageCode, definitionLanguageCode)
+        ConnectAsyncTask(url, userAgent, wordLanguageCode, definitionLanguageCode, onPageParsed).execute()
     }
 
     //TODO: Try to find another alternative to page parsing again
@@ -57,12 +61,29 @@ abstract class JsoupDictionaryWebPage(val vocabularyFactory: IVocabularyFactory,
                wordLanguageCode: String,
                definitionLanguageCode: String,
                matchType: MatchType,
-               pageLoadedCallback: IDictionaryWebPage.OnPageParsed) {
+               onPageParsed: IDictionaryWebPage.OnPageParsed) {
 
         val url = buildQueryURL(searchTerm, wordLanguageCode, definitionLanguageCode, matchType)
                 .toString()
         val userAgent = "Mozilla"
-        val document = Jsoup.connect(url).userAgent(userAgent).data().get()
-        pageLoadedCallback.onPageParsed(document, wordLanguageCode, definitionLanguageCode)
+        ConnectAsyncTask(url, userAgent, wordLanguageCode, definitionLanguageCode, onPageParsed).execute()
+    }
+
+    private class ConnectAsyncTask(val url : String,
+                                   val userAgent: String,
+                                   val wordLanguageCode: String,
+                                   val definitionLanguageCode: String,
+                                   val onPageParsed: IDictionaryWebPage.OnPageParsed)
+        : AsyncTask<Void, Void, Document>() {
+        override fun doInBackground(vararg params: Void?): Document {
+            return Jsoup.connect(url).userAgent(userAgent).data().get()
+        }
+
+        override fun onPostExecute(result: Document?) {
+            super.onPostExecute(result)
+            if (result != null){
+                onPageParsed.onPageParsed(result, wordLanguageCode, definitionLanguageCode)
+            }
+        }
     }
 }
