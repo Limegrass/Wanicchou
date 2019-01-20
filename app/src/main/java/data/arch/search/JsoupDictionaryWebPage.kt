@@ -69,6 +69,7 @@ abstract class JsoupDictionaryWebPage(private val vocabularyFactory: IVocabulary
         ConnectAsyncTask(url, userAgent, wordLanguageCode, definitionLanguageCode, onPageParsed).execute()
     }
 
+    //TODO: Remove AsyncTask for proper implementation with coroutines
     private class ConnectAsyncTask(val url : String,
                                    val userAgent: String,
                                    val wordLanguageCode: String,

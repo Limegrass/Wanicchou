@@ -1,11 +1,7 @@
 package com.waifusims.wanicchou.viewmodel
 
 import android.app.Application
-import android.arch.lifecycle.AndroidViewModel
-import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.MutableLiveData
-import data.arch.vocab.DefinitionLiveData
-import data.arch.vocab.VocabularyLiveData
+import android.arch.lifecycle.*
 import data.room.entity.Definition
 import data.room.entity.Vocabulary
 import data.arch.vocab.WordListEntry
@@ -14,52 +10,94 @@ import data.arch.vocab.WordListEntry
 // TODO: Remove related words completely and just use the new scheme for queries to find same words
 class SearchViewModel(application: Application) : AndroidViewModel(application) {
     var relatedWords: List<WordListEntry> = getDefaultRelatedWord()
-    var vocabularyList : MutableLiveData<List<Vocabulary>> = getDefaultVocabularyList()
-    var definitionList : MutableLiveData<List<Definition>> = getDefaultDefinitionList()
+//    var vocabularyList : LiveData<List<Vocabulary>> = getDefaultMutableLiveData()
+//    var definitionList : List<LiveData<List<Definition>>> = getDefaultDefinitionList()
+    private val vocabularyMutableLiveData : MutableLiveData<List<Vocabulary>> = MutableLiveData()
+    private val definitionMutableLiveData : MutableLiveData<LiveData<List<Definition>>> = MutableLiveData()
+    init {
+        vocabularyMutableLiveData.value = listOf(getDefaultVocabulary())
+        definitionMutableLiveData.value = object : LiveData<List<Definition>>(){
+            override fun getValue() = getDefaultDefinitionList()
+        }
+    }
+
+//    private val mediator : MediatorLiveData<LiveData<Vocabulary>> = MediatorLiveData()
+    fun setVocabularyData (data : List<Vocabulary>){
+        vocabularyMutableLiveData.value = data
+    }
+
+    fun setDefinitionData (data : LiveData<List<Definition>>) {
+        definitionMutableLiveData.value = data
+    }
+
+    fun setVocabularyObserver(lifecycleOwner: LifecycleOwner, observer: Observer<List<Vocabulary>>){
+        vocabularyMutableLiveData.observe(lifecycleOwner, observer)
+    }
+    fun setDefinitionObserver(lifecycleOwner: LifecycleOwner, observer: Observer<LiveData<List<Definition>>>){
+        definitionMutableLiveData.observe(lifecycleOwner, observer)
+    }
 
     val vocabulary : Vocabulary
     get() {
-        return vocabularyList.value!![currentVocabularyIndex]
+        return if (vocabularyMutableLiveData.value != null){
+            vocabularyMutableLiveData.value!![wordIndex]
+        }
+        else {
+            getDefaultVocabulary()
+        }
     }
 
     val definitions : List<Definition>
     get() {
-        return definitionList.value!!
+        return if (definitionMutableLiveData.value != null){
+            definitionMutableLiveData.value!!.value!!
+        }
+        else{
+            getDefaultDefinitionList()
+        }
     }
 
+    fun moveToPreviousWord() {
+        this.wordIndex++
+    }
     fun moveToNextWord() {
-        this.currentVocabularyIndex++
+        this.wordIndex++
     }
 
     //TODO: Should change the list of definition/related word on vocab change.
-    private var currentVocabularyIndex : Int = 0
+    var wordIndex : Int = 0
 
     private fun getDefaultRelatedWord(): List<WordListEntry>{
-        return listOf(WordListEntry("テスト"))
+        return listOf(WordListEntry(DEFAULT_RELATED_WORD))
     }
 
-    private fun getDefaultVocabularyList(): MutableLiveData<List<Vocabulary>>{
-        val word = "和日帳"
-        val pronunciation = "わにっちょう"
-        val wordLanguageCode = "jp"
+    private fun getDefaultVocabulary() : Vocabulary {
+        val word = DEFAULT_WORD
+        val pronunciation = DEFAULT_WORD_PRONUNCIATION
+        val wordLanguageCode = DEFAULT_LANGUAGE_CODE
 
-        val vocabulary = Vocabulary(word, wordLanguageCode, pronunciation)
-        val liveData = MutableLiveData<List<Vocabulary>>()
-        liveData.value = listOf(vocabulary)
-        return liveData
+        return Vocabulary(word, wordLanguageCode, pronunciation)
     }
 
-    private fun getDefaultDefinitionList(): MutableLiveData<List<Definition>>{
-        val definitionText = "使えないアプリ。"
-        val definitionLanguageCode = "jp"
+    private fun getDefaultDefinitionList(): List<Definition> {
+        val definitionText = DEFAULT_DEFINITION
+        val definitionLanguageCode = DEFAULT_LANGUAGE_CODE
         val definition = Definition(definitionText, definitionLanguageCode, 0, 0)
-        val liveData = MutableLiveData<List<Definition>>()
-        liveData.value = listOf(definition)
-        return liveData
+        return listOf(definition)
+    }
+
+    companion object {
+        const val DEFAULT_DEFINITION = "使えないアプリ。"
+        const val DEFAULT_LANGUAGE_CODE = "jp"
+        const val DEFAULT_WORD_PRONUNCIATION = "わにっちょう"
+        const val DEFAULT_WORD = "和日帳"
+        const val DEFAULT_RELATED_WORD = "テスト"
     }
 
 
-//AUtomatically display the first entry, and related definitions/tags/etc for it
+
+
+//Automatically display the first entry, and related definitions/tags/etc for it
 //    init {
 //        vocabularyRepository.getLatest(this)
 //    }

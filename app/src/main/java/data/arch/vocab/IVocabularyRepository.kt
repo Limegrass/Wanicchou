@@ -19,12 +19,13 @@ interface IVocabularyRepository {
                wordLanguageCode: String,
                definitionLanguageCode: String,
                matchType: MatchType = MatchType.WORD_EQUALS,
+               dictionary: String,
                onPageParsed: IDictionaryWebPage.OnPageParsed,
                lifecycleOwner: LifecycleOwner)
 
     interface OnQueryFinish{
         fun onQueryFinish(vocabularyList: List<Vocabulary>,
-                          definitionList: List<Definition>,
+                          definitionList: LiveData<List<Definition>>,
                           relatedWords: List<WordListEntry>)
     }
 }

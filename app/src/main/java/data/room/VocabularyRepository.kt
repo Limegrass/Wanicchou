@@ -14,10 +14,8 @@ import data.arch.vocab.WordListEntry
 // TODO: Decision to search DB or online should occur here
 // TODO: Make things nullable and do appropriate logic when null for everything
 class VocabularyRepository(application: Application,
-                           var webPage: IDictionaryWebPage,
                            private val onQueryFinish : IVocabularyRepository.OnQueryFinish)
     : IVocabularyRepository {
-    //onQueryFinish might need to be a public var at some point
 
     val database = WanicchouDatabase.getInstance(application)
 
@@ -91,55 +89,63 @@ class VocabularyRepository(application: Application,
                         wordLanguageCode: String,
                         definitionLanguageCode: String,
                         matchType: MatchType,
+                        dictionary: String,
                         onPageParsed: IDictionaryWebPage.OnPageParsed,
-                        lifecycleOwner: LifecycleOwner) {
-        // Do whatever, then use the callback
+                        lifecycleOwner: LifecycleOwner){
         val vocabularyList = searchVocabularyDatabase(searchTerm,
                                                       matchType,
                                                       wordLanguageCode,
                                                       definitionLanguageCode)
-        if(vocabularyList.isEmpty()){
-            webPage.search(searchTerm,
-                    wordLanguageCode,
-                    definitionLanguageCode,
-                    matchType,
-                    onPageParsed)
+        val observer = Observer<List<Vocabulary>> {
+            it ->
+            // Web Search
+            if (it!!.isEmpty()){
+                val webPage = SearchProvider.getWebPage(dictionary)
+                webPage.search(searchTerm,
+                        wordLanguageCode,
+                        definitionLanguageCode,
+                        matchType,
+                        onPageParsed)
+            }
+            // Else it exists in DB, so return it
+            else {
+                val firstMatch = it[0]
+                val definitionList = database.definitionDao()
+                                             .getVocabularyDefinitions(firstMatch.vocabularyID,
+                                                                       definitionLanguageCode)
+                val relatedWords = getRelatedWords(firstMatch.vocabularyID,
+                                                   definitionLanguageCode,
+                                                   dictionary)
+                onQueryFinish.onQueryFinish(vocabularyList.value!!, definitionList, relatedWords)
+            }
         }
-        else {
-            val currentVocabularyIndex = 0
-            val definitionList = getDefinitionList(vocabularyList,
-                    definitionLanguageCode,
-                    currentVocabularyIndex)
-            val firstMatch = vocabularyList[0]
-            val relatedWords = getRelatedWords(firstMatch.vocabularyID,
-                    definitionLanguageCode,
-                    webPage.getDictionaryName())
-            onQueryFinish.onQueryFinish(vocabularyList, definitionList, relatedWords)
-        }
+        // search online
+        vocabularyList.observe(lifecycleOwner, observer)
     }
-
-    private fun getDefinitionList(vocabularyList: List<Vocabulary>,
-                                  definitionLanguageCode: String,
-                                  vocabularyIndex: Int):
-            List<Definition> {
-        val vocabulary = vocabularyList[vocabularyIndex]
-        return database.definitionDao().getVocabularyDefinitions(vocabulary.vocabularyID,
-                                                                 definitionLanguageCode)
-    }
+//    private fun getDefinitionList(vocabularyList: List<Vocabulary>,
+//                                  definitionLanguageCode: String)
+//            : List<List<Definition>>{
+//        val definitionList = arrayListOf<LiveData<List<Definition>>>()
+//        vocabularyList.forEach {
+//            val definitions = database.definitionDao()
+//                                      .getVocabularyDefinitions(it.vocabularyID, definitionLanguageCode)
+//            definitionList.add(definitions.value!!)
+//        }
+//        return definitionList
+//    }
 
     override fun getLatest(onQueryFinish: IVocabularyRepository.OnQueryFinish) {
         val vocabularyList = database.vocabularyDao().getLatest()
-        if (!vocabularyList.isEmpty()){
-            val latestDefinition = database.definitionDao()
-                    .getLatestDefinition(vocabularyList[0].vocabularyID)
-            val dictionaryID = latestDefinition[0].dictionaryID
-            val definitionLanguageCode = latestDefinition[0].languageCode
-            val dictionary = getDictionaryName(dictionaryID)
+        val latestDefinition = database.definitionDao()
+                .getLatestDefinition(vocabularyList.value!![0].vocabularyID)
+        val dictionaryID = latestDefinition.value!![0].dictionaryID
+        val definitionLanguageCode = latestDefinition.value!![0].languageCode
+        val dictionary = getDictionaryName(dictionaryID)
+        val offlineList = vocabularyList.value!!
 
-            val relatedWords = SearchProvider.getWebPage(dictionary)
-                    .getRelatedWords(vocabularyList, definitionLanguageCode)
-            onQueryFinish.onQueryFinish(vocabularyList, latestDefinition, relatedWords)
-        }
+        val relatedWords = SearchProvider.getWebPage(dictionary)
+                .getRelatedWords(offlineList, definitionLanguageCode)
+        onQueryFinish.onQueryFinish(vocabularyList.value!!, latestDefinition, relatedWords)
     }
 
     private fun getDictionaryName(dictionaryID: Int): String {
@@ -147,8 +153,9 @@ class VocabularyRepository(application: Application,
     }
 
     fun getDefinitions(vocabularyID: Int,
-                       definitionLanguageCode: String): List<Definition> {
-        return database.definitionDao().getVocabularyDefinitions(vocabularyID, definitionLanguageCode)
+                       definitionLanguageCode: String): List<LiveData<List<Definition>>>{
+
+        return arrayListOf(database.definitionDao().getVocabularyDefinitions(vocabularyID, definitionLanguageCode))
     }
 
     fun getRelatedWords(vocabularyID: Int,
@@ -164,7 +171,7 @@ class VocabularyRepository(application: Application,
     private fun searchVocabularyDatabase(searchTerm: String,
                                          matchType: MatchType,
                                          wordLanguageCode: String,
-                                         definitionLanguageCode: String): List<Vocabulary> {
+                                         definitionLanguageCode: String): LiveData<List<Vocabulary>> {
         return when (matchType) {
             MatchType.WORD_EQUALS -> database.vocabularyDao().search(searchTerm, wordLanguageCode)
             MatchType.WORD_WILDCARDS -> database.vocabularyDao().searchWithWildcards(searchTerm, wordLanguageCode)
@@ -191,7 +198,7 @@ class VocabularyRepository(application: Application,
 
     fun addTag(tag : String, word: String){
         val tagID = getTagID(tag)
-        val vocabularyID = database.vocabularyDao().getVocabulary(word).vocabularyID
+        val vocabularyID = database.vocabularyDao().getVocabulary(word).value!!.vocabularyID
         val vocabularyTag = VocabularyTag(tagID, vocabularyID)
         database.vocabularyTagDao().insert(vocabularyTag)
     }

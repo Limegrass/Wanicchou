@@ -1,6 +1,7 @@
 package com.waifusims.wanicchou
 
 import android.app.SearchManager
+import android.arch.lifecycle.LifecycleOwner
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
@@ -27,8 +28,6 @@ import com.waifusims.wanicchou.viewmodel.SearchViewModel
 import data.arch.vocab.WordListEntry
 import data.arch.anki.AnkiDroidHelper
 import data.arch.search.IDictionaryWebPage
-import data.arch.vocab.DefinitionLiveData
-import data.arch.vocab.VocabularyLiveData
 import data.search.SearchProvider
 import org.jsoup.nodes.Document
 
@@ -59,11 +58,11 @@ class SearchActivity : AppCompatActivity() {
 
     private val onQueryFinish = object : IVocabularyRepository.OnQueryFinish {
         override fun onQueryFinish(vocabularyList: List<Vocabulary>,
-                                   definitionList: List<Definition>,
+                                   definitionList: LiveData<List<Definition>>,
                                    relatedWords: List<WordListEntry>) {
             Log.d(TAG, "onQueryFinished")
-            searchViewModel.vocabularyList.value = vocabularyList
-            searchViewModel.definitionList.value = definitionList
+            searchViewModel.setVocabularyData(vocabularyList)
+            searchViewModel.setDefinitionData(definitionList)
             searchViewModel.relatedWords = relatedWords
         }
     }
@@ -78,10 +77,12 @@ class SearchActivity : AppCompatActivity() {
 
             val relatedWords = webPage.getRelatedWords(document, wordLanguageCode, definitionLanguageCode)
 
-            searchViewModel.vocabularyList.value = vocabularyList
-            searchViewModel.definitionList.value = definitionList
-            searchViewModel.relatedWords = relatedWords
+            searchViewModel.setVocabularyData(vocabularyList)
+            searchViewModel.setDefinitionData(object : LiveData<List<Definition>>(){
+                override fun getValue() = definitionList
+            })
 
+            searchViewModel.relatedWords = relatedWords
         }
     }
 
@@ -117,10 +118,19 @@ class SearchActivity : AppCompatActivity() {
         val searchManager = getSystemService(Context.SEARCH_SERVICE) as SearchManager
         val searchableInfo = searchManager.getSearchableInfo(componentName)
         val searchView = menu.findItem(R.id.menu_search).actionView as SearchView
-        searchView.apply {
-            Log.i(TAG, "SearchableInfo: $searchableInfo")
-            setSearchableInfo(searchableInfo)
-        }
+        searchView.setSearchableInfo(searchableInfo)
+        searchView.setOnQueryTextListener(
+                object : SearchView.OnQueryTextListener {
+                    override fun onQueryTextChange(changedText: String?): Boolean {
+                        return true
+                    }
+
+                    override fun onQueryTextSubmit(query: String?): Boolean {
+                        menu.findItem(R.id.menu_search).collapseActionView()
+                        return true
+                    }
+                })
+        Log.i(TAG, "SearchableInfo: $searchableInfo")
         return true
     }
 
@@ -141,11 +151,9 @@ class SearchActivity : AppCompatActivity() {
         sharedPreferences = WanicchouSharedPreferenceHelper(this)
 
         webPage = SearchProvider.getWebPage(sharedPreferences.dictionary)
-        repository = VocabularyRepository(this.application, webPage, onQueryFinish)
-        searchViewModel = ViewModelProviders.of(this).get(SearchViewModel::class.java)
+        repository = VocabularyRepository(this.application, onQueryFinish)
 
-        setWordObserver()
-        setDefinitionObserver()
+        initializeViewModel()
 
         handleIntent(this.intent)
         //TODO: Don't initialize this until they request for a card
@@ -168,7 +176,6 @@ class SearchActivity : AppCompatActivity() {
 
     }
 
-
     override fun onSearchRequested(searchEvent: SearchEvent?): Boolean {
         Log.i(TAG, "SearchRequested: $searchEvent")
         return super.onSearchRequested(searchEvent)
@@ -181,28 +188,39 @@ class SearchActivity : AppCompatActivity() {
                 sharedPreferences.wordLanguageCode,
                 sharedPreferences.definitionLanguageCode,
                 sharedPreferences.matchType,
+                sharedPreferences.dictionary,
                 onPageParsed,
                 lifecycleOwner)
     }
 
+    private fun initializeViewModel(){
+        searchViewModel = ViewModelProviders.of(this).get(SearchViewModel::class.java)
+        setWordObserver()
+        setDefinitionObserver()
+    }
+
     private fun setWordObserver(){
         val tvWord = findViewById<TextView>(R.id.tv_word)
+        val tvPronunciation = findViewById<TextView>(R.id.tv_pronunciation)
         val wordObserver = Observer<List<Vocabulary>>{
-             it -> tvWord.text = it!![0].word
+             it ->
+            tvWord.text = it!![searchViewModel.wordIndex].word
+            tvPronunciation.text = it[searchViewModel.wordIndex].pronunciation
         }
-        searchViewModel.vocabularyList.observe(this, wordObserver)
+        val lifecycleOwner = this
+        searchViewModel.setVocabularyObserver(lifecycleOwner, wordObserver)
     }
 
     private fun setDefinitionObserver() {
         val recyclerView = findViewById<RecyclerView>(R.id.rv_definitions)
         val context = this@SearchActivity
-        val definitionObserver = Observer<List<Definition>>{
+        val definitionObserver = Observer<LiveData<List<Definition>>>{
             it ->
             recyclerView.layoutManager = LinearLayoutManager(context)
-            recyclerView.adapter = DefinitionAdapter(it!!)
+            recyclerView.adapter = DefinitionAdapter(it!!.value!!)
         }
-
-        searchViewModel.definitionList.observe(this, definitionObserver)
+        val lifecycleOwner = this
+        searchViewModel.setDefinitionObserver(lifecycleOwner, definitionObserver)
     }
 
 
