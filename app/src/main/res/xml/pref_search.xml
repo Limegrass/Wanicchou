@@ -1,33 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android">
     <PreferenceCategory
-        android:title="@string/search_settings_category_title" />
-    <ListPreference
-        android:title="@string/pref_dictionary_title"
-        android:key="@string/pref_dictionary_title"
-        android:defaultValue="@string/pref_dictionary_default"
-        android:entries="@array/pref_search_provider_entries"
-        android:entryValues="@array/pref_search_provider_values"/>
+        android:title="@string/search_settings_category_title" >
+        <ListPreference
+            android:title="@string/pref_dictionary_title"
+            android:key="@string/pref_dictionary_key"
+            android:defaultValue="@string/pref_dictionary_default"
+            android:entries="@array/pref_search_provider_entries"
+            android:entryValues="@array/pref_search_provider_values"/>
 
-    <ListPreference
-        android:title="@string/pref_match_type_title"
-        android:key="@string/pref_match_type_key"
-        android:defaultValue="@string/pref_match_type_default"
-        android:entries="@array/pref_match_type_entries"
-        android:entryValues="@array/pref_match_type_values"/>
+        <ListPreference
+            android:title="@string/pref_match_type_title"
+            android:key="@string/pref_match_type_key"
+            android:defaultValue="@string/pref_match_type_default"
+            android:entries="@array/pref_match_type_entries"
+            android:entryValues="@array/pref_match_type_values"/>
 
-    <ListPreference
-        android:title="@string/pref_auto_delete_title"
-        android:key="@string/pref_auto_delete_key"
-        android:defaultValue="@string/pref_auto_delete_default"
-        android:entries="@array/pref_auto_delete_entries"
-        android:entryValues="@array/pref_auto_delete_values"/>
+        <ListPreference
+            android:title="@string/pref_auto_delete_title"
+            android:key="@string/pref_auto_delete_key"
+            android:defaultValue="@string/pref_auto_delete_default"
+            android:entries="@array/pref_auto_delete_entries"
+            android:entryValues="@array/pref_auto_delete_values"/>
 
-    <ListPreference
-        android:title="@string/pref_auto_save_title"
-        android:key="@string/pref_auto_save_key"
-        android:defaultValue="@string/pref_auto_save_default"
-        android:entries="@array/pref_auto_save_entries"
-        android:entryValues="@array/pref_auto_save_values"/>
+        <ListPreference
+            android:title="@string/pref_auto_save_title"
+            android:key="@string/pref_auto_save_key"
+            android:defaultValue="@string/pref_auto_save_default"
+            android:entries="@array/pref_auto_save_entries"
+            android:entryValues="@array/pref_auto_save_values"/>
 
+    </PreferenceCategory>
 </PreferenceScreen>

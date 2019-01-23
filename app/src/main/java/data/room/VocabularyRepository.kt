@@ -180,7 +180,7 @@ class VocabularyRepository(application: Application,
             MatchType.WORD_CONTAINS -> database.vocabularyDao().searchContains(searchTerm, wordLanguageCode)
             MatchType.DEFINITION_CONTAINS -> database.vocabularyDao()
                     .searchDefinitionContains(searchTerm, definitionLanguageCode)
-            MatchType.DEFINITION_OR_WORD_CONTAINS -> database.vocabularyDao()
+            MatchType.WORD_OR_DEFINITION_CONTAINS -> database.vocabularyDao()
                     .searchWordOrDefinitionContains(searchTerm, wordLanguageCode, definitionLanguageCode)
         }
     }

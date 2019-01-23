@@ -8,53 +8,40 @@
 
     <string-array
         name="pref_search_provider_values">
-        <item>data.vocab.jp.search.sanseido.Sanseido</item>
+        <item>Sanseido</item>
     </string-array>
-
-    <string-array name="pref_dictionary_type_entries">
-        <item>Japanese to Japanese</item>
-        <item>Japanese to English</item>
-        <!--<item>English to Japanese</item>-->
-    </string-array>
-
-    <string-array
-        name="pref_dictionary_type_values">
-        <item>JJ</item>
-        <item>JE</item>
-        <!--<item>EJ</item>-->
-    </string-array>
-
 
     <string-array
         name="pref_match_type_entries">
-        <item>Forward Match</item>
-        <item>Exact Match</item>
-        <item>Backwards Match</item>
-        <item>Full Text Search</item>
-        <item>Partial Match</item>
+        <item>Word Starts with</item>
+        <item>Word Ends with</item>
+        <item>Word Equals</item>
+        <item>Word Contains</item>
+        <item>Word Contains with Wildcards</item>
+        <item>Definition Contains</item>
+        <item>Word or Definition Contains</item>
     </string-array>
 
     <string-array
         name="pref_match_type_values">
-        <item>0</item>
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-        <item>5</item>
+        <item>WORD_STARTS_WITH</item>
+        <item>WORD_ENDS_WITH</item>
+        <item>WORD_EQUALS</item>
+        <item>WORD_CONTAINS</item>
+        <item>WORD_WILDCARDS</item>
+        <item>DEFINITION_CONTAINS</item>
+        <item>WORD_OR_DEFINITION_CONTAINS</item>
     </string-array>
 
     <string-array
         name="pref_auto_delete_entries">
-        <item>Never Delete</item>
+        <item>Never AutoDelete</item>
         <item>Delete on Anki Import</item>
-        <item>Delete All on App Close</item>
     </string-array>
-
     <string-array
         name="pref_auto_delete_values">
-        <item>never</item>
-        <item>import</item>
-        <item>close</item>
+        <item>NEVER</item>
+        <item>ANKI_IMPORT</item>
     </string-array>
 
     <string-array
@@ -66,9 +53,9 @@
     </string-array>
     <string-array
         name="pref_auto_save_values">
-        <item>none</item>
-        <item>all</item>
-        <item>success</item>
-        <item>info</item>
+        <item>NEVER</item>
+        <item>ALL</item>
+        <item>SUCCESS</item>
+        <item>INFO</item>
     </string-array>
 </resources>

@@ -21,7 +21,7 @@
     <string name="pref_dictionary_default" translatable="false">Sanseido</string>
     <string name="pref_word_language_default" translatable="false">jp</string>
     <string name="pref_definition_language_default" translatable="false">jp</string>
-    <string name="pref_match_type_default" translatable="false">WORD_EQUALS</string>
+    <string name="pref_match_type_default" translatable="false">WORD_STARTS_WITH</string>
     <string name="pref_auto_delete_default" translatable="false">NEVER</string>
     <string name="pref_auto_save_default" translatable="false">NEVER</string>
 </resources>

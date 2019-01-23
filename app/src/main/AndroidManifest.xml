@@ -42,14 +42,13 @@
                 <!--android:name="android.support.PARENT_ACTIVITY"-->
                 <!--android:value=".SearchActivity" />-->
         <!--</activity>-->
-        <!--<activity-->
-            <!--android:name=".SettingsActivity"-->
-            <!--android:label="@string/settings_action_label"-->
-            <!--android:parentActivityName=".SearchActivity">-->
-            <!--<meta-data-->
-                <!--android:name="android.support.PARENT_ACTIVITY"-->
-                <!--android:value=".SearchActivity" />-->
-        <!--</activity>-->
+        <activity
+            android:name=".SettingsActivity"
+            android:label="@string/settings_action_label">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".SearchActivity" />
+        </activity>
     </application>
 
 </manifest>

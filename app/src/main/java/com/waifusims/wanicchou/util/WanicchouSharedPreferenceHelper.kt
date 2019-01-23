@@ -54,7 +54,6 @@ class WanicchouSharedPreferenceHelper(val context: Context) {
             val pref = getString(R.string.pref_auto_delete_key,
                     R.string.pref_auto_delete_default)!!
             return AutoDelete.valueOf(pref)
-
         }
         set(value) {
             putString(R.string.pref_auto_delete_key, value.toString())

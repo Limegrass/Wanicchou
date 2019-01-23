@@ -141,6 +141,13 @@ class SearchActivity : AppCompatActivity() {
 //                (item.actionView as SearchView).onActionViewExpanded()
                 true
             }
+            R.id.action_settings -> {
+                val context = this
+                val childActivity = SettingsActivity::class.java
+                val settingsActivityIntent = Intent(context, childActivity)
+                startActivity(settingsActivityIntent)
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }
@@ -148,7 +155,8 @@ class SearchActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_wanicchou)
-        sharedPreferences = WanicchouSharedPreferenceHelper(this)
+        val context = this
+        sharedPreferences = WanicchouSharedPreferenceHelper(context)
 
         webPage = SearchProvider.getWebPage(sharedPreferences.dictionary)
         repository = VocabularyRepository(this.application, onQueryFinish)
