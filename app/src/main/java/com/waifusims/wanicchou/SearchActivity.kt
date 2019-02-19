@@ -1,7 +1,6 @@
 package com.waifusims.wanicchou
 
 import android.app.SearchManager
-import android.arch.lifecycle.LifecycleOwner
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
@@ -25,9 +24,9 @@ import data.room.entity.Vocabulary
 import data.arch.vocab.IVocabularyRepository
 import data.room.VocabularyRepository
 import com.waifusims.wanicchou.viewmodel.SearchViewModel
-import data.arch.vocab.WordListEntry
 import data.arch.anki.AnkiDroidHelper
 import data.arch.search.IDictionaryWebPage
+import data.room.entity.VocabularyInformation
 import data.search.SearchProvider
 import org.jsoup.nodes.Document
 
@@ -51,40 +50,18 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var searchViewModel: SearchViewModel
     private lateinit var sharedPreferences : WanicchouSharedPreferenceHelper
     private lateinit var ankiDroidHelper : AnkiDroidHelper
-    //TODO: Make sure that webviews are automatically recycled but I'm pretty sure
-    private lateinit var webPage : IDictionaryWebPage
     private var toast : Toast? = null
 
 
     private val onQueryFinish = object : IVocabularyRepository.OnQueryFinish {
-        override fun onQueryFinish(vocabularyList: List<Vocabulary>,
-                                   definitionList: LiveData<List<Definition>>,
-                                   relatedWords: List<WordListEntry>) {
+        override fun onQueryFinish(vocabularyInformation: List<VocabularyInformation>) {
             Log.d(TAG, "onQueryFinished")
-            searchViewModel.setVocabularyData(vocabularyList)
-            searchViewModel.setDefinitionData(definitionList)
-            searchViewModel.relatedWords = relatedWords
+            searchViewModel.setVocabularyInformation(vocabularyInformation)
         }
     }
 
-    private val onPageParsed = object : IDictionaryWebPage.OnPageParsed {
-        override fun onPageParsed(document: Document,
-                                  wordLanguageCode: String,
-                                  definitionLanguageCode: String) {
-            val vocabularyList = listOf(webPage.getVocabulary(document, wordLanguageCode))
 
-            val definitionList = listOf(webPage.getDefinition(document, definitionLanguageCode))
 
-            val relatedWords = webPage.getRelatedWords(document, wordLanguageCode, definitionLanguageCode)
-
-            searchViewModel.setVocabularyData(vocabularyList)
-            searchViewModel.setDefinitionData(object : LiveData<List<Definition>>(){
-                override fun getValue() = definitionList
-            })
-
-            searchViewModel.relatedWords = relatedWords
-        }
-    }
 
 //            val vocabularyList = searchVocabularyDatabase(dictionaryEntry.word,
 //                    MatchType.WORD_EQUALS,
@@ -157,12 +134,8 @@ class SearchActivity : AppCompatActivity() {
         setContentView(R.layout.activity_wanicchou)
         val context = this
         sharedPreferences = WanicchouSharedPreferenceHelper(context)
-
-        webPage = SearchProvider.getWebPage(sharedPreferences.dictionary)
         repository = VocabularyRepository(this.application, onQueryFinish)
-
         initializeViewModel()
-
         handleIntent(this.intent)
         //TODO: Don't initialize this until they request for a card
         ankiDroidHelper = AnkiDroidHelper(this)
@@ -197,38 +170,31 @@ class SearchActivity : AppCompatActivity() {
                 sharedPreferences.definitionLanguageCode,
                 sharedPreferences.matchType,
                 sharedPreferences.dictionary,
-                onPageParsed,
                 lifecycleOwner)
     }
 
     private fun initializeViewModel(){
         searchViewModel = ViewModelProviders.of(this).get(SearchViewModel::class.java)
         setWordObserver()
-        setDefinitionObserver()
     }
 
     private fun setWordObserver(){
         val tvWord = findViewById<TextView>(R.id.tv_word)
         val tvPronunciation = findViewById<TextView>(R.id.tv_pronunciation)
-        val wordObserver = Observer<List<Vocabulary>>{
-             it ->
-            tvWord.text = it!![searchViewModel.wordIndex].word
-            tvPronunciation.text = it[searchViewModel.wordIndex].pronunciation
-        }
-        val lifecycleOwner = this
-        searchViewModel.setVocabularyObserver(lifecycleOwner, wordObserver)
-    }
-
-    private fun setDefinitionObserver() {
         val recyclerView = findViewById<RecyclerView>(R.id.rv_definitions)
         val context = this@SearchActivity
-        val definitionObserver = Observer<LiveData<List<Definition>>>{
-            it ->
+
+        //TODO: Reset the wordIndex on new search
+        val wordObserver = Observer<List<VocabularyInformation>>{
+            tvWord.text = it!![searchViewModel.getWordIndex()].vocabulary!!.word
+            tvPronunciation.text = it[searchViewModel.getWordIndex()].vocabulary!!.pronunciation
+
             recyclerView.layoutManager = LinearLayoutManager(context)
-            recyclerView.adapter = DefinitionAdapter(it!!.value!!)
+            recyclerView.adapter = DefinitionAdapter(it[searchViewModel.getWordIndex()].definitions)
         }
+
         val lifecycleOwner = this
-        searchViewModel.setDefinitionObserver(lifecycleOwner, definitionObserver)
+        searchViewModel.setVocabularyInformationObserver(lifecycleOwner, wordObserver)
     }
 
 

@@ -4,10 +4,9 @@ import android.arch.lifecycle.LifecycleOwner
 import android.arch.lifecycle.LiveData
 import android.webkit.WebView
 import data.arch.search.IDictionaryWebPage
-import data.room.entity.Definition
-import data.room.entity.Vocabulary
 import data.graveyard.DictionaryEntry
 import data.enums.MatchType
+import data.room.entity.*
 
 interface IVocabularyRepository {
     fun getLatest(onQueryFinish: OnQueryFinish)
@@ -20,12 +19,19 @@ interface IVocabularyRepository {
                definitionLanguageCode: String,
                matchType: MatchType = MatchType.WORD_EQUALS,
                dictionary: String,
-               onPageParsed: IDictionaryWebPage.OnPageParsed,
                lifecycleOwner: LifecycleOwner)
 
+//    fun save(definition : Definition)
+//    fun save(vocabulary : Vocabulary)
+//    fun save(note : VocabularyNote)
+//    fun save(note : DefinitionNote)
+//    fun save(tag : Tag)
+//    fun save(vocabularyRelation : VocabularyRelation)
+//    fun save(tag : VocabularyTag)
+
     interface OnQueryFinish{
-        fun onQueryFinish(vocabularyList: List<Vocabulary>,
-                          definitionList: LiveData<List<Definition>>,
-                          relatedWords: List<WordListEntry>)
+        fun onQueryFinish(vocabularyInformation: List<VocabularyInformation>)
     }
+
+
 }

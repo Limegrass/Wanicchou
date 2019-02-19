@@ -7,16 +7,20 @@ import data.room.entity.Dictionary
 
 @Dao
 interface DictionaryDao : BaseDao<Dictionary> {
-    @Query("""
+    @Query(value = """
         SELECT d.*
         FROM Dictionary d
         WHERE d.DictionaryName = :dictionary""")
     fun getDictionaryByName(dictionary: String) : LiveData<Dictionary>
 
-    @Query("""
+    @Query(value = """
         SELECT d.*
         FROM Dictionary d
-        WHERE d.DictionaryID = :dictionaryID
-    """)
+        WHERE d.DictionaryID = :dictionaryID""")
     fun getDictionaryByID(dictionaryID : Int) : LiveData<Dictionary>
+
+    @Query(value = """
+        SELECT d.*
+        FROM Dictionary d""")
+    fun getAllDictionaries() : LiveData<List<Dictionary>>
 }

@@ -53,7 +53,13 @@ abstract class JsoupDictionaryWebPage(private val vocabularyFactory: IVocabulary
                          definitionLanguageCode: String,
                          onPageParsed: IDictionaryWebPage.OnPageParsed) {
         val userAgent = "Mozilla"
-        ConnectAsyncTask(url, userAgent, wordLanguageCode, definitionLanguageCode, onPageParsed).execute()
+        val webPage = this
+        ConnectAsyncTask(url,
+                         userAgent,
+                         wordLanguageCode,
+                         definitionLanguageCode,
+                         onPageParsed,
+                         webPage).execute()
     }
 
     //TODO: Try to find another alternative to page parsing again
@@ -66,7 +72,13 @@ abstract class JsoupDictionaryWebPage(private val vocabularyFactory: IVocabulary
         val url = buildQueryURL(searchTerm, wordLanguageCode, definitionLanguageCode, matchType)
                 .toString()
         val userAgent = "Mozilla"
-        ConnectAsyncTask(url, userAgent, wordLanguageCode, definitionLanguageCode, onPageParsed).execute()
+        val webPage = this
+        ConnectAsyncTask(url,
+                         userAgent,
+                         wordLanguageCode,
+                         definitionLanguageCode,
+                         onPageParsed,
+                         webPage).execute()
     }
 
     //TODO: Remove AsyncTask for proper implementation with coroutines
@@ -74,7 +86,8 @@ abstract class JsoupDictionaryWebPage(private val vocabularyFactory: IVocabulary
                                    val userAgent: String,
                                    val wordLanguageCode: String,
                                    val definitionLanguageCode: String,
-                                   val onPageParsed: IDictionaryWebPage.OnPageParsed)
+                                   val onPageParsed: IDictionaryWebPage.OnPageParsed,
+                                   val webPage : IDictionaryWebPage)
         : AsyncTask<Void, Void, Document>() {
         override fun doInBackground(vararg params: Void?): Document {
             return Jsoup.connect(url).userAgent(userAgent).data().get()
@@ -83,7 +96,7 @@ abstract class JsoupDictionaryWebPage(private val vocabularyFactory: IVocabulary
         override fun onPostExecute(result: Document?) {
             super.onPostExecute(result)
             if (result != null){
-                onPageParsed.onPageParsed(result, wordLanguageCode, definitionLanguageCode)
+                onPageParsed.onPageParsed(result, wordLanguageCode, definitionLanguageCode, webPage)
             }
         }
     }

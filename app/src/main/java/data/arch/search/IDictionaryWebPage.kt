@@ -35,7 +35,8 @@ interface IDictionaryWebPage {
     interface OnPageParsed {
         fun onPageParsed(document: Document,
                          wordLanguageCode: String,
-                         definitionLanguageCode: String)
+                         definitionLanguageCode: String,
+                         webPage : IDictionaryWebPage)
     }
 
 

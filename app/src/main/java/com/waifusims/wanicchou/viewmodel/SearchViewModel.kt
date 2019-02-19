@@ -5,6 +5,7 @@ import android.arch.lifecycle.*
 import data.room.entity.Definition
 import data.room.entity.Vocabulary
 import data.arch.vocab.WordListEntry
+import data.room.entity.VocabularyInformation
 
 
 // TODO: Remove related words completely and just use the new scheme for queries to find same words
@@ -12,35 +13,29 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
     var relatedWords: List<WordListEntry> = getDefaultRelatedWord()
 //    var vocabularyList : LiveData<List<Vocabulary>> = getDefaultMutableLiveData()
 //    var definitionList : List<LiveData<List<Definition>>> = getDefaultDefinitionList()
-    private val vocabularyMutableLiveData : MutableLiveData<List<Vocabulary>> = MutableLiveData()
-    private val definitionMutableLiveData : MutableLiveData<LiveData<List<Definition>>> = MutableLiveData()
+    private val vocabularyInformationLiveData : MutableLiveData<List<VocabularyInformation>> = MutableLiveData()
     init {
-        vocabularyMutableLiveData.value = listOf(getDefaultVocabulary())
-        definitionMutableLiveData.value = object : LiveData<List<Definition>>(){
-            override fun getValue() = getDefaultDefinitionList()
-        }
+        val defaultVocabularyInformation = VocabularyInformation()
+        defaultVocabularyInformation.vocabulary = getDefaultVocabulary()
+        defaultVocabularyInformation.definitions = getDefaultDefinitionList()
+        vocabularyInformationLiveData.value = listOf(defaultVocabularyInformation)
+        relatedWords = getDefaultRelatedWord()
+    }
+
+    fun setVocabularyInformation(vocabularyInformation: List<VocabularyInformation>){
+        vocabularyInformationLiveData.value = vocabularyInformation
     }
 
 //    private val mediator : MediatorLiveData<LiveData<Vocabulary>> = MediatorLiveData()
-    fun setVocabularyData (data : List<Vocabulary>){
-        vocabularyMutableLiveData.value = data
-    }
-
-    fun setDefinitionData (data : LiveData<List<Definition>>) {
-        definitionMutableLiveData.value = data
-    }
-
-    fun setVocabularyObserver(lifecycleOwner: LifecycleOwner, observer: Observer<List<Vocabulary>>){
-        vocabularyMutableLiveData.observe(lifecycleOwner, observer)
-    }
-    fun setDefinitionObserver(lifecycleOwner: LifecycleOwner, observer: Observer<LiveData<List<Definition>>>){
-        definitionMutableLiveData.observe(lifecycleOwner, observer)
+    fun setVocabularyInformationObserver(lifecycleOwner: LifecycleOwner,
+                                         observer: Observer<List<VocabularyInformation>>){
+        vocabularyInformationLiveData.observe(lifecycleOwner, observer)
     }
 
     val vocabulary : Vocabulary
     get() {
-        return if (vocabularyMutableLiveData.value != null){
-            vocabularyMutableLiveData.value!![wordIndex]
+        return if (vocabularyInformationLiveData.value != null){
+            vocabularyInformationLiveData.value!![wordIndex].vocabulary!!
         }
         else {
             getDefaultVocabulary()
@@ -49,8 +44,8 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
 
     val definitions : List<Definition>
     get() {
-        return if (definitionMutableLiveData.value != null){
-            definitionMutableLiveData.value!!.value!!
+        return if (vocabularyInformationLiveData.value != null){
+            vocabularyInformationLiveData.value!![wordIndex].definitions
         }
         else{
             getDefaultDefinitionList()
@@ -58,14 +53,20 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     fun moveToPreviousWord() {
-        this.wordIndex++
+        if(wordIndex > 0){
+            this.wordIndex--
+        }
     }
     fun moveToNextWord() {
-        this.wordIndex++
+        if(wordIndex < vocabularyInformationLiveData.value!!.size - 1) {
+            this.wordIndex++
+        }
     }
-
+    fun getWordIndex(): Int {
+        return wordIndex
+    }
     //TODO: Should change the list of definition/related word on vocab change.
-    var wordIndex : Int = 0
+    private var wordIndex : Int = 0
 
     private fun getDefaultRelatedWord(): List<WordListEntry>{
         return listOf(WordListEntry(DEFAULT_RELATED_WORD))

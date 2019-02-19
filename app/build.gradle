@@ -37,12 +37,13 @@ android {
         implementation "com.android.support:design:$android_support_version"
         implementation "com.android.support:recyclerview-v7:$android_support_version"
 
-        def room_version = "1.1.1"
-        implementation "android.arch.persistence.room:runtime:$room_version"
-        kapt "android.arch.persistence.room:compiler:$room_version"
 
         def lifecycle_version = "1.1.1"
         implementation "android.arch.lifecycle:extensions:$lifecycle_version"
+
+        def room_version = "1.1.1"
+        implementation "android.arch.persistence.room:runtime:$room_version"
+        kapt "android.arch.persistence.room:compiler:$room_version"
     }
 
     testOptions {
@@ -86,5 +87,7 @@ dependencies {
 }
 
 repositories {
+    jcenter()
+    google()
     mavenCentral()
 }

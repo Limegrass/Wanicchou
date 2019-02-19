@@ -54,7 +54,7 @@ abstract class WebViewDictionaryWebPage(val webView: WebView,
     override fun loadUrl(url: String,
                          wordLanguageCode: String,
                          definitionLanguageCode: String,
-                         pageLoadedCallback: IDictionaryWebPage.OnPageParsed) {
+                         onPageParsed: IDictionaryWebPage.OnPageParsed) {
         webView.loadUrl(url)
     }
 
@@ -65,12 +65,14 @@ abstract class WebViewDictionaryWebPage(val webView: WebView,
                wordLanguageCode: String,
                definitionLanguageCode: String,
                matchType: MatchType,
-               pageLoadedCallback: IDictionaryWebPage.OnPageParsed) {
+               onPageParsed: IDictionaryWebPage.OnPageParsed) {
 
+        val webPage = this
         val searchUrl = buildQueryURL(searchTerm, wordLanguageCode, definitionLanguageCode, matchType)
-        webView.addJavascriptInterface(HtmlParserInterface(pageLoadedCallback,
+        webView.addJavascriptInterface(HtmlParserInterface(onPageParsed,
                                                            wordLanguageCode,
-                                                           definitionLanguageCode),
+                                                           definitionLanguageCode,
+                                                           webPage),
                 HTML_PARSER_NAME)
         webView.settings.javaScriptEnabled = true
         webView.webViewClient = object : WebViewClient() {
@@ -107,11 +109,15 @@ abstract class WebViewDictionaryWebPage(val webView: WebView,
     private inner class HtmlParserInterface (
             private val pageParsed: IDictionaryWebPage.OnPageParsed,
             private val wordLanguageCode: String,
-            private val definitionLanguageCode: String) {
+            private val definitionLanguageCode: String,
+            private val webPage: IDictionaryWebPage) {
         @JavascriptInterface
         fun parsePage(html: String) {
             val document = Jsoup.parse(html)
-            pageParsed.onPageParsed(document, wordLanguageCode, definitionLanguageCode)
+            pageParsed.onPageParsed(document,
+                                    wordLanguageCode,
+                                    definitionLanguageCode,
+                                    webPage)
         }
     }
 

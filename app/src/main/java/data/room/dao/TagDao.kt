@@ -33,4 +33,12 @@ interface TagDao : BaseDao<Tag> {
             ON vt.TagID = t.TagID
         WHERE vt.VocabularyID = :vocabularyID""")
     fun getTagsForVocabularyID(vocabularyID: Int) : LiveData<List<Tag>>
+
+
+
+    @Query(value = """
+        SELECT t.*
+        FROM Tag t
+        WHERE t.TagID IN (:tagIDs)""")
+    fun getTags(tagIDs : List<Int>) : LiveData<List<Tag>>
 }
