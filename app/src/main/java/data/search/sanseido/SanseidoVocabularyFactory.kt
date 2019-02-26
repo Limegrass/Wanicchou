@@ -4,7 +4,6 @@ import data.room.entity.Vocabulary
 import data.arch.vocab.IVocabularyFactory
 import data.arch.lang.EnglishVocabulary
 import data.arch.lang.JapaneseVocabulary
-import org.jsoup.nodes.Document
 import java.util.regex.Pattern
 
 object SanseidoVocabularyFactory : IVocabularyFactory {
@@ -13,18 +12,16 @@ object SanseidoVocabularyFactory : IVocabularyFactory {
     private const val SEPARATOR_FRAGMENTS_REGEX = "[△▲･・]"
     private const val PRONUNCIATION_REGEX = "[\\p{script=Hiragana}|\\p{script=Katakana}]+" +
             "($|[\\p{script=Han}０-９]|\\d|\\s)*?"
-    private const val SANSEIDO_WORD_ID = "word"
 
-    override fun getVocabulary(document: Document,
+    override fun getVocabulary(wordSource: String,
                                wordLanguageCode: String) : Vocabulary {
-        val wordSource = findWordSource(document).trim()
         val word = isolateWord(wordSource, wordLanguageCode)
         val pronunciation = isolateReading(wordSource, wordLanguageCode)
         val pitch = JapaneseVocabulary.isolatePitch(wordSource)
         return Vocabulary(word,
-                wordLanguageCode,
-                pronunciation,
-                pitch)
+                          wordLanguageCode,
+                          pronunciation,
+                          pitch)
     }
 
     /**
@@ -55,7 +52,7 @@ object SanseidoVocabularyFactory : IVocabularyFactory {
             }
         }
         throw IllegalArgumentException("Invalid Language Code: $wordLanguageCode for Sanseidou." +
-                " Source $cleanedWordSource")
+                " Source: $cleanedWordSource.")
     }
 
     /**
@@ -88,13 +85,5 @@ object SanseidoVocabularyFactory : IVocabularyFactory {
 
 
 
-    /**
-     * Retrieve the searched word from the html source
-     * @param html the html source
-     * @return the word searched for
-     */
-    private fun findWordSource(html: Document): String {
-        return html.getElementById(SANSEIDO_WORD_ID).text()
-    }
 
 }

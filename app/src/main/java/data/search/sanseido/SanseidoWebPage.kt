@@ -1,7 +1,6 @@
 package data.search.sanseido
 
 import android.net.Uri
-import android.webkit.WebView
 import data.arch.search.JsoupDictionaryWebPage
 import data.arch.search.WebViewDictionaryWebPage
 import data.arch.vocab.WordListEntry
@@ -51,10 +50,6 @@ class SanseidoWebPage
 
     override fun getSupportedMatchTypes(): Set<MatchType> {
         return SUPPORTED_MATCH_TYPES.keys
-    }
-
-    override fun getDictionaryName(): String {
-        return DICTIONARY_NAME
     }
 
 

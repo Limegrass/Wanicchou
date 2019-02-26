@@ -6,6 +6,9 @@ import data.room.entity.Definition
 import data.room.entity.Vocabulary
 import data.arch.vocab.WordListEntry
 import data.room.entity.VocabularyInformation
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 
 
 // TODO: Remove related words completely and just use the new scheme for queries to find same words
@@ -13,7 +16,8 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
     var relatedWords: List<WordListEntry> = getDefaultRelatedWord()
 //    var vocabularyList : LiveData<List<Vocabulary>> = getDefaultMutableLiveData()
 //    var definitionList : List<LiveData<List<Definition>>> = getDefaultDefinitionList()
-    private val vocabularyInformationLiveData : MutableLiveData<List<VocabularyInformation>> = MutableLiveData()
+    private val vocabularyInformationLiveData : MediatorLiveData<List<VocabularyInformation>>
+                                                = MediatorLiveData()
     init {
         val defaultVocabularyInformation = VocabularyInformation()
         defaultVocabularyInformation.vocabulary = getDefaultVocabulary()
@@ -22,8 +26,10 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
         relatedWords = getDefaultRelatedWord()
     }
 
-    fun setVocabularyInformation(vocabularyInformation: List<VocabularyInformation>){
-        vocabularyInformationLiveData.value = vocabularyInformation
+    fun setVocabularyInformation(vocabularyInformation: LiveData<List<VocabularyInformation>>){
+        vocabularyInformationLiveData.addSource(vocabularyInformation) {
+            vocabularyInformationLiveData.value = it
+        }
     }
 
 //    private val mediator : MediatorLiveData<LiveData<Vocabulary>> = MediatorLiveData()

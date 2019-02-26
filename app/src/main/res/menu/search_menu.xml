@@ -4,6 +4,7 @@
     <item android:id="@+id/menu_search"
           android:title="@string/search_field_hint"
           android:icon="@drawable/ic_search_white_24dp"
+          android:orderInCategory="1"
           app:showAsAction="collapseActionView|ifRoom"
           app:actionViewClass="android.support.v7.widget.SearchView" />
     <item

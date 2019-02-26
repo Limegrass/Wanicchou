@@ -26,7 +26,16 @@ abstract class JsoupDictionaryWebPage(private val vocabularyFactory: IVocabulary
 
     abstract override fun getSupportedMatchTypes(): Set<MatchType>
 
-    abstract override fun getDictionaryName(): String
+    abstract override val dictionaryName: String
+
+    abstract override fun getVocabulary(document: Document,
+                                        wordLanguageCode: String) : Vocabulary
+
+    abstract override fun getDefinition(document: Document,
+                                        definitionLanguageCode: String): Definition
+
+    abstract override fun getRelatedWords(document: Document,
+                                          wordLanguageCode: String): List<Vocabulary>
 
     // ====================== PUBLIC =====================
 
@@ -69,8 +78,11 @@ abstract class JsoupDictionaryWebPage(private val vocabularyFactory: IVocabulary
                matchType: MatchType,
                onPageParsed: IDictionaryWebPage.OnPageParsed) {
 
-        val url = buildQueryURL(searchTerm, wordLanguageCode, definitionLanguageCode, matchType)
-                .toString()
+        val url = buildQueryURL(searchTerm,
+                                wordLanguageCode,
+                                definitionLanguageCode,
+                                matchType)
+                                .toString()
         val userAgent = "Mozilla"
         val webPage = this
         ConnectAsyncTask(url,

@@ -6,7 +6,7 @@ import org.jsoup.nodes.Document
 interface IRelatedWordFactory{
     fun getRelatedWords(document: Document,
                         wordLanguageCode: String,
-                        definitionLanguageCode: String): List<WordListEntry>
+                        definitionLanguageCode: String): List<Vocabulary>
     fun getRelatedWords(databaseList: List<Vocabulary>,
-                        definitionLanguageCode: String) : List<WordListEntry>
+                        definitionLanguageCode: String) : List<Vocabulary>
 }

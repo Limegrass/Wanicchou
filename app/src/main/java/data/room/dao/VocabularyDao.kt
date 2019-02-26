@@ -27,7 +27,22 @@ interface VocabularyDao : BaseDao<Vocabulary> {
         FROM Vocabulary v
         WHERE v.Word = :searchTerm
         """)
-    fun getVocabularyID(searchTerm: String): Int
+    fun getVocabularyID(searchTerm: String): Long
+
+    // The index constraint fails on insert
+    // if it already exists. Until @Insert properly supports it, must use this.
+    @Query("""
+        SELECT COUNT(1)
+        FROM Vocabulary v
+        WHERE v.Word = :word
+            AND v.LanguageCode = :wordLanguageCode
+            AND v.Pronunciation = :pronunciation
+            AND v.Pitch = :pitch
+    """)
+    fun isAlreadyInserted(word: String,
+                         pronunciation: String,
+                         wordLanguageCode: String,
+                         pitch: String): Boolean
 
     @Query("""
         SELECT v.*
@@ -35,7 +50,7 @@ interface VocabularyDao : BaseDao<Vocabulary> {
         JOIN VocabularyRelation vr
             ON vr.SearchVocabularyID = v.VocabularyID
         WHERE vr.SearchVocabularyID = :vocabularyID """)
-    fun getWordsRelatedToVocabularyID(vocabularyID: Int): List<Vocabulary>
+    fun getWordsRelatedToVocabularyID(vocabularyID: Long): List<Vocabulary>
 
 
     @Query("""
@@ -114,6 +129,13 @@ interface VocabularyDao : BaseDao<Vocabulary> {
 //        WHERE v.VocabularyID IN (:vocabularyIDs)""")
 //    fun getRelatedVocabulary(vocabularyIDs : List<Int>) : LiveData<List<Vocabulary>>
 
+    @Transaction
+    @Query(value = """
+        SELECT v.*
+        FROM Vocabulary v
+        WHERE v.VocabularyID = :vocabularyID
+        """)
+    fun search(vocabularyID: Long) : LiveData<List<VocabularyInformation>>
 
     /**
      * TESTING GARBAGE HERE FOR ROOM CRAZY RELATIONSHIT
@@ -124,7 +146,8 @@ interface VocabularyDao : BaseDao<Vocabulary> {
         WHERE v.Word = :searchTerm
             AND v.LanguageCode = :wordLanguageCode""")
     fun search(searchTerm : String,
-               wordLanguageCode: String) : LiveData<List<VocabularyInformation>>
+               wordLanguageCode: String) : List<VocabularyInformation>
+
 
     @Query("""
         SELECT v.*
@@ -132,7 +155,7 @@ interface VocabularyDao : BaseDao<Vocabulary> {
         WHERE  v.LanguageCode = :wordLanguageCode
             AND v.Word LIKE :searchTerm""")
     fun searchWithWildcards(searchTerm: String,
-                            wordLanguageCode: String): LiveData<List<VocabularyInformation>>
+                            wordLanguageCode: String): List<VocabularyInformation>
 
     @Query("""
         SELECT v.*
@@ -140,7 +163,7 @@ interface VocabularyDao : BaseDao<Vocabulary> {
         WHERE v.LanguageCode = :wordLanguageCode
             AND v.Word LIKE :searchTerm+'%' """)
     fun searchStartsWith(searchTerm: String,
-                         wordLanguageCode: String): LiveData<List<VocabularyInformation>>
+                         wordLanguageCode: String): List<VocabularyInformation>
 
     @Query("""
         SELECT v.*
@@ -148,7 +171,7 @@ interface VocabularyDao : BaseDao<Vocabulary> {
         WHERE v.LanguageCode = :wordLanguageCode
             AND v.Word LIKE '%'+:searchTerm""")
     fun searchEndsWith(searchTerm: String,
-                       wordLanguageCode: String): LiveData<List<VocabularyInformation>>
+                       wordLanguageCode: String): List<VocabularyInformation>
 
     @Query("""
         SELECT v.*
@@ -156,7 +179,7 @@ interface VocabularyDao : BaseDao<Vocabulary> {
         WHERE v.LanguageCode = :wordLanguageCode
             AND v.Word LIKE '%'+:searchTerm+'%' """)
     fun searchContains(searchTerm: String,
-                       wordLanguageCode: String): LiveData<List<VocabularyInformation>>
+                       wordLanguageCode: String): List<VocabularyInformation>
 
     @Query("""
         SELECT v.*
@@ -166,7 +189,7 @@ interface VocabularyDao : BaseDao<Vocabulary> {
         WHERE d.LanguageCode = :definitionLanguageCode
             AND d.DefinitionText LIKE '%'+:searchTerm+'%' """)
     fun searchDefinitionContains(searchTerm: String,
-                                 definitionLanguageCode: String): LiveData<List<VocabularyInformation>>
+                                 definitionLanguageCode: String): List<VocabularyInformation>
 
     @Query("""
         SELECT v.*
@@ -177,14 +200,14 @@ interface VocabularyDao : BaseDao<Vocabulary> {
             OR (d.LanguageCode = :definitionLanguageCode AND d.DefinitionText LIKE '%'+:searchTerm+'%') """)
     fun searchWordOrDefinitionContains(searchTerm: String,
                                        wordLanguageCode: String,
-                                       definitionLanguageCode: String): LiveData<List<VocabularyInformation>>
+                                       definitionLanguageCode: String): List<VocabularyInformation>
 
 
     @Query(value = """
         SELECT v.*
         FROM Vocabulary v
         WHERE v.VocabularyID IN (:vocabularyIDs)""")
-    fun getRelatedVocabulary(vocabularyIDs : List<Int>) : LiveData<List<VocabularyInformation>>
+    fun getRelatedVocabulary(vocabularyIDs : List<Int>) : List<VocabularyInformation>
 
 
 

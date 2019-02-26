@@ -4,23 +4,21 @@ import android.arch.persistence.room.*
 
 @Entity(tableName = "VocabularyRelation",
         foreignKeys = [
-            ForeignKey(
-                    entity = Vocabulary::class,
-                    parentColumns = ["VocabularyID"],
-                    childColumns = ["SearchVocabularyID"]),
-            ForeignKey(
-                    entity = Vocabulary::class,
-                    parentColumns = ["VocabularyID"],
-                    childColumns = ["ResultVocabularyID"])
+            ForeignKey(entity = Vocabulary::class,
+                       parentColumns = ["VocabularyID"],
+                       childColumns = ["SearchVocabularyID"]),
+            ForeignKey(entity = Vocabulary::class,
+                       parentColumns = ["VocabularyID"],
+                       childColumns = ["ResultVocabularyID"])
         ]
 )
 data class VocabularyRelation (
-    @ColumnInfo(name = "SearchVocabularyID")
-    var searchVocabularyID: Int,
+    @ColumnInfo(name = "SearchVocabularyID", index = true)
+    var searchVocabularyID: Long,
 
-    @ColumnInfo(name = "ResultVocabularyID")
-    var resultVocabularyID: Int,
+    @ColumnInfo(name = "ResultVocabularyID", index = true)
+    var resultVocabularyID: Long,
 
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "VocabularyRelationID")
-    var vocabularyRelationID: Int = 0 )
+    var vocabularyRelationID: Long = 0 )

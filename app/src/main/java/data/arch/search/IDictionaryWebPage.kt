@@ -30,7 +30,7 @@ interface IDictionaryWebPage {
 
     fun getSupportedMatchTypes(): Set<MatchType>
 
-    fun getDictionaryName(): String
+    val dictionaryName : String
 
     interface OnPageParsed {
         fun onPageParsed(document: Document,

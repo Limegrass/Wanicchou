@@ -6,8 +6,10 @@ import android.arch.persistence.room.*
         indices = [Index(
                 value = arrayOf("Word",
                                 "Pronunciation",
-                                "LanguageCode"),
+                                "LanguageCode",
+                                "Pitch"),
                 unique = true)]
+//                unique = true)]
 )
 
 data class Vocabulary (
@@ -25,8 +27,27 @@ data class Vocabulary (
 
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "VocabularyID")
-    var vocabularyID: Int = 0 ) {
+    var vocabularyID: Long = 0 ) {
     override fun toString(): String {
         return word
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (other == null || other !is Vocabulary){
+            return false
+        }
+        return this.word == other.word
+                && this.pronunciation == other.pronunciation
+                && this.languageCode == other.languageCode
+                && this.pitch == other.pitch
+    }
+
+    override fun hashCode(): Int {
+        var hash = 17
+        hash = hash * 31 + word.hashCode()
+        hash = hash * 31 + pronunciation.hashCode()
+        hash = hash * 31 + languageCode.hashCode()
+        hash = hash * 31 + pitch.hashCode()
+        return hash
     }
 }
