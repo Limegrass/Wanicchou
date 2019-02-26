@@ -29,8 +29,6 @@ object SanseidoDefinitionFactory : IDefinitionFactory {
         //TODO: FIX REGEX
         formattedDefinition = formattedDefinition.replace(MULTIPLE_DEFINITION_REGEX.toRegex(),
                                                           MULTIPLE_DEFINITION_SEPARATOR)
-//        formattedDefinition = formattedDefinition.replaceFirst(MULTIPLE_DEFINITION_REGEX.toRegex(),
-//                                                               MULTIPLE_DEFINITION_SEPARATOR)
 
         return formattedDefinition
     }

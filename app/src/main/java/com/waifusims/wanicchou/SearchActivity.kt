@@ -65,32 +65,32 @@ class SearchActivity : AppCompatActivity() {
          menuInflater.inflate(R.menu.search_menu, menu)
 //        val searchManager = getSystemService(Context.SEARCH_SERVICE) as SearchManager
 //        val searchableInfo = searchManager.getSearchableInfo(componentName)
+//        searchView.setSearchableInfo(searchableInfo)
+//        Log.i(TAG, "SearchableInfo: $searchableInfo")
         val searchView = menu.findItem(R.id.menu_search).actionView as SearchView
         val menuItem = menu.findItem(R.id.menu_search)
-//        searchView.setSearchableInfo(searchableInfo)
         searchView.setOnQueryTextListener(
                 object : SearchView.OnQueryTextListener {
                     override fun onQueryTextChange(newText: String): Boolean {
-                        Log.i(TAG, "Query text changed: $newText")
+                        Log.i(TAG, "Query text changed: [$newText].")
                         return true
                     }
 
                     override fun onQueryTextSubmit(query: String): Boolean {
-                        Log.i(TAG, "Query text submitted: $query")
-                        searchView.clearFocus()
+                        Log.i(TAG, "Query text submitted: [$query].")
                         menuItem.collapseActionView()
                         return true
                     }
                 })
-//        Log.i(TAG, "SearchableInfo: $searchableInfo")
+
         return true
     }
+
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.menu_search -> {
                 onSearchRequested()
-//                (item.actionView as SearchView).onActionViewExpanded()
                 true
             }
             R.id.action_settings -> {
@@ -111,19 +111,20 @@ class SearchActivity : AppCompatActivity() {
         sharedPreferences = WanicchouSharedPreferenceHelper(context)
         repository = VocabularyRepository(this.application, onQueryFinish)
         initializeViewModel()
-        handleIntent(this.intent)
+//        handleIntent(this.intent)
         //TODO: Don't initialize this until they request for a card
         ankiDroidHelper = AnkiDroidHelper(this)
     }
 
 
     override fun onNewIntent(intent: Intent) {
+        Log.i(TAG, "Received new intent. Action: [${intent.action}].")
         super.onNewIntent(intent)
         handleIntent(intent)
     }
 
     private fun handleIntent(intent: Intent) {
-        Log.i(TAG, "Handling Intent: " + intent.action)
+        Log.i(TAG, "Handling Intent: [${intent.action}]")
         // This was recommended, but the search button caused Intent.ACTION_MAIN instead
         if(intent.action == Intent.ACTION_SEARCH){
             val searchTerm = intent.getStringExtra(SearchManager.QUERY)
@@ -133,19 +134,34 @@ class SearchActivity : AppCompatActivity() {
     }
 
     override fun onSearchRequested(searchEvent: SearchEvent?): Boolean {
-        Log.i(TAG, "SearchRequested: $searchEvent")
+        Log.i(TAG, "SearchRequested: [$searchEvent].")
         return super.onSearchRequested(searchEvent)
     }
 
-    private fun search(searchTerm: String){
-        Log.i(TAG, "Search Initiated: $searchTerm")
-        val lifecycleOwner = this
+    private fun showToast(toastText : String){
+        val context = this
+        toast = Toast.makeText(context,
+                toastText,
+                Toast.LENGTH_LONG)
+        toast!!.show()
+    }
+
+    private fun search(searchTerm: String) {
+        Log.i(TAG, "Search Initiated: [$searchTerm].")
+        showToast( "Searching for $searchTerm..." )
+
+        if(sharedPreferences.autoDelete == AutoDelete.ON_SEARCH){
+            repository.removeVocabulary(searchViewModel.vocabulary)
+        }
+        //TODO: String template it
+        //TODO: Progress bar it
+        val lifecycleOwner = this@SearchActivity
         repository.search(searchTerm,
-                sharedPreferences.wordLanguageCode,
-                sharedPreferences.definitionLanguageCode,
-                sharedPreferences.matchType,
-                sharedPreferences.dictionary,
-                lifecycleOwner)
+                          sharedPreferences.wordLanguageCode,
+                          sharedPreferences.definitionLanguageCode,
+                          sharedPreferences.matchType,
+                          sharedPreferences.dictionary,
+                          lifecycleOwner)
     }
 
     private fun initializeViewModel(){
@@ -161,6 +177,7 @@ class SearchActivity : AppCompatActivity() {
 
         //TODO: Reset the wordIndex on new search
         val wordObserver = Observer<List<VocabularyInformation>>{
+            Log.i(TAG, "LiveData emitted. Size: [${it?.size}].")
             if(it != null && it.isNotEmpty()){
                 tvWord.text = it[searchViewModel.getWordIndex()].vocabulary!!.word
                 tvPronunciation.text = it[searchViewModel.getWordIndex()].vocabulary!!.pronunciation

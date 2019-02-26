@@ -61,5 +61,10 @@
     <string name="action_db_delete">Delete</string>
     <string name="action_db_import">Import</string>
     <string name="database_title">Database</string>
+    <string name="lbl_definition_header_text">Definition</string>
+    <string name="lbl_word_button_text">Word</string>
+    <string name="lbl_related_button_text">Related</string>
+    <string name="lbl_word_default_text" translatable="false">わにっちょう</string>
+    <string name="lbl_kanji_default_text" translatable="false">和日帳</string>
 
 </resources>

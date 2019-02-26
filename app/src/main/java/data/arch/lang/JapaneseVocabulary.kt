@@ -6,6 +6,8 @@ import java.util.regex.Pattern
  * Created by Limegrass on 4/4/2018.
  */
 
+//TODO: Potentially create a formatter class to handle these functions
+// Before submission
 class JapaneseVocabulary {
     companion object {
         // Kanji followed by Kana
@@ -43,6 +45,5 @@ class JapaneseVocabulary {
             }
             return pitch
         }
-
     }
 }

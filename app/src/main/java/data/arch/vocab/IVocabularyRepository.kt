@@ -1,12 +1,10 @@
 package data.arch.vocab
 
-import android.arch.lifecycle.LifecycleOwner
-import android.arch.lifecycle.LiveData
-import android.webkit.WebView
-import data.arch.search.IDictionaryWebPage
-import data.graveyard.DictionaryEntry
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LiveData
 import data.enums.MatchType
-import data.room.entity.*
+import data.room.entity.Vocabulary
+import data.room.entity.VocabularyInformation
 
 interface IVocabularyRepository {
     fun getLatest(onQueryFinish: OnQueryFinish)
@@ -32,6 +30,7 @@ interface IVocabularyRepository {
     interface OnQueryFinish{
         fun onQueryFinish(vocabularyInformation: LiveData<List<VocabularyInformation>>)
     }
+
 
 
 }

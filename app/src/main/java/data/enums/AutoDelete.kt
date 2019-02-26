@@ -2,5 +2,6 @@ package data.enums
 
 enum class AutoDelete {
     NEVER,
-    ANKI_IMPORT
+    ON_ANKI_IMPORT,
+    ON_SEARCH,
 }

@@ -24,12 +24,5 @@
             android:entries="@array/pref_auto_delete_entries"
             android:entryValues="@array/pref_auto_delete_values"/>
 
-        <ListPreference
-            android:title="@string/pref_auto_save_title"
-            android:key="@string/pref_auto_save_key"
-            android:defaultValue="@string/pref_auto_save_default"
-            android:entries="@array/pref_auto_save_entries"
-            android:entryValues="@array/pref_auto_save_values"/>
-
     </PreferenceCategory>
 </PreferenceScreen>

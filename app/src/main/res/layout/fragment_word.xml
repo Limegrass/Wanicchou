@@ -12,7 +12,7 @@
         android:id="@+id/tv_pronunciation"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
-        android:text="たべもの"
+        android:text="@string/lbl_word_default_text"
 
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -20,7 +20,7 @@
         />
     <TextView
         android:id="@+id/tv_word"
-        android:text="食べ物"
+        android:text="@string/lbl_kanji_default_text"
         app:layout_constraintTop_toBottomOf="@id/tv_pronunciation"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"

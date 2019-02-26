@@ -4,7 +4,6 @@ import android.content.Context
 import android.preference.PreferenceManager
 import com.waifusims.wanicchou.R
 import data.enums.AutoDelete
-import data.enums.AutoSave
 import data.enums.MatchType
 
 class WanicchouSharedPreferenceHelper(val context: Context) {
@@ -37,16 +36,6 @@ class WanicchouSharedPreferenceHelper(val context: Context) {
         get() = getString(R.string.pref_definition_language_key, R.string.pref_definition_language_default)!!
         set(value) {
             putString(R.string.pref_definition_language_key, value)
-        }
-
-    var autoSave: AutoSave
-        get() {
-            val pref = getString(R.string.pref_auto_save_key,
-                    R.string.pref_auto_save_default)!!
-            return AutoSave.valueOf(pref)
-        }
-        set(value) {
-            putString(R.string.pref_auto_save_key, value.toString())
         }
 
     var autoDelete : AutoDelete

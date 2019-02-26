@@ -7,7 +7,7 @@
     >
     <TextView
         android:id="@+id/btn_tab_word"
-        android:text="Word"
+        android:text="@string/lbl_word_button_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingTop="10sp"
@@ -17,11 +17,11 @@
         android:width="100sp"
         android:height="40sp"
         android:textAlignment="center"
-        android:background="@color/color_aqua"
+        android:background="@color/color_accent"
         />
     <TextView
         android:id="@+id/btn_tab_related"
-        android:text="Related"
+        android:text="@string/lbl_related_button_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingTop="10sp"
@@ -31,7 +31,7 @@
         android:width="100sp"
         android:height="40sp"
         android:textAlignment="center"
-        android:background="@color/color_deep_purple"
+        android:background="@color/color_grey_inactive"
 
         />
 

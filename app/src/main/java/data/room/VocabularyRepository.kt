@@ -15,7 +15,7 @@ import org.jsoup.nodes.Document
 // TODO: Decision to search DB or online should occur here
 // TODO: Make things nullable and do appropriate logic when null for everything
 class VocabularyRepository(application: Application,
-                           private val onQueryFinish : IVocabularyRepository.OnQueryFinish)
+                           private var onQueryFinish : IVocabularyRepository.OnQueryFinish)
     : IVocabularyRepository {
 
     //TODO: Make sure that webviews are automatically recycled but I'm pretty sure
@@ -24,6 +24,12 @@ class VocabularyRepository(application: Application,
     private val dictionaries : List<Dictionary> by lazy {
         runBlocking{
             database.dictionaryDao().getAllDictionaries()
+        }
+    }
+
+    override fun removeVocabulary(vocabulary: Vocabulary) {
+        GlobalScope.launch(Dispatchers.IO) {
+            database.vocabularyDao().delete(vocabulary)
         }
     }
 

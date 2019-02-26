@@ -68,6 +68,9 @@
     <string name="action_db_delete">削除</string>
     <string name="title_selected">%1$d 単語をセレクトしています。</string>
     <string name="database_title">データベース</string>
+    <string name="lbl_definition_header_text">Definition</string>
+    <string name="lbl_related_button_text">Related</string>
+    <string name="lbl_word_button_text">単語</string>
     <!--<string name="pref_match_type_key" translatable="false">listPrefSearchDir</string>-->
     <!--<string name="pref_match_type_default" translatable="false">1</string>-->
 </resources>

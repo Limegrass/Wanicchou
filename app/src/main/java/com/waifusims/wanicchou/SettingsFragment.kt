@@ -3,18 +3,14 @@ package com.waifusims.wanicchou
 
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.support.v7.preference.ListPreference
-import android.support.v7.preference.PreferenceFragmentCompat
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import androidx.preference.ListPreference
+import androidx.preference.PreferenceFragmentCompat
 
 class SettingsFragment : PreferenceFragmentCompat(),
                          SharedPreferences.OnSharedPreferenceChangeListener {
 
     private var dictionaryListPref: ListPreference? = null
     private var matchTypeListPref: ListPreference? = null
-    private var autoSaveListPref: ListPreference? = null
     private var autoDeleteListPref: ListPreference? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -23,8 +19,6 @@ class SettingsFragment : PreferenceFragmentCompat(),
                 .findPreference(context!!.getString(R.string.pref_dictionary_key)) as ListPreference
         matchTypeListPref = preferenceScreen
                 .findPreference(context!!.getString(R.string.pref_match_type_key)) as ListPreference
-        autoSaveListPref = preferenceScreen
-                .findPreference(context!!.getString(R.string.pref_auto_save_key)) as ListPreference
         autoDeleteListPref = preferenceScreen
                 .findPreference(context!!.getString(R.string.pref_auto_delete_key)) as ListPreference
     }
@@ -34,7 +28,6 @@ class SettingsFragment : PreferenceFragmentCompat(),
         dictionaryListPref!!.summary = dictionaryListPref!!.entry.toString()
         matchTypeListPref!!.summary = matchTypeListPref!!.entry.toString()
         autoDeleteListPref!!.summary = autoDeleteListPref!!.entry.toString()
-        autoSaveListPref!!.summary = autoSaveListPref!!.entry.toString()
         preferenceScreen.sharedPreferences.registerOnSharedPreferenceChangeListener(this)
     }
 
@@ -55,10 +48,6 @@ class SettingsFragment : PreferenceFragmentCompat(),
             context!!.getString(R.string.pref_auto_delete_key) -> {
                 autoDeleteListPref!!.summary = autoDeleteListPref!!.entry.toString()
             }
-            context!!.getString(R.string.pref_auto_save_key) -> {
-                autoSaveListPref!!.summary = autoSaveListPref!!.entry.toString()
-            }
-
             context!!.getString(R.string.pref_dictionary_key) -> {
                 dictionaryListPref!!.summary = dictionaryListPref!!.entry.toString()
             }

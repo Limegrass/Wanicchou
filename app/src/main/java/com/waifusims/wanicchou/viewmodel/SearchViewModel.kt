@@ -27,8 +27,12 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     fun setVocabularyInformation(vocabularyInformation: LiveData<List<VocabularyInformation>>){
+        vocabularyInformationLiveData.removeSource(vocabularyInformationLiveData)
         vocabularyInformationLiveData.addSource(vocabularyInformation) {
             vocabularyInformationLiveData.value = it
+            if (vocabularyInformationLiveData.value != vocabularyInformation){
+                vocabularyInformationLiveData.removeSource(vocabularyInformation)
+            }
         }
     }
 
@@ -38,10 +42,16 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
         vocabularyInformationLiveData.observe(lifecycleOwner, observer)
     }
 
+    private val vocabularyInformation : List<VocabularyInformation>? = vocabularyInformationLiveData.value
+
     val vocabulary : Vocabulary
     get() {
-        return if (vocabularyInformationLiveData.value != null){
-            vocabularyInformationLiveData.value!![wordIndex].vocabulary!!
+        return if (vocabularyInformation != null
+                && vocabularyInformation.isNotEmpty()){
+            if (vocabularyInformation.size < this.wordIndex){
+                wordIndex = 0
+            }
+            vocabularyInformation[wordIndex].vocabulary!!
         }
         else {
             getDefaultVocabulary()

@@ -4,24 +4,18 @@ import android.annotation.SuppressLint
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import data.arch.vocab.IDefinitionFactory
-import data.arch.vocab.IRelatedWordFactory
-import data.arch.vocab.IVocabularyFactory
 import data.enums.MatchType
 import data.room.entity.Definition
 import data.room.entity.Vocabulary
-import data.arch.vocab.WordListEntry
-
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import java.io.IOException
 import java.net.URL
 
 //TODO: Change lazy public vals to private and use the SearchProvider
-abstract class WebViewDictionaryWebPage(val webView: WebView,
-                                        val vocabularyFactory: IVocabularyFactory,
-                                        val definitionFactory: IDefinitionFactory,
-                                        val relatedWordFactory: IRelatedWordFactory)
+abstract class WebViewDictionaryWebPage(private val webView: WebView)
     : IDictionaryWebPage {
     companion object {
         private const val HTML_PARSER_NAME = "HtmlParser"
@@ -35,21 +29,16 @@ abstract class WebViewDictionaryWebPage(val webView: WebView,
                                         definitionLanguageCode: String,
                                         matchType: MatchType): URL
 
+    abstract override fun getVocabulary(document: Document,
+                                        wordLanguageCode: String) : Vocabulary
+
+    abstract override fun getDefinition(document: Document,
+                                        definitionLanguageCode: String): Definition
+
+    abstract override fun getRelatedWords(document: Document,
+                                          wordLanguageCode: String): List<Vocabulary>
     // ====================== PUBLIC =====================
 
-    override fun getVocabulary(document: Document, wordLanguageCode: String) : Vocabulary {
-        return vocabularyFactory.getVocabulary(document, wordLanguageCode)
-    }
-
-    override fun getDefinition(document: Document, definitionLanguageCode: String): Definition {
-        return definitionFactory.getDefinition(document, definitionLanguageCode)
-    }
-
-    override fun getRelatedWords(document: Document,
-                                 wordLanguageCode: String,
-                                 definitionLanguageCode: String): List<WordListEntry> {
-        return relatedWordFactory.getRelatedWords(document, wordLanguageCode, definitionLanguageCode)
-    }
 
     override fun loadUrl(url: String,
                          wordLanguageCode: String,

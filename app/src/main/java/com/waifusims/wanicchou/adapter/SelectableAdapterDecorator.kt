@@ -1,10 +1,8 @@
 package com.waifusims.wanicchou.adapter
 
-import android.support.v7.widget.RecyclerView
 import android.util.SparseBooleanArray
 import android.view.ViewGroup
-
-import java.util.ArrayList
+import java.util.*
 
 abstract class SelectableAdapterDecorator<VH : RecyclerView.ViewHolder>(val adapter: RecyclerView.Adapter<VH>)
     : RecyclerView.Adapter<VH>() {

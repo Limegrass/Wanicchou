@@ -11,6 +11,8 @@
     <color name="color_related_word">#101010</color>
     <color name="color_related_word_alt">#202020</color>
 
+    <color name="color_grey_inactive">#3A3A3A</color>
+
     <color name="color_secondary_text">#FFFFFF</color>
     <color name="color_grey_transparent">#D8D8D8CC</color>
     <color name="color_deep_purple">#530879</color>

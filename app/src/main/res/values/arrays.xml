@@ -35,27 +35,15 @@
 
     <string-array
         name="pref_auto_delete_entries">
-        <item>Never AutoDelete</item>
-        <item>Delete on Anki Import</item>
+        <item>Never delete</item>
+        <item>Delete on Anki import</item>
+        <item>Delete on new search request</item>
     </string-array>
     <string-array
         name="pref_auto_delete_values">
         <item>NEVER</item>
-        <item>ANKI_IMPORT</item>
+        <item>ON_ANKI_IMPORT</item>
+        <item>ON_SEARCH</item>
     </string-array>
 
-    <string-array
-        name="pref_auto_save_entries">
-        <item>Don\'t Save</item>
-        <item>Save All Searches</item>
-        <item>Save Successful Searches</item>
-        <item>Save on Notes/Context added</item>
-    </string-array>
-    <string-array
-        name="pref_auto_save_values">
-        <item>NEVER</item>
-        <item>ALL</item>
-        <item>SUCCESS</item>
-        <item>INFO</item>
-    </string-array>
 </resources>
