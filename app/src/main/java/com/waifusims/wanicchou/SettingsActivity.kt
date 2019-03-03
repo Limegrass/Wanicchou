@@ -1,9 +1,11 @@
 package com.waifusims.wanicchou
 
-import android.support.v4.app.NavUtils
-import android.support.v7.app.AppCompatActivity
+import androidx.core.app.NavUtils
+import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MenuItem
+import com.waifusims.wanicchou.R
+import com.waifusims.wanicchou.ui.fragments.SettingsFragment
 
 class SettingsActivity : AppCompatActivity() {
 

@@ -13,7 +13,7 @@ import kotlinx.coroutines.withContext
 
 // TODO: Remove related words completely and just use the new scheme for queries to find same words
 class SearchViewModel(application: Application) : AndroidViewModel(application) {
-    var relatedWords: List<WordListEntry> = getDefaultRelatedWord()
+//    var relatedWords: List<WordListEntry> = getDefaultRelatedWord()
 //    var vocabularyList : LiveData<List<Vocabulary>> = getDefaultMutableLiveData()
 //    var definitionList : List<LiveData<List<Definition>>> = getDefaultDefinitionList()
     private val vocabularyInformationLiveData : MediatorLiveData<List<VocabularyInformation>>
@@ -23,7 +23,7 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
         defaultVocabularyInformation.vocabulary = getDefaultVocabulary()
         defaultVocabularyInformation.definitions = getDefaultDefinitionList()
         vocabularyInformationLiveData.value = listOf(defaultVocabularyInformation)
-        relatedWords = getDefaultRelatedWord()
+//        relatedWords = getDefaultRelatedWord()
     }
 
     fun setVocabularyInformation(vocabularyInformation: LiveData<List<VocabularyInformation>>){

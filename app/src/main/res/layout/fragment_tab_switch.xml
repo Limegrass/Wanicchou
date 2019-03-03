@@ -19,6 +19,7 @@
         android:textAlignment="center"
         android:background="@color/color_accent"
         />
+
     <TextView
         android:id="@+id/btn_tab_related"
         android:text="@string/lbl_related_button_text"
@@ -32,7 +33,6 @@
         android:height="40sp"
         android:textAlignment="center"
         android:background="@color/color_grey_inactive"
-
         />
 
 </LinearLayout>

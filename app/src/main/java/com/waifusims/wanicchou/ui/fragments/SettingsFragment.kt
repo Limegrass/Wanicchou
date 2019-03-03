@@ -1,10 +1,11 @@
-package com.waifusims.wanicchou
+package com.waifusims.wanicchou.ui.fragments
 
 
 import android.content.SharedPreferences
 import android.os.Bundle
 import androidx.preference.ListPreference
 import androidx.preference.PreferenceFragmentCompat
+import com.waifusims.wanicchou.R
 
 class SettingsFragment : PreferenceFragmentCompat(),
                          SharedPreferences.OnSharedPreferenceChangeListener {

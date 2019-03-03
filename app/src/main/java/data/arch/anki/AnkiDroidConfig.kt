@@ -52,22 +52,45 @@ object AnkiDroidConfig {
     //TODO: Rework the format because it only applies to Japanese.
     // Or just keep it until another language is added?
     // CSS to share between all the cards (optional). User will need to install the NotoSans font by themselves
-    const val CSS = ".card {\n" +
-            " font-family: NotoSansJP;\n" +
-            " font-size: 24px;\n" +
-            " text-align: center;\n" +
-            " color: white;\n" +
-            " background-color: black;\n" +
-            " word-wrap: break-word;\n" +
-            "}\n" +
-            "@font-face { font-family: \"NotoSansJP\"; src: url('_NotoSansJP-Regular.otf'); }\n" +
-            "@font-face { font-family: \"NotoSansJP\"; src: url('_NotoSansJP-Bold.otf'); font-weight: bold; }\n" +
-            "\n" +
-            ".big { font-size: 24px; }\n" +
-            ".small { font-size: 12px;}\n" +
-            ".highlight{ color: cyan }\n" +
-            "ruby rt { visibility: hidden; }\n" +
-            "ruby:hover rt { visibility: visible; }\n"
+    const val CSS = """
+.card {
+    font-family: 'NotoSansJP';
+    font-size: 24px;
+    text-align: center;
+    color: white;
+    background-color: #202020;
+    word-wrap: break-word;
+}
+
+@font-face {
+    font-family: 'NotoSansJP';
+    src: url('_NotoSansJP-Regular.otf');
+}
+
+@font-face {
+    font-family: 'NotoSansJP';
+    src: url('_NotoSansJP-Bold.otf');
+    font-weight: bold;
+}
+
+.big {
+    font-size: 24px;
+}
+
+.small {
+    font-size: 12px;
+}
+
+.highlight {
+    color: #247E80
+}
+
+ruby rt {
+    visibility: hidden;
+}
+ruby:hover rt {
+    visibility: visible;
+}"""
     // Template for the question of each card
     //    static final String QFMT1 = "<div class=big>Reading of: {{Kanji}}</div><br><br>{{Sentence}}";
     //TODO: Add a clozed  type option where they can edit the clozed word through UI
@@ -75,11 +98,11 @@ object AnkiDroidConfig {
     private const val QFMT2 = "<div class=big>{{furigana:Furigana}}:意味</div>"
     val QFMT = arrayOf(QFMT1, QFMT2)
     // Template for the answer (use identical for both sides)
-    private const val AFMT1 = "{{FrontSide}}\n<br>\n<hr id=answer>\n<br>\n{{Reading}}\n<br>\n" + "<div class=extra>{{Definition}}"
+    private const val AFMT1 = "{{FrontSide}}\n<br>\n<hr id=answer>\n<br>\n{{Pronunciation}}\n<br>\n" + "<div class=extra>{{Definition}}"
     private const val AFMT2 = "{{FrontSide}}\n<br>\n<hr id=answer>\n<br>\n" + "{{Definition}}"
     val AFMT = arrayOf(AFMT1, AFMT2)
 
     // Define two keys which will be used when using legacy ACTION_SEND intent
-    val FRONT_SIDE_KEY = FIELDS[0]  //Kanji
-    val BACK_SIDE_KEY = FIELDS[2]   //Definition
+    val FRONT_SIDE_KEY = FIELDS[FIELDS_INDEX_WORD]  //Kanji
+    val BACK_SIDE_KEY = FIELDS[FIELDS_INDEX_DEFINITION]   //Definition
 }

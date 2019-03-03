@@ -1,4 +1,4 @@
-package com.waifusims.wanicchou.adapter
+package com.waifusims.wanicchou.ui.adapter
 
 import android.view.View
 import android.widget.TextView

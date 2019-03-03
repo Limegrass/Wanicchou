@@ -1,35 +1,37 @@
+//<editor-fold desc="Imports">
 package com.waifusims.wanicchou
-
 import android.app.SearchManager
-import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProviders
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
-import android.support.v7.widget.SearchView
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.SearchEvent
-import android.widget.TextView
 import android.widget.Toast
-import com.waifusims.wanicchou.adapter.DefinitionAdapter
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SearchView
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.waifusims.wanicchou.ui.fragments.DefinitionFragment
+import com.waifusims.wanicchou.ui.fragments.FabFragment
+import com.waifusims.wanicchou.ui.fragments.TabSwitchFragment
+import com.waifusims.wanicchou.ui.fragments.WordFragment
 import com.waifusims.wanicchou.util.WanicchouSharedPreferenceHelper
-import data.room.entity.Definition
-import data.room.entity.Vocabulary
-import data.arch.vocab.IVocabularyRepository
-import data.room.VocabularyRepository
 import com.waifusims.wanicchou.viewmodel.SearchViewModel
 import data.arch.anki.AnkiDroidHelper
-import data.arch.search.IDictionaryWebPage
+import data.arch.vocab.IVocabularyRepository
+import data.enums.AutoDelete
+import data.room.VocabularyRepository
+import data.room.entity.Dictionary
 import data.room.entity.VocabularyInformation
-import data.search.SearchProvider
-import org.jsoup.nodes.Document
 
+//</editor-fold>
+
+//<editor-fold desc="TODO Notes">
+//TODO: Don't save related words,
+// just include an option for them to initiate an online search
 //TODO: AutoImport to AnkiDroid if it exists
 //TODO: Link related words by words that appear in definition
 // TODO: Automatically select EJ for English input
@@ -37,32 +39,97 @@ import org.jsoup.nodes.Document
 // TODO: Toasts for DB searches
 //TODO : Add click listener for Def label
 //TODO: Figure out how to use UI fragments properly and split initialization up
-class SearchActivity : AppCompatActivity() {
+//TODO: Search Suggestions
+//</editor-fold>
+class SearchActivity
+    : AppCompatActivity()
+        , IVocabularyRepository.OnQueryFinish
+{
+
+    //<editor-fold desc="Fields/Properties">
+    private val searchViewModel: SearchViewModel by lazy {
+        ViewModelProviders.of(this)
+                          .get(SearchViewModel::class.java)
+    }
+
+    private val repository : IVocabularyRepository by lazy {
+        VocabularyRepository(this.application, this)
+    }
+    private val sharedPreferences
+            : WanicchouSharedPreferenceHelper by lazy {
+        WanicchouSharedPreferenceHelper(this)
+    }
+
+    private val ankiDroidHelper : AnkiDroidHelper by lazy {
+        AnkiDroidHelper(this)
+    }
+
+//    private val floatingActionButton: FloatingActionButton by lazy {
+//        this.findViewById(R.id.fab) as FloatingActionButton
+//    }
 
     companion object {
         private val TAG : String = SearchActivity::class.java.simpleName
     }
-
-    //TODO: Loader or another Async Framework
-
-    //TODO: Search Suggestions
-    private lateinit var repository : IVocabularyRepository
-    private lateinit var searchViewModel: SearchViewModel
-    private lateinit var sharedPreferences : WanicchouSharedPreferenceHelper
-    private lateinit var ankiDroidHelper : AnkiDroidHelper
     private var toast : Toast? = null
+    //</editor-fold>
 
-    private val onQueryFinish = object : IVocabularyRepository.OnQueryFinish {
-        override fun onQueryFinish(vocabularyInformation: LiveData<List<VocabularyInformation>>) {
-            Log.d(TAG, "onQueryFinished")
-            runOnUiThread{
-                searchViewModel.setVocabularyInformation(vocabularyInformation)
-            }
-        }
+    //<editor-fold desc="Activity LifeCycle">
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_wanicchou)
+
+        val transaction = supportFragmentManager.beginTransaction()
+
+        transaction.add(R.id.container_body, WordFragment())
+        transaction.add(R.id.container_body, TabSwitchFragment())
+        transaction.add(R.id.container_body, DefinitionFragment())
+
+        val fabFragment = FabFragment()
+        val bundle = Bundle()
+        bundle.putParcelableArrayList(FabFragment.DICTIONARIES_BUNDLE_KEY,
+                ArrayList(repository.dictionaries))
+        fabFragment.arguments = bundle
+        transaction.add(R.id.container_frame, fabFragment)
+
+        transaction.commit()
+    }
+//    private fun setFABObserver(){
+//        val wordObserver = Observer<List<VocabularyInformation>> {
+//            if(it != null
+//                    && it.isNotEmpty()
+//                    && ankiDroidHelper.isApiAvailable()) {
+//                Log.i(TAG, "LiveData emitted. Size: [${it?.size}].")
+//                floatingActionButton.show()
+//            }
+//        }
+//        val lifecycleOwner = this
+//        searchViewModel.setVocabularyInformationObserver(lifecycleOwner, wordObserver)
+//    }
+
+    override fun onResume() {
+//        if(searchViewModel.definition.definitionID == 0L){
+//            floatingActionButton.hide()
+//        }
+        repository.getLatest()
+        super.onResume()
     }
 
+    override fun onSearchRequested(searchEvent: SearchEvent?): Boolean {
+        Log.i(TAG, "SearchRequested: [$searchEvent].")
+        return super.onSearchRequested(searchEvent)
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        Log.i(TAG, "Received new intent. Action: [${intent.action}].")
+        super.onNewIntent(intent)
+        handleIntent(intent)
+    }
+
+    //<editor-fold desc="Menu">
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-         menuInflater.inflate(R.menu.search_menu, menu)
+        menuInflater.inflate(R.menu.search_menu, menu)
+        //TODO: Unsure if these were actually useful. Need to check and clean
 //        val searchManager = getSystemService(Context.SEARCH_SERVICE) as SearchManager
 //        val searchableInfo = searchManager.getSearchableInfo(componentName)
 //        searchView.setSearchableInfo(searchableInfo)
@@ -86,7 +153,6 @@ class SearchActivity : AppCompatActivity() {
         return true
     }
 
-
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.menu_search -> {
@@ -103,40 +169,51 @@ class SearchActivity : AppCompatActivity() {
             else -> super.onOptionsItemSelected(item)
         }
     }
+    //</editor-fold>
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_wanicchou)
-        val context = this
-        sharedPreferences = WanicchouSharedPreferenceHelper(context)
-        repository = VocabularyRepository(this.application, onQueryFinish)
-        initializeViewModel()
-//        handleIntent(this.intent)
-        //TODO: Don't initialize this until they request for a card
-        ankiDroidHelper = AnkiDroidHelper(this)
+    //</editor-fold>
+
+    //<editor-fold desc="Interfaces">
+    override fun onQueryFinish(vocabularyInformation: LiveData<List<VocabularyInformation>>) {
+        Log.d(TAG, "onQueryFinished")
+        runOnUiThread{
+            searchViewModel.setVocabularyInformation(vocabularyInformation)
+        }
     }
+    //</editor-fold>
 
+    //<editor-fold desc="Helpers">
+//    private fun setFABOnClick() {
+//        floatingActionButton.setOnClickListener {
+//            if(ankiDroidHelper.shouldRequestPermission()){
+//                val callbackActivity = this
+//                ankiDroidHelper.requestPermission(callbackActivity,
+//                        ANKI_PERMISSION_REQUEST_CALLBACK_CODE)
+//            }
+//            val dictionaryName = repository.dictionaries.single {
+//                it.dictionaryID == searchViewModel.definition.dictionaryID
+//            }.dictionaryName
+//
+//            //TODO: Properly include the notes and tags
+//            ankiDroidHelper.addUpdateNote(searchViewModel.vocabulary,
+//                    searchViewModel.definition,
+//                    dictionaryName,
+//                    listOf(),
+//                    mutableSetOf())
+//        }
+//    }
 
-    override fun onNewIntent(intent: Intent) {
-        Log.i(TAG, "Received new intent. Action: [${intent.action}].")
-        super.onNewIntent(intent)
-        handleIntent(intent)
-    }
 
     private fun handleIntent(intent: Intent) {
         Log.i(TAG, "Handling Intent: [${intent.action}]")
         // This was recommended, but the search button caused Intent.ACTION_MAIN instead
         if(intent.action == Intent.ACTION_SEARCH){
             val searchTerm = intent.getStringExtra(SearchManager.QUERY)
+
             search(searchTerm)
         }
-
     }
 
-    override fun onSearchRequested(searchEvent: SearchEvent?): Boolean {
-        Log.i(TAG, "SearchRequested: [$searchEvent].")
-        return super.onSearchRequested(searchEvent)
-    }
 
     private fun showToast(toastText : String){
         val context = this
@@ -157,37 +234,12 @@ class SearchActivity : AppCompatActivity() {
         //TODO: Progress bar it
         val lifecycleOwner = this@SearchActivity
         repository.search(searchTerm,
-                          sharedPreferences.wordLanguageCode,
-                          sharedPreferences.definitionLanguageCode,
-                          sharedPreferences.matchType,
-                          sharedPreferences.dictionary,
-                          lifecycleOwner)
+                sharedPreferences.wordLanguageCode,
+                sharedPreferences.definitionLanguageCode,
+                sharedPreferences.matchType,
+                sharedPreferences.dictionary,
+                lifecycleOwner)
     }
-
-    private fun initializeViewModel(){
-        searchViewModel = ViewModelProviders.of(this).get(SearchViewModel::class.java)
-        setWordObserver()
-    }
-
-    private fun setWordObserver(){
-        val tvWord = findViewById<TextView>(R.id.tv_word)
-        val tvPronunciation = findViewById<TextView>(R.id.tv_pronunciation)
-        val recyclerView = findViewById<RecyclerView>(R.id.rv_definitions)
-        val context = this@SearchActivity
-
-        //TODO: Reset the wordIndex on new search
-        val wordObserver = Observer<List<VocabularyInformation>>{
-            Log.i(TAG, "LiveData emitted. Size: [${it?.size}].")
-            if(it != null && it.isNotEmpty()){
-                tvWord.text = it[searchViewModel.getWordIndex()].vocabulary!!.word
-                tvPronunciation.text = it[searchViewModel.getWordIndex()].vocabulary!!.pronunciation
-
-                recyclerView.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
-                recyclerView.adapter = DefinitionAdapter(it[searchViewModel.getWordIndex()].definitions)
-            }
-        }
-
-        val lifecycleOwner = this
-        searchViewModel.setVocabularyInformationObserver(lifecycleOwner, wordObserver)
-    }
+    //</editor-fold>
 }
+

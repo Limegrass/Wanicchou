@@ -1,34 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:id="@+id/container_frame"
+    >
     <LinearLayout
         android:layout_gravity="center_horizontal"
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:id="@+id/container_body"
         >
-        <include
-            android:id="@+id/fragment_word"
-            layout="@layout/fragment_word"
-            android:layout_marginBottom="10sp"
-            android:layout_marginTop="20sp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            />
-
-        <include
-            android:id="@+id/fragment_tab_switch"
-            layout="@layout/fragment_tab_switch"
-            />
-        <include
-            android:id="@+id/fragment_definition"
-            layout="@layout/fragment_definition"
-            />
     </LinearLayout>
-
-    <include
-        android:id="@+id/fab"
-        layout="@layout/floating_action_button"
-        />
 </FrameLayout>

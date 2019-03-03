@@ -1,3 +1,5 @@
+package com.waifusims.wanicchou
+
 //package com.waifusims.wanicchou
 //
 //import android.support.v4.app.NavUtils
