@@ -28,7 +28,8 @@ interface IVocabularyRepository {
 //    fun save(tag : VocabularyTag)
 
     interface OnQueryFinish{
-        fun onQueryFinish(vocabularyInformation: LiveData<List<VocabularyInformation>>)
+        fun onQueryFinish(vocabularyInformation: LiveData<List<VocabularyInformation>>,
+                          relatedVocabularyList : LiveData<List<Vocabulary>>)
     }
 
 

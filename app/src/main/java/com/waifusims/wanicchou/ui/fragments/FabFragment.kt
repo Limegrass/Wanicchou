@@ -78,7 +78,7 @@ class FabFragment : Fragment() {
             if(it != null
                     && it.isNotEmpty()
                     && ankiDroidHelper.isApiAvailable()) {
-                Log.i(TAG, "Result size: [${it.size}].")
+                Log.v(TAG, "Result size: [${it.size}].")
                 floatingActionButton.show()
             }
         }

@@ -4,7 +4,6 @@ import android.app.Application
 import android.arch.lifecycle.*
 import data.room.entity.Definition
 import data.room.entity.Vocabulary
-import data.arch.vocab.WordListEntry
 import data.room.entity.VocabularyInformation
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -13,11 +12,21 @@ import kotlinx.coroutines.withContext
 
 // TODO: Remove related words completely and just use the new scheme for queries to find same words
 class SearchViewModel(application: Application) : AndroidViewModel(application) {
-//    var relatedWords: List<WordListEntry> = getDefaultRelatedWord()
 //    var vocabularyList : LiveData<List<Vocabulary>> = getDefaultMutableLiveData()
 //    var definitionList : List<LiveData<List<Definition>>> = getDefaultDefinitionList()
     private val vocabularyInformationLiveData : MediatorLiveData<List<VocabularyInformation>>
                                                 = MediatorLiveData()
+    private val relatedWordsLiveData : MediatorLiveData<List<Vocabulary>> = MediatorLiveData()
+
+    val relatedWords: List<Vocabulary>
+        get(){
+            return if(relatedWordsLiveData.value != null){
+                relatedWordsLiveData.value!!
+            } else {
+                getDefaultRelatedWord()
+            }
+        }
+
     init {
         val defaultVocabularyInformation = VocabularyInformation()
         defaultVocabularyInformation.vocabulary = getDefaultVocabulary()
@@ -26,14 +35,30 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
 //        relatedWords = getDefaultRelatedWord()
     }
 
+    fun setRelatedWords(relatedVocabularyList : LiveData<List<Vocabulary>>){
+        relatedWordsLiveData.addSource(relatedVocabularyList) {
+            relatedWordsLiveData.value = it
+            if (vocabularyInformationLiveData.value != relatedVocabularyList){
+                vocabularyInformationLiveData.removeSource(relatedVocabularyList)
+            }
+        }
+
+    }
+
+
     fun setVocabularyInformation(vocabularyInformation: LiveData<List<VocabularyInformation>>){
-        vocabularyInformationLiveData.removeSource(vocabularyInformationLiveData)
         vocabularyInformationLiveData.addSource(vocabularyInformation) {
             vocabularyInformationLiveData.value = it
             if (vocabularyInformationLiveData.value != vocabularyInformation){
                 vocabularyInformationLiveData.removeSource(vocabularyInformation)
             }
         }
+    }
+
+    fun setRelatedWordObserver(lifecycleOwner: LifecycleOwner,
+                               observer: Observer<List<Vocabulary>>){
+        relatedWordsLiveData.observe(lifecycleOwner,
+                                     observer)
     }
 
 //    private val mediator : MediatorLiveData<LiveData<Vocabulary>> = MediatorLiveData()
@@ -84,8 +109,10 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
     //TODO: Should change the list of definition/related word on vocab change.
     private var wordIndex : Int = 0
 
-    private fun getDefaultRelatedWord(): List<WordListEntry>{
-        return listOf(WordListEntry(DEFAULT_RELATED_WORD))
+    private fun getDefaultRelatedWord(): List<Vocabulary>{
+        return listOf(Vocabulary(DEFAULT_RELATED_WORD,
+                                 DEFAULT_LANGUAGE_CODE,
+                                 DEFAULT_RELATED_WORD_PRONUNCIATION))
     }
 
     private fun getDefaultVocabulary() : Vocabulary {
@@ -109,6 +136,7 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
         const val DEFAULT_WORD_PRONUNCIATION = "わにっちょう"
         const val DEFAULT_WORD = "和日帳"
         const val DEFAULT_RELATED_WORD = "テスト"
+        const val DEFAULT_RELATED_WORD_PRONUNCIATION = "てすと"
     }
 
 

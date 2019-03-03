@@ -50,7 +50,7 @@ interface VocabularyDao : BaseDao<Vocabulary> {
         JOIN VocabularyRelation vr
             ON vr.SearchVocabularyID = v.VocabularyID
         WHERE vr.SearchVocabularyID = :vocabularyID """)
-    fun getWordsRelatedToVocabularyID(vocabularyID: Long): List<Vocabulary>
+    fun getWordsRelatedToVocabularyID(vocabularyID: Long): LiveData<List<Vocabulary>>
 
 
     @Query("""

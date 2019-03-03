@@ -11,20 +11,17 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.waifusims.wanicchou.ui.fragments.DefinitionFragment
 import com.waifusims.wanicchou.ui.fragments.FabFragment
 import com.waifusims.wanicchou.ui.fragments.TabSwitchFragment
 import com.waifusims.wanicchou.ui.fragments.WordFragment
 import com.waifusims.wanicchou.util.WanicchouSharedPreferenceHelper
 import com.waifusims.wanicchou.viewmodel.SearchViewModel
-import data.arch.anki.AnkiDroidHelper
 import data.arch.vocab.IVocabularyRepository
 import data.enums.AutoDelete
 import data.room.VocabularyRepository
-import data.room.entity.Dictionary
+import data.room.entity.Vocabulary
 import data.room.entity.VocabularyInformation
 
 //</editor-fold>
@@ -60,10 +57,6 @@ class SearchActivity
         WanicchouSharedPreferenceHelper(this)
     }
 
-    private val ankiDroidHelper : AnkiDroidHelper by lazy {
-        AnkiDroidHelper(this)
-    }
-
 //    private val floatingActionButton: FloatingActionButton by lazy {
 //        this.findViewById(R.id.fab) as FloatingActionButton
 //    }
@@ -81,8 +74,8 @@ class SearchActivity
 
         val transaction = supportFragmentManager.beginTransaction()
 
-        transaction.add(R.id.container_body, WordFragment())
-        transaction.add(R.id.container_body, TabSwitchFragment())
+        transaction.add(R.id.container_header, WordFragment())
+        transaction.add(R.id.container_header, TabSwitchFragment())
         transaction.add(R.id.container_body, DefinitionFragment())
 
         val fabFragment = FabFragment()
@@ -94,23 +87,8 @@ class SearchActivity
 
         transaction.commit()
     }
-//    private fun setFABObserver(){
-//        val wordObserver = Observer<List<VocabularyInformation>> {
-//            if(it != null
-//                    && it.isNotEmpty()
-//                    && ankiDroidHelper.isApiAvailable()) {
-//                Log.i(TAG, "LiveData emitted. Size: [${it?.size}].")
-//                floatingActionButton.show()
-//            }
-//        }
-//        val lifecycleOwner = this
-//        searchViewModel.setVocabularyInformationObserver(lifecycleOwner, wordObserver)
-//    }
 
     override fun onResume() {
-//        if(searchViewModel.definition.definitionID == 0L){
-//            floatingActionButton.hide()
-//        }
         repository.getLatest()
         super.onResume()
     }
@@ -174,7 +152,8 @@ class SearchActivity
     //</editor-fold>
 
     //<editor-fold desc="Interfaces">
-    override fun onQueryFinish(vocabularyInformation: LiveData<List<VocabularyInformation>>) {
+    override fun onQueryFinish(vocabularyInformation: LiveData<List<VocabularyInformation>>,
+                               relatedVocabularyList : LiveData<List<Vocabulary>>) {
         Log.d(TAG, "onQueryFinished")
         runOnUiThread{
             searchViewModel.setVocabularyInformation(vocabularyInformation)
@@ -183,25 +162,6 @@ class SearchActivity
     //</editor-fold>
 
     //<editor-fold desc="Helpers">
-//    private fun setFABOnClick() {
-//        floatingActionButton.setOnClickListener {
-//            if(ankiDroidHelper.shouldRequestPermission()){
-//                val callbackActivity = this
-//                ankiDroidHelper.requestPermission(callbackActivity,
-//                        ANKI_PERMISSION_REQUEST_CALLBACK_CODE)
-//            }
-//            val dictionaryName = repository.dictionaries.single {
-//                it.dictionaryID == searchViewModel.definition.dictionaryID
-//            }.dictionaryName
-//
-//            //TODO: Properly include the notes and tags
-//            ankiDroidHelper.addUpdateNote(searchViewModel.vocabulary,
-//                    searchViewModel.definition,
-//                    dictionaryName,
-//                    listOf(),
-//                    mutableSetOf())
-//        }
-//    }
 
 
     private fun handleIntent(intent: Intent) {
