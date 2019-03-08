@@ -1,9 +1,9 @@
-package data.search
+package data.web
 
 import data.arch.lang.EnglishVocabulary
 import data.arch.lang.JapaneseVocabulary
 import data.arch.search.IDictionaryWebPage
-import data.search.sanseido.SanseidoWebPage
+import data.web.sanseido.SanseidoWebPage
 import data.enums.MatchType
 import java.lang.IllegalArgumentException
 

@@ -1,4 +1,4 @@
-package data.room
+package data.room.database
 
 
 object WanicchouMigration {

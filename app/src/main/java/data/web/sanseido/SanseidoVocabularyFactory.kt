@@ -1,4 +1,4 @@
-package data.search.sanseido
+package data.web.sanseido
 
 import data.room.entity.Vocabulary
 import data.arch.vocab.IVocabularyFactory

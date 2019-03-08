@@ -13,17 +13,17 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.waifusims.wanicchou.R
 import com.waifusims.wanicchou.ui.adapter.DefinitionAdapter
-import com.waifusims.wanicchou.viewmodel.SearchViewModel
+import com.waifusims.wanicchou.viewmodel.VocabularyViewModel
 import data.room.entity.VocabularyInformation
 
 class DefinitionFragment : Fragment() {
     companion object {
         private val TAG : String = DefinitionFragment::class.java.simpleName
     }
-    private val searchViewModel : SearchViewModel by lazy {
+    private val vocabularyViewModel : VocabularyViewModel by lazy {
         //TODO: Make sure this assert isn't problematic
         ViewModelProviders.of(activity!!)
-                          .get(SearchViewModel::class.java)
+                          .get(VocabularyViewModel::class.java)
     }
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val attachToRoot = false
@@ -42,11 +42,11 @@ class DefinitionFragment : Fragment() {
             if(it != null && it.isNotEmpty()){
                 Log.v(TAG, "Result size: [${it.size}].")
                 recyclerView.layoutManager = LinearLayoutManager(context)
-                recyclerView.adapter = DefinitionAdapter(it[searchViewModel.getWordIndex()].definitions)
+                recyclerView.adapter = DefinitionAdapter(it[vocabularyViewModel.wordIndex].definitions)
             }
         }
 
         val lifecycleOwner : LifecycleOwner = activity as LifecycleOwner
-        searchViewModel.setVocabularyInformationObserver(lifecycleOwner, definitionObserver)
+//        vocabularyViewModel.setVocabularyObserver(lifecycleOwner, definitionObserver)
     }
 }

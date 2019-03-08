@@ -1,11 +1,13 @@
-package data.search.sanseido
+package data.web.sanseido
 
 import android.net.Uri
 import data.arch.search.JsoupDictionaryWebPage
-import data.arch.search.WebViewDictionaryWebPage
-import data.arch.vocab.WordListEntry
+import data.arch.vocab.IDefinitionFactory
+import data.arch.vocab.IVocabularyFactory
 import data.enums.MatchType
+import data.room.entity.Definition
 import data.room.entity.Vocabulary
+import org.jsoup.nodes.Document
 import java.net.MalformedURLException
 import java.net.URL
 
@@ -13,12 +15,67 @@ import java.net.URL
 //TODO: Maybe it could be good to move all the objects inside of this since it's only used here.
 //It'll also help the problem of the Related Words having to use the private const vars
 class SanseidoWebPage
-    : JsoupDictionaryWebPage(SanseidoVocabularyFactory,
-                               SanseidoDefinitionFactory,
-                               SanseidoRelatedWordFactory) {
+    : JsoupDictionaryWebPage() {
+    private val vocabularyFactory: IVocabularyFactory = SanseidoVocabularyFactory
+    private val definitionFactory: IDefinitionFactory = SanseidoDefinitionFactory
+    override fun getRelatedWords(document: Document,
+                                 wordLanguageCode: String): List<Vocabulary> {
+        val relatedWordEntries = ArrayList<Vocabulary>()
+        val table = document.select("table")[RELATED_WORDS_TABLE_INDEX]
+        val rows = table.select("tr")
+
+        for (row in rows) {
+            val columns = row.select("td")
+            val tableEntry = columns[RELATED_WORDS_VOCAB_INDEX].text()
+            val relatedVocabulary = vocabularyFactory.getVocabulary(tableEntry, wordLanguageCode)
+            relatedWordEntries.add(relatedVocabulary)
+        }
+
+        return relatedWordEntries
+    }
+
+    override val dictionaryName: String
+        get() = DICTIONARY_NAME
+
+    // ====================== PRIVATE ======================
+    /**
+     * Retrieve the searched word from the html source
+     * @param html the html source
+     * @return the word searched for
+     */
+    private fun findWordSource(html: Document): String {
+        return html.getElementById(SANSEIDO_WORD_ID).text()
+    }
+
+    override fun getDefinition(document: Document,
+                               definitionLanguageCode: String): Definition {
+        val definitionSource = getDefinitionSource(document)
+        return definitionFactory.getDefinition(definitionLanguageCode, definitionSource)
+    }
+
+    private fun getDefinitionSource(html : Document) : String {
+        val definitionParentElement = html.getElementById(SANSEIDO_WORD_DEFINITION_ID)
+        return if (definitionParentElement.children().size > 0) {
+            definitionParentElement.child(0).text()
+        }
+        else {
+            ""
+        }
+    }
+
+
+    override fun getVocabulary(document: Document, wordLanguageCode: String): Vocabulary {
+        val wordSource = findWordSource(document)
+        return vocabularyFactory.getVocabulary(wordSource, wordLanguageCode)
+    }
 
     companion object {
         //TODO: Use pager
+        private const val RELATED_WORDS_VOCAB_INDEX = 1
+        private const val RELATED_WORDS_TABLE_INDEX = 0
+
+        private const val SANSEIDO_WORD_DEFINITION_ID = "wordBody"
+        private const val SANSEIDO_WORD_ID = "word"
         private val TAG = SanseidoWebPage::class.java.simpleName
 
         private const val RELATED_WORDS_PAGER_ID = "_ctl0_ContentPlaceHolder1_ibtGoNext"

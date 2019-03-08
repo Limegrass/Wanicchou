@@ -32,17 +32,17 @@ interface VocabularyDao : BaseDao<Vocabulary> {
     // The index constraint fails on insert
     // if it already exists. Until @Insert properly supports it, must use this.
     @Query("""
-        SELECT COUNT(1)
+        SELECT v.VocabularyID
         FROM Vocabulary v
         WHERE v.Word = :word
             AND v.LanguageCode = :wordLanguageCode
             AND v.Pronunciation = :pronunciation
             AND v.Pitch = :pitch
     """)
-    fun isAlreadyInserted(word: String,
-                         pronunciation: String,
-                         wordLanguageCode: String,
-                         pitch: String): Boolean
+    fun getVocabularyID(word: String,
+                        pronunciation: String,
+                        wordLanguageCode: String,
+                        pitch: String): Long
 
     @Query("""
         SELECT v.*
@@ -50,7 +50,7 @@ interface VocabularyDao : BaseDao<Vocabulary> {
         JOIN VocabularyRelation vr
             ON vr.SearchVocabularyID = v.VocabularyID
         WHERE vr.SearchVocabularyID = :vocabularyID """)
-    fun getWordsRelatedToVocabularyID(vocabularyID: Long): LiveData<List<Vocabulary>>
+    fun getWordsRelatedToVocabularyID(vocabularyID: Long): List<Vocabulary>
 
 
     @Query("""
@@ -58,6 +58,12 @@ interface VocabularyDao : BaseDao<Vocabulary> {
         FROM Vocabulary v
         WHERE v.Word = :word""")
     fun getVocabulary(word: String) : LiveData<Vocabulary>
+
+    @Query("""
+        SELECT v.*
+        FROM Vocabulary v
+        WHERE v.VocabularyID = :vocabularyID""")
+    fun getVocabulary(vocabularyID: Long) : List<Vocabulary>
 
 
     // =========================== Searches =========================
@@ -135,7 +141,7 @@ interface VocabularyDao : BaseDao<Vocabulary> {
         FROM Vocabulary v
         WHERE v.VocabularyID = :vocabularyID
         """)
-    fun search(vocabularyID: Long) : LiveData<List<VocabularyInformation>>
+    fun search(vocabularyID: Long) : List<VocabularyInformation>
 
     /**
      * TESTING GARBAGE HERE FOR ROOM CRAZY RELATIONSHIT
@@ -207,7 +213,7 @@ interface VocabularyDao : BaseDao<Vocabulary> {
         SELECT v.*
         FROM Vocabulary v
         WHERE v.VocabularyID IN (:vocabularyIDs)""")
-    fun getRelatedVocabulary(vocabularyIDs : List<Int>) : List<VocabularyInformation>
+    fun getRelatedVocabulary(vocabularyIDs : List<Int>) : List<Vocabulary>
 
 
 

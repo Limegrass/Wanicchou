@@ -11,7 +11,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.waifusims.wanicchou.R
-import com.waifusims.wanicchou.viewmodel.SearchViewModel
+import com.waifusims.wanicchou.viewmodel.VocabularyViewModel
 import data.arch.anki.AnkiDroidHelper
 import data.room.entity.Dictionary
 import data.room.entity.VocabularyInformation
@@ -28,15 +28,15 @@ class FabFragment : Fragment() {
         const val DICTIONARIES_BUNDLE_KEY = "key_dictionary" // TODO: Move to strings
     }
 
-    private val searchViewModel : SearchViewModel by lazy {
+    private val vocabularyViewModel : VocabularyViewModel by lazy {
         ViewModelProviders.of(activity!!)
-                .get(SearchViewModel::class.java)
+                .get(VocabularyViewModel::class.java)
     }
 
     override fun onResume() {
-        if(searchViewModel.definition.definitionID == 0L){
-            floatingActionButton.hide()
-        }
+//        if(vocabularyViewModel.definition.definitionID == 0L){
+//            floatingActionButton.hide()
+//        }
 
         super.onResume()
     }
@@ -60,16 +60,16 @@ class FabFragment : Fragment() {
                 ankiDroidHelper.requestPermission(callbackActivity,
                         ANKI_PERMISSION_REQUEST_CALLBACK_CODE)
             }
-            val dictionaryName = dictionaries.single {
-                it.dictionaryID == searchViewModel.definition.dictionaryID
-            }.dictionaryName
+//            val dictionaryName = dictionaries.single {
+//                it.dictionaryID == vocabularyViewModel.definition.dictionaryID
+//            }.dictionaryName
 
             //TODO: Properly include the notes and tags
-            ankiDroidHelper.addUpdateNote(searchViewModel.vocabulary,
-                    searchViewModel.definition,
-                    dictionaryName,
-                    listOf(),
-                    mutableSetOf())
+//            ankiDroidHelper.addUpdateNote(vocabularyViewModel.vocabulary,
+//                    vocabularyViewModel.definition,
+//                    dictionaryName,
+//                    listOf(),
+//                    mutableSetOf())
         }
     }
     private fun setFABObserver(){
@@ -83,6 +83,6 @@ class FabFragment : Fragment() {
             }
         }
         val lifecycleOwner = this
-        searchViewModel.setVocabularyInformationObserver(lifecycleOwner, wordObserver)
+//        vocabularyViewModel.setVocabularyObserver(lifecycleOwner, wordObserver)
     }
 }

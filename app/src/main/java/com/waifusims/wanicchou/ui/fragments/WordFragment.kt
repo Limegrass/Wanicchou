@@ -11,17 +11,17 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.waifusims.wanicchou.R
-import com.waifusims.wanicchou.viewmodel.SearchViewModel
-import data.room.entity.VocabularyInformation
+import com.waifusims.wanicchou.viewmodel.VocabularyViewModel
+import data.room.entity.Vocabulary
 
 class WordFragment : Fragment() {
     companion object {
         private val TAG : String = WordFragment::class.java.simpleName
     }
 
-    private val searchViewModel : SearchViewModel by lazy {
+    private val vocabularyViewModel : VocabularyViewModel by lazy {
         ViewModelProviders.of(activity!!)
-                .get(SearchViewModel::class.java)
+                          .get(VocabularyViewModel::class.java)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -38,17 +38,18 @@ class WordFragment : Fragment() {
         val tvPronunciation = view.findViewById<TextView>(R.id.tv_pronunciation)
 
         //TODO: Reset the wordIndex on new search
-        val wordObserver = Observer<List<VocabularyInformation>>{
+        val wordObserver = Observer<List<Vocabulary>>{
+            val vocabularyList = it
             Log.v(TAG, "LiveData emitted.")
-            if(it != null && it.isNotEmpty()){
-                Log.i(TAG, "Result size: [${it.size}].")
-                tvWord.text = it[searchViewModel.getWordIndex()].vocabulary!!.word
-                tvPronunciation.text = it[searchViewModel.getWordIndex()].vocabulary!!.pronunciation
+            Log.i(TAG, "Result size: [${vocabularyList.size}].")
+            if(it.isNotEmpty()){
+                tvWord.text = vocabularyList[vocabularyViewModel.wordIndex].word
+                tvPronunciation.text = vocabularyList[vocabularyViewModel.wordIndex].pronunciation
             }
         }
 
         val lifecycleOwner : LifecycleOwner = activity as LifecycleOwner
-        searchViewModel.setVocabularyInformationObserver(lifecycleOwner, wordObserver)
+        vocabularyViewModel.setVocabularyObserver(lifecycleOwner, wordObserver)
     }
 }
 

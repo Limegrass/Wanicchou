@@ -9,7 +9,6 @@ import android.arch.persistence.room.*
                                 "LanguageCode",
                                 "Pitch"),
                 unique = true)]
-//                unique = true)]
 )
 
 data class Vocabulary (

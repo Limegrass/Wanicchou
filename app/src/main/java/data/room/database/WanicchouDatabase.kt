@@ -1,9 +1,12 @@
-package data.room
+package data.room.database
 
-import android.arch.persistence.db.SupportSQLiteDatabase
 import android.content.Context
-import android.arch.persistence.room.*
-import android.arch.persistence.room.migration.Migration
+import androidx.room.Database
+import androidx.room.Room
+import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import data.arch.util.SingletonHolder
 import data.room.dao.*
 import data.room.entity.*
@@ -22,9 +25,11 @@ import data.room.entity.*
             Tag::class,
             VocabularyNote::class,
             VocabularyRelation::class,
-            VocabularyTag::class
+            VocabularyTag::class,
+            MatchType::class
         ],
-        version = 2
+        version = 2,
+        exportSchema = false
 )
 @TypeConverters(Converters::class)
 abstract class WanicchouDatabase : RoomDatabase() {
@@ -36,6 +41,7 @@ abstract class WanicchouDatabase : RoomDatabase() {
     abstract fun vocabularyNoteDao(): VocabularyNoteDao
     abstract fun vocabularyRelationDao(): VocabularyRelationDao
     abstract fun vocabularyTagDao(): VocabularyTagDao
+    abstract fun matchTypeDao(): MatchTypeDao
 
     companion object : SingletonHolder<WanicchouDatabase, Context>({
         val MIGRATION_1_2 = object : Migration(1, 2){
@@ -43,10 +49,14 @@ abstract class WanicchouDatabase : RoomDatabase() {
                 database.execSQL(WanicchouMigration.MIGRATION_1_2_QUERY)
             }
         }
+        val dictionaryInsertCallback = DictionaryInsertDatabaseCallback(it)
+        val matchTypeInsertCallback = MatchTypeInsertDatabaseCallback(it)
         Room.databaseBuilder<WanicchouDatabase>(it.applicationContext,
                                                         WanicchouDatabase::class.java,
                                                        "WanicchouDatabase")
                 .addMigrations(MIGRATION_1_2)
+                .addCallback(dictionaryInsertCallback)
+                .addCallback(matchTypeInsertCallback)
                 .build()
     })
 }

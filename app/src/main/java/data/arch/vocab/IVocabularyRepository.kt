@@ -1,8 +1,8 @@
 package data.arch.vocab
 
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.LiveData
 import data.enums.MatchType
+import data.room.entity.Dictionary
 import data.room.entity.Vocabulary
 import data.room.entity.VocabularyInformation
 
@@ -12,12 +12,17 @@ interface IVocabularyRepository {
 //    fun saveResults(dictionaryEntry: DictionaryEntry,
 //                    relatedWords: List<WordListEntry>)
 
-    fun search(searchTerm: String = "",
-               wordLanguageCode: String,
-               definitionLanguageCode: String,
-               matchType: MatchType = MatchType.WORD_EQUALS,
-               dictionary: String,
-               lifecycleOwner: LifecycleOwner)
+    suspend fun vocabularySearch(searchTerm: String,
+                         wordLanguageCode: String,
+                         definitionLanguageCode: String,
+                         matchType: MatchType,
+                         dictionary: String) : List<Vocabulary>
+//    fun search(searchTerm: String = "",
+//               wordLanguageCode: String,
+//                       definitionLanguageCode: String,
+//                       matchType: MatchType = MatchType.WORD_EQUALS,
+//                       dictionary: String,
+//                       lifecycleOwner: LifecycleOwner)
 
 //    fun save(definition : Definition)
 //    fun save(vocabulary : Vocabulary)
@@ -33,5 +38,6 @@ interface IVocabularyRepository {
     }
 
 
+    val dictionaries : List<Dictionary>
 
 }
