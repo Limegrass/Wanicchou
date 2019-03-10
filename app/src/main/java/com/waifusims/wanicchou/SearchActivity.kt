@@ -7,8 +7,6 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.SearchEvent
-import android.widget.FrameLayout
-import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
@@ -18,6 +16,7 @@ import com.waifusims.wanicchou.ui.fragments.FabFragment
 import com.waifusims.wanicchou.ui.fragments.TabSwitchFragment
 import com.waifusims.wanicchou.ui.fragments.WordFragment
 import com.waifusims.wanicchou.util.WanicchouSharedPreferenceHelper
+import com.waifusims.wanicchou.viewmodel.DefinitionViewModel
 import com.waifusims.wanicchou.viewmodel.VocabularyViewModel
 import data.arch.vocab.IVocabularyRepository
 import data.enums.AutoDelete
@@ -49,6 +48,11 @@ class SearchActivity
     private val vocabularyViewModel: VocabularyViewModel by lazy {
         ViewModelProviders.of(this)
                           .get(VocabularyViewModel::class.java)
+    }
+
+    private val definitionViewModel: DefinitionViewModel by lazy {
+        ViewModelProviders.of(this)
+                          .get(DefinitionViewModel::class.java)
     }
 
 //    private val vocabularyViewModel: VocabularyViewModel by lazy {
@@ -101,9 +105,15 @@ class SearchActivity
     private fun getLatest() {
         GlobalScope.launch(Dispatchers.IO) {
             val vocabularyList = repository.getLatest()
+            //TODO: Maybe refactor to just give the dictionaryID
+            // (or when I figure out dynamic settings pref)
+            val definitionList = repository.getDefinitions(vocabularyList[0].vocabularyID,
+                                                           sharedPreferences.definitionLanguageCode,
+                                                           sharedPreferences.dictionary)
             runOnUiThread {
                 vocabularyViewModel.resetWordIndex()
                 vocabularyViewModel.setVocabularyList(vocabularyList)
+                definitionViewModel.setDefinitionList(definitionList)
             }
         }
     }
@@ -204,9 +214,16 @@ class SearchActivity
                     sharedPreferences.definitionLanguageCode,
                     sharedPreferences.matchType,
                     sharedPreferences.dictionary)
-            runOnUiThread {
-                vocabularyViewModel.setVocabularyList(vocabularyList)
+            if(vocabularyList.isNotEmpty()){
+                val definitionList = repository.getDefinitions(vocabularyList[0].vocabularyID,
+                        sharedPreferences.definitionLanguageCode,
+                        sharedPreferences.dictionary)
+                runOnUiThread {
+                    vocabularyViewModel.setVocabularyList(vocabularyList)
+                    definitionViewModel.setDefinitionList(definitionList)
+                }
             }
+
         }
 
     }

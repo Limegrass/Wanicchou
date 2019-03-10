@@ -13,40 +13,44 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.waifusims.wanicchou.R
 import com.waifusims.wanicchou.ui.adapter.DefinitionAdapter
+import com.waifusims.wanicchou.viewmodel.DefinitionViewModel
 import com.waifusims.wanicchou.viewmodel.VocabularyViewModel
+import data.room.entity.Definition
 import data.room.entity.VocabularyInformation
 
 class DefinitionFragment : Fragment() {
     companion object {
         private val TAG : String = DefinitionFragment::class.java.simpleName
     }
-    private val vocabularyViewModel : VocabularyViewModel by lazy {
+    private val definitionViewModel : DefinitionViewModel by lazy {
         //TODO: Make sure this assert isn't problematic
         ViewModelProviders.of(activity!!)
-                          .get(VocabularyViewModel::class.java)
+                .get(DefinitionViewModel::class.java)
     }
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val attachToRoot = false
         val view = inflater.inflate(R.layout.fragment_definition,
                                     container,
                                     attachToRoot)
-        setDefinitionObserver(view)
+        setDefinitionObserver()
         return view
     }
 
 
-    private fun setDefinitionObserver(view : View){
-        val recyclerView = view.findViewById<RecyclerView>(R.id.rv_definitions)
-        val definitionObserver = Observer<List<VocabularyInformation>>{
-            Log.v(TAG, "LiveData emitted.")
-            if(it != null && it.isNotEmpty()){
-                Log.v(TAG, "Result size: [${it.size}].")
-                recyclerView.layoutManager = LinearLayoutManager(context)
-                recyclerView.adapter = DefinitionAdapter(it[vocabularyViewModel.wordIndex].definitions)
-            }
-        }
+    private fun setDefinitionObserver(){
 
         val lifecycleOwner : LifecycleOwner = activity as LifecycleOwner
-//        vocabularyViewModel.setVocabularyObserver(lifecycleOwner, definitionObserver)
+        definitionViewModel.setObserver(lifecycleOwner, ::setDefinition)
+    }
+
+    private fun setDefinition(){
+        val recyclerView = view!!.findViewById<RecyclerView>(R.id.rv_definitions)
+        Log.v(TAG, "LiveData emitted.")
+        val definitionList = definitionViewModel.definitionList
+        if(!definitionList.isNullOrEmpty()){
+            Log.v(TAG, "Result size: [${definitionList.size}].")
+            recyclerView.layoutManager = LinearLayoutManager(context)
+            recyclerView.adapter = DefinitionAdapter(definitionList)
+        }
     }
 }

@@ -1,7 +1,6 @@
 package com.waifusims.wanicchou.viewmodel
 
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.*
 import data.room.entity.Vocabulary
 
@@ -16,10 +15,6 @@ class VocabularyViewModel(application: Application) : AndroidViewModel(applicati
     init {
         vocabularyMediator.value = listOf(getDefaultVocabulary())
         wordIndexLiveData.value = 0
-
-        vocabularyMediator.addSource(wordIndexLiveData) {
-            Log.v(TAG, "Word Index: $it")
-        }
     }
 
     fun setVocabularyList(vocabularyList: List<Vocabulary>){
@@ -27,10 +22,23 @@ class VocabularyViewModel(application: Application) : AndroidViewModel(applicati
     }
 
 //    private val mediator : MediatorLiveData<LiveData<Vocabulary>> = MediatorLiveData()
-    fun setVocabularyObserver(lifecycleOwner: LifecycleOwner,
-                              observer: Observer<List<Vocabulary>>){
-        vocabularyMediator.observe(lifecycleOwner, observer)
+    // TODO: Something better than this.
+    // There has to be a way to propagate observer calls from wordIndex changes
+    // to everything registered on the vocabulary.
+    // May need to implement my own visitor pattern.
+    fun setObserver(lifecycleOwner: LifecycleOwner,
+                    action : () -> Unit){
+        val wordObserver = Observer<Int>{
+            action()
+        }
+        val vocabularyObserver = Observer<List<Vocabulary>>{
+            action()
+        }
+
+        vocabularyMediator.observe(lifecycleOwner, vocabularyObserver)
+        wordIndexLiveData.observe(lifecycleOwner, wordObserver)
     }
+
 
     private val currentList : List<Vocabulary>
         get() {
@@ -64,7 +72,7 @@ class VocabularyViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     fun moveToNextWord() {
-        if(wordIndex < vocabularyMediator.value!!.size - 1) {
+        if(wordIndex < currentList.size - 1){
             val currentIndex = wordIndexLiveData.value!!
             wordIndexLiveData.value = currentIndex + 1
             definitionIndex = 0

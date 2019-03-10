@@ -1,7 +1,7 @@
 package data.arch.vocab
 
-import androidx.lifecycle.LifecycleOwner
 import data.enums.MatchType
+import data.room.entity.Definition
 import data.room.entity.Dictionary
 import data.room.entity.Vocabulary
 import data.room.entity.VocabularyInformation

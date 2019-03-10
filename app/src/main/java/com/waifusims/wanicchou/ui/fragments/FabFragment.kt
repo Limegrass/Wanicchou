@@ -33,14 +33,6 @@ class FabFragment : Fragment() {
                 .get(VocabularyViewModel::class.java)
     }
 
-    override fun onResume() {
-//        if(vocabularyViewModel.definition.definitionID == 0L){
-//            floatingActionButton.hide()
-//        }
-
-        super.onResume()
-    }
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val attachToRoot = false
         val view = inflater.inflate(R.layout.floating_action_button,
@@ -55,11 +47,12 @@ class FabFragment : Fragment() {
 
     private fun setFABOnClick() {
         floatingActionButton.setOnClickListener {
-            if(ankiDroidHelper.shouldRequestPermission()){
-                val callbackActivity = activity!!
-                ankiDroidHelper.requestPermission(callbackActivity,
-                        ANKI_PERMISSION_REQUEST_CALLBACK_CODE)
-            }
+            vocabularyViewModel.moveToNextWord()
+//            if(ankiDroidHelper.shouldRequestPermission()){
+//                val callbackActivity = activity!!
+//                ankiDroidHelper.requestPermission(callbackActivity,
+//                        ANKI_PERMISSION_REQUEST_CALLBACK_CODE)
+//            }
 //            val dictionaryName = dictionaries.single {
 //                it.dictionaryID == vocabularyViewModel.definition.dictionaryID
 //            }.dictionaryName
@@ -83,6 +76,6 @@ class FabFragment : Fragment() {
             }
         }
         val lifecycleOwner = this
-//        vocabularyViewModel.setVocabularyObserver(lifecycleOwner, wordObserver)
+//        vocabularyViewModel.setObserver(lifecycleOwner, wordObserver)
     }
 }
