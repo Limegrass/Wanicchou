@@ -1,6 +1,7 @@
 package com.waifusims.wanicchou.viewmodel
 
 import android.app.Application
+import android.view.View
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.MutableLiveData
@@ -31,9 +32,10 @@ class DefinitionViewModel(application: Application) : AndroidViewModel(applicati
         }
 
     fun setObserver(lifecycleOwner: LifecycleOwner,
-                    action : () -> Unit){
+                    action : (View?) -> Unit,
+                    view : View? = null){
         val definitionObserver = Observer<List<Definition>>{
-            action()
+            action(view)
         }
         definitionLiveData.observe(lifecycleOwner, definitionObserver)
     }
@@ -52,7 +54,7 @@ class DefinitionViewModel(application: Application) : AndroidViewModel(applicati
 
 
     companion object {
-        private const val DEFAULT_DEFINITION = "使えないアプリ。"
+        private const val DEFAULT_DEFINITION = "ある使えないアプリ。"
         private const val DEFAULT_LANGUAGE_CODE = "jp"
     }
 }

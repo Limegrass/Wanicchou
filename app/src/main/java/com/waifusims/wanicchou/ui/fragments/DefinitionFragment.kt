@@ -32,18 +32,17 @@ class DefinitionFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_definition,
                                     container,
                                     attachToRoot)
-        setDefinitionObserver()
+        setDefinitionObserver(view)
         return view
     }
 
 
-    private fun setDefinitionObserver(){
-
+    private fun setDefinitionObserver(view: View){
         val lifecycleOwner : LifecycleOwner = activity as LifecycleOwner
-        definitionViewModel.setObserver(lifecycleOwner, ::setDefinition)
+        definitionViewModel.setObserver(lifecycleOwner, ::setDefinition, view)
     }
 
-    private fun setDefinition(){
+    private fun setDefinition(view: View?){
         val recyclerView = view!!.findViewById<RecyclerView>(R.id.rv_definitions)
         Log.v(TAG, "LiveData emitted.")
         val definitionList = definitionViewModel.definitionList

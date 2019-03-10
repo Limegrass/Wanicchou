@@ -1,6 +1,7 @@
 package com.waifusims.wanicchou.viewmodel
 
 import android.app.Application
+import android.view.View
 import androidx.lifecycle.*
 import data.room.entity.Vocabulary
 
@@ -8,7 +9,7 @@ import data.room.entity.Vocabulary
 // TODO: Remove related words completely and just use the new scheme for queries to find same words
 class VocabularyViewModel(application: Application) : AndroidViewModel(application) {
 //    var vocabularyList : LiveData<List<Vocabulary>> = getDefaultMutableLiveData()
-//    var definitionList : List<LiveData<List<Definition>>> = getDefaultDefinitionList()
+//    var relatedVocabularyList : List<LiveData<List<Definition>>> = getDefaultDefinitionList()
     private val vocabularyMediator : MediatorLiveData<List<Vocabulary>> = MediatorLiveData()
     private val wordIndexLiveData : MutableLiveData<Int> = MutableLiveData()
 
@@ -27,12 +28,13 @@ class VocabularyViewModel(application: Application) : AndroidViewModel(applicati
     // to everything registered on the vocabulary.
     // May need to implement my own visitor pattern.
     fun setObserver(lifecycleOwner: LifecycleOwner,
-                    action : () -> Unit){
+                    action : (View?) -> Unit,
+                    view : View?){
         val wordObserver = Observer<Int>{
-            action()
+            action(view)
         }
         val vocabularyObserver = Observer<List<Vocabulary>>{
-            action()
+            action(view)
         }
 
         vocabularyMediator.observe(lifecycleOwner, vocabularyObserver)
@@ -85,11 +87,6 @@ class VocabularyViewModel(application: Application) : AndroidViewModel(applicati
     val wordIndex : Int
         get() = wordIndexLiveData.value!!
 
-    private fun getDefaultRelatedWord(): List<Vocabulary>{
-        return listOf(Vocabulary(DEFAULT_RELATED_WORD,
-                                 DEFAULT_LANGUAGE_CODE,
-                                 DEFAULT_RELATED_WORD_PRONUNCIATION))
-    }
 
     private fun getDefaultVocabulary() : Vocabulary {
         val word = DEFAULT_WORD
@@ -105,8 +102,6 @@ class VocabularyViewModel(application: Application) : AndroidViewModel(applicati
         private const val DEFAULT_LANGUAGE_CODE = "jp"
         private const val DEFAULT_WORD_PRONUNCIATION = "わにっちょう"
         private const val DEFAULT_WORD = "和日帳"
-        private const val DEFAULT_RELATED_WORD = "テスト"
-        private const val DEFAULT_RELATED_WORD_PRONUNCIATION = "てすと"
     }
 
 

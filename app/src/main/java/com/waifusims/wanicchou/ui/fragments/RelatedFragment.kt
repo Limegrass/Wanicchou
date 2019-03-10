@@ -12,6 +12,8 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.waifusims.wanicchou.R
+import com.waifusims.wanicchou.ui.adapter.RelatedVocabularyAdapter
+import com.waifusims.wanicchou.viewmodel.RelatedVocabularyViewModel
 import com.waifusims.wanicchou.viewmodel.VocabularyViewModel
 import data.room.entity.VocabularyInformation
 
@@ -19,10 +21,10 @@ class RelatedFragment : Fragment() {
     companion object {
         private val TAG : String = RelatedFragment::class.java.simpleName
     }
-    private val vocabularyViewModel : VocabularyViewModel by lazy {
+    private val relatedVocabularyViewModel : RelatedVocabularyViewModel by lazy {
         //TODO: Make sure this assert isn't problematic
         ViewModelProviders.of(activity!!)
-                .get(VocabularyViewModel::class.java)
+                .get(RelatedVocabularyViewModel::class.java)
     }
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val attachToRoot = false
@@ -34,18 +36,18 @@ class RelatedFragment : Fragment() {
     }
 
     private fun setRelatedObserver(view : View){
-        val recyclerView = view.findViewById<RecyclerView>(R.id.rv_related)
-        val definitionObserver = Observer<List<VocabularyInformation>>{
-            Log.v(TAG, "LiveData emitted.")
-            if(it != null && it.isNotEmpty()){
-                Log.v(TAG, "Result size: [${it.size}].")
-                recyclerView.layoutManager = LinearLayoutManager(context)
-//                recyclerView.adapter = RelatedVocabularyAdapter(vocabularyViewModel.relatedWords)
-            }
-        }
-
         val lifecycleOwner : LifecycleOwner = activity as LifecycleOwner
-//        vocabularyViewModel.setRelatedWordObserver(lifecycleOwner, definitionObserver)
+        relatedVocabularyViewModel.setObserver(lifecycleOwner, ::setRelatedWords, view)
+    }
+    private fun setRelatedWords(view : View?) {
+        val recyclerView = view!!.findViewById<RecyclerView>(R.id.rv_related)
+        Log.v(TAG, "LiveData emitted.")
+        val relatedVocabularyList = relatedVocabularyViewModel.relatedVocabularyList
+        if(!relatedVocabularyList.isNullOrEmpty()){
+            Log.v(TAG, "Result size: [${relatedVocabularyList.size}].")
+            recyclerView.layoutManager = LinearLayoutManager(context)
+            recyclerView.adapter = RelatedVocabularyAdapter(relatedVocabularyList)
+        }
     }
 
 }

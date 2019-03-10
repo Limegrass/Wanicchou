@@ -1,20 +1,17 @@
 package com.waifusims.wanicchou.ui.fragments
 
-import android.content.ContentValues.TAG
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.waifusims.wanicchou.R
+import com.waifusims.wanicchou.viewmodel.DefinitionViewModel
 import com.waifusims.wanicchou.viewmodel.VocabularyViewModel
 import data.arch.anki.AnkiDroidHelper
 import data.room.entity.Dictionary
-import data.room.entity.VocabularyInformation
 
 class FabFragment : Fragment() {
     private lateinit var floatingActionButton : FloatingActionButton
@@ -30,7 +27,12 @@ class FabFragment : Fragment() {
 
     private val vocabularyViewModel : VocabularyViewModel by lazy {
         ViewModelProviders.of(activity!!)
-                .get(VocabularyViewModel::class.java)
+                          .get(VocabularyViewModel::class.java)
+    }
+
+    private val definitionViewModel : DefinitionViewModel by lazy {
+        ViewModelProviders.of(activity!!)
+                          .get(DefinitionViewModel::class.java)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -41,41 +43,43 @@ class FabFragment : Fragment() {
         floatingActionButton = view.findViewById(R.id.fab)
         dictionaries = arguments!!.getParcelableArrayList<Dictionary>(DICTIONARIES_BUNDLE_KEY)!!
         setFABOnClick()
-        setFABObserver()
+        setFABObserver(view)
         return view
     }
 
     private fun setFABOnClick() {
         floatingActionButton.setOnClickListener {
-            vocabularyViewModel.moveToNextWord()
-//            if(ankiDroidHelper.shouldRequestPermission()){
-//                val callbackActivity = activity!!
-//                ankiDroidHelper.requestPermission(callbackActivity,
-//                        ANKI_PERMISSION_REQUEST_CALLBACK_CODE)
-//            }
-//            val dictionaryName = dictionaries.single {
-//                it.dictionaryID == vocabularyViewModel.definition.dictionaryID
-//            }.dictionaryName
+            if(ankiDroidHelper.shouldRequestPermission()){
+                val callbackActivity = activity!!
+                ankiDroidHelper.requestPermission(callbackActivity,
+                        ANKI_PERMISSION_REQUEST_CALLBACK_CODE)
+            }
 
-            //TODO: Properly include the notes and tags
-//            ankiDroidHelper.addUpdateNote(vocabularyViewModel.vocabulary,
-//                    vocabularyViewModel.definition,
-//                    dictionaryName,
-//                    listOf(),
-//                    mutableSetOf())
+            val dictionaryNames = definitionViewModel.definitionList.map {
+                dictionaries.single {
+                    it.dictionaryID == it.dictionaryID
+                }.dictionaryName
+            }
+
+//            TODO: Properly include the notes and tags
+            ankiDroidHelper.addUpdateNote(vocabularyViewModel.vocabulary,
+                    definitionViewModel.definitionList,
+                    dictionaryNames,
+                    listOf(),
+                    mutableSetOf())
         }
     }
-    private fun setFABObserver(){
-        val wordObserver = Observer<List<VocabularyInformation>> {
-            Log.v(TAG, "LiveData emitted.")
-            if(it != null
-                    && it.isNotEmpty()
-                    && ankiDroidHelper.isApiAvailable()) {
-                Log.v(TAG, "Result size: [${it.size}].")
-                floatingActionButton.show()
-            }
-        }
+    private fun setFABObserver(view: View?){
         val lifecycleOwner = this
-//        vocabularyViewModel.setObserver(lifecycleOwner, wordObserver)
+        vocabularyViewModel.setObserver(lifecycleOwner, ::showFAB, view)
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    private fun showFAB(view : View?){
+        if(!definitionViewModel.definitionList.isNullOrEmpty()
+                && definitionViewModel.definitionList[0].vocabularyID != 0L
+                && ankiDroidHelper.isApiAvailable()) {
+            floatingActionButton.show()
+        }
     }
 }

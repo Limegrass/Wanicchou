@@ -33,7 +33,7 @@ class TabSwitchFragment : Fragment() {
             val definitionFragment = fragmentManager!!.findFragmentById(R.id.fragment_definition)
             if(definitionFragment == null || !definitionFragment.isVisible) {
                 val transaction = fragmentManager!!.beginTransaction()
-                transaction.replace(R.id.fragment_related,
+                transaction.replace(R.id.container_body,
                                     DefinitionFragment())
                 transaction.commit()
             }
@@ -46,7 +46,7 @@ class TabSwitchFragment : Fragment() {
             val relatedFragment = fragmentManager!!.findFragmentById(R.id.fragment_related)
             if(relatedFragment == null || !relatedFragment.isVisible){
                 val transaction = fragmentManager!!.beginTransaction()
-                transaction.replace(R.id.fragment_definition,
+                transaction.replace(R.id.container_body,
                                     RelatedFragment())
                 transaction.commit()
             }
