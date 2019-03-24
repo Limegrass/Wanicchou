@@ -18,7 +18,7 @@
     <string name="page_key" translatable="false">webPage</string>
 
     <!--defaults-->
-    <string name="pref_dictionary_default" translatable="false">Sanseido</string>
+    <integer name="pref_dictionary_default" translatable="false">1</integer>
     <string name="pref_word_language_default" translatable="false">jp</string>
     <string name="pref_definition_language_default" translatable="false">jp</string>
     <string name="pref_match_type_default" translatable="false">WORD_STARTS_WITH</string>

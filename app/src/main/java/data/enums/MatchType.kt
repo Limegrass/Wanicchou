@@ -31,6 +31,3 @@ enum class MatchType {
         }
     }
 }
-//    WORD_FUZZY_CONTAINS,
-
-// 2+ 1 + 4     + 32 + 8

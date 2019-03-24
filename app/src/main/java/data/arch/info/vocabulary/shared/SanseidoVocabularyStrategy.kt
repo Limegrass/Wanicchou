@@ -1,27 +1,28 @@
-package data.web.sanseido
+package data.arch.info.vocabulary.shared
 
-import data.room.entity.Vocabulary
-import data.arch.vocab.IVocabularyFactory
 import data.arch.lang.EnglishVocabulary
 import data.arch.lang.JapaneseVocabulary
+import data.room.entity.Vocabulary
 import java.util.regex.Pattern
 
-object SanseidoVocabularyFactory : IVocabularyFactory {
-    private const val EXACT_WORD_REGEX = "(?<=［).*(?=］)"
-    private const val EXACT_EJ_REGEX = ".*(?=［.*］)"
-    private const val SEPARATOR_FRAGMENTS_REGEX = "[△▲･・]"
-    private const val PRONUNCIATION_REGEX = "[\\p{script=Hiragana}|\\p{script=Katakana}]+" +
-            "($|[\\p{script=Han}０-９]|\\d|\\s)*?"
+internal class SanseidoVocabularyStrategy : IVocabularyStrategy {
+    companion object {
+        private const val EXACT_WORD_REGEX = "(?<=［).*(?=］)"
+        private const val EXACT_EJ_REGEX = ".*(?=［.*］)"
+        private const val SEPARATOR_FRAGMENTS_REGEX = "[△▲･・]"
+        private const val PRONUNCIATION_REGEX = "[\\p{script=Hiragana}|\\p{script=Katakana}]+" +
+                "($|[\\p{script=Han}０-９]|\\d|\\s)*?"
+    }
 
-    override fun getVocabulary(wordSource: String,
-                               wordLanguageCode: String) : Vocabulary {
+    override fun get(wordSource: String,
+                     wordLanguageCode: String) : Vocabulary {
         val word = isolateWord(wordSource, wordLanguageCode)
         val pronunciation = isolateReading(wordSource, wordLanguageCode)
         val pitch = JapaneseVocabulary.isolatePitch(wordSource)
         return Vocabulary(word,
-                          wordLanguageCode,
-                          pronunciation,
-                          pitch)
+                wordLanguageCode,
+                pronunciation,
+                pitch)
     }
 
     /**
@@ -82,8 +83,5 @@ object SanseidoVocabularyFactory : IVocabularyFactory {
             readingMatcher.group(0)
         } else strippedWordSource
     }
-
-
-
 
 }

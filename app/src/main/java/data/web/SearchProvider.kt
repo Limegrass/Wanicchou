@@ -10,7 +10,7 @@ import java.lang.IllegalArgumentException
 //TODO: Make this somehow take into account some pages possibly needing JSwith webview.
 // Maybe the builder pattern could be used?
 
-object SearchProvider {
+class SearchProvider {
     private lateinit var webPage : IDictionaryWebPage
 
     fun getWebPage(dictionary: String): IDictionaryWebPage {
@@ -30,20 +30,7 @@ object SearchProvider {
             else -> default
         }
     }
-
     private fun isEnglishInput(input :String): Boolean {
         return input.trim()[0].toInt() < 255
     }
-
-    //TODO: I hate how this is implemented, need some way of forcing abstract static members/fun
-    fun getCurrentDictionarySupportedMatchTypes() : Set<MatchType> {
-        return webPage.getSupportedMatchTypes()
-    }
-
-//    fun getSearch(webPage: WebViewDictionaryWebPage,
-//                  html: String,
-//                  wordLanguageCode: String,
-//                  definitionLanguageCode: String): Search {
-//        return webPage.getSearch(html, wordLanguageCode, definitionLanguageCode)
-//    }
 }

@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.waifusims.wanicchou.R
 
@@ -36,6 +37,10 @@ class TabSwitchFragment : Fragment() {
                 transaction.replace(R.id.container_body,
                                     DefinitionFragment())
                 transaction.commit()
+                val context = context!!
+                wordButton.setBackgroundColor(ContextCompat.getColor(context, R.color.color_aqua))
+                val relatedButton = view.findViewById<TextView>(R.id.btn_tab_related)
+                relatedButton.setBackgroundColor(ContextCompat.getColor(context, R.color.color_grey_inactive))
             }
         }
     }
@@ -49,6 +54,10 @@ class TabSwitchFragment : Fragment() {
                 transaction.replace(R.id.container_body,
                                     RelatedFragment())
                 transaction.commit()
+                val context = context!!
+                relatedButton.setBackgroundColor(ContextCompat.getColor(context, R.color.color_aqua))
+                val wordButton = view.findViewById<TextView>(R.id.btn_tab_word)
+                wordButton.setBackgroundColor(ContextCompat.getColor(context, R.color.color_grey_inactive))
             }
         }
     }

@@ -26,7 +26,7 @@ abstract class JsoupDictionaryWebPage(private val vocabularyFactory: IVocabulary
 
     abstract override fun getSupportedMatchTypes(): Set<MatchType>
 
-    abstract override val dictionaryName: String
+    abstract override val dictionaryID: Long
 
     abstract override fun getVocabulary(document: Document,
                                         wordLanguageCode: String) : Vocabulary

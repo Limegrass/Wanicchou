@@ -11,18 +11,20 @@ import com.waifusims.wanicchou.R
 import com.waifusims.wanicchou.viewmodel.DefinitionViewModel
 import com.waifusims.wanicchou.viewmodel.VocabularyViewModel
 import data.arch.anki.AnkiDroidHelper
-import data.room.entity.Dictionary
+import data.room.VocabularyRepository
 
 class FabFragment : Fragment() {
     private lateinit var floatingActionButton : FloatingActionButton
-    private lateinit var dictionaries : ArrayList<Dictionary>
 
     private val ankiDroidHelper : AnkiDroidHelper by lazy {
         AnkiDroidHelper(context!!)
     }
     companion object {
         private const val ANKI_PERMISSION_REQUEST_CALLBACK_CODE : Int = 420
-        const val DICTIONARIES_BUNDLE_KEY = "key_dictionary" // TODO: Move to strings
+    }
+
+    private val repository : VocabularyRepository by lazy {
+        VocabularyRepository(activity!!.application)
     }
 
     private val vocabularyViewModel : VocabularyViewModel by lazy {
@@ -41,7 +43,6 @@ class FabFragment : Fragment() {
                 container,
                 attachToRoot)
         floatingActionButton = view.findViewById(R.id.fab)
-        dictionaries = arguments!!.getParcelableArrayList<Dictionary>(DICTIONARIES_BUNDLE_KEY)!!
         setFABOnClick()
         setFABObserver(view)
         return view
@@ -56,7 +57,7 @@ class FabFragment : Fragment() {
             }
 
             val dictionaryNames = definitionViewModel.definitionList.map {
-                dictionaries.single {
+                repository.dictionaries.single {
                     it.dictionaryID == it.dictionaryID
                 }.dictionaryName
             }

@@ -7,18 +7,21 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.SearchEvent
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.lifecycle.ViewModelProviders
-import com.waifusims.wanicchou.ui.fragments.DefinitionFragment
+import androidx.viewpager.widget.ViewPager
+import com.google.android.material.tabs.TabLayout
+import com.waifusims.wanicchou.ui.adapter.WordPagerAdapter
 import com.waifusims.wanicchou.ui.fragments.FabFragment
 import com.waifusims.wanicchou.ui.fragments.TabSwitchFragment
 import com.waifusims.wanicchou.ui.fragments.WordFragment
 import com.waifusims.wanicchou.util.WanicchouSharedPreferenceHelper
 import com.waifusims.wanicchou.viewmodel.DefinitionViewModel
+import com.waifusims.wanicchou.viewmodel.RelatedVocabularyViewModel
 import com.waifusims.wanicchou.viewmodel.VocabularyViewModel
-import data.arch.vocab.IVocabularyRepository
 import data.enums.AutoDelete
 import data.room.VocabularyRepository
 import kotlinx.coroutines.Dispatchers
@@ -47,20 +50,20 @@ class SearchActivity
     //<editor-fold desc="Fields/Properties">
     private val vocabularyViewModel: VocabularyViewModel by lazy {
         ViewModelProviders.of(this)
-                          .get(VocabularyViewModel::class.java)
+                .get(VocabularyViewModel::class.java)
     }
 
     private val definitionViewModel: DefinitionViewModel by lazy {
         ViewModelProviders.of(this)
-                          .get(DefinitionViewModel::class.java)
+                .get(DefinitionViewModel::class.java)
     }
 
-//    private val vocabularyViewModel: VocabularyViewModel by lazy {
-//        ViewModelProviders.of(this)
-//                .get(VocabularyViewModel::class.java)
-//    }
+    private val relatedVocabularyViewModel: RelatedVocabularyViewModel by lazy {
+        ViewModelProviders.of(this)
+                .get(RelatedVocabularyViewModel::class.java)
+    }
 
-    private val repository : IVocabularyRepository by lazy {
+    private val repository : VocabularyRepository by lazy {
         VocabularyRepository(this.application)
     }
     private val sharedPreferences
@@ -73,9 +76,10 @@ class SearchActivity
 //    }
 
     companion object {
-        private val TAG : String = SearchActivity::class.java.simpleName
+        private val TAG: String = SearchActivity::class.java.simpleName
     }
-    private var toast : Toast? = null
+
+    private var toast: Toast? = null
     //</editor-fold>
 
     //<editor-fold desc="Activity LifeCycle">
@@ -83,37 +87,35 @@ class SearchActivity
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_wanicchou)
 
+        val pager = findViewById<ViewPager>(R.id.pager)
+        val tabDots = findViewById<TabLayout>(R.id.tab_dots)
+        tabDots.setupWithViewPager(pager, true)
+        pager.adapter = WordPagerAdapter(supportFragmentManager)
         val transaction = supportFragmentManager.beginTransaction()
 
         transaction.add(R.id.container_header, WordFragment())
         transaction.add(R.id.container_header, TabSwitchFragment())
-        transaction.add(R.id.container_body, DefinitionFragment())
+//        transaction.add(R.id.container_body, DefinitionFragment())
 
         val fabFragment = FabFragment()
-        val bundle = Bundle()
-        bundle.putParcelableArrayList(FabFragment.DICTIONARIES_BUNDLE_KEY,
-                ArrayList(repository.dictionaries))
-        fabFragment.arguments = bundle
         transaction.add(R.id.container_frame, fabFragment)
         transaction.commit()
+        setVocabularyObserver()
     }
 
     override fun onResume() {
         getLatest()
         super.onResume()
     }
+
     private fun getLatest() {
         GlobalScope.launch(Dispatchers.IO) {
             val vocabularyList = repository.getLatest()
-            //TODO: Maybe refactor to just give the dictionaryID
+            //TODO: Maybe refactor to just give the DICTIONARY_ID
             // (or when I figure out dynamic settings pref)
-            val definitionList = repository.getDefinitions(vocabularyList[0].vocabularyID,
-                                                           sharedPreferences.definitionLanguageCode,
-                                                           sharedPreferences.dictionary)
             runOnUiThread {
                 vocabularyViewModel.resetWordIndex()
                 vocabularyViewModel.setVocabularyList(vocabularyList)
-                definitionViewModel.setDefinitionList(definitionList)
             }
         }
     }
@@ -182,7 +184,7 @@ class SearchActivity
     private fun handleIntent(intent: Intent) {
         Log.i(TAG, "Handling Intent: [${intent.action}]")
         // This was recommended, but the search button caused Intent.ACTION_MAIN instead
-        if(intent.action == Intent.ACTION_SEARCH){
+        if (intent.action == Intent.ACTION_SEARCH) {
             val searchTerm = intent.getStringExtra(SearchManager.QUERY)
 
             search(searchTerm)
@@ -190,7 +192,7 @@ class SearchActivity
     }
 
 
-    private fun showToast(toastText : String){
+    private fun showToast(toastText: String) {
         val context = this
         toast = Toast.makeText(context,
                 toastText,
@@ -198,11 +200,17 @@ class SearchActivity
         toast!!.show()
     }
 
+    private fun setVocabularyObserver() {
+        val lifecycleOwner = this
+        vocabularyViewModel.setObserver(lifecycleOwner, ::setupDefinitionViewModel, null)
+        vocabularyViewModel.setObserver(lifecycleOwner, ::setupRelatedVocabularyViewModel, null)
+    }
+
     private fun search(searchTerm: String) {
         Log.i(TAG, "Search Initiated: [$searchTerm].")
-        showToast( "Searching for $searchTerm..." )
+        showToast("Searching for $searchTerm...")
 
-        if(sharedPreferences.autoDelete == AutoDelete.ON_SEARCH){
+        if (sharedPreferences.autoDelete == AutoDelete.ON_SEARCH) {
             repository.removeVocabulary(vocabularyViewModel.vocabulary)
         }
         //TODO: String template it
@@ -214,18 +222,35 @@ class SearchActivity
                     sharedPreferences.definitionLanguageCode,
                     sharedPreferences.matchType,
                     sharedPreferences.dictionary)
-            if(vocabularyList.isNotEmpty()){
-                val definitionList = repository.getDefinitions(vocabularyList[0].vocabularyID,
-                        sharedPreferences.definitionLanguageCode,
-                        sharedPreferences.dictionary)
+            if (vocabularyList.isNotEmpty()) {
                 runOnUiThread {
                     vocabularyViewModel.setVocabularyList(vocabularyList)
-                    definitionViewModel.setDefinitionList(definitionList)
                 }
             }
 
         }
+    }
 
+    private fun setupDefinitionViewModel(@Suppress("UNUSED_PARAMETER") view: View?) {
+        GlobalScope.launch(Dispatchers.IO) {
+            val vocabularyID = vocabularyViewModel.vocabulary.vocabularyID
+            val definitionList = repository.getDefinitions(vocabularyID,
+                    sharedPreferences.definitionLanguageCode,
+                    sharedPreferences.dictionary)
+            runOnUiThread {
+                definitionViewModel.setDefinitionList(definitionList)
+            }
+        }
+    }
+
+    private fun setupRelatedVocabularyViewModel(@Suppress("UNUSED_PARAMETER") view: View?) {
+        GlobalScope.launch(Dispatchers.IO) {
+            val vocabularyID = vocabularyViewModel.vocabulary.vocabularyID
+            val relatedWordList = repository.getRelatedWords(vocabularyID)
+            runOnUiThread {
+                relatedVocabularyViewModel.setRelatedVocabularyList(relatedWordList)
+            }
+        }
     }
     //</editor-fold>
 }

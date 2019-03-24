@@ -10,9 +10,9 @@ import com.waifusims.wanicchou.R
 class SettingsFragment : PreferenceFragmentCompat(),
                          SharedPreferences.OnSharedPreferenceChangeListener {
 
-    private var dictionaryListPref: ListPreference? = null
-    private var matchTypeListPref: ListPreference? = null
-    private var autoDeleteListPref: ListPreference? = null
+    private lateinit var dictionaryListPref: ListPreference
+    private lateinit var matchTypeListPref: ListPreference
+    private lateinit var autoDeleteListPref: ListPreference
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,9 +26,9 @@ class SettingsFragment : PreferenceFragmentCompat(),
 
     override fun onResume() {
         super.onResume()
-        dictionaryListPref!!.summary = dictionaryListPref!!.entry.toString()
-        matchTypeListPref!!.summary = matchTypeListPref!!.entry.toString()
-        autoDeleteListPref!!.summary = autoDeleteListPref!!.entry.toString()
+        dictionaryListPref.summary = dictionaryListPref.entry.toString()
+        matchTypeListPref.summary = matchTypeListPref.entry.toString()
+        autoDeleteListPref.summary = autoDeleteListPref.entry.toString()
         preferenceScreen.sharedPreferences.registerOnSharedPreferenceChangeListener(this)
     }
 
@@ -44,13 +44,13 @@ class SettingsFragment : PreferenceFragmentCompat(),
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
         when (key){
             context!!.getString(R.string.pref_match_type_key) -> {
-                matchTypeListPref!!.summary = matchTypeListPref!!.entry.toString()
+                matchTypeListPref.summary = matchTypeListPref.entry.toString()
             }
             context!!.getString(R.string.pref_auto_delete_key) -> {
-                autoDeleteListPref!!.summary = autoDeleteListPref!!.entry.toString()
+                autoDeleteListPref.summary = autoDeleteListPref.entry.toString()
             }
             context!!.getString(R.string.pref_dictionary_key) -> {
-                dictionaryListPref!!.summary = dictionaryListPref!!.entry.toString()
+                dictionaryListPref.summary = dictionaryListPref.entry.toString()
             }
 
         }

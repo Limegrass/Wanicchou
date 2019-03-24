@@ -40,8 +40,8 @@ class RelatedVocabularyViewModel(application: Application) : AndroidViewModel(ap
         relatedVocabularyLiveData.observe(lifecycleOwner, definitionObserver)
     }
 
-    fun setDefinitionList(definitionList : List<Vocabulary>){
-        relatedVocabularyLiveData.value = definitionList
+    fun setRelatedVocabularyList(relatedVocabularyList : List<Vocabulary>){
+        relatedVocabularyLiveData.value = relatedVocabularyList
     }
 
     //TODO: Make this just an initial database value

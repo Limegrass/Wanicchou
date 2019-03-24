@@ -6,7 +6,7 @@
         <ListPreference
             android:title="@string/pref_dictionary_title"
             android:key="@string/pref_dictionary_key"
-            android:defaultValue="@string/pref_dictionary_default"
+            android:defaultValue="@integer/pref_dictionary_default"
             android:entries="@array/pref_search_provider_entries"
             android:entryValues="@array/pref_search_provider_values"/>
 

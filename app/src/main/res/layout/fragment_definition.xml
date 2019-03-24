@@ -1,33 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--<fragment-->
-    <!--xmlns:android="http://schemas.android.com/apk/res/android"-->
-    <!--android:layout_width="match_parent"-->
-    <!--android:layout_height="match_parent"-->
-    <!--android:id="@+id/fragment_definition"-->
-    <!--android:name="com.waifusims.wanicchou.ui.fragments.DefinitionFragment"-->
-    <!--&gt;-->
-    <LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/fragment_definition"
-        android:layout_margin="40sp"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/fragment_definition"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center_horizontal"
+    android:orientation="vertical">
+    <TextView
+        android:id="@+id/tv_label_definition"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:orientation="vertical">
-        <TextView
-            android:id="@+id/tv_label_definition"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="20sp"
-            android:text="@string/lbl_definition_header_text"
-            android:padding="10sp"
-            />
+        android:textSize="20sp"
+        android:text="@string/lbl_definition_header_text"
+        android:padding="10sp"
+        />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rv_definitions"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_definitions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 
-    </LinearLayout>
-<!--</fragment>-->
+</LinearLayout>
 

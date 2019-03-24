@@ -6,34 +6,38 @@ import com.waifusims.wanicchou.R
 import data.enums.AutoDelete
 import data.enums.MatchType
 
-class WanicchouSharedPreferenceHelper(val context: Context) {
+class WanicchouSharedPreferenceHelper(private val context: Context) {
 
     private val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
 
     var matchType: MatchType
         get() {
             val pref = getString(R.string.pref_match_type_key,
-                    R.string.pref_match_type_default)!!
+                    R.string.pref_match_type_default)
             return MatchType.valueOf(pref)
         }
         set(value) {
             putString(R.string.pref_match_type_key, value.toString())
         }
 
-    var dictionary: String
-        get() = getString(R.string.pref_dictionary_key, R.string.pref_dictionary_default)!!
+    var dictionary: Long
+        get() {
+            val dictionary = getString(R.string.pref_dictionary_key,
+                    R.integer.pref_dictionary_default)
+            return dictionary.toLong()
+        }
         set(value) {
-            putString(R.string.pref_dictionary_key, value)
+            putString(R.string.pref_dictionary_key, value.toString())
         }
 
     var wordLanguageCode: String
-        get() = getString(R.string.pref_word_language_key, R.string.pref_word_language_default)!!
+        get() = getString(R.string.pref_word_language_key, R.string.pref_word_language_default)
         set(value) {
             putString(R.string.pref_word_language_key, value)
         }
 
     var definitionLanguageCode: String
-        get() = getString(R.string.pref_definition_language_key, R.string.pref_definition_language_default)!!
+        get() = getString(R.string.pref_definition_language_key, R.string.pref_definition_language_default)
         set(value) {
             putString(R.string.pref_definition_language_key, value)
         }
@@ -41,17 +45,17 @@ class WanicchouSharedPreferenceHelper(val context: Context) {
     var autoDelete : AutoDelete
         get() {
             val pref = getString(R.string.pref_auto_delete_key,
-                    R.string.pref_auto_delete_default)!!
+                    R.string.pref_auto_delete_default)
             return AutoDelete.valueOf(pref)
         }
         set(value) {
             putString(R.string.pref_auto_delete_key, value.toString())
         }
 
-    private fun getString(resKey: Int, missingResKey: Int): String? {
+    private fun getString(resKey: Int, missingResKey: Int): String {
         val sharedPrefKey = context.getString(resKey)
         val stringIfMissing = context.getString(missingResKey)
-        return sharedPreferences.getString(sharedPrefKey, stringIfMissing)
+        return sharedPreferences.getString(sharedPrefKey, stringIfMissing)!!
     }
 
     private fun putString(resKey: Int, stringToSave: String) {

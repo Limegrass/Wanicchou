@@ -24,13 +24,11 @@ interface DefinitionDao : BaseDao<Definition> {
     fun definitionContains(searchTerm: String): Definition
 
     @Query("""
-        SELECT def.*
-        FROM Definition def
-        JOIN Dictionary di
-            ON def.DictionaryID = di.DictionaryID
-        WHERE def.VocabularyID = :vocabularyID
-            AND def.LanguageCode = :definitionLanguageCode
-            AND di.DictionaryName = :dictionaryName
+        SELECT d.*
+        FROM Definition d
+        WHERE d.VocabularyID = :vocabularyID
+            AND d.LanguageCode = :definitionLanguageCode
+            AND d.DictionaryID = :dictionaryID
     """)
     fun getVocabularyDefinitions(vocabularyID: Int, definitionLanguageCode: String): List<Definition>
 
