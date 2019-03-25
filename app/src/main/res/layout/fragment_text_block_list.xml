@@ -10,20 +10,20 @@
         android:layout_height="match_parent">
 
         <TextView
-            android:id="@+id/tv_label_tag"
+            android:id="@+id/tv_text_block_label"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="20sp"
-            android:text="Tags"
+            android:text=""
             android:padding="10sp"
             />
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rv_tag"
+            android:id="@+id/rv_text_block_contents"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content" />
     </LinearLayout>
     <androidx.appcompat.widget.AppCompatImageButton
-        android:id="@+id/iv_btn_add_tag"
+        android:id="@+id/iv_btn_add"
         android:layout_margin="20sp"
         android:layout_gravity="end|top"
         android:background="@drawable/ic_add_circle_filled_white_24dp"

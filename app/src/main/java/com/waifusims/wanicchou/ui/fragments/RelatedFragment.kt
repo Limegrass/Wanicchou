@@ -15,6 +15,7 @@ import com.google.android.flexbox.JustifyContent
 import com.waifusims.wanicchou.R
 import com.waifusims.wanicchou.ui.adapter.RelatedVocabularyAdapter
 import com.waifusims.wanicchou.util.WanicchouSharedPreferenceHelper
+import com.waifusims.wanicchou.viewmodel.DefinitionViewModel
 import com.waifusims.wanicchou.viewmodel.RelatedVocabularyViewModel
 import com.waifusims.wanicchou.viewmodel.VocabularyViewModel
 import data.room.VocabularyRepository
@@ -34,6 +35,10 @@ class RelatedFragment : Fragment() {
         //TODO: Make sure this assert isn't problematic
         ViewModelProviders.of(activity!!)
                 .get(RelatedVocabularyViewModel::class.java)
+    }
+    private val definitionViewModel : DefinitionViewModel by lazy {
+        ViewModelProviders.of(activity!!)
+                          .get(DefinitionViewModel::class.java)
     }
     private val repository : VocabularyRepository by lazy {
         VocabularyRepository(activity!!.application)
@@ -66,15 +71,13 @@ class RelatedFragment : Fragment() {
                 val position = recyclerView.getChildLayoutPosition(v!!)
                 val vocab = relatedVocabularyList[position]
                 runBlocking(Dispatchers.IO){
-                    val searchTerm = vocab.word+" "+vocab.pronunciation
-                    val vocabularyList = repository.vocabularySearch(searchTerm,
-                                                sharedPreferenceHelper.wordLanguageCode,
+                    val definitionList = repository.getRelatedVocabularyDefinition(vocab,
                                                 sharedPreferenceHelper.definitionLanguageCode,
-                                                sharedPreferenceHelper.matchType,
                                                 sharedPreferenceHelper.dictionary)
-                    if(vocabularyList.isNotEmpty()){
+                    if(definitionList.isNotEmpty()){
                         activity!!.runOnUiThread {
-                            vocabularyViewModel.setVocabularyList(vocabularyList)
+                            vocabularyViewModel.vocabularyList = listOf(vocab)
+                            definitionViewModel.definitionList = definitionList
                         }
                     }
                 }

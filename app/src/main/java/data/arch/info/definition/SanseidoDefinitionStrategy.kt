@@ -34,7 +34,7 @@ internal class SanseidoDefinitionStrategy : IDefinitionStrategy {
         formattedDefinition = formattedDefinition.replace(MULTIPLE_DEFINITION_REGEX.toRegex(),
                 MULTIPLE_DEFINITION_SEPARATOR)
 
-        return formattedDefinition
+        return formattedDefinition.trim()
     }
 
     private fun getDefinitionSource(html : Document) : String {

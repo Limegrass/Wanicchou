@@ -114,8 +114,8 @@ class SearchActivity
             //TODO: Maybe refactor to just give the DICTIONARY_ID
             // (or when I figure out dynamic settings pref)
             runOnUiThread {
-                vocabularyViewModel.resetWordIndex()
-                vocabularyViewModel.setVocabularyList(vocabularyList)
+                vocabularyViewModel.wordIndex = 0
+                vocabularyViewModel.vocabularyList = vocabularyList
             }
         }
     }
@@ -224,7 +224,7 @@ class SearchActivity
                     sharedPreferences.dictionary)
             if (vocabularyList.isNotEmpty()) {
                 runOnUiThread {
-                    vocabularyViewModel.setVocabularyList(vocabularyList)
+                    vocabularyViewModel.vocabularyList = vocabularyList
                 }
             }
 
@@ -238,7 +238,7 @@ class SearchActivity
                     sharedPreferences.definitionLanguageCode,
                     sharedPreferences.dictionary)
             runOnUiThread {
-                definitionViewModel.setDefinitionList(definitionList)
+                definitionViewModel.definitionList = definitionList
             }
         }
     }
@@ -248,7 +248,7 @@ class SearchActivity
             val vocabularyID = vocabularyViewModel.vocabulary.vocabularyID
             val relatedWordList = repository.getRelatedWords(vocabularyID)
             runOnUiThread {
-                relatedVocabularyViewModel.setRelatedVocabularyList(relatedWordList)
+                relatedVocabularyViewModel.relatedVocabularyList = relatedWordList
             }
         }
     }

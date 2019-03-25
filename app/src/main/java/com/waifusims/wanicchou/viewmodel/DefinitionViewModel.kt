@@ -20,7 +20,7 @@ class DefinitionViewModel(application: Application) : AndroidViewModel(applicati
             return definitionLiveData.value!!
         }
 
-    val definitionList : List<Definition>
+    var definitionList : List<Definition>
         get() {
             val currentLiveDataValue = currentList
             return if (currentLiveDataValue.isNotEmpty()){
@@ -29,6 +29,9 @@ class DefinitionViewModel(application: Application) : AndroidViewModel(applicati
             else{
                 listOf(getDefaultDefinition())
             }
+        }
+        set(value){
+            definitionLiveData.value = value
         }
 
     fun setObserver(lifecycleOwner: LifecycleOwner,
@@ -40,9 +43,6 @@ class DefinitionViewModel(application: Application) : AndroidViewModel(applicati
         definitionLiveData.observe(lifecycleOwner, definitionObserver)
     }
 
-    fun setDefinitionList(definitionList : List<Definition>){
-        definitionLiveData.value = definitionList
-    }
 
     //TODO: Make this just an initial database value
     private fun getDefaultDefinition(): Definition {

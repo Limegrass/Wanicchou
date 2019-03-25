@@ -18,11 +18,12 @@ internal class SanseidoRelatedVocabularyStrategy
         val relatedWordEntries = ArrayList<Vocabulary>()
         val table = htmlElement.select("table")[RELATED_WORDS_TABLE_INDEX]
         val rows = table.select("tr")
+        val strategy = SanseidoVocabularyStrategy()
 
         for (row in rows) {
             val columns = row.select("td")
             val tableEntry = columns[RELATED_WORDS_VOCAB_INDEX].text()
-            val relatedVocabulary = SanseidoVocabularyStrategy().get(tableEntry, wordLanguageCode)
+            val relatedVocabulary = strategy.get(tableEntry, wordLanguageCode)
             relatedWordEntries.add(relatedVocabulary)
         }
 

@@ -12,23 +12,15 @@ class RelatedVocabularyViewModel(application: Application) : AndroidViewModel(ap
     private val relatedVocabularyLiveData : MutableLiveData<List<Vocabulary>> = MutableLiveData()
 
     init{
-        relatedVocabularyLiveData.value = listOf(getDefaultRelatedWord())
+        relatedVocabularyLiveData.value = listOf()
     }
 
-    private val currentList : List<Vocabulary>
+    var relatedVocabularyList : List<Vocabulary>
         get() {
             return relatedVocabularyLiveData.value!!
         }
-
-    val relatedVocabularyList : List<Vocabulary>
-        get() {
-            val currentLiveDataValue = currentList
-            return if (currentLiveDataValue.isNotEmpty()){
-                currentLiveDataValue
-            }
-            else{
-                listOf(getDefaultRelatedWord())
-            }
+        set(value){
+            relatedVocabularyLiveData.value = value
         }
 
     fun setObserver(lifecycleOwner: LifecycleOwner,
@@ -38,22 +30,5 @@ class RelatedVocabularyViewModel(application: Application) : AndroidViewModel(ap
             action(view)
         }
         relatedVocabularyLiveData.observe(lifecycleOwner, definitionObserver)
-    }
-
-    fun setRelatedVocabularyList(relatedVocabularyList : List<Vocabulary>){
-        relatedVocabularyLiveData.value = relatedVocabularyList
-    }
-
-    //TODO: Make this just an initial database value
-    private fun getDefaultRelatedWord(): Vocabulary{
-        return Vocabulary(DEFAULT_RELATED_WORD,
-                DEFAULT_LANGUAGE_CODE,
-                DEFAULT_RELATED_WORD_PRONUNCIATION)
-    }
-
-    companion object {
-        private const val DEFAULT_LANGUAGE_CODE = "jp"
-        private const val DEFAULT_RELATED_WORD = "テスト"
-        private const val DEFAULT_RELATED_WORD_PRONUNCIATION = "てすと"
     }
 }
