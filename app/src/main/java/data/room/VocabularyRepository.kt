@@ -1,31 +1,43 @@
 package data.room
 
 import android.app.Application
-import android.arch.lifecycle.LifecycleOwner
-import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.Observer
+import androidx.annotation.WorkerThread
+import data.arch.info.definition.DefinitionFactory
+import data.arch.info.vocabulary.related.RelatedVocabularyFactory
+import data.arch.info.vocabulary.search.SearchWordVocabularyFactory
 import data.arch.search.IDictionaryWebPage
-import data.arch.vocab.IVocabularyRepository
-import data.room.entity.*
-import data.search.SearchProvider
 import data.enums.MatchType
-import data.arch.vocab.WordListEntry
+import data.room.database.WanicchouDatabase
+import data.room.entity.*
+import data.room.search.DatabaseSearchStrategyFactory
+import data.web.DictionaryWebPageFactory
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.jsoup.nodes.Document
 
 // TODO: Decision to search DB or online should occur here
 // TODO: Make things nullable and do appropriate logic when null for everything
 class VocabularyRepository(application: Application) {
 
-    //TODO: Make sure that webviews are automatically recycled but I'm pretty sure
+    @WorkerThread
+    fun getLatest() : List<Vocabulary> {
+        return database.vocabularyDao().getLatest()
+    }
 
-    val database = WanicchouDatabase.getInstance(application)
-    private val dictionaries : List<Dictionary> by lazy {
-        runBlocking{
+    private val database = WanicchouDatabase.getInstance(application)
+
+    // TODO: this should be late and not lazy
+    // and it should run not blocking
+    val dictionaries : List<Dictionary> by lazy {
+        runBlocking(Dispatchers.IO){
             database.dictionaryDao().getAllDictionaries()
         }
     }
 
-    override fun removeVocabulary(vocabulary: Vocabulary) {
+
+    fun removeVocabulary(vocabulary: Vocabulary) {
         GlobalScope.launch(Dispatchers.IO) {
             database.vocabularyDao().delete(vocabulary)
         }
@@ -164,10 +176,14 @@ class VocabularyRepository(application: Application) {
         }
     }
 
+    fun getRelatedWords(vocabularyID: Long) : List<Vocabulary> {
+        return database.vocabularyDao().getWordsRelatedToVocabularyID(vocabularyID)
+    }
+
     @WorkerThread
-    override fun getDefinitions(vocabularyID : Long,
-                      definitionLanguageCode: String,
-                      dictionary: String) : List<Definition> {
+    fun getDefinitions(vocabularyID : Long,
+                       definitionLanguageCode: String,
+                       dictionaryID: Long) : List<Definition> {
         return database.definitionDao()
                        .getVocabularyDefinitions(vocabularyID,
                                                  definitionLanguageCode,
@@ -193,56 +209,20 @@ class VocabularyRepository(application: Application) {
         return database.matchTypeDao().getTemplateString(matchTypeID)
     }
 
-    private fun getDictionaryName(dictionaryID: Int): String {
-        return database.dictionaryDao().getDictionaryByID(dictionaryID).value!!.dictionaryName
-    }
-
-    private fun getVocabulary(vocabularyID: Long): List<VocabularyInformation>{
-        return database.vocabularyDao().search(vocabularyID)
-    }
-
-    private fun searchVocabularyDatabase(searchTerm: String,
-                                         matchType: MatchType,
-                                         wordLanguageCode: String,
-                                         definitionLanguageCode: String): List<VocabularyInformation> {
-        return when (matchType) {
-            MatchType.WORD_EQUALS -> database.vocabularyDao().search(searchTerm, wordLanguageCode)
-            MatchType.WORD_WILDCARDS -> database.vocabularyDao().searchWithWildcards(searchTerm, wordLanguageCode)
-            MatchType.WORD_STARTS_WITH -> database.vocabularyDao().searchStartsWith(searchTerm, wordLanguageCode)
-            MatchType.WORD_ENDS_WITH -> database.vocabularyDao().searchEndsWith(searchTerm, wordLanguageCode)
-            MatchType.WORD_CONTAINS -> database.vocabularyDao().searchContains(searchTerm, wordLanguageCode)
-            MatchType.DEFINITION_CONTAINS -> database.vocabularyDao()
-                    .searchDefinitionContains(searchTerm, definitionLanguageCode)
-            MatchType.WORD_OR_DEFINITION_CONTAINS -> database.vocabularyDao()
-                    .searchWordOrDefinitionContains(searchTerm, wordLanguageCode, definitionLanguageCode)
+    fun addVocabularyTag(tagText: String,
+               vocabularyID: Long){
+        var tagID = database.tagDao().getExistingTagID(tagText)
+        if(tagID == null){
+            val tag = Tag(tagText)
+            runBlocking (Dispatchers.IO){
+                tagID = database.tagDao().insert(tag)
+            }
         }
-    }
+        val vocabularyTag = VocabularyTag(tagID!!, vocabularyID)
+        GlobalScope.launch (Dispatchers.IO) {
 
-
-    // I'm not too concerned about the cost of querying the DB at this
-    // point since it's all local, but this could probably be improved
-    private fun getTagID(tag: String) : Int {
-        if (!database.tagDao().tagExists(tag)) {
-            val tagEntity = Tag(tag)
-            database.tagDao().insert(tagEntity)
+            database.vocabularyTagDao().insert(vocabularyTag)
         }
-        return database.tagDao().getTag(tag).tagID
-    }
-
-    fun addTag(tag : String, word: String){
-        val tagID = getTagID(tag)
-        val vocabularyID = database.vocabularyDao().getVocabulary(word).value!!.vocabularyID
-        val vocabularyTag = VocabularyTag(tagID, vocabularyID)
-        database.vocabularyTagDao().insert(vocabularyTag)
-    }
-
-    fun deleteTag(tag: String){
-        val tagEntity = database.tagDao().getTag(tag)
-        database.tagDao().delete(tagEntity)
-    }
-
-    fun getVocabularyNotes(vocabularyID: Int): LiveData<List<VocabularyNote>> {
-        return database.vocabularyNoteDao().getVocabularyNoteForVocabularyID(vocabularyID)
     }
 
     fun getTags(vocabularyID: Long) : List<Tag> {

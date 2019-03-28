@@ -1,9 +1,9 @@
 package data.room.dao
 
-import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.MutableLiveData
-import android.arch.persistence.room.Dao
-import android.arch.persistence.room.Query
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.room.Dao
+import androidx.room.Query
 import data.room.entity.Definition
 
 @Dao
@@ -13,15 +13,14 @@ interface DefinitionDao : BaseDao<Definition> {
         FROM Definition
         ORDER BY DefinitionID DESC
         LIMIT 1""")
-    fun getLatest(): Definition
-//    fun getLatest(): LiveData<Definition>
+    fun getLatest(): LiveData<Definition>
 
     @Query("""
         SELECT *
         FROM Definition
         WHERE DefinitionText LIKE '%' + :searchTerm + '%'
     """)
-    fun definitionContains(searchTerm: String): Definition
+    fun definitionContains(searchTerm: String): LiveData<Definition>
 
     @Query("""
         SELECT d.*
@@ -30,7 +29,9 @@ interface DefinitionDao : BaseDao<Definition> {
             AND d.LanguageCode = :definitionLanguageCode
             AND d.DictionaryID = :dictionaryID
     """)
-    fun getVocabularyDefinitions(vocabularyID: Int, definitionLanguageCode: String): List<Definition>
+    fun getVocabularyDefinitions(vocabularyID: Long,
+                                 definitionLanguageCode: String,
+                                 dictionaryID : Long): List<Definition>
 
     @Query("""
         SELECT d.*
@@ -38,7 +39,6 @@ interface DefinitionDao : BaseDao<Definition> {
         WHERE d.VocabularyID = :vocabularyID
         ORDER BY d.DefinitionID DESC
         LIMIT 1
-    """
-    )
-    fun getLatestDefinition(vocabularyID: Int): List<Definition>
+    """)
+    fun getLatestDefinition(vocabularyID: Int): LiveData<List<Definition>>
 }

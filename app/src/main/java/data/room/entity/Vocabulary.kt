@@ -1,6 +1,7 @@
 package data.room.entity
 
-import android.arch.persistence.room.*
+import androidx.room.*
+import java.util.*
 
 @Entity(tableName = "Vocabulary",
         indices = [Index(

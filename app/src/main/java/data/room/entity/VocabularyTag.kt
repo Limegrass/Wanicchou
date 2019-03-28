@@ -1,23 +1,32 @@
 package data.room.entity
 
-import android.arch.persistence.room.*
+import androidx.room.*
 
 @Entity(tableName = "VocabularyTag",
         foreignKeys = [
             ForeignKey(
                     entity = Vocabulary::class,
                     parentColumns = ["VocabularyID"],
-                    childColumns = ["VocabularyID"])
-        ]
+                    childColumns = ["VocabularyID"]),
+            ForeignKey(
+                    entity = Tag::class,
+                    parentColumns = ["TagID"],
+                    childColumns = ["TagID"])
+        ],
+        indices = [Index(
+                value = ["TagID",
+                         "VocabularyID"],
+                unique = true
+        )]
 )
 
 data class VocabularyTag (
     @ColumnInfo(name = "TagID")
-    var tagID: Int,
+    var tagID: Long,
 
-    @ColumnInfo(name = "VocabularyID")
-    var vocabularyID: Int,
+    @ColumnInfo(name = "VocabularyID", index = true)
+    var vocabularyID: Long,
 
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "VocabularyTagID")
-    var vocabularyTagID: Int = 0 )
+    var vocabularyTagID: Long = 0 )

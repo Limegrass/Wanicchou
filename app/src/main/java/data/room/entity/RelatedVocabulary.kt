@@ -1,7 +1,7 @@
 package data.room.entity
 
-import android.arch.persistence.room.Embedded
-import android.arch.persistence.room.Relation
+import androidx.room.Embedded
+import androidx.room.Relation
 
 class RelatedVocabulary {
     @Embedded
@@ -19,11 +19,11 @@ class RelatedVocabulary {
             entityColumn = "SearchVocabularyID",
             entity = VocabularyRelation::class,
             projection = ["ResultVocabularyID"])
-    var relatedWordIDs: List<Int> = listOf()
+    var relatedWordIDs: List<Long> = listOf()
 
     @Relation(parentColumn = "VocabularyID",
             entityColumn = "VocabularyID",
             entity = VocabularyTag::class,
             projection = ["TagID"])
-    var tags: List<Int> = listOf()
+    var tags: List<Long> = listOf()
 }

@@ -4,12 +4,14 @@ import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
-import android.support.v4.app.ActivityCompat
-import android.support.v4.content.ContextCompat
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import android.util.SparseArray
 import com.ichi2.anki.api.AddContentApi
 import com.ichi2.anki.api.AddContentApi.READ_WRITE_PERMISSION
 import com.ichi2.anki.api.NoteInfo
+import data.room.entity.Definition
+import data.room.entity.Vocabulary
 import data.room.entity.VocabularyInformation
 import java.util.*
 
@@ -20,7 +22,7 @@ import java.util.*
 //TODO: SingletonHolder
 class AnkiDroidHelper(context: Context) {
     private val mContext: Context = context.applicationContext
-    private val api: AddContentApi = AddContentApi(mContext)
+    private val api : AddContentApi = AddContentApi(mContext)
     /**
      * Checks for the DeckID in sharedPref, then in AnkiDroid
      * Adds the deck if it doesn't exist in either
@@ -95,40 +97,44 @@ class AnkiDroidHelper(context: Context) {
     }
 
     // Attempts to find existing note and update it if it exists, else add it
-//    fun addUpdateNote(vocabularyInformation: VocabularyInformation,
-//                      notes: List<String>,
-//                      tags: MutableSet<String>): Long {
-//        val existingNotes = findDuplicateNotes(wanicchouModelID, vocabularyInformation.vocabulary)
-//        for (note in existingNotes){
-//            // If Word, word language, def language, pronunciation, and dictionary is the same,
-//            // then we will treat it as the same card.
-//            val noteWordLanguage = note.fields[AnkiDroidConfig.FIELDS_INDEX_WORD_LANGUAGE]
-//            val noteDefinitionLanguage = note.fields[AnkiDroidConfig.FIELDS_INDEX_DEFINITION_LANGUAGE]
-//            val noteDictionary = note.fields[AnkiDroidConfig.FIELDS_INDEX_DICTIONARY]
-//            val notePronunciation = note.fields[AnkiDroidConfig.FIELDS_INDEX_PRONUNCIATION]
-//            if (noteWordLanguage == vocabularyInformation.wordLanguageCode
-//                    && noteDefinitionLanguage == vocabularyInformation.definitions.
-//                    && noteDictionary == vocabularyInformation.definitions[0].dictionaryID
-//                    && notePronunciation == vocabularyInformation.vocabulary.pronunciation){
-//                updateNoteFields(note.id, vocabularyInformation, notes)
-//                updateNoteTags(note.id, tags)
-//                return note.id
-//            }
-//        }
-//        return addNote(vocabularyInformation, notes, tags)
-//    }
+    fun addUpdateNote(vocabulary : Vocabulary,
+                      definitionList: List<Definition>,
+                      dictionaryNames: List<String>,
+                      notes: List<String>,
+                      tags: MutableSet<String>): List<Long> {
+        val existingNotes = findDuplicateNotes(wanicchouModelID, vocabulary.word)
+        val noteIDs : MutableList<Long> = mutableListOf()
+        for (i in definitionList.indices){
+            for (note in existingNotes){
+                // If Word, word language, def language, pronunciation, and dictionary is the same,
+                // then we will treat it as the same card.
+                val noteWordLanguage = note.fields[AnkiDroidConfig.FIELDS_INDEX_WORD_LANGUAGE]
+                val noteDefinitionLanguage = note.fields[AnkiDroidConfig.FIELDS_INDEX_DEFINITION_LANGUAGE]
+                val noteDictionary = note.fields[AnkiDroidConfig.FIELDS_INDEX_DICTIONARY]
+                val notePronunciation = note.fields[AnkiDroidConfig.FIELDS_INDEX_PRONUNCIATION]
+                if (noteWordLanguage == vocabulary.languageCode
+                        && noteDefinitionLanguage == definitionList[i].definitionText
+                        && noteDictionary == dictionaryNames[i]
+                        && notePronunciation == vocabulary.pronunciation){
+                    updateNoteFields(note.id, vocabulary, definitionList[i], dictionaryNames[i], notes)
+                    updateNoteTags(note.id, tags)
+                    noteIDs.add(note.id)
+                }
+            }
+            noteIDs.add(addNote(vocabulary, definitionList[i], dictionaryNames[i], notes, tags))
+        }
+        return noteIDs
+    }
 
-    /**
-     * Add a search result to Anki
-     * @param dictionaryEntry the entry to add
-     * @param notes user saved notes
-     * @param tags to include
-     */
-//    private fun addNote(dictionaryEntry: DictionaryEntry, notes: List<String>, tags : MutableSet<String>): Long {
-//        val fields = getFieldsArray(dictionaryEntry, notes)
-//        tags.addAll(AnkiDroidConfig.TAGS)
-//        return api.addNote(wanicchouModelID, wanicchouDeckID, fields, tags)
-//    }
+    private fun addNote(vocabulary: Vocabulary,
+                        definition: Definition,
+                        dictionary: String,
+                        notes: List<String>,
+                        tags : MutableSet<String>): Long {
+        val fields = getFieldsArray(vocabulary, definition, dictionary, notes)
+        tags.addAll(AnkiDroidConfig.TAGS)
+        return api.addNote(wanicchouModelID, wanicchouDeckID, fields, tags)
+    }
 
 
     /**
@@ -220,33 +226,42 @@ class AnkiDroidHelper(context: Context) {
 
 
     private fun separateNotes(notes: List<String>): String{
+        if(notes.isEmpty()){
+            return ""
+        }
         return notes.reduce { a, b -> a + "\n" +b }
     }
 
-//    private fun getFieldsArray(dictionaryEntry: DictionaryEntry,
-//                               notes: List<String>) : Array<String?>{
-//        val fieldNames = api.getFieldList(wanicchouModelID)
-//        val fields = arrayOfNulls<String>(fieldNames.size)
-//        fields[AnkiDroidConfig.FIELDS_INDEX_WORD] = dictionaryEntry.word
-//        fields[AnkiDroidConfig.FIELDS_INDEX_WORD_LANGUAGE] = dictionaryEntry.word
-//        fields[AnkiDroidConfig.FIELDS_INDEX_PRONUNCIATION] = dictionaryEntry.pronunciation
-//        fields[AnkiDroidConfig.FIELDS_INDEX_DEFINITION] = dictionaryEntry.definition
-//        fields[AnkiDroidConfig.FIELDS_INDEX_DEFINITION_LANGUAGE] = dictionaryEntry.definition
-//        fields[AnkiDroidConfig.FIELDS_INDEX_FURIGANA] = getFurigana(dictionaryEntry)
-//        fields[AnkiDroidConfig.FIELDS_INDEX_PITCH] = dictionaryEntry.pitch
-//        fields[AnkiDroidConfig.FIELDS_INDEX_NOTES] = separateNotes(notes)
-//        fields[AnkiDroidConfig.FIELDS_INDEX_DICTIONARY] = dictionaryEntry.dictionary
-//        return fields
-//    }
+    private fun getFieldsArray(vocabulary: Vocabulary,
+                               definition: Definition,
+                               dictionary: String,
+                               notes: List<String>) : Array<String?>{
+        val fieldNames = api.getFieldList(wanicchouModelID)
+        val fields = arrayOfNulls<String>(fieldNames.size)
+        fields[AnkiDroidConfig.FIELDS_INDEX_WORD] = vocabulary.word
+        fields[AnkiDroidConfig.FIELDS_INDEX_WORD_LANGUAGE] = vocabulary.languageCode
+        fields[AnkiDroidConfig.FIELDS_INDEX_PRONUNCIATION] = vocabulary.pronunciation
+        fields[AnkiDroidConfig.FIELDS_INDEX_DEFINITION] = definition.definitionText
+        fields[AnkiDroidConfig.FIELDS_INDEX_DEFINITION_LANGUAGE] = definition.languageCode
+        fields[AnkiDroidConfig.FIELDS_INDEX_FURIGANA] = getFurigana(vocabulary)
+        fields[AnkiDroidConfig.FIELDS_INDEX_PITCH] = vocabulary.pitch
+        fields[AnkiDroidConfig.FIELDS_INDEX_NOTES] = separateNotes(notes)
+        fields[AnkiDroidConfig.FIELDS_INDEX_DICTIONARY] = dictionary
+        return fields
+    }
 
     //TODO: Change click to expand a menu and add associated UI elements
     //TODO: Maybe implement a clozed type when sentence search is included
     //TODO: Duplicate checking
 
-//    private fun updateNoteFields(noteID: Long, dictionaryEntry: DictionaryEntry, notes: List<String>){
-//        val fields = getFieldsArray(dictionaryEntry, notes)
-//        api.updateNoteFields(noteID, fields)
-//    }
+    private fun updateNoteFields(noteID: Long,
+                                 vocabulary: Vocabulary,
+                                 definition: Definition,
+                                 dictionary: String,
+                                 notes: List<String>){
+        val fields = getFieldsArray(vocabulary, definition, dictionary, notes)
+        api.updateNoteFields(noteID, fields)
+    }
 
     private fun updateNoteTags(noteID: Long, tags : MutableSet<String>): Boolean {
         tags.addAll(AnkiDroidConfig.TAGS)
@@ -322,11 +337,11 @@ class AnkiDroidHelper(context: Context) {
      * Generates an Anki format furigana string if word is not its pronunciation
      * @return a string for Anki's furigana display.
      */
-//    private fun getFurigana(vocabulary: DictionaryEntry): String {
-//        return if (vocabulary.word == vocabulary.pronunciation) {
-//            vocabulary.pronunciation
-//        } else "$vocabulary.word[${vocabulary.pronunciation}]"
-//    }
+    private fun getFurigana(vocabulary: Vocabulary): String {
+        return if (vocabulary.word == vocabulary.pronunciation) {
+            vocabulary.pronunciation
+        } else "$vocabulary[${vocabulary.pronunciation}]"
+    }
 
 
     /**

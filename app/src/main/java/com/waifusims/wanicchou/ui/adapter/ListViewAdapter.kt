@@ -1,13 +1,13 @@
-package com.waifusims.wanicchou.adapter
+package com.waifusims.wanicchou.ui.adapter
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 
-abstract class ListViewAdapter<T, VH : ListViewAdapter.ViewHolder<T>>(private val list : List<T>,
+abstract class ListViewAdapter<T, VH : ListViewAdapter.ViewHolder<T>>(protected val list : List<T>,
                                                              private val viewHolderConstructor: (View) -> VH,
                                                              private val layoutID : Int)
-    : RecyclerView.Adapter<VH>(){
+    : androidx.recyclerview.widget.RecyclerView.Adapter<VH>(){
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
         val context = parent.context
@@ -25,7 +25,8 @@ abstract class ListViewAdapter<T, VH : ListViewAdapter.ViewHolder<T>>(private va
         viewHolder.bind(list[position])
     }
 
-    abstract class ViewHolder<T>(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    abstract class ViewHolder<T>(itemView: View)
+        : androidx.recyclerview.widget.RecyclerView.ViewHolder(itemView) {
         abstract fun bind(value: T)
     }
 }

@@ -1,6 +1,6 @@
 package data.room.dao
 
-import android.arch.persistence.room.Dao
+import androidx.room.Dao
 import data.room.entity.VocabularyTag
 
 @Dao

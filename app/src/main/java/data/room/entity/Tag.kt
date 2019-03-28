@@ -1,6 +1,6 @@
 package data.room.entity
 
-import android.arch.persistence.room.*
+import androidx.room.*
 
 @Entity(tableName = "Tag")
 data class Tag (
@@ -9,7 +9,7 @@ data class Tag (
 
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "TagID")
-    var tagID: Int = 0){
+    var tagID: Long = 0){
     override fun toString(): String {
         return tagText
     }

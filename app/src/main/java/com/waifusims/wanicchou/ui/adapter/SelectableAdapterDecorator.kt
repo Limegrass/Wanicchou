@@ -1,11 +1,11 @@
-package com.waifusims.wanicchou.adapter
+package com.waifusims.wanicchou.ui.adapter
 
 import android.util.SparseBooleanArray
 import android.view.ViewGroup
 import java.util.*
 
-abstract class SelectableAdapterDecorator<VH : RecyclerView.ViewHolder>(val adapter: RecyclerView.Adapter<VH>)
-    : RecyclerView.Adapter<VH>() {
+abstract class SelectableAdapterDecorator<VH : androidx.recyclerview.widget.RecyclerView.ViewHolder>(val adapter: androidx.recyclerview.widget.RecyclerView.Adapter<VH>)
+    : androidx.recyclerview.widget.RecyclerView.Adapter<VH>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, position: Int): VH {
         return adapter.onCreateViewHolder(parent, position)

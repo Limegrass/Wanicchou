@@ -1,6 +1,6 @@
 package data.room.entity
 
-import android.arch.persistence.room.*
+import androidx.room.*
 
 @Entity(tableName = "VocabularyRelation",
         foreignKeys = [
@@ -18,6 +18,9 @@ data class VocabularyRelation (
 
     @ColumnInfo(name = "ResultVocabularyID", index = true)
     var resultVocabularyID: Long,
+
+    @ColumnInfo(name = "MatchTypeBitMask")
+    var matchTypeBitMask: Int,
 
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "VocabularyRelationID")

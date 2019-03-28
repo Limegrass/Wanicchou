@@ -1,6 +1,6 @@
 package data.room.entity
 
-import android.arch.persistence.room.*
+import androidx.room.*
 
 @Entity(tableName = "Definition",
         foreignKeys = [
@@ -21,16 +21,16 @@ data class Definition (
     @ColumnInfo(name = "LanguageCode")
     var languageCode: String = "",
 
-    @ColumnInfo(name = "DictionaryID")
-    var dictionaryID: Int,
+    @ColumnInfo(name = "DictionaryID", index = true)
+    var dictionaryID: Long,
 
-    @ColumnInfo(name = "VocabularyID")
-    var vocabularyID: Int,
+    @ColumnInfo(name = "VocabularyID", index = true)
+    var vocabularyID: Long,
 
 
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "DefinitionID")
-    var definitionID: Int = 0 ) {
+    var definitionID: Long = 0 ) {
     override fun toString(): String {
         return definitionText
     }
