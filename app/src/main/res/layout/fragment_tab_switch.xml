@@ -1,38 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:gravity="center_horizontal"
-    >
-    <TextView
-        android:id="@+id/btn_tab_word"
-        android:text="@string/lbl_word_button_text"
+    android:orientation="vertical">
+    <LinearLayout
+        android:layout_gravity="center_horizontal"
+        android:orientation="horizontal"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingTop="10sp"
-        android:paddingBottom="10sp"
-        android:paddingRight="20sp"
-        android:paddingLeft="20sp"
-        android:width="100sp"
-        android:height="40sp"
-        android:textAlignment="center"
-        android:background="@color/color_accent"
-        />
+        android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/btn_tab_word"
+            android:text="@string/lbl_word_button_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="10sp"
+            android:paddingBottom="10sp"
+            android:paddingRight="20sp"
+            android:paddingLeft="20sp"
+            android:width="100sp"
+            android:height="40sp"
+            android:textAlignment="center"
+            android:background="@color/color_accent"
+            />
 
-    <TextView
-        android:id="@+id/btn_tab_related"
-        android:text="@string/lbl_related_button_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingTop="10sp"
-        android:paddingBottom="10sp"
-        android:paddingRight="20sp"
-        android:paddingLeft="20sp"
-        android:width="100sp"
-        android:height="40sp"
-        android:textAlignment="center"
-        android:background="@color/color_grey_inactive"
-        />
+        <TextView
+            android:id="@+id/btn_tab_related"
+            android:text="@string/lbl_related_button_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="10sp"
+            android:paddingBottom="10sp"
+            android:paddingRight="20sp"
+            android:paddingLeft="20sp"
+            android:width="100sp"
+            android:height="40sp"
+            android:textAlignment="center"
+            android:background="@color/color_grey_inactive"
+            />
+    </LinearLayout>
 
+    <androidx.viewpager.widget.ViewPager
+        android:id="@+id/pager"
+        android:layout_marginTop="20sp"
+        android:layout_marginBottom="60sp"
+        android:layout_marginRight="40sp"
+        android:layout_marginLeft="40sp"
+        android:layout_marginStart="40sp"
+        android:layout_gravity="center_horizontal|bottom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="40sp" />
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tab_dots"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:tabBackground="@drawable/tab_selector"
+        app:tabGravity="center"
+        android:layout_marginTop="-60sp"
+        app:tabIndicatorHeight="0dp"/>
 </LinearLayout>

@@ -59,38 +59,35 @@ class RelatedFragment : Fragment() {
 
     private fun setRelatedObserver(view : View){
         val lifecycleOwner : LifecycleOwner = activity as LifecycleOwner
-        relatedVocabularyViewModel.setObserver(lifecycleOwner, ::setRelatedWords, view)
-    }
-    private fun setRelatedWords(view : View?) {
-        val recyclerView = view!!.findViewById<RecyclerView>(R.id.rv_related)
-        Log.v(TAG, "LiveData emitted.")
-        val relatedVocabularyList = relatedVocabularyViewModel.relatedVocabularyList
-        if(!relatedVocabularyList.isNullOrEmpty()){
-            val onClickListener = View.OnClickListener { v ->
-                Log.v(TAG, "OnClick")
-                val position = recyclerView.getChildLayoutPosition(v!!)
-                val vocab = relatedVocabularyList[position]
-                runBlocking(Dispatchers.IO){
-                    val definitionList = repository.getRelatedVocabularyDefinition(vocab,
-                                                sharedPreferenceHelper.definitionLanguageCode,
-                                                sharedPreferenceHelper.dictionary)
-                    if(definitionList.isNotEmpty()){
-                        activity!!.runOnUiThread {
-                            vocabularyViewModel.vocabularyList = listOf(vocab)
-                            definitionViewModel.definitionList = definitionList
+        relatedVocabularyViewModel.setObserver(lifecycleOwner){
+            val recyclerView = view.findViewById<RecyclerView>(R.id.rv_related)
+            Log.v(TAG, "LiveData emitted.")
+            val relatedVocabularyList = relatedVocabularyViewModel.list
+            if(!relatedVocabularyList.isNullOrEmpty()){
+                val onClickListener = View.OnClickListener { v ->
+                    Log.v(TAG, "OnClick")
+                    val position = recyclerView.getChildLayoutPosition(v!!)
+                    val vocab = relatedVocabularyList[position]
+                    runBlocking(Dispatchers.IO){
+                        val definitionList = repository.getRelatedVocabularyDefinition(vocab,
+                                sharedPreferenceHelper.definitionLanguageCode,
+                                sharedPreferenceHelper.dictionary)
+                        if(definitionList.isNotEmpty()){
+                            activity!!.runOnUiThread {
+                                vocabularyViewModel.list = listOf(vocab)
+                                definitionViewModel.list = definitionList
+                            }
                         }
                     }
                 }
-            }
-            Log.v(TAG, "Result size: [${relatedVocabularyList.size}].")
-            val layoutManager = FlexboxLayoutManager(context)
-            layoutManager.flexDirection = FlexDirection.ROW
-            layoutManager.justifyContent = JustifyContent.SPACE_AROUND
+                Log.v(TAG, "Result size: [${relatedVocabularyList.size}].")
+                val layoutManager = FlexboxLayoutManager(context)
+                layoutManager.flexDirection = FlexDirection.ROW
+                layoutManager.justifyContent = JustifyContent.SPACE_AROUND
 
-            recyclerView.layoutManager = layoutManager
-            recyclerView.adapter = RelatedVocabularyAdapter(relatedVocabularyList, onClickListener)
+                recyclerView.layoutManager = layoutManager
+                recyclerView.adapter = RelatedVocabularyAdapter(relatedVocabularyList, onClickListener)
+            }
         }
     }
-
-
 }

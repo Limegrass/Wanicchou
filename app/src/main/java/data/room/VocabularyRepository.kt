@@ -149,20 +149,18 @@ class VocabularyRepository(application: Application) {
                 .get()
                 .distinct()
         for (relatedVocabulary in relatedWords) {
-            GlobalScope.launch(Dispatchers.IO) {
-                var relatedVocabularyID = database.vocabularyDao().insert(relatedVocabulary)
-                if (relatedVocabularyID == -1L){
-                    relatedVocabularyID = database.vocabularyDao()
-                            .getVocabularyID(relatedVocabulary.word,
-                                    relatedVocabulary.pronunciation,
-                                    relatedVocabulary.languageCode,
-                                    relatedVocabulary.pitch)
-                }
-                val vocabularyRelation = VocabularyRelation(vocabularyID,
-                        relatedVocabularyID,
-                        matchType.getBitMask())
-                database.vocabularyRelationDao().insert(vocabularyRelation)
+            var relatedVocabularyID = database.vocabularyDao().insert(relatedVocabulary)
+            if (relatedVocabularyID == -1L){
+                relatedVocabularyID = database.vocabularyDao()
+                        .getVocabularyID(relatedVocabulary.word,
+                                relatedVocabulary.pronunciation,
+                                relatedVocabulary.languageCode,
+                                relatedVocabulary.pitch)
             }
+            val vocabularyRelation = VocabularyRelation(vocabularyID,
+                    relatedVocabularyID,
+                    matchType.getBitMask())
+            database.vocabularyRelationDao().insert(vocabularyRelation)
         }
     }
 
@@ -245,5 +243,9 @@ class VocabularyRepository(application: Application) {
 
     fun getVocabularyNotes(vocabularyID: Int): LiveData<List<VocabularyNote>> {
         return database.vocabularyNoteDao().getVocabularyNoteForVocabularyID(vocabularyID)
+    }
+
+    fun getTags(vocabularyID: Long) : List<Tag> {
+        return database.tagDao().getTagsForVocabularyID(vocabularyID)
     }
 }

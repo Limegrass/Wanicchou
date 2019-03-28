@@ -3,7 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/container_frame">
     <LinearLayout
         android:layout_width="match_parent"
@@ -30,18 +29,5 @@
             android:id="@+id/container_body"
             >
         </LinearLayout>
-        <androidx.viewpager.widget.ViewPager
-            android:id="@+id/pager"
-            android:layout_margin="40sp"
-            android:layout_gravity="center_horizontal|bottom"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-        <com.google.android.material.tabs.TabLayout
-            android:id="@+id/tab_dots"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:tabBackground="@drawable/tab_selector"
-            app:tabGravity="center"
-            app:tabIndicatorHeight="0dp"/>
     </LinearLayout>
 </FrameLayout>

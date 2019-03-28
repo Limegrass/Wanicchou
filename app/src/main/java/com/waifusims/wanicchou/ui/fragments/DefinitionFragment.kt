@@ -39,17 +39,15 @@ class DefinitionFragment : Fragment() {
 
     private fun setDefinitionObserver(view: View){
         val lifecycleOwner : LifecycleOwner = activity as LifecycleOwner
-        definitionViewModel.setObserver(lifecycleOwner, ::setDefinition, view)
-    }
-
-    private fun setDefinition(view: View?){
-        val recyclerView = view!!.findViewById<RecyclerView>(R.id.rv_definitions)
-        Log.v(TAG, "LiveData emitted.")
-        val definitionList = definitionViewModel.definitionList
-        if(!definitionList.isNullOrEmpty()){
-            Log.v(TAG, "Result size: [${definitionList.size}].")
-            recyclerView.layoutManager = LinearLayoutManager(context)
-            recyclerView.adapter = DefinitionAdapter(definitionList)
+        definitionViewModel.setObserver(lifecycleOwner){
+            val recyclerView = view.findViewById<RecyclerView>(R.id.rv_definitions)
+            Log.v(TAG, "LiveData emitted.")
+            val definitionList = definitionViewModel.list
+            if(!definitionList.isNullOrEmpty()){
+                Log.v(TAG, "Result size: [${definitionList.size}].")
+                recyclerView.layoutManager = LinearLayoutManager(context)
+                recyclerView.adapter = DefinitionAdapter(definitionList)
+            }
         }
     }
 }

@@ -7,20 +7,20 @@ import android.view.ViewGroup
 import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
 import com.waifusims.wanicchou.R
-import data.arch.util.IFactory
 
-class InputAlertDialogBuilderFactory(
-        private val context : Context,
-        private val viewGroup : ViewGroup?,
-        private val title : String?,
-        private val message : String?)
-    : IFactory<AlertDialog>{
-    override fun get(): AlertDialog {
-        val dialogBuilder = AlertDialog.Builder(context).create()
+class InputAlertDialogBuilder(
+        context : Context,
+        viewGroup : ViewGroup?,
+        title : String?,
+        message : String?)
+    : AlertDialog.Builder(context) {
+    val input : EditText
+    init {
+        val dialogBuilder = this
         val view = LayoutInflater.from(context).inflate(R.layout.dialog_text_input,
-                                                        viewGroup,
-                                                               false)
-        val input = view.findViewById<EditText>(R.id.et_input)
+                viewGroup,
+                false)
+        input = view.findViewById(R.id.et_input)
         input.inputType = InputType.TYPE_CLASS_TEXT
         dialogBuilder.setView(view)
         if(!title.isNullOrBlank()){
@@ -29,6 +29,5 @@ class InputAlertDialogBuilderFactory(
         if(!message.isNullOrBlank()){
             dialogBuilder.setMessage(message)
         }
-        return dialogBuilder
     }
 }

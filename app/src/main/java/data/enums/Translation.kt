@@ -1,6 +1,7 @@
 package data.enums
 
 import android.os.Build
+import data.arch.lang.JapaneseVocabulary
 import java.util.*
 
 /**
@@ -54,6 +55,16 @@ class Translation {
                         " -> " + Locale.forLanguageTag(defLanguageCode).displayLanguage
             } else {
                 vocabLanguageCode.toUpperCase() + " -> " + defLanguageCode.toUpperCase()
+            }
+        }
+
+        //TODO: Actually make this method instead of hacky assumptions, move them somewhere else?
+        private fun assignLanguageCode(str: String,
+                                       default: String = JapaneseVocabulary.LANGUAGE_CODE): String {
+            return when {
+                JapaneseVocabulary.isJapaneseInput(str) -> JapaneseVocabulary.LANGUAGE_CODE
+                //TODO: use kana/jp regex for jp
+                else -> default
             }
         }
     }

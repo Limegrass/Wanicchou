@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -44,7 +45,7 @@ class FabFragment : Fragment() {
                 attachToRoot)
         floatingActionButton = view.findViewById(R.id.fab)
         setFABOnClick()
-        setFABObserver(view)
+        setFABObserver()
         return view
     }
 
@@ -56,7 +57,7 @@ class FabFragment : Fragment() {
                         ANKI_PERMISSION_REQUEST_CALLBACK_CODE)
             }
 
-            val dictionaryNames = definitionViewModel.definitionList.map {
+            val dictionaryNames = definitionViewModel.list!!.map {
                 repository.dictionaries.single {
                     it.dictionaryID == it.dictionaryID
                 }.dictionaryName
@@ -64,23 +65,25 @@ class FabFragment : Fragment() {
 
 //            TODO: Properly include the notes and tags
             ankiDroidHelper.addUpdateNote(vocabularyViewModel.vocabulary,
-                    definitionViewModel.definitionList,
+                    definitionViewModel.list!!,
                     dictionaryNames,
                     listOf(),
                     mutableSetOf())
+            //TODO: Use string resource
+            Toast.makeText(context,
+                          "${vocabularyViewModel.vocabulary.word} sent to AnkiDroid",
+                          Toast.LENGTH_LONG).show()
+
         }
     }
-    private fun setFABObserver(view: View?){
+    private fun setFABObserver(){
         val lifecycleOwner = this
-        vocabularyViewModel.setObserver(lifecycleOwner, ::showFAB, view)
-    }
-
-    @Suppress("UNUSED_PARAMETER")
-    private fun showFAB(view : View?){
-        if(!definitionViewModel.definitionList.isNullOrEmpty()
-                && definitionViewModel.definitionList[0].vocabularyID != 0L
-                && ankiDroidHelper.isApiAvailable()) {
-            floatingActionButton.show()
+        vocabularyViewModel.setObserver(lifecycleOwner){
+            if(!definitionViewModel.list.isNullOrEmpty()
+                    && definitionViewModel.list!![0].vocabularyID != 0L
+                    && ankiDroidHelper.isApiAvailable()) {
+                floatingActionButton.show()
+            }
         }
     }
 }

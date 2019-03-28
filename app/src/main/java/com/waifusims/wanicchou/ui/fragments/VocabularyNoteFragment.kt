@@ -17,12 +17,12 @@ import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
 import com.waifusims.wanicchou.R
 import com.waifusims.wanicchou.ui.adapter.TextBlockRecyclerViewAdapter
-import com.waifusims.wanicchou.util.InputAlertDialogBuilderFactory
+import com.waifusims.wanicchou.util.InputAlertDialogBuilder
 import com.waifusims.wanicchou.viewmodel.VocabularyNoteViewModel
 
-class VocabularyNoteFragment : Fragment() {
+class VocabularyNoteFragment : TextBlockFragment("Vocabulary Notes") {
     companion object {
-        private val TAG : String = TagFragment::class.java.simpleName
+        private val TAG : String = VocabularyNoteFragment::class.java.simpleName
     }
 
     private val notesViewModel : VocabularyNoteViewModel by lazy {
@@ -34,20 +34,30 @@ class VocabularyNoteFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater,
                               container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        val attachToRoot = false
-        val view = inflater.inflate(R.layout.fragment_text_block_list,
-                container,
-                attachToRoot)
-        view.findViewById<TextView>(R.id.tv_text_block_label).text = "Vocabulary Notes"
-
+        val view = super.onCreateView(inflater, container, savedInstanceState)!!
         setRelatedObserver(view)
-        setAddTagButtonOnClick(view, container)
+        setAddTagButtonOnClick(view)
         return view
     }
 
     private fun setRelatedObserver(view : View){
         val lifecycleOwner : LifecycleOwner = activity as LifecycleOwner
-        notesViewModel.setObserver(lifecycleOwner, ::setTags, view)
+        notesViewModel.setObserver(lifecycleOwner){
+            val recyclerView = view.findViewById<RecyclerView>(R.id.rv_text_block_contents)
+            Log.v(TAG, "LiveData emitted.")
+            val notes = notesViewModel.list!!.map {
+                it.noteText
+            }
+            if(!notes.isNullOrEmpty()){
+                Log.v(TAG, "Result size: [${notes.size}].")
+                val layoutManager = FlexboxLayoutManager(context)
+                layoutManager.flexDirection = FlexDirection.ROW
+                layoutManager.justifyContent = JustifyContent.SPACE_AROUND
+
+                recyclerView.layoutManager = layoutManager
+                recyclerView.adapter = TextBlockRecyclerViewAdapter(notes)
+            }
+        }
     }
 
     // Create an observer that is generic. Construct with a TV to change the text of on update,
@@ -56,37 +66,19 @@ class VocabularyNoteFragment : Fragment() {
     // (Async operations in the background to insert into the DB and the autoupdate)
     // Keep Vocabulary and Definition as they are since they won't change without a search anyways?
 
-    private fun setAddTagButtonOnClick(view : View, container: ViewGroup?) {
+    private fun setAddTagButtonOnClick(view : View) {
         view.findViewById<AppCompatImageButton>(R.id.iv_btn_add).setOnClickListener {
             val context = context!!
             val title = "Add Vocabulary Note"
             val message = null
-            val dialogBuilder = InputAlertDialogBuilderFactory(context,
+            val dialogBuilder = InputAlertDialogBuilder(context,
                     view as ViewGroup,
                     title,
-                    message).get()
-
-            dialogBuilder.setButton(AlertDialog.BUTTON_POSITIVE, "Add") { dialog, which ->
+                    message)
+            dialogBuilder.setPositiveButton("Add") { dialog, _ ->
                 dialog.dismiss()
             }
             dialogBuilder.show()
-        }
-    }
-
-    private fun setTags(view : View?) {
-        val recyclerView = view!!.findViewById<RecyclerView>(R.id.rv_text_block_contents)
-        Log.v(TAG, "LiveData emitted.")
-        val notes = notesViewModel.notes.map {
-            it.noteText
-        }
-        if(!notes.isNullOrEmpty()){
-            Log.v(TAG, "Result size: [${notes.size}].")
-            val layoutManager = FlexboxLayoutManager(context)
-            layoutManager.flexDirection = FlexDirection.ROW
-            layoutManager.justifyContent = JustifyContent.SPACE_AROUND
-
-            recyclerView.layoutManager = layoutManager
-            recyclerView.adapter = TextBlockRecyclerViewAdapter(notes)
         }
     }
 }

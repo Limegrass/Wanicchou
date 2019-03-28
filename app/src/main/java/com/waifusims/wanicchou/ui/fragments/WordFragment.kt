@@ -33,14 +33,13 @@ class WordFragment : Fragment() {
     private fun setVocabularyListObserver(view : View?){
         //TODO: Reset the wordIndex on new search
         val lifecycleOwner : LifecycleOwner = activity as LifecycleOwner
-        vocabularyViewModel.setObserver(lifecycleOwner, ::setHeader, view)
+        vocabularyViewModel.setObserver(lifecycleOwner){
+            val tvWord = view!!.findViewById<TextView>(R.id.tv_word)
+            val tvPronunciation = view.findViewById<TextView>(R.id.tv_pronunciation)
+            tvWord.text = vocabularyViewModel.vocabulary.word
+            tvPronunciation.text = vocabularyViewModel.vocabulary.pronunciation
+        }
     }
 
-    private fun setHeader(view : View?){
-        val tvWord = view!!.findViewById<TextView>(R.id.tv_word)
-        val tvPronunciation = view.findViewById<TextView>(R.id.tv_pronunciation)
-        tvWord.text = vocabularyViewModel.vocabulary.word
-        tvPronunciation.text = vocabularyViewModel.vocabulary.pronunciation
-    }
 }
 

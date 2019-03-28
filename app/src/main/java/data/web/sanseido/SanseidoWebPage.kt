@@ -43,7 +43,7 @@ class SanseidoWebPage
                 MatchType.WORD_ENDS_WITH to 2,
                 MatchType.DEFINITION_CONTAINS to 3,
                 MatchType.WORD_CONTAINS to 5)
-        private const val DICTIONARY_NAME = "Sanseido"
+
         const val DICTIONARY_ID = 1L
     }
 

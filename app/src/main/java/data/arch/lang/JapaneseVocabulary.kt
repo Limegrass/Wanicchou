@@ -45,5 +45,14 @@ class JapaneseVocabulary {
             }
             return pitch
         }
+
+
+        fun isJapaneseInput(input :String): Boolean {
+            if (input.isBlank()){
+                return false
+            }
+
+            return input[input.length/2].toInt() < 255
+        }
     }
 }

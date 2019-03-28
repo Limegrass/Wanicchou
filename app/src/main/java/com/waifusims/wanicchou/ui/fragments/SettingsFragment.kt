@@ -17,11 +17,11 @@ class SettingsFragment : PreferenceFragmentCompat(),
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         dictionaryListPref = preferenceScreen
-                .findPreference(context!!.getString(R.string.pref_dictionary_key)) as ListPreference
+                .findPreference<ListPreference>(context!!.getString(R.string.pref_dictionary_key)) as ListPreference
         matchTypeListPref = preferenceScreen
-                .findPreference(context!!.getString(R.string.pref_match_type_key)) as ListPreference
+                .findPreference<ListPreference>(context!!.getString(R.string.pref_match_type_key)) as ListPreference
         autoDeleteListPref = preferenceScreen
-                .findPreference(context!!.getString(R.string.pref_auto_delete_key)) as ListPreference
+                .findPreference<ListPreference>(context!!.getString(R.string.pref_auto_delete_key)) as ListPreference
     }
 
     override fun onResume() {
