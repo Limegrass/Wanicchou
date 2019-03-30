@@ -75,11 +75,13 @@ class DefinitionFragment : Fragment() {
         vocabularyViewModel.setObserver(lifecycleOwner){
             GlobalScope.launch(Dispatchers.IO) {
                 val vocabularyID = vocabularyViewModel.vocabulary.vocabularyID
-                val definitionList = repository.getDefinitions(vocabularyID,
-                        sharedPreferences.definitionLanguageCode,
-                        sharedPreferences.dictionary)
-                activity!!.runOnUiThread{
-                    definitionViewModel.value = listOf(definitionList)
+                val definition = repository.getDefinition(vocabularyID,
+                                                           sharedPreferences.definitionLanguageCode,
+                                                           sharedPreferences.dictionary)
+                if(definition != null){
+                    activity!!.runOnUiThread{
+                        definitionViewModel.value = listOf(definition)
+                    }
                 }
             }
         }

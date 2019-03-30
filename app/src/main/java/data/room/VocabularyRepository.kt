@@ -183,13 +183,13 @@ class VocabularyRepository(application: Application) {
     }
 
     @WorkerThread
-    fun getDefinitions(vocabularyID : Long,
+    fun getDefinition(vocabularyID : Long,
                        definitionLanguageCode: String,
-                       dictionaryID: Long) : Definition {
+                       dictionaryID: Long) : Definition? {
         return database.definitionDao()
                        .getVocabularyDefinitions(vocabularyID,
                                                  definitionLanguageCode,
-                                                 dictionaryID)!!
+                                                 dictionaryID)
     }
 
     @WorkerThread
