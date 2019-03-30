@@ -20,6 +20,8 @@ import com.waifusims.wanicchou.viewmodel.RelatedVocabularyViewModel
 import com.waifusims.wanicchou.viewmodel.VocabularyViewModel
 import data.room.VocabularyRepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 class RelatedFragment : Fragment() {
@@ -50,33 +52,34 @@ class RelatedFragment : Fragment() {
                               container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         val attachToRoot = false
-        val view = inflater.inflate(R.layout.fragment_related,
+        return inflater.inflate(R.layout.fragment_related,
                 container,
                 attachToRoot)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         setRelatedObserver(view)
-        return view
+        super.onViewCreated(view, savedInstanceState)
     }
 
     private fun setRelatedObserver(view : View){
-        val lifecycleOwner : LifecycleOwner = activity as LifecycleOwner
+        val lifecycleOwner : LifecycleOwner = context as LifecycleOwner
         relatedVocabularyViewModel.setObserver(lifecycleOwner){
             val recyclerView = view.findViewById<RecyclerView>(R.id.rv_related)
             Log.v(TAG, "LiveData emitted.")
-            val relatedVocabularyList = relatedVocabularyViewModel.list
+            val relatedVocabularyList = relatedVocabularyViewModel.value
             if(!relatedVocabularyList.isNullOrEmpty()){
                 val onClickListener = View.OnClickListener { v ->
                     Log.v(TAG, "OnClick")
                     val position = recyclerView.getChildLayoutPosition(v!!)
                     val vocab = relatedVocabularyList[position]
                     runBlocking(Dispatchers.IO){
-                        val definitionList = repository.getRelatedVocabularyDefinition(vocab,
+                        val definition = repository.getRelatedVocabularyDefinition(vocab,
                                 sharedPreferenceHelper.definitionLanguageCode,
                                 sharedPreferenceHelper.dictionary)
-                        if(definitionList.isNotEmpty()){
-                            activity!!.runOnUiThread {
-                                vocabularyViewModel.list = listOf(vocab)
-                                definitionViewModel.list = definitionList
-                            }
+                        activity!!.runOnUiThread {
+                            vocabularyViewModel.value = listOf(vocab)
+                            definitionViewModel.value = listOf(definition)
                         }
                     }
                 }
@@ -87,6 +90,16 @@ class RelatedFragment : Fragment() {
 
                 recyclerView.layoutManager = layoutManager
                 recyclerView.adapter = RelatedVocabularyAdapter(relatedVocabularyList, onClickListener)
+            }
+        }
+
+        vocabularyViewModel.setObserver(lifecycleOwner){
+            GlobalScope.launch(Dispatchers.IO) {
+                val vocabularyID = vocabularyViewModel.vocabulary.vocabularyID
+                val relatedWordList = repository.getRelatedWords(vocabularyID)
+                activity!!.runOnUiThread {
+                    relatedVocabularyViewModel.value = relatedWordList
+                }
             }
         }
     }

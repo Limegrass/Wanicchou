@@ -11,5 +11,5 @@ interface DefinitionNoteDao : BaseDao<DefinitionNote> {
         SELECT dn.*
         FROM DefinitionNote dn
         WHERE dn.DefinitionID = :definitionID""")
-    fun getNotesForDefinitionID(definitionID: Int) : LiveData<List<DefinitionNote>>
+    fun getNotesForDefinitionID(definitionID: Long) : List<DefinitionNote>
 }

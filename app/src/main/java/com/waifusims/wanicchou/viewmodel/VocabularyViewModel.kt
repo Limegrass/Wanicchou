@@ -8,16 +8,16 @@ import data.room.entity.Vocabulary
 
 // TODO: Remove related words completely and just use the new scheme for queries to find same words
 class VocabularyViewModel(application: Application)
-    : ObservableListViewModel<Vocabulary>(application) {
+    : ObservableViewModel<List<Vocabulary>>(application) {
 
     init {
-        list = listOf(getDefaultVocabulary())
+        value = listOf(getDefaultVocabulary())
     }
 
     val vocabulary : Vocabulary
     get() {
-        return if (!list.isNullOrEmpty()){
-            list!![wordIndex]
+        return if (!value.isNullOrEmpty()){
+            value!![wordIndex]
         }
         else {
             getDefaultVocabulary()

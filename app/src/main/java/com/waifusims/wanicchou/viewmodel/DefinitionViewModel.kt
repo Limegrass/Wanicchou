@@ -3,10 +3,18 @@ package com.waifusims.wanicchou.viewmodel
 import android.app.Application
 import data.room.entity.Definition
 
+// Temporarily a list due to simplify UI management for now.
+// Need to change
+// TODO: Change from recycler view
 class DefinitionViewModel(application: Application)
-    : ObservableListViewModel<Definition>(application){
+    : ObservableViewModel<List<Definition>>(application){
     init {
-        list = listOf(getDefaultDefinition())
+        value = listOf(getDefaultDefinition())
+    }
+    //Always only one element. Not a list.
+    val definition : Definition
+    get () {
+        return value!![0]
     }
 
     private fun getDefaultDefinition(): Definition {

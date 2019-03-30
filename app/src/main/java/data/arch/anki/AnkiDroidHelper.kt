@@ -117,42 +117,49 @@ class AnkiDroidHelper(context: Context) {
 
     // Attempts to find existing note and update it if it exists, else add it
     fun addUpdateNote(vocabulary: Vocabulary,
-                      definitionList: List<Definition>,
-                      dictionaryNames: List<String>,
+                      definition: Definition,
+                      dictionaryName: String,
                       notes: List<String>,
                       tags: MutableSet<String>): List<Long> {
         val existingNotes = findDuplicateNotes(wanicchouModelID, vocabulary.word)
         val noteIDs: MutableList<Long> = mutableListOf()
 
-        for (i in definitionList.indices) {
-            var isExisting = false
-            var existingNoteID : Long? = null
-            for (note in existingNotes) {
-                // If word, word language, def language, pronunciation, and dictionary is the same,
-                // then we will treat it as the same card.
-                val noteWordLanguage = note.fields[AnkiDroidConfig.FIELDS_INDEX_WORD_LANGUAGE]
-                val noteDefinitionLanguage = note.fields[AnkiDroidConfig.FIELDS_INDEX_DEFINITION_LANGUAGE]
-                val noteDictionary = note.fields[AnkiDroidConfig.FIELDS_INDEX_DICTIONARY]
-                val notePronunciation = note.fields[AnkiDroidConfig.FIELDS_INDEX_PRONUNCIATION]
-                //All existing notes already have same word
-                if (noteWordLanguage == vocabulary.languageCode
-                        && noteDefinitionLanguage == definitionList[i].languageCode
-                        && noteDictionary == dictionaryNames[i]
-                        && notePronunciation == vocabulary.pronunciation
-                        ) {
-                    isExisting = true
-                    existingNoteID = note.id
-                }
+        var isExisting = false
+        var existingNoteID : Long? = null
+        for (note in existingNotes) {
+            // If word, word language, def language, pronunciation, and dictionary is the same,
+            // then we will treat it as the same card.
+            val noteWordLanguage = note.fields[AnkiDroidConfig.FIELDS_INDEX_WORD_LANGUAGE]
+            val noteDefinitionLanguage = note.fields[AnkiDroidConfig.FIELDS_INDEX_DEFINITION_LANGUAGE]
+            val noteDictionary = note.fields[AnkiDroidConfig.FIELDS_INDEX_DICTIONARY]
+            val notePronunciation = note.fields[AnkiDroidConfig.FIELDS_INDEX_PRONUNCIATION]
+            //All existing notes already have same word
+            if (noteWordLanguage == vocabulary.languageCode
+                    && noteDefinitionLanguage == definition.languageCode
+                    && noteDictionary == dictionaryName
+                    && notePronunciation == vocabulary.pronunciation
+                    ) {
+                isExisting = true
+                existingNoteID = note.id
             }
+        }
 
-            if(isExisting){
-                updateNoteFields(existingNoteID!!, vocabulary, definitionList[i], dictionaryNames[i], notes)
-                updateNoteTags(existingNoteID, tags)
-                noteIDs.add(existingNoteID)
-            }
-            else {
-                noteIDs.add(addNote(vocabulary, definitionList[i], dictionaryNames[i], notes, tags))
-            }
+        if(isExisting){
+            updateNoteFields(existingNoteID!!,
+                             vocabulary,
+                             definition,
+                             dictionaryName,
+                             notes)
+            updateNoteTags(existingNoteID, tags)
+            noteIDs.add(existingNoteID)
+        }
+        else {
+            val addedNoteID = addNote(vocabulary,
+                                      definition,
+                                      dictionaryName,
+                                      notes,
+                                      tags)
+            noteIDs.add(addedNoteID)
         }
         return noteIDs
     }

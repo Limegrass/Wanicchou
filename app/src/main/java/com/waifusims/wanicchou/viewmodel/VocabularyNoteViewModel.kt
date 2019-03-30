@@ -4,8 +4,8 @@ import android.app.Application
 import data.room.entity.VocabularyNote
 
 class VocabularyNoteViewModel(application: Application)
-    : ObservableListViewModel<VocabularyNote>(application){
+    : ObservableViewModel<List<VocabularyNote>>(application){
     init {
-        list = listOf()
+        value = listOf()
     }
 }

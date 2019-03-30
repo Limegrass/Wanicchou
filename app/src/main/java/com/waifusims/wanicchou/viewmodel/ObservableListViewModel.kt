@@ -6,22 +6,23 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 
-abstract class ObservableListViewModel<T>(application: Application) : AndroidViewModel(application){
-    private val listLiveData : MutableLiveData<List<T>> = MutableLiveData()
+abstract class ObservableViewModel<T>(application: Application) : AndroidViewModel(application){
+    private val liveData : MutableLiveData<T> = MutableLiveData()
 
-    var list : List<T>?
+    var value : T?
         get() {
-            return listLiveData.value
+            return liveData.value
         }
         set(value){
-            listLiveData.value = value
+            liveData.value = value
         }
 
     fun setObserver(lifecycleOwner: LifecycleOwner,
                     action : () -> Unit){
-        val observer = Observer<List<T>>{
+        val observer = Observer<T>{
             action()
         }
-        listLiveData.observe(lifecycleOwner, observer)
+        liveData.observe(lifecycleOwner, observer)
     }
 }
+

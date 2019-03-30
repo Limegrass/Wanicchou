@@ -2,13 +2,11 @@ package com.waifusims.wanicchou.ui.fragments
 
 import android.os.Bundle
 import android.util.Log
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.AppCompatImageButton
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.RecyclerView
@@ -19,10 +17,26 @@ import com.waifusims.wanicchou.R
 import com.waifusims.wanicchou.ui.adapter.TextBlockRecyclerViewAdapter
 import com.waifusims.wanicchou.util.InputAlertDialogBuilder
 import com.waifusims.wanicchou.viewmodel.VocabularyNoteViewModel
+import com.waifusims.wanicchou.viewmodel.VocabularyViewModel
+import data.room.VocabularyRepository
+import data.room.entity.VocabularyNote
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 class VocabularyNoteFragment : TextBlockFragment("Vocabulary Notes") {
     companion object {
         private val TAG : String = VocabularyNoteFragment::class.java.simpleName
+    }
+
+    private val repository : VocabularyRepository by lazy {
+        VocabularyRepository(activity!!.application)
+    }
+
+    private val vocabularyViewModel : VocabularyViewModel by lazy {
+        ViewModelProviders.of(activity!!)
+                .get(VocabularyViewModel::class.java)
     }
 
     private val notesViewModel : VocabularyNoteViewModel by lazy {
@@ -41,21 +55,24 @@ class VocabularyNoteFragment : TextBlockFragment("Vocabulary Notes") {
     }
 
     private fun setRelatedObserver(view : View){
-        val lifecycleOwner : LifecycleOwner = activity as LifecycleOwner
-        notesViewModel.setObserver(lifecycleOwner){
+        val lifecycleOwner : LifecycleOwner = context as LifecycleOwner
+        vocabularyViewModel.setObserver(lifecycleOwner){
+            runBlocking (Dispatchers.IO){
+                val dbNotes = repository.getVocabularyNotes(vocabularyViewModel.vocabulary.vocabularyID)
+                activity!!.runOnUiThread {
+                    notesViewModel.value = dbNotes
+                }
+            }
             val recyclerView = view.findViewById<RecyclerView>(R.id.rv_text_block_contents)
             Log.v(TAG, "LiveData emitted.")
-            val notes = notesViewModel.list!!.map {
-                it.noteText
-            }
-            if(!notes.isNullOrEmpty()){
-                Log.v(TAG, "Result size: [${notes.size}].")
+            val tags = notesViewModel.value!!.map{ it.noteText }
+            if(!tags.isNullOrEmpty()){
+                Log.v(TAG, "Result size: [${tags.size}].")
                 val layoutManager = FlexboxLayoutManager(context)
                 layoutManager.flexDirection = FlexDirection.ROW
                 layoutManager.justifyContent = JustifyContent.SPACE_AROUND
-
                 recyclerView.layoutManager = layoutManager
-                recyclerView.adapter = TextBlockRecyclerViewAdapter(notes)
+                recyclerView.adapter = TextBlockRecyclerViewAdapter(tags)
             }
         }
     }
@@ -76,8 +93,26 @@ class VocabularyNoteFragment : TextBlockFragment("Vocabulary Notes") {
                     title,
                     message)
             dialogBuilder.setPositiveButton("Add") { dialog, _ ->
+                val tagText = dialogBuilder.input.text
+                val vocabularyID = vocabularyViewModel.vocabulary.vocabularyID
+                GlobalScope.launch (Dispatchers.IO){
+                    repository.addVocabularyNote(tagText.toString(), vocabularyID)
+                }
+                val tag = VocabularyNote(tagText.toString(), vocabularyID)
+                val tags = notesViewModel.value!!.toMutableList()
+                tags.add(tag)
+                notesViewModel.value = tags
+                val recyclerViewAdapter = view.findViewById<RecyclerView>(R.id.rv_text_block_contents)
+                        .adapter!! as TextBlockRecyclerViewAdapter
+                recyclerViewAdapter.list.add(tagText.toString())
+                recyclerViewAdapter.notifyItemInserted(tags.size)
                 dialog.dismiss()
             }
+            dialogBuilder.input.setSingleLine(false)
+            dialogBuilder.input.setLines(1)
+            dialogBuilder.input.maxLines = 5
+            dialogBuilder.input.gravity = (Gravity.START.or(Gravity.TOP))
+            dialogBuilder.input.setHorizontallyScrolling(false)
             dialogBuilder.show()
         }
     }

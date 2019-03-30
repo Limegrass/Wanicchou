@@ -5,9 +5,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.appcompat.widget.AppCompatImageButton
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.RecyclerView
@@ -15,7 +13,7 @@ import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
 import com.waifusims.wanicchou.R
-import com.waifusims.wanicchou.ui.adapter.TagAdapter
+import com.waifusims.wanicchou.ui.adapter.TextSpanRecyclerViewAdapter
 import com.waifusims.wanicchou.util.InputAlertDialogBuilder
 import com.waifusims.wanicchou.viewmodel.TagViewModel
 import com.waifusims.wanicchou.viewmodel.VocabularyViewModel
@@ -24,6 +22,7 @@ import data.room.entity.Tag
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 // Builder or Factory for the fragment
 // TODO: onCreate is very repeated between tags, notes. Maybe abstract and inherit
@@ -43,36 +42,38 @@ class TagFragment : TextBlockFragment("Tags") {
                           .get(VocabularyViewModel::class.java)
     }
 
-    private lateinit var repository : VocabularyRepository
+    private val repository : VocabularyRepository by lazy {
+        VocabularyRepository(activity!!.application)
+    }
 
     override fun onCreateView(inflater: LayoutInflater,
                               container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         val view = super.onCreateView(inflater, container, savedInstanceState)!!
-        setRelatedObserver(view)
+        setObserver(view)
         setAddTagButtonOnClick(view)
         return view
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        repository = VocabularyRepository(activity!!.application)
-        super.onViewCreated(view, savedInstanceState)
-    }
-
-    private fun setRelatedObserver(view : View){
-        val lifecycleOwner : LifecycleOwner = activity as LifecycleOwner
-        tagViewModel.setObserver(lifecycleOwner){
+    private fun setObserver(view : View){
+        val lifecycleOwner : LifecycleOwner = context as LifecycleOwner
+        vocabularyViewModel.setObserver(lifecycleOwner){
+            runBlocking (Dispatchers.IO){
+                val dbTags = repository.getTags(vocabularyViewModel.vocabulary.vocabularyID)
+                activity!!.runOnUiThread {
+                    tagViewModel.value = dbTags
+                }
+            }
             val recyclerView = view.findViewById<RecyclerView>(R.id.rv_text_block_contents)
             Log.v(TAG, "LiveData emitted.")
-            val tags = tagViewModel.list
+            val tags = tagViewModel.value!!.map{ it.tagText }
             if(!tags.isNullOrEmpty()){
                 Log.v(TAG, "Result size: [${tags.size}].")
                 val layoutManager = FlexboxLayoutManager(context)
                 layoutManager.flexDirection = FlexDirection.ROW
                 layoutManager.justifyContent = JustifyContent.SPACE_AROUND
-
                 recyclerView.layoutManager = layoutManager
-                recyclerView.adapter = TagAdapter(tags)
+                recyclerView.adapter = TextSpanRecyclerViewAdapter(tags)
             }
         }
     }
@@ -100,9 +101,13 @@ class TagFragment : TextBlockFragment("Tags") {
                     repository.addVocabularyTag(tagText.toString(), vocabularyID)
                 }
                 val tag = Tag(tagText.toString())
-                val tags = tagViewModel.list!!.toMutableList()
+                val tags = tagViewModel.value!!.toMutableList()
                 tags.add(tag)
-                tagViewModel.list = tags
+                tagViewModel.value = tags
+                val recyclerViewAdapter = view.findViewById<RecyclerView>(R.id.rv_text_block_contents)
+                                              .adapter!! as TextSpanRecyclerViewAdapter
+                recyclerViewAdapter.list.add(tagText.toString())
+                recyclerViewAdapter.notifyItemInserted(tags.size)
                 dialog.dismiss()
             }
             dialogBuilder.show()

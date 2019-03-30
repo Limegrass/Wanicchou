@@ -4,8 +4,8 @@ import android.app.Application
 import data.room.entity.Tag
 
 class TagViewModel(application: Application)
-    : ObservableListViewModel<Tag>(application){
+    : ObservableViewModel<List<Tag>>(application){
     init {
-        list = listOf()
+        value = listOf()
     }
 }

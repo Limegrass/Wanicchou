@@ -46,16 +46,6 @@ class SearchActivity
                 .get(VocabularyViewModel::class.java)
     }
 
-    private val definitionViewModel: DefinitionViewModel by lazy {
-        ViewModelProviders.of(this)
-                .get(DefinitionViewModel::class.java)
-    }
-
-    private val relatedVocabularyViewModel: RelatedVocabularyViewModel by lazy {
-        ViewModelProviders.of(this)
-                .get(RelatedVocabularyViewModel::class.java)
-    }
-
     private val repository : VocabularyRepository by lazy {
         VocabularyRepository(this.application)
     }
@@ -77,31 +67,10 @@ class SearchActivity
         setContentView(R.layout.activity_wanicchou)
 
         val transaction = supportFragmentManager.beginTransaction()
-
         transaction.add(R.id.container_header, WordFragment())
         transaction.add(R.id.container_header, TabSwitchFragment())
-
-        val fabFragment = FabFragment()
-        transaction.add(R.id.container_frame, fabFragment)
+        transaction.add(R.id.container_frame, FabFragment())
         transaction.commit()
-        setVocabularyObserver()
-    }
-
-
-    override fun onResume() {
-        getLatest()
-        super.onResume()
-    }
-
-    private fun getLatest() {
-        GlobalScope.launch(Dispatchers.IO) {
-            val vocabularyList = repository.getLatest()
-            //TODO: Maybe refactor to just give the DICTIONARY_ID
-            // (or when I figure out dynamic settings pref)
-            runOnUiThread {
-                vocabularyViewModel.list = vocabularyList
-            }
-        }
     }
 
     override fun onSearchRequested(searchEvent: SearchEvent?): Boolean {
@@ -165,30 +134,6 @@ class SearchActivity
         toast!!.show()
     }
 
-    private fun setVocabularyObserver() {
-        val lifecycleOwner = this
-        vocabularyViewModel.setObserver(lifecycleOwner){
-            GlobalScope.launch(Dispatchers.IO) {
-                val vocabularyID = vocabularyViewModel.vocabulary.vocabularyID
-                val definitionList = repository.getDefinitions(vocabularyID,
-                        sharedPreferences.definitionLanguageCode,
-                        sharedPreferences.dictionary)
-                runOnUiThread {
-                    definitionViewModel.list = definitionList
-                }
-            }
-        }
-
-        vocabularyViewModel.setObserver(lifecycleOwner){
-            GlobalScope.launch(Dispatchers.IO) {
-                val vocabularyID = vocabularyViewModel.vocabulary.vocabularyID
-                val relatedWordList = repository.getRelatedWords(vocabularyID)
-                runOnUiThread {
-                    relatedVocabularyViewModel.list = relatedWordList
-                }
-            }
-        }
-    }
 
     private fun search(searchTerm: String) {
         Log.i(TAG, "Search Initiated: [$searchTerm].")
@@ -207,10 +152,9 @@ class SearchActivity
                     sharedPreferences.dictionary)
             if (vocabularyList.isNotEmpty()) {
                 runOnUiThread {
-                    vocabularyViewModel.list = vocabularyList
+                    vocabularyViewModel.value = vocabularyList
                 }
             }
-
         }
     }
     //</editor-fold>

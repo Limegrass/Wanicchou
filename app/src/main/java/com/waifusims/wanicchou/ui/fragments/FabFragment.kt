@@ -56,17 +56,16 @@ class FabFragment : Fragment() {
                 ankiDroidHelper.requestPermission(callbackActivity,
                         ANKI_PERMISSION_REQUEST_CALLBACK_CODE)
             }
+            val definition = definitionViewModel.definition
 
-            val dictionaryNames = definitionViewModel.list!!.map {
-                repository.dictionaries.single {
-                    it.dictionaryID == it.dictionaryID
-                }.dictionaryName
-            }
+            val dictionaryName = repository.dictionaries.single {
+                    it.dictionaryID == definition.dictionaryID
+            }.dictionaryName
 
 //            TODO: Properly include the notes and tags
             ankiDroidHelper.addUpdateNote(vocabularyViewModel.vocabulary,
-                    definitionViewModel.list!!,
-                    dictionaryNames,
+                    definition,
+                    dictionaryName,
                     listOf(),
                     mutableSetOf())
             //TODO: Use string resource
@@ -79,8 +78,8 @@ class FabFragment : Fragment() {
     private fun setFABObserver(){
         val lifecycleOwner = this
         vocabularyViewModel.setObserver(lifecycleOwner){
-            if(!definitionViewModel.list.isNullOrEmpty()
-                    && definitionViewModel.list!![0].vocabularyID != 0L
+            if(!definitionViewModel.value.isNullOrEmpty()
+                    && definitionViewModel.value!![0].vocabularyID != 0L
                     && ankiDroidHelper.isApiAvailable()) {
                 floatingActionButton.show()
             }

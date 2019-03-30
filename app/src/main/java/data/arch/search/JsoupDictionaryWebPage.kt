@@ -33,7 +33,6 @@ abstract class JsoupDictionaryWebPage
                                 wordLanguageCode: String,
                                 definitionLanguageCode: String,
                                 matchType: MatchType): Document {
-
         val url = buildQueryURL(searchTerm,
                                 wordLanguageCode,
                                 definitionLanguageCode,
@@ -41,9 +40,9 @@ abstract class JsoupDictionaryWebPage
                                 .toString()
         val userAgent = "Mozilla"
         return Jsoup.connect(url)
-                          .userAgent(userAgent)
-                          .data()
-                          .get()
+                    .userAgent(userAgent)
+                    .data()
+                    .get()
     }
 
 }

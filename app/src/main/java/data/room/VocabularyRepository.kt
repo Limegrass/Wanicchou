@@ -53,6 +53,7 @@ class VocabularyRepository(application: Application) {
 
         return database.vocabularyDao().insert(vocabulary)
     }
+
     private suspend fun insertDefinition(document: Document,
                                          definitionLanguageCode: String,
                                          vocabularyID : Long,
@@ -67,12 +68,12 @@ class VocabularyRepository(application: Application) {
     @WorkerThread
     suspend fun getRelatedVocabularyDefinition(relatedVocabulary: Vocabulary,
                                         definitionLanguageCode: String,
-                                        dictionaryID: Long) : List<Definition>{
+                                        dictionaryID: Long) : Definition {
         var definitions = database.definitionDao()
                                   .getVocabularyDefinitions(relatedVocabulary.vocabularyID,
                                                             definitionLanguageCode,
                                                             dictionaryID)
-        if (definitions.isEmpty()){
+        if (definitions == null){
             val webPage = DictionaryWebPageFactory(dictionaryID).get()
             val webPageDocument = webPage.search("${relatedVocabulary.word} ${relatedVocabulary.pronunciation}",
                                                 relatedVocabulary.languageCode,
@@ -87,7 +88,8 @@ class VocabularyRepository(application: Application) {
                                                             definitionLanguageCode,
                                                             dictionaryID)
         }
-        return definitions
+
+        return definitions!!
     }
 
     @WorkerThread
@@ -183,11 +185,11 @@ class VocabularyRepository(application: Application) {
     @WorkerThread
     fun getDefinitions(vocabularyID : Long,
                        definitionLanguageCode: String,
-                       dictionaryID: Long) : List<Definition> {
+                       dictionaryID: Long) : Definition {
         return database.definitionDao()
                        .getVocabularyDefinitions(vocabularyID,
                                                  definitionLanguageCode,
-                                                 dictionaryID)
+                                                 dictionaryID)!!
     }
 
     @WorkerThread
@@ -228,4 +230,31 @@ class VocabularyRepository(application: Application) {
     fun getTags(vocabularyID: Long) : List<Tag> {
         return database.tagDao().getTagsForVocabularyID(vocabularyID)
     }
+
+    fun addVocabularyNote(noteText : String, vocabularyID: Long){
+        GlobalScope.launch (Dispatchers.IO) {
+            val note = VocabularyNote(noteText, vocabularyID)
+            database.vocabularyNoteDao().insert(note)
+        }
+    }
+
+    fun getVocabularyNotes(vocabularyID: Long) : List<VocabularyNote>{
+        return database.vocabularyNoteDao()
+                       .getVocabularyNoteForVocabularyID(vocabularyID)
+
+    }
+
+    fun addDefinitionNote(noteText : String, vocabularyID: Long){
+        GlobalScope.launch (Dispatchers.IO) {
+            val note = DefinitionNote(noteText, vocabularyID)
+            database.definitionNoteDao().insert(note)
+        }
+    }
+
+    fun getDefinitionNotes(vocabularyID: Long) : List<DefinitionNote>{
+        return database.definitionNoteDao()
+                       .getNotesForDefinitionID(vocabularyID)
+
+    }
+
 }

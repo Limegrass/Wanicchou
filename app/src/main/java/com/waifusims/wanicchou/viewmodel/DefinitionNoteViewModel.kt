@@ -9,8 +9,8 @@ import androidx.lifecycle.Observer
 import data.room.entity.DefinitionNote
 
 class DefinitionNoteViewModel(application: Application)
-    : ObservableListViewModel<DefinitionNote>(application){
+    : ObservableViewModel<List<DefinitionNote>>(application){
     init{
-        list = listOf()
+        value = listOf()
     }
 }

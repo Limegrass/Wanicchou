@@ -11,7 +11,7 @@ import data.room.entity.Vocabulary
 
 
 class RelatedVocabularyAdapter(list : List<Vocabulary>, private val onClickListener : View.OnClickListener) :
-        ListViewAdapter<Vocabulary, RelatedVocabularyAdapter.ViewHolder>(list, ::ViewHolder, R.layout.rv_item_text_span){
+        ListViewAdapter<Vocabulary, RelatedVocabularyAdapter.ViewHolder>(list.toMutableList(), ::ViewHolder, R.layout.rv_item_text_span){
     companion object {
         private val TAG = RelatedVocabularyAdapter::class.java.simpleName
     }

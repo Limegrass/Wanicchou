@@ -10,10 +10,18 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProviders
 import com.waifusims.wanicchou.R
 import com.waifusims.wanicchou.viewmodel.VocabularyViewModel
+import data.room.VocabularyRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 class WordFragment : Fragment() {
     companion object {
         private val TAG : String = WordFragment::class.java.simpleName
+    }
+
+    private val repository : VocabularyRepository by lazy {
+        VocabularyRepository(activity!!.application)
     }
 
     private val vocabularyViewModel : VocabularyViewModel by lazy {
@@ -23,16 +31,31 @@ class WordFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val attachToRoot = false
-        val view = inflater.inflate(R.layout.fragment_word,
+        return inflater.inflate(R.layout.fragment_word,
                 container,
                 attachToRoot)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         setVocabularyListObserver(view)
-        return view
+        getLatest()
+        super.onViewCreated(view, savedInstanceState)
+    }
+
+    private fun getLatest(){
+        GlobalScope.launch(Dispatchers.IO) {
+            val vocabularyList = repository.getLatest()
+            //TODO: Maybe refactor to just give the DICTIONARY_ID
+            // (or when I figure out dynamic settings pref)
+            activity!!.runOnUiThread {
+                vocabularyViewModel.value = vocabularyList
+            }
+        }
     }
 
     private fun setVocabularyListObserver(view : View?){
         //TODO: Reset the wordIndex on new search
-        val lifecycleOwner : LifecycleOwner = activity as LifecycleOwner
+        val lifecycleOwner : LifecycleOwner = context as LifecycleOwner
         vocabularyViewModel.setObserver(lifecycleOwner){
             val tvWord = view!!.findViewById<TextView>(R.id.tv_word)
             val tvPronunciation = view.findViewById<TextView>(R.id.tv_pronunciation)
@@ -40,6 +63,5 @@ class WordFragment : Fragment() {
             tvPronunciation.text = vocabularyViewModel.vocabulary.pronunciation
         }
     }
-
 }
 

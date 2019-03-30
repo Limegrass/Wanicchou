@@ -31,7 +31,7 @@ interface DefinitionDao : BaseDao<Definition> {
     """)
     fun getVocabularyDefinitions(vocabularyID: Long,
                                  definitionLanguageCode: String,
-                                 dictionaryID : Long): List<Definition>
+                                 dictionaryID : Long): Definition?
 
     @Query("""
         SELECT d.*

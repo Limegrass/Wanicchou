@@ -11,5 +11,5 @@ interface VocabularyNoteDao : BaseDao<VocabularyNote> {
         SELECT vn.*
         FROM VocabularyNote vn
         WHERE vn.VocabularyID = :vocabularyID""")
-    fun getVocabularyNoteForVocabularyID(vocabularyID: Int): LiveData<List<VocabularyNote>>
+    fun getVocabularyNoteForVocabularyID(vocabularyID: Long): List<VocabularyNote>
 }
