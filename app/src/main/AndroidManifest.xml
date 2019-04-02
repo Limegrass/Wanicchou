@@ -14,7 +14,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".SearchActivity"
+            android:name="com.waifusims.wanicchou.SearchActivity"
             android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -28,18 +28,18 @@
                 android:resource="@xml/searchable"/>
         </activity>
         <activity
-            android:name=".DatabaseActivity"
+            android:name="com.waifusims.wanicchou.DatabaseActivity"
             android:label="@string/database_title">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".SearchActivity" />
+                android:value="com.waifusims.wanicchou.SearchActivity" />
         </activity>
         <activity
-            android:name=".SettingsActivity"
+            android:name="com.waifusims.wanicchou.SettingsActivity"
             android:label="@string/settings_action_label">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".SearchActivity" />
+                android:value="com.waifusims.wanicchou.SearchActivity" />
         </activity>
     </application>
 

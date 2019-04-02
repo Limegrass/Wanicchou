@@ -14,7 +14,6 @@ import com.waifusims.wanicchou.ui.fragments.FabFragment
 import com.waifusims.wanicchou.ui.fragments.TabSwitchFragment
 import com.waifusims.wanicchou.ui.fragments.WordFragment
 import com.waifusims.wanicchou.util.WanicchouSharedPreferenceHelper
-import com.waifusims.wanicchou.viewmodel.DatabaseViewModel
 import com.waifusims.wanicchou.viewmodel.VocabularyViewModel
 import data.enums.AutoDelete
 import data.room.VocabularyRepository

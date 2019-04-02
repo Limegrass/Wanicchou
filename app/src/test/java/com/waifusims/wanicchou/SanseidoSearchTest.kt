@@ -1,11 +1,5 @@
 package com.waifusims.wanicchou
 
-import junit.framework.Assert
-
-import org.junit.Test
-
-import junit.framework.Assert.assertEquals
-
 /**
  * Test for Sanseidou Search
  * Also somewhat indirectly Japanese DictionaryEntry

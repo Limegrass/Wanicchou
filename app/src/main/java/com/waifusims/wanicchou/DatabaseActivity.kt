@@ -5,24 +5,15 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.RecyclerView
-import androidx.room.DatabaseView
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
 import com.waifusims.wanicchou.ui.adapter.RelatedVocabularyAdapter
-import com.waifusims.wanicchou.ui.adapter.TextBlockRecyclerViewAdapter
-import com.waifusims.wanicchou.ui.adapter.TextSpanRecyclerViewAdapter
 import com.waifusims.wanicchou.viewmodel.DatabaseViewModel
-import com.waifusims.wanicchou.viewmodel.VocabularyViewModel
-import data.room.VocabularyRepository
 import data.room.entity.Vocabulary
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
 
 
 /**
