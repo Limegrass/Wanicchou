@@ -7,7 +7,7 @@ import data.room.entity.DefinitionNote
 
 @Dao
 interface DefinitionNoteDao : BaseDao<DefinitionNote> {
-    @Query(value = """
+    @Query("""
         SELECT dn.*
         FROM DefinitionNote dn
         WHERE dn.DefinitionID = :definitionID""")

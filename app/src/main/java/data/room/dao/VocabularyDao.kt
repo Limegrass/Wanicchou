@@ -5,7 +5,6 @@ import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Transaction
 import data.room.entity.Vocabulary
-import data.room.entity.VocabularyInformation
 
 @Dao
 interface VocabularyDao : BaseDao<Vocabulary> {
@@ -23,6 +22,8 @@ interface VocabularyDao : BaseDao<Vocabulary> {
     @Query("""
         SELECT v.*
         FROM Vocabulary v
+        INNER JOIN Definition d
+            on v.VocabularyID = d.VocabularyID
     """)
     fun getAll(): LiveData<List<Vocabulary>>
 
@@ -43,13 +44,13 @@ interface VocabularyDao : BaseDao<Vocabulary> {
         INNER JOIN Definition d
             ON v.VocabularyID = d.VocabularyID
         WHERE v.Word = :word
-            AND v.LanguageCode = :wordLanguageCode
+            AND v.LanguageID = :wordLanguageID
             AND v.Pronunciation = :pronunciation
             AND v.Pitch = :pitch
     """)
     fun getVocabularyID(word: String,
                         pronunciation: String,
-                        wordLanguageCode: String,
+                        wordLanguageID: Long,
                         pitch: String): Long
 
     @Query("""
@@ -58,12 +59,12 @@ interface VocabularyDao : BaseDao<Vocabulary> {
         INNER JOIN Definition d
             ON v.VocabularyID = d.VocabularyID
         WHERE v.Word = :word
-            AND v.LanguageCode = :wordLanguageCode
+            AND v.LanguageID = :wordLanguageID
             AND v.Pronunciation = :pronunciation
     """)
     fun getVocabularyID(word: String,
                         pronunciation: String,
-                        wordLanguageCode: String): Long
+                        wordLanguageID: Long): Long
 
     @Query("""
         SELECT v.*
@@ -87,83 +88,6 @@ interface VocabularyDao : BaseDao<Vocabulary> {
     fun getVocabulary(vocabularyID: Long) : List<Vocabulary>
 
 
-    // =========================== Searches =========================
-//    @Query("""
-//        SELECT v.*
-//        FROM Vocabulary v
-//        WHERE  v.LanguageCode = :wordLanguageCode
-//            AND v.Word = :searchTerm""")
-//    fun search(searchTerm: String,
-//               wordLanguageCode: String): LiveData<List<Vocabulary>>
-//
-//    @Query("""
-//        SELECT v.*
-//        FROM Vocabulary v
-//        WHERE  v.LanguageCode = :wordLanguageCode
-//            AND v.Word LIKE :searchTerm""")
-//    fun searchWithWildcards(searchTerm: String,
-//               wordLanguageCode: String): LiveData<List<Vocabulary>>
-//
-//    @Query("""
-//        SELECT v.*
-//        FROM Vocabulary v
-//        WHERE v.LanguageCode = :wordLanguageCode
-//            AND v.Word LIKE :searchTerm+'%' """)
-//    fun searchStartsWith(searchTerm: String,
-//                         wordLanguageCode: String): LiveData<List<Vocabulary>>
-//
-//    @Query("""
-//        SELECT v.*
-//        FROM Vocabulary v
-//        WHERE v.LanguageCode = :wordLanguageCode
-//            AND v.Word LIKE '%'+:searchTerm""")
-//    fun searchEndsWith(searchTerm: String,
-//                       wordLanguageCode: String): LiveData<List<Vocabulary>>
-//
-//    @Query("""
-//        SELECT v.*
-//        FROM Vocabulary v
-//        WHERE v.LanguageCode = :wordLanguageCode
-//            AND v.Word LIKE '%'+:searchTerm+'%' """)
-//    fun searchContains(searchTerm: String,
-//                       wordLanguageCode: String): LiveData<List<Vocabulary>>
-//
-//    @Query("""
-//        SELECT v.*
-//        FROM Vocabulary v
-//        JOIN Definition d
-//            ON v.VocabularyID = d.VocabularyID
-//        WHERE d.LanguageCode = :definitionLanguageCode
-//            AND d.DefinitionText LIKE '%'+:searchTerm+'%' """)
-//    fun searchDefinitionContains(searchTerm: String,
-//                                 definitionLanguageCode: String): LiveData<List<Vocabulary>>
-//
-//    @Query("""
-//        SELECT v.*
-//        FROM Vocabulary v
-//        JOIN Definition d
-//            ON v.VocabularyID = d.VocabularyID
-//        WHERE (v.LanguageCode = :wordLanguageCode AND v.Word LIKE '%'+:searchTerm+'%')
-//            OR (d.LanguageCode = :definitionLanguageCode AND d.DefinitionText LIKE '%'+:searchTerm+'%') """)
-//    fun searchWordOrDefinitionContains(searchTerm: String,
-//                                       wordLanguageCode: String,
-//                                       definitionLanguageCode: String): LiveData<List<Vocabulary>>
-//
-//
-//    @Query(value = """
-//        SELECT v.*
-//        FROM Vocabulary v
-//        WHERE v.VocabularyID IN (:vocabularyIDs)""")
-//    fun getRelatedVocabulary(vocabularyIDs : List<Int>) : LiveData<List<Vocabulary>>
-
-    @Transaction
-    @Query(value = """
-        SELECT v.*
-        FROM Vocabulary v
-        WHERE v.VocabularyID = :vocabularyID
-        """)
-    fun search(vocabularyID: Long) : List<VocabularyInformation>
-
     /**
      * TESTING GARBAGE HERE FOR ROOM CRAZY RELATIONSHIT
      */
@@ -173,11 +97,11 @@ interface VocabularyDao : BaseDao<Vocabulary> {
         FROM Vocabulary v
         INNER JOIN Definition d
             ON v.VocabularyID = d.VocabularyID
-        WHERE v.LanguageCode = :wordLanguageCode
+        WHERE v.LanguageID = :wordLanguageID
             AND (v.Word = :searchTerm
                 OR v.Pronunciation = :searchTerm)""")
     fun search(searchTerm : String,
-               wordLanguageCode: String) : List<Vocabulary>
+               wordLanguageID: Long) : List<Vocabulary>
 
     @Transaction
     @Query(value = """
@@ -185,11 +109,11 @@ interface VocabularyDao : BaseDao<Vocabulary> {
         FROM Vocabulary v
         INNER JOIN Definition d
             ON v.VocabularyID = d.VocabularyID
-        WHERE v.LanguageCode = :wordLanguageCode
+        WHERE v.LanguageID = :wordLanguageID
             AND (v.Word LIKE :searchTerm
                 OR v.Pronunciation LIKE :searchTerm)""")
     fun searchWordLike(searchTerm : String,
-               wordLanguageCode: String) : List<Vocabulary>
+               wordLanguageID: Long) : List<Vocabulary>
 
     @Transaction
     @Query("""
@@ -197,10 +121,10 @@ interface VocabularyDao : BaseDao<Vocabulary> {
         FROM Vocabulary v
         INNER JOIN Definition d
             ON v.VocabularyID = d.VocabularyID
-        WHERE d.LanguageCode = :definitionLanguageCode
+        WHERE d.LanguageID = :definitionLanguageID
             AND d.DefinitionText LIKE :searchTerm""")
     fun searchDefinitionLike(searchTerm: String,
-                                 definitionLanguageCode: String): List<Vocabulary>
+                                 definitionLanguageID: Long): List<Vocabulary>
 
     @Transaction
     @Query("""
@@ -209,14 +133,14 @@ interface VocabularyDao : BaseDao<Vocabulary> {
         INNER JOIN Definition d
             ON v.VocabularyID = d.VocabularyID
         WHERE
-            (v.LanguageCode = :wordLanguageCode
+            (v.LanguageID = :wordLanguageID
                 AND (v.Word LIKE :searchTerm
                     OR v.Pronunciation LIKE :searchTerm))
-            OR (d.LanguageCode = :definitionLanguageCode
+            OR (d.LanguageID = :definitionLanguageID
                 AND d.DefinitionText LIKE :searchTerm) """)
     fun searchWordOrDefinitionLike(searchTerm: String,
-                                   wordLanguageCode: String,
-                                   definitionLanguageCode: String): List<Vocabulary>
+                                   wordLanguageID: Long,
+                                   definitionLanguageID: Long): List<Vocabulary>
 
 
     @Transaction

@@ -11,22 +11,25 @@ import androidx.room.*
             ForeignKey(
                     entity = Vocabulary::class,
                     parentColumns = ["VocabularyID"],
-                    childColumns = ["VocabularyID"] )
+                    childColumns = ["VocabularyID"] ),
+            ForeignKey(
+                    entity = Language::class,
+                    parentColumns = ["LanguageID"],
+                    childColumns = ["LanguageID"] )
         ]
 )
 data class Definition (
     @ColumnInfo(name = "DefinitionText")
-    var definitionText: String = "",
+    var definitionText: String,
 
-    @ColumnInfo(name = "LanguageCode")
-    var languageCode: String = "",
+    @ColumnInfo(name = "LanguageID", index = true)
+    var languageID: Long,
 
     @ColumnInfo(name = "DictionaryID", index = true)
     var dictionaryID: Long,
 
     @ColumnInfo(name = "VocabularyID", index = true)
     var vocabularyID: Long,
-
 
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "DefinitionID")

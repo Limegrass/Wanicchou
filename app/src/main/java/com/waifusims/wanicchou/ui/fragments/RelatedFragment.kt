@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProviders
@@ -63,6 +64,8 @@ class RelatedFragment : Fragment() {
     }
 
     private fun setRelatedObserver(view : View){
+        val context = context!!
+        val activity = activity!!
         val lifecycleOwner : LifecycleOwner = context as LifecycleOwner
         relatedVocabularyViewModel.setObserver(lifecycleOwner){
             val recyclerView = view.findViewById<RecyclerView>(R.id.rv_related)
@@ -73,11 +76,12 @@ class RelatedFragment : Fragment() {
                     Log.v(TAG, "OnClick")
                     val position = recyclerView.getChildLayoutPosition(v!!)
                     val vocab = relatedVocabularyList[position]
+                    Toast.makeText(context, "Searching for ${vocab.word}.", Toast.LENGTH_LONG).show()
                     runBlocking(Dispatchers.IO){
                         val definition = repository.getRelatedVocabularyDefinition(vocab,
-                                sharedPreferenceHelper.definitionLanguageCode,
+                                sharedPreferenceHelper.definitionLanguageID,
                                 sharedPreferenceHelper.dictionary)
-                        activity!!.runOnUiThread {
+                        activity.runOnUiThread {
                             vocabularyViewModel.value = listOf(vocab)
                             definitionViewModel.value = listOf(definition)
                         }
@@ -97,7 +101,7 @@ class RelatedFragment : Fragment() {
             GlobalScope.launch(Dispatchers.IO) {
                 val vocabularyID = vocabularyViewModel.vocabulary.vocabularyID
                 val relatedWordList = repository.getRelatedWords(vocabularyID)
-                activity!!.runOnUiThread {
+                activity.runOnUiThread {
                     relatedVocabularyViewModel.value = relatedWordList
                 }
             }

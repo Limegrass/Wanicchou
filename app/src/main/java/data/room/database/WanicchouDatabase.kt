@@ -26,7 +26,10 @@ import data.room.entity.*
             VocabularyNote::class,
             VocabularyRelation::class,
             VocabularyTag::class,
-            MatchType::class
+            MatchType::class,
+            DictionaryMatchType::class,
+            Language::class,
+            Translation::class
         ],
         version = 2,
         exportSchema = false
@@ -42,6 +45,9 @@ abstract class WanicchouDatabase : RoomDatabase() {
     abstract fun vocabularyRelationDao(): VocabularyRelationDao
     abstract fun vocabularyTagDao(): VocabularyTagDao
     abstract fun matchTypeDao(): MatchTypeDao
+    abstract fun dictionaryMatchTypeDao(): DictionaryMatchTypeDao
+    abstract fun languageDao(): LanguageDao
+    abstract fun translationDao(): TranslationDao
 
     companion object : SingletonHolder<WanicchouDatabase, Context>({
         val MIGRATION_1_2 = object : Migration(1, 2){
@@ -49,14 +55,13 @@ abstract class WanicchouDatabase : RoomDatabase() {
                 database.execSQL(WanicchouMigration.MIGRATION_1_2_QUERY)
             }
         }
-        val dictionaryInsertCallback = DictionaryInsertDatabaseCallback(it)
-        val matchTypeInsertCallback = MatchTypeInsertDatabaseCallback(it)
+        //TODO: A first run crash occurs. Must combine the callbacks into one
+        val enumLikeValueInsertDatabaseCallback = EnumLikeValueInsertDatabaseCallback(it)
         Room.databaseBuilder<WanicchouDatabase>(it.applicationContext,
                                                         WanicchouDatabase::class.java,
                                                        "WanicchouDatabase")
                 .addMigrations(MIGRATION_1_2)
-                .addCallback(dictionaryInsertCallback)
-                .addCallback(matchTypeInsertCallback)
+                .addCallback(enumLikeValueInsertDatabaseCallback)
                 .build()
     })
 }

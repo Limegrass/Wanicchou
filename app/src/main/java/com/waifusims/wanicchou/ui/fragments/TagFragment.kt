@@ -67,14 +67,12 @@ class TagFragment : TextBlockFragment("Tags") {
             val recyclerView = view.findViewById<RecyclerView>(R.id.rv_text_block_contents)
             Log.v(TAG, "LiveData emitted.")
             val tags = tagViewModel.value!!.map{ it.tagText }
-            if(!tags.isNullOrEmpty()){
-                Log.v(TAG, "Result size: [${tags.size}].")
-                val layoutManager = FlexboxLayoutManager(context)
-                layoutManager.flexDirection = FlexDirection.ROW
-                layoutManager.justifyContent = JustifyContent.SPACE_AROUND
-                recyclerView.layoutManager = layoutManager
-                recyclerView.adapter = TextSpanRecyclerViewAdapter(tags)
-            }
+            Log.v(TAG, "Result size: [${tags.size}].")
+            val layoutManager = FlexboxLayoutManager(context)
+            layoutManager.flexDirection = FlexDirection.ROW
+            layoutManager.justifyContent = JustifyContent.SPACE_AROUND
+            recyclerView.layoutManager = layoutManager
+            recyclerView.adapter = TextSpanRecyclerViewAdapter(tags)
         }
     }
 
@@ -85,8 +83,8 @@ class TagFragment : TextBlockFragment("Tags") {
     // Keep Vocabulary and Definition as they are since they won't change without a search anyways?
 
     private fun setAddTagButtonOnClick(view : View) {
+        val context = context!!
         view.findViewById<AppCompatImageButton>(R.id.iv_btn_add).setOnClickListener {
-            val context = context!!
             val title = "Add Tag"
             val message = null
             val dialogBuilder = InputAlertDialogBuilder(context,

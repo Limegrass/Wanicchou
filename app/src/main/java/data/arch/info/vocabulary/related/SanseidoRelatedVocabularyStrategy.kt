@@ -14,7 +14,7 @@ internal class SanseidoRelatedVocabularyStrategy
     }
 
     override fun getRelatedVocabulary(htmlElement: Element,
-                                      wordLanguageCode : String): List<Vocabulary> {
+                                      wordLanguageID : Long): List<Vocabulary> {
         val relatedWordEntries = ArrayList<Vocabulary>()
         val table = htmlElement.select("table")[RELATED_WORDS_TABLE_INDEX]
         val rows = table.select("tr")
@@ -23,7 +23,7 @@ internal class SanseidoRelatedVocabularyStrategy
         for (row in rows) {
             val columns = row.select("td")
             val tableEntry = columns[RELATED_WORDS_VOCAB_INDEX].text()
-            val relatedVocabulary = strategy.get(tableEntry, wordLanguageCode)
+            val relatedVocabulary = strategy.get(tableEntry, wordLanguageID)
             relatedWordEntries.add(relatedVocabulary)
         }
 

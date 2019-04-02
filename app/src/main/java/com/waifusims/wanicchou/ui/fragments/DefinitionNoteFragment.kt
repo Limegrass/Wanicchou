@@ -3,7 +3,6 @@ package com.waifusims.wanicchou.ui.fragments
 import android.os.Bundle
 import android.util.Log
 import android.view.Gravity
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.AppCompatImageButton
@@ -59,25 +58,24 @@ class DefinitionNoteFragment : TextBlockFragment("Definition Note") {
 
     private fun setRelatedObserver(view : View){
         val lifecycleOwner : LifecycleOwner = activity as LifecycleOwner
+        val activity = activity!!
 
         vocabularyViewModel.setObserver(lifecycleOwner){
             runBlocking (Dispatchers.IO){
                 val dbNotes = repository.getDefinitionNotes(vocabularyViewModel.vocabulary.vocabularyID)
-                activity!!.runOnUiThread {
+                activity.runOnUiThread {
                     notesViewModel.value = dbNotes
                 }
             }
             val recyclerView = view.findViewById<RecyclerView>(R.id.rv_text_block_contents)
             Log.v(TAG, "LiveData emitted.")
-            val tags = notesViewModel.value!!.map{ it.noteText }
-            if(!tags.isNullOrEmpty()){
-                Log.v(TAG, "Result size: [${tags.size}].")
+            val notes = notesViewModel.value!!.map{ it.noteText }
+                Log.v(TAG, "Result size: [${notes.size}].")
                 val layoutManager = FlexboxLayoutManager(context)
                 layoutManager.flexDirection = FlexDirection.ROW
                 layoutManager.justifyContent = JustifyContent.SPACE_AROUND
                 recyclerView.layoutManager = layoutManager
-                recyclerView.adapter = TextBlockRecyclerViewAdapter(tags)
-            }
+                recyclerView.adapter = TextBlockRecyclerViewAdapter(notes)
         }
     }
 
@@ -97,6 +95,8 @@ class DefinitionNoteFragment : TextBlockFragment("Definition Note") {
                     title,
                     message)
 
+            val recyclerViewAdapter = view.findViewById<RecyclerView>(R.id.rv_text_block_contents)
+                                          .adapter!! as TextBlockRecyclerViewAdapter
             dialogBuilder.setPositiveButton("Add") { dialog, _ ->
                 val tagText = dialogBuilder.input.text
                 val definitionID = definitionViewModel.definition.definitionID
@@ -107,8 +107,6 @@ class DefinitionNoteFragment : TextBlockFragment("Definition Note") {
                 val tags = notesViewModel.value!!.toMutableList()
                 tags.add(tag)
                 notesViewModel.value = tags
-                val recyclerViewAdapter = view.findViewById<RecyclerView>(R.id.rv_text_block_contents)
-                        .adapter!! as TextBlockRecyclerViewAdapter
                 recyclerViewAdapter.list.add(tagText.toString())
                 recyclerViewAdapter.notifyItemInserted(tags.size)
                 dialog.dismiss()

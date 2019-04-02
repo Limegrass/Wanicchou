@@ -9,15 +9,12 @@ data class MatchType (
         @ColumnInfo(name = "MatchTypeName")
         var matchTypeName : String,
 
-        @ColumnInfo(name = "BitMask")
-        var bitMask : Int = 0,
-
         @ColumnInfo(name = "TemplateString")
         var templateString : String,
 
-        @PrimaryKey(autoGenerate = true)
-        @ColumnInfo(name = "MatchTypeID")
-        var matchTypeID : Long = 0
+        @PrimaryKey
+        @ColumnInfo(name = "MatchTypeBitmask")
+        var bitmask : Long
 ) {
     override fun toString(): String {
         return matchTypeName

@@ -9,6 +9,11 @@ interface MatchTypeDao : BaseDao<MatchType> {
     @Query("""
         SELECT mt.TemplateString
         FROM MatchType mt
-        WHERE mt.MatchTypeID = :matchTypeID """)
-    fun getTemplateString(matchTypeID : Long): String
+        WHERE mt.MatchTypeBitmask = :bitmask """)
+    fun getTemplateString(bitmask : Long): String
+
+    @Query( """
+        SELECT mt.*
+        FROM MatchType mt""")
+    fun getAllMatchTypes() : List<MatchType>
 }

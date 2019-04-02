@@ -24,5 +24,18 @@
             android:entries="@array/pref_auto_delete_entries"
             android:entryValues="@array/pref_auto_delete_values"/>
 
+        <ListPreference
+            android:title="@string/pref_word_language_title"
+            android:key="@string/pref_word_language_key"
+            android:defaultValue="@string/pref_word_language_default"
+            android:entries="@array/pref_input_language_entries"
+            android:entryValues="@array/pref_input_language_values"/>
+
+        <ListPreference
+            android:title="@string/pref_definition_language_title"
+            android:key="@string/pref_definition_language_key"
+            android:defaultValue="@string/pref_definition_language_default"
+            android:entries="@array/pref_definition_language_entries"
+            android:entryValues="@array/pref_definition_language_values"/>
     </PreferenceCategory>
 </PreferenceScreen>

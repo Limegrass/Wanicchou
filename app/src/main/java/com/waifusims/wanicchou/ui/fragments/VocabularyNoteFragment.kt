@@ -55,25 +55,25 @@ class VocabularyNoteFragment : TextBlockFragment("Vocabulary Notes") {
     }
 
     private fun setRelatedObserver(view : View){
+        val context = context
         val lifecycleOwner : LifecycleOwner = context as LifecycleOwner
+        val activity = activity!!
         vocabularyViewModel.setObserver(lifecycleOwner){
             runBlocking (Dispatchers.IO){
                 val dbNotes = repository.getVocabularyNotes(vocabularyViewModel.vocabulary.vocabularyID)
-                activity!!.runOnUiThread {
+                activity.runOnUiThread {
                     notesViewModel.value = dbNotes
                 }
             }
             val recyclerView = view.findViewById<RecyclerView>(R.id.rv_text_block_contents)
             Log.v(TAG, "LiveData emitted.")
-            val tags = notesViewModel.value!!.map{ it.noteText }
-            if(!tags.isNullOrEmpty()){
-                Log.v(TAG, "Result size: [${tags.size}].")
-                val layoutManager = FlexboxLayoutManager(context)
-                layoutManager.flexDirection = FlexDirection.ROW
-                layoutManager.justifyContent = JustifyContent.SPACE_AROUND
-                recyclerView.layoutManager = layoutManager
-                recyclerView.adapter = TextBlockRecyclerViewAdapter(tags)
-            }
+            val notes = notesViewModel.value!!.map{ it.noteText }
+            Log.v(TAG, "Result size: [${notes.size}].")
+            val layoutManager = FlexboxLayoutManager(context)
+            layoutManager.flexDirection = FlexDirection.ROW
+            layoutManager.justifyContent = JustifyContent.SPACE_AROUND
+            recyclerView.layoutManager = layoutManager
+            recyclerView.adapter = TextBlockRecyclerViewAdapter(notes)
         }
     }
 
@@ -84,8 +84,8 @@ class VocabularyNoteFragment : TextBlockFragment("Vocabulary Notes") {
     // Keep Vocabulary and Definition as they are since they won't change without a search anyways?
 
     private fun setAddTagButtonOnClick(view : View) {
+        val context = context!!
         view.findViewById<AppCompatImageButton>(R.id.iv_btn_add).setOnClickListener {
-            val context = context!!
             val title = "Add Vocabulary Note"
             val message = null
             val dialogBuilder = InputAlertDialogBuilder(context,

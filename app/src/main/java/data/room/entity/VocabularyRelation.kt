@@ -10,7 +10,13 @@ import androidx.room.*
             ForeignKey(entity = Vocabulary::class,
                        parentColumns = ["VocabularyID"],
                        childColumns = ["ResultVocabularyID"])
-        ]
+        ],
+
+        indices = [Index(
+                value = ["SearchVocabularyID",
+                         "ResultVocabularyID"],
+                unique = true
+        )]
 )
 data class VocabularyRelation (
     @ColumnInfo(name = "SearchVocabularyID", index = true)
@@ -19,9 +25,10 @@ data class VocabularyRelation (
     @ColumnInfo(name = "ResultVocabularyID", index = true)
     var resultVocabularyID: Long,
 
-    @ColumnInfo(name = "MatchTypeBitMask")
-    var matchTypeBitMask: Int,
+    @ColumnInfo(name = "MatchTypeBitmask")
+    var matchTypeBitMask: Long,
 
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "VocabularyRelationID")
-    var vocabularyRelationID: Long = 0 )
+    var vocabularyRelationID: Long = 0
+)

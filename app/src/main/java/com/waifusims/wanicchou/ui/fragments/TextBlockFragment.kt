@@ -11,7 +11,7 @@ import com.waifusims.wanicchou.R
 abstract class TextBlockFragment(private val title: String) : Fragment(){
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val attachToRoot = false
-        val view = inflater.inflate(R.layout.fragment_text_block_list,
+        val view = inflater.inflate(R.layout.fragment_text_list,
                 container,
                 attachToRoot)
         view.findViewById<TextView>(R.id.tv_text_block_label).text = title

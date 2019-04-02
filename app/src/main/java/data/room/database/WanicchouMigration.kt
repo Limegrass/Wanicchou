@@ -2,134 +2,205 @@ package data.room.database
 
 
 object WanicchouMigration {
-    val MIGRATION_1_2_QUERY =
+    const val MIGRATION_1_2_QUERY =
 """
-BEGIN TRAN
-    CREATE TABLE Dictionary
-    (
-        DictionaryID INT NOT NULL PRIMARY KEY,
-        DictionaryName NVARCHAR(322) NOT NULL
-    );
+CREATE TABLE Language
+(
+    LanguageID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    LanguageCode VARCHAR(2) NOT NULL,
+    LanguageName NVARCHAR(322) NOT NULL
+);
 
-    CREATE TABLE Vocabulary
-    (
-        VocabularyID INT NOT NULL PRIMARY KEY,
-        Word VARCHAR(420) NOT NULL,
-        Pronunciation VARCHAR(420) NOT NULL,
-        Pitch VARCHAR(4) NOT NULL,
-        LanguageCode VARCHAR(2) NOT NULL
-    );
+INSERT INTO Language
+(
+    LanguageID,
+    LanguageCode,
+    LanguageName
+)
+VALUES  (1, 'jp', '日本語'),
+        (2, 'en', 'English');
 
-    CREATE TABLE Definition
-    (
-        DefinitionID INT NOT NULL PRIMARY KEY,
-        VocabularyID INT NOT NULL,
-        DictionaryID INT NOT NULL,
-        DefinitionText NVARCHAR(MAX) NOT NULL,
-        LanguageCode VARCHAR(2) NOT NULL,
-        FOREIGN KEY(VocabularyID) REFERENCES Vocabulary(VocabularyID),
-        FOREIGN KEY(DictionaryID) REFERENCES Dictionary(DictionaryID)
-    );
+CREATE TABLE Dictionary
+(
+    DictionaryID INT NOT NULL PRIMARY KEY AUTOINCREMENT,
+    DictionaryName NVARCHAR(322) NOT NULL
+);
 
-    CREATE TABLE Tag
-    (
-        TagID INT NOT NULL PRIMARY KEY,
-        TagText NVARCHAR(100) NOT NULL
-    );
+INSERT INTO Dictionary ( DictionaryName )
+VALUES ('三省堂');
 
-    CREATE TABLE VocabularyTag
-    (
-        VocabularyTagID INT NOT NULL PRIMARY KEY,
-        VocabularyID INT NOT NULL,
-        TagID INT NOT NULL,
-        FOREIGN KEY(TagID) REFERENCES Tag(TagID),
-        FOREIGN KEY(VocabularyID) REFERENCES Vocabulary(VocabularyID)
-    );
 
-    CREATE TABLE VocabularyRelation
-    (
-        VocabularyRelationID INT NOT NULL PRIMARY KEY,
-        SearchVocabularyID INT NOT NULL,
-        ResultVocabularyID INT NOT NULL,
-        FOREIGN KEY(SearchVocabularyID) REFERENCES Vocabulary(VocabularyID),
-        FOREIGN KEY(ResultVocabularyID) REFERENCES Vocabulary(VocabularyID)
-    );
+CREATE TABLE MatchType
+(
+    MatchTypeBitmask INTEGER NOT NULL PRIMARY KEY,
+    MatchTypeName VARCHAR(322) NOT NULL,
+    TemplateString VARCHAR(420) NOT NULL
+);
 
-    CREATE TABLE VocabularyNote
-    (
-        VocabularyNoteID INT NOT NULL PRIMARY KEY,
-        VocabularyID INT NOT NULL,
-        NoteText NVARCHAR(MAX),
-        FOREIGN KEY(VocabularyID) REFERENCES Vocabulary(VocabularyID)
-    );
+INSERT INTO MatchType (MatchTypeName, TemplateString, MatchTypeBitmask)
+VALUES  ('WORD_EQUALS', "%s", 1),
+        ('WORD_STARTS_WITH' , "%s%%", 2),
+        ('WORD_ENDS_WITH' , "%%%s", 4),
+        ('WORD_CONTAINS' , "%%%s%%", 8),
+        ('WORD_WILDCARDS' , "%s", 16),
+        ('DEFINITION_CONTAINS' , "%%%s%%", 32),
+        ('WORD_OR_DEFINITION_CONTAINS' , "%%%s%%", 64);
 
-    CREATE TABLE DefinitionNote
-    (
-        DefinitionNoteID INT NOT NULL PRIMARY KEY,
-        DefinitionID INT NOT NULL,
-        NoteText NVARCHAR(MAX) NOT NULL
-        FOREIGN KEY(DefinitionID) REFERENCES Definition(DefinitionID)
-    );
+CREATE TABLE DictionaryMatchType
+(
+    DictionaryMatchTypeID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    DictionaryID INT NOT NULL,
+    MatchTypeBitmask INT NOT NULL,
+    FOREIGN KEY(DictionaryID) REFERENCES Dictionary(DictionaryID)
+    FOREIGN KEY(MatchTypeBitmask) REFERENCES MatchType(MatchTypeBitmask)
+);
 
-    INSERT INTO Dictionary ( DictionaryName )
-    VALUES ('Sanseido')
+INSERT INTO DictionaryMatchType (DictionaryMatchTypeID, DictionaryID, MatchTypeBitmask)
+VALUES  (1, 1, 1),
+        (2, 1, 2),
+        (3, 1, 4),
+        (4, 1, 8),
+        (5, 1, 32);
 
-    INSERT INTO Vocabulary
-    (
-        Word,
-        Pronunciation,
-        Pitch,
-        LanguageCode
-    )
-    SELECT vo.Word,
-           vo.Reading,
-           vo.Pitch,
-        CASE WHEN SUBSTR(vo.DictionaryType, 1, 1) = 'J' THEN 'jp'
-            ELSE 'en' END
-    FROM VocabularyWords vo;
+CREATE TABLE Translation
+(
+    TranslationID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    SourceLanguageID INT NOT NULL,
+    TargetLanguageID INT NOT NULL,
+    TranslationName NVARCHAR(100) NOT NULL,
+    DictionaryID INT NOT NULL
+    FOREIGN KEY(DictionaryID) REFERENCES Dictionary(DictionaryID)
+    FOREIGN KEY(SourceLanguageID) REFERENCES Language(LanguageID)
+    FOREIGN KEY(TargetLanguageID) REFERENCES Language(LanguageID)
+);
 
-    INSERT INTO Definition
-    (
-        VocabularyID,
-        DictionaryID,
-        DefinitionText,
-        LanguageCode
-    )
-    SELECT vo.VocabularyID,
-           1,
-           vo.Definition,
-        CASE WHEN SUBSTR(vo.DictionaryType, 2, 2) = 'J' THEN 'jp'
-            ELSE 'en' END
-    FROM VocabularyWords vo;
+INSERT Translation (SourceLanguageID, TargetLanguageID, TranslationName, DictionaryID)
+VALUES  (1, 1, '国語', 1),
+        (1, 2, '和英', 1),
+        (2, 1, '英和', 1);
 
-    INSERT INTO VocabularyRelation
-    (
-        SearchVocabularyID,
-        ResultVocabularyID
-    )
-    SELECT rw.RelatedWordID,
-           rw.FKBaseWordID
-    FROM RelatedWords rw;
 
-    INSERT INTO VocabularyNote (VocabularyID, NoteText)
-    SELECT vo.VocabularyID,
-           n.Note
-    FROM Notes n
-    JOIN VocabularyWords vo
-        ON vo.Word = n.Word;
+CREATE TABLE Vocabulary
+(
+    VocabularyID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    Word VARCHAR(420) NOT NULL,
+    Pronunciation VARCHAR(420) NOT NULL,
+    Pitch VARCHAR(4) NOT NULL,
+    LanguageID INT NOT NULL,
+    FOREIGN KEY LanguageID REFERENCES Language(LanguageID)
+);
 
-    INSERT INTO VocabularyNote (VocabularyID, NoteText)
-    SELECT vo.VocabularyID,
-           c.Context
-    FROM WordContext c
-    JOIN VocabularyWords vo
-        ON vo.Word = n.Word;
+CREATE UNIQUE INDEX VocabularyIndex ON Vocabulary(Word, Pronunciation, LanguageID, Pitch)
 
-    DROP TABLE Notes;
-    DROP TABLE VocabularyWords;
-    DROP TABLE WordContext;
-    DROP TABLE RelatedWords;
-COMMIT TRAN
-""".trimIndent()
+CREATE TABLE Definition
+(
+    DefinitionID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    VocabularyID INT NOT NULL,
+    DictionaryID INT NOT NULL,
+    DefinitionText NVARCHAR(MAX) NOT NULL,
+    LanguageID INT NOT NULL,
+    FOREIGN KEY(VocabularyID) REFERENCES Vocabulary(VocabularyID),
+    FOREIGN KEY(DictionaryID) REFERENCES Dictionary(DictionaryID)
+    FOREIGN KEY(LanguageID) REFERENCES TableName(ForeignKeyColumn)
+);
+
+CREATE TABLE Tag
+(
+    TagID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    TagText NVARCHAR(100) NOT NULL
+);
+
+CREATE TABLE VocabularyTag
+(
+    VocabularyTagID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    VocabularyID INT NOT NULL,
+    TagID INT NOT NULL,
+    FOREIGN KEY(TagID) REFERENCES Tag(TagID),
+    FOREIGN KEY(VocabularyID) REFERENCES Vocabulary(VocabularyID)
+);
+CREATE UNIQUE INDEX VocabularyTagIndex ON VocabularyTag(TagID, VocabularyID)
+
+CREATE TABLE VocabularyRelation
+(
+    VocabularyRelationID INT NOT NULL PRIMARY KEY AUTOINCREMENT,
+    SearchVocabularyID INT NOT NULL,
+    ResultVocabularyID INT NOT NULL,
+    FOREIGN KEY(SearchVocabularyID) REFERENCES Vocabulary(VocabularyID),
+    FOREIGN KEY(ResultVocabularyID) REFERENCES Vocabulary(VocabularyID)
+);
+CREATE UNIQUE INDEX VocabularyRelationIndex ON VocabularyRelation(SearchVocabularyID, ResultVocabularyID)
+
+CREATE TABLE VocabularyNote
+(
+    VocabularyNoteID INT NOT NULL PRIMARY KEY,
+    VocabularyID INT NOT NULL,
+    NoteText NVARCHAR(MAX),
+    FOREIGN KEY(VocabularyID) REFERENCES Vocabulary(VocabularyID)
+);
+
+CREATE TABLE DefinitionNote
+(
+    DefinitionNoteID INT NOT NULL PRIMARY KEY,
+    DefinitionID INT NOT NULL,
+    NoteText NVARCHAR(MAX) NOT NULL
+    FOREIGN KEY(DefinitionID) REFERENCES Definition(DefinitionID)
+);
+
+INSERT INTO Vocabulary
+(
+    Word,
+    Pronunciation,
+    Pitch,
+    LanguageID
+)
+SELECT vo.Word,
+       vo.Reading,
+       vo.Pitch,
+    CASE WHEN SUBSTR(vo.DictionaryType, 1, 1) = 'J' THEN 1
+        ELSE 2 END
+FROM VocabularyWords vo;
+
+INSERT INTO Definition
+(
+    VocabularyID,
+    DictionaryID,
+    DefinitionText,
+    LanguageID
+)
+SELECT vo.VocabularyID,
+       1,
+       vo.Definition,
+    CASE WHEN SUBSTR(vo.DictionaryType, 1, 1) = 'J' THEN 1
+        ELSE 2 END
+FROM VocabularyWords vo;
+
+INSERT INTO VocabularyRelation
+(
+    SearchVocabularyID,
+    ResultVocabularyID
+)
+SELECT rw.RelatedWordID,
+       rw.FKBaseWordID
+FROM RelatedWords rw;
+
+INSERT INTO VocabularyNote(VocabularyID, NoteText)
+SELECT vo.VocabularyID,
+       n.Note
+FROM Notes n
+JOIN VocabularyWords vo
+    ON vo.Word = n.Word;
+
+INSERT INTO VocabularyNote (VocabularyID, NoteText)
+SELECT vo.VocabularyID,
+       c.Context
+FROM WordContext c
+JOIN VocabularyWords vo
+    ON vo.Word = n.Word;
+
+DROP TABLE Notes;
+DROP TABLE VocabularyWords;
+DROP TABLE WordContext;
+DROP TABLE RelatedWords;
+"""
 
 }

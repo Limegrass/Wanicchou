@@ -10,16 +10,16 @@ import android.view.SearchEvent
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProviders
-import com.waifusims.wanicchou.ui.fragments.*
+import com.waifusims.wanicchou.ui.fragments.FabFragment
+import com.waifusims.wanicchou.ui.fragments.TabSwitchFragment
+import com.waifusims.wanicchou.ui.fragments.WordFragment
 import com.waifusims.wanicchou.util.WanicchouSharedPreferenceHelper
-import com.waifusims.wanicchou.viewmodel.DefinitionViewModel
-import com.waifusims.wanicchou.viewmodel.RelatedVocabularyViewModel
+import com.waifusims.wanicchou.viewmodel.DatabaseViewModel
 import com.waifusims.wanicchou.viewmodel.VocabularyViewModel
 import data.enums.AutoDelete
 import data.room.VocabularyRepository
+import data.room.entity.Vocabulary
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 //</editor-fold>
@@ -84,6 +84,18 @@ class SearchActivity
         handleIntent(intent)
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if(requestCode == DatabaseActivity.REQUEST_CODE) {
+            val vocab = data?.extras?.getParcelable<Vocabulary>("Vocabulary")
+            if(vocab != null){
+                vocabularyViewModel.value = listOf(vocab)
+            }
+        }
+        else{
+            super.onActivityResult(requestCode, resultCode, data)
+        }
+    }
+
     //<editor-fold desc="Menu">
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.search_menu, menu)
@@ -98,6 +110,13 @@ class SearchActivity
                 // If voice/etc is implemented in the future, make sure it works with this.
                 // Else need to remove this and add the actionViewClass onto the menu item.
                 onSearchRequested()
+                true
+            }
+            R.id.action_database -> {
+                val context = this
+                val childActivity = DatabaseActivity::class.java
+                val settingsActivityIntent = Intent(context, childActivity)
+                startActivityForResult(settingsActivityIntent, DatabaseActivity.REQUEST_CODE)
                 true
             }
             R.id.action_settings -> {
@@ -116,7 +135,6 @@ class SearchActivity
 
     //<editor-fold desc="Helpers">
 
-
     private fun handleIntent(intent: Intent) {
         Log.i(TAG, "Handling Intent: [${intent.action}]")
         if (intent.action == Intent.ACTION_SEARCH) {
@@ -124,7 +142,6 @@ class SearchActivity
             search(searchTerm)
         }
     }
-
 
     private fun showToast(toastText: String) {
         val context = this
@@ -146,8 +163,8 @@ class SearchActivity
         //TODO: Progress bar it
         runBlocking(Dispatchers.IO) {
             val vocabularyList = repository.vocabularySearch(searchTerm,
-                    sharedPreferences.wordLanguageCode,
-                    sharedPreferences.definitionLanguageCode,
+                    sharedPreferences.wordLanguageID,
+                    sharedPreferences.definitionLanguageID,
                     sharedPreferences.matchType,
                     sharedPreferences.dictionary)
             if (vocabularyList.isNotEmpty()) {

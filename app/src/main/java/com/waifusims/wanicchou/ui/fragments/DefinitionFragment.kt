@@ -1,5 +1,6 @@
 package com.waifusims.wanicchou.ui.fragments
 
+import android.app.Activity
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -7,7 +8,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -17,8 +17,6 @@ import com.waifusims.wanicchou.util.WanicchouSharedPreferenceHelper
 import com.waifusims.wanicchou.viewmodel.DefinitionViewModel
 import com.waifusims.wanicchou.viewmodel.VocabularyViewModel
 import data.room.VocabularyRepository
-import data.room.entity.Definition
-import data.room.entity.VocabularyInformation
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -27,24 +25,13 @@ class DefinitionFragment : Fragment() {
     companion object {
         private val TAG : String = DefinitionFragment::class.java.simpleName
     }
-    private val definitionViewModel : DefinitionViewModel by lazy {
-        //TODO: Make sure this assert isn't problematic
-        ViewModelProviders.of(activity!!)
-                .get(DefinitionViewModel::class.java)
-    }
+    private lateinit var definitionViewModel : DefinitionViewModel
 
-    private val sharedPreferences
-            : WanicchouSharedPreferenceHelper by lazy {
-        WanicchouSharedPreferenceHelper(context!!)
-    }
+    private lateinit var sharedPreferences : WanicchouSharedPreferenceHelper
 
-    private val repository : VocabularyRepository by lazy {
-        VocabularyRepository(activity!!.application)
-    }
-    private val vocabularyViewModel : VocabularyViewModel by lazy {
-        ViewModelProviders.of(activity!!)
-                .get(VocabularyViewModel::class.java)
-    }
+    private lateinit var repository : VocabularyRepository
+
+    private lateinit var vocabularyViewModel : VocabularyViewModel
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val attachToRoot = false
@@ -54,12 +41,17 @@ class DefinitionFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        setDefinitionObserver(view)
+        val activity = activity!!
+        definitionViewModel = ViewModelProviders.of(activity).get(DefinitionViewModel::class.java)
+        sharedPreferences = WanicchouSharedPreferenceHelper(context!!)
+        repository = VocabularyRepository.getInstance(activity.application)
+        vocabularyViewModel = ViewModelProviders.of(activity).get(VocabularyViewModel::class.java)
+        setDefinitionObserver(view, activity)
         super.onViewCreated(view, savedInstanceState)
     }
 
 
-    private fun setDefinitionObserver(view: View){
+    private fun setDefinitionObserver(view: View, activity: Activity){
         val lifecycleOwner : LifecycleOwner = context as LifecycleOwner
         definitionViewModel.setObserver(lifecycleOwner){
             val recyclerView = view.findViewById<RecyclerView>(R.id.rv_definitions)
@@ -76,10 +68,10 @@ class DefinitionFragment : Fragment() {
             GlobalScope.launch(Dispatchers.IO) {
                 val vocabularyID = vocabularyViewModel.vocabulary.vocabularyID
                 val definition = repository.getDefinition(vocabularyID,
-                                                           sharedPreferences.definitionLanguageCode,
+                                                           sharedPreferences.definitionLanguageID,
                                                            sharedPreferences.dictionary)
                 if(definition != null){
-                    activity!!.runOnUiThread{
+                    activity.runOnUiThread{
                         definitionViewModel.value = listOf(definition)
                     }
                 }

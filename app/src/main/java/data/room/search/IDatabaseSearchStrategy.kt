@@ -6,6 +6,6 @@ import data.room.entity.Vocabulary
 interface IDatabaseSearchStrategy {
     suspend fun search(database : WanicchouDatabase,
                searchTerm : String,
-               wordLanguageCode : String,
-               definitionLanguageCode : String) : List<Vocabulary>
+               wordLanguageID : Long,
+               definitionLanguageID : Long) : List<Vocabulary>
 }

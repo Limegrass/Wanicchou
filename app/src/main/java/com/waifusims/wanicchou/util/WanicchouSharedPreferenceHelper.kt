@@ -30,16 +30,18 @@ class WanicchouSharedPreferenceHelper(private val context: Context) {
             putString(R.string.pref_dictionary_key, value.toString())
         }
 
-    var wordLanguageCode: String
-        get() = getString(R.string.pref_word_language_key, R.string.pref_word_language_default)
+    var wordLanguageID: Long
+        get() = getString(R.string.pref_word_language_key, R.string.pref_word_language_default).toLong()
         set(value) {
-            putString(R.string.pref_word_language_key, value)
+            putString(R.string.pref_word_language_key, value.toString())
         }
 
-    var definitionLanguageCode: String
-        get() = getString(R.string.pref_definition_language_key, R.string.pref_definition_language_default)
+    var definitionLanguageID: Long
+        get() = getString(R.string.pref_definition_language_key,
+                          R.string.pref_definition_language_default)
+                         .toLong()
         set(value) {
-            putString(R.string.pref_definition_language_key, value)
+            putString(R.string.pref_definition_language_key, value.toString())
         }
 
     var autoDelete : AutoDelete

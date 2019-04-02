@@ -11,13 +11,13 @@ internal class SanseidoDefinitionStrategy : IDefinitionStrategy {
     }
 
     override fun get(htmlDocument: Document,
-                     definitionLanguageCode: String,
+                     definitionLanguageID: Long,
                      dictionaryID: Long,
                      vocabularyID: Long) : Definition {
         val definitionSource = getDefinitionSource(htmlDocument)
         val definition = formatDefinitionSource(definitionSource)
         return Definition(definition,
-                definitionLanguageCode,
+                definitionLanguageID,
                 dictionaryID,
                 vocabularyID)
     }

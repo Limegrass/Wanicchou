@@ -1,8 +1,11 @@
 package data.web.sanseido
 
 import android.net.Uri
+import data.arch.lang.EnglishVocabulary
+import data.arch.lang.JapaneseVocabulary
 import data.arch.search.JsoupDictionaryWebPage
 import data.enums.MatchType
+import java.lang.UnsupportedOperationException
 import java.net.MalformedURLException
 import java.net.URL
 
@@ -37,13 +40,14 @@ class SanseidoWebPage
         private const val PARAM_DIC_PREFIX = "Daily"
         private const val SET_LANG = "checkbox"
 
-        private val SUPPORTED_MATCH_TYPES = hashMapOf(
+        val SUPPORTED_MATCH_TYPES = hashMapOf(
                 MatchType.WORD_STARTS_WITH to 0,
                 MatchType.WORD_EQUALS to 1,
                 MatchType.WORD_ENDS_WITH to 2,
                 MatchType.DEFINITION_CONTAINS to 3,
                 MatchType.WORD_CONTAINS to 5)
 
+        const val DICTIONARY_NAME = "三省堂"
         const val DICTIONARY_ID = 1L
     }
 
@@ -62,8 +66,8 @@ class SanseidoWebPage
      */
     @Throws(MalformedURLException::class)
     override fun buildQueryURL(searchTerm: String,
-                               wordLanguageCode: String,
-                               definitionLanguageCode: String,
+                               wordLanguageID: Long,
+                               definitionLanguageID: Long,
                                matchType: MatchType): URL {
 
         val uriBuilder = Uri.parse(SANSEIDO_BASE_URL).buildUpon()
@@ -74,10 +78,18 @@ class SanseidoWebPage
         uriBuilder.appendQueryParameter(PARAM_WORD_QUERY, searchTerm)
         uriBuilder.appendQueryParameter(
                 PARAM_DIC_PREFIX
-                        + wordLanguageCode[0].toUpperCase()
-                        + definitionLanguageCode[0].toUpperCase(),
+                        + getLanguagePrefix(wordLanguageID)
+                        + getLanguagePrefix(definitionLanguageID),
                 SET_LANG)
 
         return URL(uriBuilder.build().toString())
+    }
+
+    private fun getLanguagePrefix(languageID : Long) : Char {
+        return when (languageID){
+            EnglishVocabulary.LANGUAGE_ID -> 'E'
+            JapaneseVocabulary.LANGUAGE_ID -> 'J'
+            else -> throw UnsupportedOperationException()
+        }
     }
 }

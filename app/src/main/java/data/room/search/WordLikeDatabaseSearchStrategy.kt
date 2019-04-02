@@ -6,8 +6,8 @@ import data.room.entity.Vocabulary
 internal class WordLikeDatabaseSearchStrategy : IDatabaseSearchStrategy {
     override suspend fun search(database : WanicchouDatabase,
                                 searchTerm: String,
-                                wordLanguageCode: String,
-                                definitionLanguageCode: String): List<Vocabulary> {
-        return database.vocabularyDao().searchWordLike(searchTerm, wordLanguageCode)
+                                wordLanguageID: Long,
+                                definitionLanguageID: Long): List<Vocabulary> {
+        return database.vocabularyDao().searchWordLike(searchTerm, wordLanguageID)
     }
 }

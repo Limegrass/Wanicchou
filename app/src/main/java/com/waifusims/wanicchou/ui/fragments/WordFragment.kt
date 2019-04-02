@@ -1,10 +1,14 @@
 package com.waifusims.wanicchou.ui.fragments
 
+import android.os.Build
 import android.os.Bundle
+import android.text.Html
+import android.text.Spanned
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProviders
@@ -39,15 +43,28 @@ class WordFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         setVocabularyListObserver(view)
         getLatest()
+        setOnClickListener(view)
         super.onViewCreated(view, savedInstanceState)
     }
 
+    private fun setOnClickListener(view: View){
+        val tvPronunciation = view.findViewById<TextView>(R.id.tv_pronunciation)
+        val context = context
+        tvPronunciation.setOnClickListener {
+            Toast.makeText(context,
+                           "Pitch: ${vocabularyViewModel.vocabulary.pitch}",
+                           Toast.LENGTH_SHORT).show()
+
+        }
+    }
+
     private fun getLatest(){
+        val activity = activity!!
         GlobalScope.launch(Dispatchers.IO) {
             val vocabularyList = repository.getLatest()
             //TODO: Maybe refactor to just give the DICTIONARY_ID
             // (or when I figure out dynamic settings pref)
-            activity!!.runOnUiThread {
+            activity.runOnUiThread {
                 vocabularyViewModel.value = vocabularyList
             }
         }
@@ -59,8 +76,9 @@ class WordFragment : Fragment() {
         vocabularyViewModel.setObserver(lifecycleOwner){
             val tvWord = view!!.findViewById<TextView>(R.id.tv_word)
             val tvPronunciation = view.findViewById<TextView>(R.id.tv_pronunciation)
-            tvWord.text = vocabularyViewModel.vocabulary.word
-            tvPronunciation.text = vocabularyViewModel.vocabulary.pronunciation
+            val vocabulary = vocabularyViewModel.vocabulary
+            tvWord.text = vocabulary.word
+            tvPronunciation.text = vocabulary.pronunciation
         }
     }
 }

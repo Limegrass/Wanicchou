@@ -1,8 +1,6 @@
 package com.waifusims.wanicchou.viewmodel
 
 import android.app.Application
-import android.view.View
-import androidx.lifecycle.*
 import data.room.entity.Vocabulary
 
 
@@ -29,16 +27,14 @@ class VocabularyViewModel(application: Application)
         get() = 0
 
     private fun getDefaultVocabulary() : Vocabulary {
-        val word = DEFAULT_WORD
-        val pronunciation = DEFAULT_WORD_PRONUNCIATION
-        val wordLanguageCode = DEFAULT_LANGUAGE_CODE
-
-        return Vocabulary(word, wordLanguageCode, pronunciation)
+        return Vocabulary(DEFAULT_WORD,
+                          DEFAULT_LANGUAGE_ID,
+                          DEFAULT_WORD_PRONUNCIATION)
     }
 
     companion object {
         private val TAG : String = VocabularyViewModel::class.java.simpleName
-        private const val DEFAULT_LANGUAGE_CODE = "jp"
+        private const val DEFAULT_LANGUAGE_ID = 1L
         private const val DEFAULT_WORD_PRONUNCIATION = "わにっちょう"
         private const val DEFAULT_WORD = "和日帳"
     }

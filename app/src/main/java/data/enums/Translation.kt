@@ -1,7 +1,9 @@
 package data.enums
 
 import android.os.Build
+import data.arch.lang.EnglishVocabulary
 import data.arch.lang.JapaneseVocabulary
+import java.lang.UnsupportedOperationException
 import java.util.*
 
 /**
@@ -20,32 +22,32 @@ System.out.println(Locale.forLanguageTag(language).getDisplayLanguage());
 
 class Translation {
     companion object {
-        fun getTranslationDisplay(vocabLanguageCode: String, defLanguageCode: String): String {
+        fun getTranslationDisplay(wordLanguageID: Long, definitionLanguageID: Long): String {
             /**
              * Query the DB for the vocab language IDs and get their language codes
              * pass it in
              * Use the language codes to get the locales
              * Return the locale
              */
-            return when (vocabLanguageCode) {
-                "jp" -> getJapaneseDisplayDictionary(defLanguageCode)
-                "en" -> getEnglishDisplayDictionary(defLanguageCode)
-                else -> getDefaultDisplay(vocabLanguageCode, defLanguageCode)
+            return when (wordLanguageID) {
+                JapaneseVocabulary.LANGUAGE_ID -> getJapaneseDisplayDictionary(definitionLanguageID)
+                EnglishVocabulary.LANGUAGE_ID -> getEnglishDisplayDictionary(definitionLanguageID)
+                else -> throw UnsupportedOperationException("Unknown word language ID: [$wordLanguageID]")
             }
         }
         //TODO("Move strings to android string resources")
         //TODO("Maybe this whole thing can change but I'll think about it some other time since it's isolated")
-        private fun getJapaneseDisplayDictionary(defLanguageCode: String): String {
-            return when (defLanguageCode) {
-                "en" -> "和英"
-                "jp" -> "国語"
-                else -> getDefaultDisplay("jp", defLanguageCode)
+        private fun getJapaneseDisplayDictionary(definitionLanguageID: Long): String {
+            return when (definitionLanguageID) {
+                EnglishVocabulary.LANGUAGE_ID -> "和英"
+                JapaneseVocabulary.LANGUAGE_ID -> "国語"
+                else -> throw UnsupportedOperationException("Unknown definition language ID for Japanese: [$definitionLanguageID]")
             }
         }
-        private fun getEnglishDisplayDictionary(defLanguageCode: String): String {
-            return when (defLanguageCode) {
-                "jp" -> "英和"
-                else -> getDefaultDisplay("en", defLanguageCode)
+        private fun getEnglishDisplayDictionary(definitionLanguageID: Long): String {
+            return when (definitionLanguageID) {
+                JapaneseVocabulary.LANGUAGE_ID -> "英和"
+                else -> throw UnsupportedOperationException("Unknown definition language ID for English: [$definitionLanguageID]")
             }
         }
 
@@ -58,15 +60,15 @@ class Translation {
             }
         }
 
-        //TODO: Actually make this method instead of hacky assumptions, move them somewhere else?
-        private fun assignLanguageCode(str: String,
-                                       default: String = JapaneseVocabulary.LANGUAGE_CODE): String {
-            return when {
-                JapaneseVocabulary.isJapaneseInput(str) -> JapaneseVocabulary.LANGUAGE_CODE
-                //TODO: use kana/jp regex for jp
-                else -> default
-            }
-        }
+//        //TODO: Actually make this method instead of hacky assumptions, move them somewhere else?
+//        private fun assignLanguageCode(str: String,
+//                                       default: String = JapaneseVocabulary.LANGUAGE_ID): String {
+//            return when {
+//                JapaneseVocabulary.isJapaneseInput(str) -> JapaneseVocabulary.LANGUAGE_ID
+//                //TODO: use kana/jp regex for jp
+//                else -> default
+//            }
+//        }
     }
 
 }

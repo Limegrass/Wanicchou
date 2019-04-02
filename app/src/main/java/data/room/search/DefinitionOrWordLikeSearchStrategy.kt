@@ -6,11 +6,11 @@ import data.room.entity.Vocabulary
 class DefinitionOrWordLikeSearchStrategy : IDatabaseSearchStrategy {
     override suspend fun search(database: WanicchouDatabase,
                                 searchTerm: String,
-                                wordLanguageCode: String,
-                                definitionLanguageCode: String): List<Vocabulary> {
+                                wordLanguageID: Long,
+                                definitionLanguageID: Long): List<Vocabulary> {
         return database.vocabularyDao().searchWordOrDefinitionLike(searchTerm,
-                                                                   wordLanguageCode,
-                                                                   definitionLanguageCode)
+                                                                   wordLanguageID,
+                                                                   definitionLanguageID)
     }
 
 }

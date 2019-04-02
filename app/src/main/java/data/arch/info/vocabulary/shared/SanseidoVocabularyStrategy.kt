@@ -15,12 +15,12 @@ internal class SanseidoVocabularyStrategy : IVocabularyStrategy {
     }
 
     override fun get(wordSource: String,
-                     wordLanguageCode: String) : Vocabulary {
-        val word = isolateWord(wordSource, wordLanguageCode)
-        val pronunciation = isolateReading(wordSource, wordLanguageCode)
+                     wordLanguageID: Long) : Vocabulary {
+        val word = isolateWord(wordSource, wordLanguageID)
+        val pronunciation = isolateReading(wordSource, wordLanguageID)
         val pitch = JapaneseVocabulary.isolatePitch(wordSource)
         return Vocabulary(word,
-                wordLanguageCode,
+                wordLanguageID,
                 pronunciation,
                 pitch)
     }
@@ -31,17 +31,17 @@ internal class SanseidoVocabularyStrategy : IVocabularyStrategy {
      * @return The full word isolated from any furigana readings or tones
      */
     @Throws(IllegalArgumentException::class)
-    private fun isolateWord(wordSource: String, wordLanguageCode: String): String {
+    private fun isolateWord(wordSource: String, wordLanguageID: Long): String {
         val cleanedWordSource = wordSource.replace(SEPARATOR_FRAGMENTS_REGEX.toRegex(), "")
         //TODO: Move use make english vocab if it is
-        if (wordLanguageCode == EnglishVocabulary.LANGUAGE_CODE) {
+        if (wordLanguageID == EnglishVocabulary.LANGUAGE_ID) {
             val ejMatcher = Pattern.compile(EXACT_EJ_REGEX).matcher(cleanedWordSource)
             if (ejMatcher.find()) {
                 return ejMatcher.group(0)
             }
             return cleanedWordSource
         }
-        else if (wordLanguageCode == JapaneseVocabulary.LANGUAGE_CODE) {
+        else if (wordLanguageID == JapaneseVocabulary.LANGUAGE_ID) {
             val exactMatcher = Pattern
                     .compile(EXACT_WORD_REGEX)
                     .matcher(cleanedWordSource)
@@ -52,7 +52,7 @@ internal class SanseidoVocabularyStrategy : IVocabularyStrategy {
                 JapaneseVocabulary.isolateWord(cleanedWordSource)
             }
         }
-        throw IllegalArgumentException("Invalid Language Code: $wordLanguageCode for Sanseidou." +
+        throw IllegalArgumentException("Invalid Language Code: $wordLanguageID for Sanseido." +
                 " Source: $cleanedWordSource.")
     }
 
@@ -61,13 +61,13 @@ internal class SanseidoVocabularyStrategy : IVocabularyStrategy {
      * @param wordSource the raw string containing the dictionaryEntry word.
      * @return a string with the isolated kana reading of the word.
      */
-    private fun isolateReading(wordSource: String, wordLanguageCode: String): String {
+    private fun isolateReading(wordSource: String, wordLanguageID: Long): String {
         if (wordSource == "") {
             return ""
         }
         // Dic uses images to show pronunciations in the International Phonetic Alphabet
         // Maybe work around some other time
-        if (wordLanguageCode == EnglishVocabulary.LANGUAGE_CODE) {
+        if (wordLanguageID == EnglishVocabulary.LANGUAGE_ID) {
             var splitPosition = wordSource.indexOf('[')
             if (splitPosition < 0) {
                 splitPosition = wordSource.indexOf('［')

@@ -16,9 +16,9 @@ abstract class JsoupDictionaryWebPage
     : IDictionaryWebPage {
     // ====================== ABSTRACT ======================
     abstract fun buildQueryURL(searchTerm: String,
-                                        wordLanguageCode: String,
-                                        definitionLanguageCode: String,
-                                        matchType: MatchType): URL
+                               wordLanguageID: Long,
+                               definitionLanguageID: Long,
+                               matchType: MatchType): URL
 
     abstract override fun getSupportedMatchTypes(): Set<MatchType>
 
@@ -30,12 +30,12 @@ abstract class JsoupDictionaryWebPage
     //TODO: Try to find another alternative to page parsing again
     @WorkerThread
     override suspend fun search(searchTerm: String,
-                                wordLanguageCode: String,
-                                definitionLanguageCode: String,
+                                wordLanguageID: Long,
+                                definitionLanguageID: Long,
                                 matchType: MatchType): Document {
         val url = buildQueryURL(searchTerm,
-                                wordLanguageCode,
-                                definitionLanguageCode,
+                                wordLanguageID,
+                                definitionLanguageID,
                                 matchType)
                                 .toString()
         val userAgent = "Mozilla"

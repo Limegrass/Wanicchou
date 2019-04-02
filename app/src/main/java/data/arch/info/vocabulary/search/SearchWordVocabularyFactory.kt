@@ -6,11 +6,11 @@ import data.room.entity.Vocabulary
 import org.jsoup.nodes.Document
 
 class SearchWordVocabularyFactory(private val htmlDocument : Document,
-                                  private val wordLanguageCode : String,
+                                  private val wordLanguageID : Long,
                                   private val dictionaryID : Long) : IFactory<Vocabulary> {
     override fun get(): Vocabulary {
         val wordSource = SearchWordSourceFactory(htmlDocument, dictionaryID).get()
         val strategy = VocabularyStrategyFactory(dictionaryID).get()
-        return strategy.get(wordSource, wordLanguageCode)
+        return strategy.get(wordSource, wordLanguageID)
     }
 }

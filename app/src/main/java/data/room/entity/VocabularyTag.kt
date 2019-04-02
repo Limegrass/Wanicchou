@@ -20,6 +20,7 @@ import androidx.room.*
         )]
 )
 
+//Note: room requires a PK on an entity.
 data class VocabularyTag (
     @ColumnInfo(name = "TagID")
     var tagID: Long,
@@ -28,5 +29,5 @@ data class VocabularyTag (
     var vocabularyID: Long,
 
     @PrimaryKey(autoGenerate = true)
-    @ColumnInfo(name = "VocabularyTagID")
-    var vocabularyTagID: Long = 0 )
+    @ColumnInfo(name = "VocabularyTagID", index = true)
+    var vocabularyTagID: Long = 0)

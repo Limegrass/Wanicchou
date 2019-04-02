@@ -18,13 +18,14 @@ class DefinitionViewModel(application: Application)
     }
 
     private fun getDefaultDefinition(): Definition {
-        val definitionText = DEFAULT_DEFINITION
-        val definitionLanguageCode = DEFAULT_LANGUAGE_CODE
-        return Definition(definitionText, definitionLanguageCode, 1, 0)
+        return Definition(DEFAULT_DEFINITION,
+                            DEFAULT_LANGUAGE_ID,
+                                1,
+                                0)
     }
 
     companion object {
         private const val DEFAULT_DEFINITION = "ある使えないアプリ。"
-        private const val DEFAULT_LANGUAGE_CODE = "jp"
+        private const val DEFAULT_LANGUAGE_ID = 1L
     }
 }

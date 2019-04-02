@@ -10,9 +10,6 @@ data class Dictionary (
     @ColumnInfo(name = "DictionaryName")
     var dictionaryName: String,
 
-    @ColumnInfo(name = "AvailableMatchTypeBitMask")
-    var availableMatchTypeBitMask : Int = 0,
-
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "DictionaryID")
     var dictionaryID: Long = 0

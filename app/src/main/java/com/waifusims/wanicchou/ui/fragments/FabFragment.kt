@@ -18,14 +18,14 @@ class FabFragment : Fragment() {
     private lateinit var floatingActionButton : FloatingActionButton
 
     private val ankiDroidHelper : AnkiDroidHelper by lazy {
-        AnkiDroidHelper(context!!)
+        AnkiDroidHelper(context!!, repository)
     }
     companion object {
         private const val ANKI_PERMISSION_REQUEST_CALLBACK_CODE : Int = 420
     }
 
     private val repository : VocabularyRepository by lazy {
-        VocabularyRepository(activity!!.application)
+        VocabularyRepository.getInstance(activity!!.application)
     }
 
     private val vocabularyViewModel : VocabularyViewModel by lazy {

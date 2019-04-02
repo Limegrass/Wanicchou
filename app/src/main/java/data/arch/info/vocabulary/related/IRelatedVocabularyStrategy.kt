@@ -5,5 +5,5 @@ import org.jsoup.nodes.Element
 
 internal interface IRelatedVocabularyStrategy {
     fun getRelatedVocabulary(htmlElement : Element,
-                             wordLanguageCode : String): List<Vocabulary>
+                             wordLanguageID : Long): List<Vocabulary>
 }

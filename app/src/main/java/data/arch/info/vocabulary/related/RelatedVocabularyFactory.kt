@@ -6,12 +6,12 @@ import org.jsoup.nodes.Document
 
 internal class RelatedVocabularyFactory(
         private val htmlDocument: Document,
-        private val wordLanguageCode : String,
+        private val wordLanguageID : Long,
         private val dictionaryID : Long)
     : IFactory<List<Vocabulary>> {
     override fun get(): List<Vocabulary> {
         val strategy = RelatedVocabularyStrategyFactory(dictionaryID).get()
-        return strategy.getRelatedVocabulary(htmlDocument, wordLanguageCode)
+        return strategy.getRelatedVocabulary(htmlDocument, wordLanguageID)
     }
 }
 

@@ -2,10 +2,12 @@ package data.room
 
 import android.app.Application
 import androidx.annotation.WorkerThread
+import androidx.lifecycle.LiveData
 import data.arch.info.definition.DefinitionFactory
 import data.arch.info.vocabulary.related.RelatedVocabularyFactory
 import data.arch.info.vocabulary.search.SearchWordVocabularyFactory
 import data.arch.search.IDictionaryWebPage
+import data.arch.util.SingletonHolder
 import data.enums.MatchType
 import data.room.database.WanicchouDatabase
 import data.room.entity.*
@@ -20,10 +22,30 @@ import org.jsoup.nodes.Document
 // TODO: Decision to search DB or online should occur here
 // TODO: Make things nullable and do appropriate logic when null for everything
 class VocabularyRepository(application: Application) {
+    // Is there even any benefit to using this considering how fast data retrieval is
+    companion object : SingletonHolder<VocabularyRepository, Application>({
+        VocabularyRepository(it)
+    })
+
+    val languages : List<data.room.entity.Language> by lazy {
+        runBlocking (Dispatchers.IO){
+            database.languageDao().getAllLanguages()
+        }
+    }
+
+    val matchTypes : List<data.room.entity.MatchType> by lazy {
+        runBlocking (Dispatchers.IO){
+            database.matchTypeDao().getAllMatchTypes()
+        }
+    }
 
     @WorkerThread
     fun getLatest() : List<Vocabulary> {
         return database.vocabularyDao().getLatest()
+    }
+
+    fun getAllSavedVocabulary() : LiveData<List<Vocabulary>> {
+        return database.vocabularyDao().getAll()
     }
 
     private val database = WanicchouDatabase.getInstance(application)
@@ -45,21 +67,21 @@ class VocabularyRepository(application: Application) {
 
 
     private suspend fun insertVocabulary(document: Document,
-                                         wordLanguageCode: String,
+                                         wordLanguageID: Long,
                                          webPage : IDictionaryWebPage) : Long {
         val vocabulary = SearchWordVocabularyFactory(document,
-                                                     wordLanguageCode,
+                                                     wordLanguageID,
                                                      webPage.dictionaryID).get()
 
         return database.vocabularyDao().insert(vocabulary)
     }
 
     private suspend fun insertDefinition(document: Document,
-                                         definitionLanguageCode: String,
+                                         definitionLanguageID: Long,
                                          vocabularyID : Long,
                                          webPage: IDictionaryWebPage) {
         val definition = DefinitionFactory(document,
-                                           definitionLanguageCode,
+                                           definitionLanguageID,
                                            webPage.dictionaryID,
                                            vocabularyID).get()
         database.definitionDao().insert(definition)
@@ -67,25 +89,25 @@ class VocabularyRepository(application: Application) {
 
     @WorkerThread
     suspend fun getRelatedVocabularyDefinition(relatedVocabulary: Vocabulary,
-                                        definitionLanguageCode: String,
+                                        definitionLanguageID: Long,
                                         dictionaryID: Long) : Definition {
         var definitions = database.definitionDao()
                                   .getVocabularyDefinitions(relatedVocabulary.vocabularyID,
-                                                            definitionLanguageCode,
+                                                            definitionLanguageID,
                                                             dictionaryID)
         if (definitions == null){
             val webPage = DictionaryWebPageFactory(dictionaryID).get()
             val webPageDocument = webPage.search("${relatedVocabulary.word} ${relatedVocabulary.pronunciation}",
-                                                relatedVocabulary.languageCode,
-                                                definitionLanguageCode,
+                                                relatedVocabulary.languageID,
+                                                definitionLanguageID,
                                                 MatchType.WORD_EQUALS)
             insertDefinition(webPageDocument,
-                             definitionLanguageCode,
+                             definitionLanguageID,
                              relatedVocabulary.vocabularyID,
                              webPage)
             definitions = database.definitionDao()
                                   .getVocabularyDefinitions(relatedVocabulary.vocabularyID,
-                                                            definitionLanguageCode,
+                                                            definitionLanguageID,
                                                             dictionaryID)
         }
 
@@ -94,8 +116,8 @@ class VocabularyRepository(application: Application) {
 
     @WorkerThread
     suspend fun vocabularySearch(searchTerm: String,
-                                 wordLanguageCode: String,
-                                 definitionLanguageCode: String,
+                                 wordLanguageID: Long,
+                                 definitionLanguageID: Long,
                                  matchType : MatchType,
                                  dictionaryID: Long) : List<Vocabulary>{
         val split = searchTerm.split(" ")
@@ -104,13 +126,13 @@ class VocabularyRepository(application: Application) {
             val word = split[0]
             val pronunciation = split[1]
             val vocabularyID = database.vocabularyDao()
-                    .getVocabularyID(word, pronunciation, wordLanguageCode)
+                    .getVocabularyID(word, pronunciation, wordLanguageID)
             database.vocabularyDao().getVocabulary(vocabularyID)
         }
         else{
             getVocabularyFromDatabase(searchTerm,
-                    wordLanguageCode,
-                    definitionLanguageCode,
+                    wordLanguageID,
+                    definitionLanguageID,
                     matchType)
 
         }
@@ -119,32 +141,32 @@ class VocabularyRepository(application: Application) {
         }
 
         return getVocabularyFromOnline(searchTerm,
-                wordLanguageCode,
-                definitionLanguageCode,
+                wordLanguageID,
+                definitionLanguageID,
                 matchType,
                 dictionaryID)
     }
 
     private suspend fun getVocabularyFromOnline(searchTerm: String,
-                             wordLanguageCode: String,
-                             definitionLanguageCode: String,
+                             wordLanguageID: Long,
+                             definitionLanguageID: Long,
                              matchType: MatchType,
                              dictionaryID: Long) : List<Vocabulary>{
         val webPage = DictionaryWebPageFactory(dictionaryID).get()
         val webPageDocument = webPage.search(searchTerm,
-                                             wordLanguageCode,
-                                             definitionLanguageCode,
+                                             wordLanguageID,
+                                             definitionLanguageID,
                                              matchType)
 
-        val vocabularyID = insertVocabulary(webPageDocument, wordLanguageCode, webPage)
+        val vocabularyID = insertVocabulary(webPageDocument, wordLanguageID, webPage)
 
         if(vocabularyID != -1L) {
             insertDefinition(webPageDocument,
-                    definitionLanguageCode,
+                    definitionLanguageID,
                     vocabularyID,
                     webPage)
             insertRelatedVocabulary(webPageDocument,
-                                    wordLanguageCode,
+                                    wordLanguageID,
                                     vocabularyID,
                                     matchType,
                                     webPage)
@@ -155,11 +177,11 @@ class VocabularyRepository(application: Application) {
 
     @WorkerThread
     private suspend fun insertRelatedVocabulary(document : Document,
-                                                wordLanguageCode: String,
+                                                wordLanguageID: Long,
                                                 vocabularyID : Long,
                                                 matchType : MatchType,
                                                 webPage: IDictionaryWebPage){
-        val relatedWords = RelatedVocabularyFactory(document, wordLanguageCode, webPage.dictionaryID)
+        val relatedWords = RelatedVocabularyFactory(document, wordLanguageID, webPage.dictionaryID)
                 .get()
                 .distinct()
         for (relatedVocabulary in relatedWords) {
@@ -168,12 +190,12 @@ class VocabularyRepository(application: Application) {
                 relatedVocabularyID = database.vocabularyDao()
                         .getVocabularyID(relatedVocabulary.word,
                                 relatedVocabulary.pronunciation,
-                                relatedVocabulary.languageCode,
+                                relatedVocabulary.languageID,
                                 relatedVocabulary.pitch)
             }
             val vocabularyRelation = VocabularyRelation(vocabularyID,
                     relatedVocabularyID,
-                    matchType.getBitMask())
+                    matchType.getBitmask())
             database.vocabularyRelationDao().insert(vocabularyRelation)
         }
     }
@@ -184,31 +206,32 @@ class VocabularyRepository(application: Application) {
 
     @WorkerThread
     fun getDefinition(vocabularyID : Long,
-                       definitionLanguageCode: String,
+                       definitionLanguageID: Long,
                        dictionaryID: Long) : Definition? {
         return database.definitionDao()
                        .getVocabularyDefinitions(vocabularyID,
-                                                 definitionLanguageCode,
+                                                 definitionLanguageID,
                                                  dictionaryID)
     }
 
     @WorkerThread
     private suspend fun getVocabularyFromDatabase(searchTerm: String,
-                                                  wordLanguageCode: String,
-                                                  definitionLanguageCode: String,
+                                                  wordLanguageID: Long,
+                                                  definitionLanguageID: Long,
                                                   matchType: MatchType) : List<Vocabulary> {
         val templateString = getTemplateString(matchType)
         val formattedSearchTerm = templateString.format(searchTerm)
         val searchStrategy = DatabaseSearchStrategyFactory(matchType).get()
         return searchStrategy.search(database,
                                formattedSearchTerm,
-                               wordLanguageCode,
-                               definitionLanguageCode)
+                               wordLanguageID,
+                               definitionLanguageID)
     }
 
     private fun getTemplateString(matchType: MatchType) : String {
-        val matchTypeID = matchType.getMatchTypeID()
-        return database.matchTypeDao().getTemplateString(matchTypeID)
+        val matchTypeID = matchType.getBitmask()
+        return database.matchTypeDao()
+                       .getTemplateString(matchTypeID)
     }
 
     fun addVocabularyTag(tagText: String,

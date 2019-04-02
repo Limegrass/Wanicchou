@@ -1,5 +1,4 @@
 package data.room.entity
-
 import androidx.room.*
 
 @Entity(tableName = "Tag")
@@ -14,5 +13,3 @@ data class Tag (
         return tagText
     }
 }
-
-

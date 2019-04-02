@@ -1,23 +1,26 @@
 package data.room.entity
 
+import android.os.Parcelable
 import androidx.room.*
+import kotlinx.android.parcel.Parcelize
 import java.util.*
 
+@Parcelize
 @Entity(tableName = "Vocabulary",
         indices = [Index(
                 value = arrayOf("Word",
                                 "Pronunciation",
-                                "LanguageCode",
+                                "LanguageID",
                                 "Pitch"),
                 unique = true)]
 )
 
 data class Vocabulary (
     @ColumnInfo(name = "Word")
-    var word: String = "",
+    var word: String,
 
-    @ColumnInfo(name = "LanguageCode")
-    var languageCode: String = "",
+    @ColumnInfo(name = "LanguageID")
+    var languageID: Long,
 
     @ColumnInfo(name = "Pronunciation")
     var pronunciation: String = "",
@@ -27,7 +30,7 @@ data class Vocabulary (
 
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "VocabularyID")
-    var vocabularyID: Long = 0 ) {
+    var vocabularyID: Long = 0 ) : Parcelable {
     override fun toString(): String {
         return word
     }
@@ -38,7 +41,7 @@ data class Vocabulary (
         }
         return this.word == other.word
                 && this.pronunciation == other.pronunciation
-                && this.languageCode == other.languageCode
+                && this.languageID == other.languageID
                 && this.pitch == other.pitch
     }
 
@@ -46,7 +49,7 @@ data class Vocabulary (
         var hash = 17
         hash = hash * 31 + word.hashCode()
         hash = hash * 31 + pronunciation.hashCode()
-        hash = hash * 31 + languageCode.hashCode()
+        hash = hash * 31 + languageID.hashCode()
         hash = hash * 31 + pitch.hashCode()
         return hash
     }

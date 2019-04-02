@@ -16,7 +16,6 @@ class RelatedVocabularyAdapter(list : List<Vocabulary>, private val onClickListe
         private val TAG = RelatedVocabularyAdapter::class.java.simpleName
     }
 
-
     private lateinit var recyclerView: RecyclerView
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {

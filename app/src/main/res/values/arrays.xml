@@ -21,16 +21,6 @@
         <item>Word or Definition Contains</item>
     </string-array>
 
-    <!--<string-array-->
-        <!--name="pref_match_type_entries">-->
-        <!--<item>Word Equals</item>-->
-        <!--<item>Word Starts with</item>-->
-        <!--<item>Word Ends with</item>-->
-        <!--<item>Word Contains</item>-->
-        <!--<item>Word using Wildcards</item>-->
-        <!--<item>Definition Contains</item>-->
-        <!--<item>Word or Definition Contains</item>-->
-    <!--</string-array>-->
     <string-array
         name="pref_match_type_values">
         <item>WORD_STARTS_WITH</item>
@@ -41,16 +31,6 @@
         <item>DEFINITION_CONTAINS</item>
         <item>WORD_OR_DEFINITION_CONTAINS</item>
     </string-array>
-    <!--<string-array-->
-        <!--name="pref_match_type_values">-->
-        <!--<item>0</item>-->
-        <!--<item>1</item>-->
-        <!--<item>2</item>-->
-        <!--<item>3</item>-->
-        <!--<item>4</item>-->
-        <!--<item>8</item>-->
-        <!--<item>11</item>-->
-    <!--</string-array>-->
 
     <string-array
         name="pref_auto_delete_entries">
@@ -63,6 +43,28 @@
         <item>NEVER</item>
         <item>ON_ANKI_IMPORT</item>
         <item>ON_SEARCH</item>
+    </string-array>
+
+    <string-array
+        name="pref_input_language_entries">
+        <item>Japanese</item>
+        <item>English</item>
+    </string-array>
+    <string-array
+        name="pref_input_language_values">
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+
+    <string-array
+        name="pref_definition_language_entries">
+        <item>Japanese</item>
+        <item>English</item>
+    </string-array>
+    <string-array
+        name="pref_definition_language_values">
+        <item>1</item>
+        <item>2</item>
     </string-array>
 
 </resources>

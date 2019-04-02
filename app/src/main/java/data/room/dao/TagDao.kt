@@ -34,7 +34,7 @@ interface TagDao : BaseDao<Tag> {
         WHERE vt.VocabularyID = :vocabularyID""")
     fun getTagsForVocabularyID(vocabularyID: Long) : List<Tag>
 
-    @Query(value = """
+    @Query("""
         SELECT t.*
         FROM Tag t
         WHERE t.TagID IN (:tagIDs)""")

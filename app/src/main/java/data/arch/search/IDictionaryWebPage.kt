@@ -7,8 +7,8 @@ import org.jsoup.nodes.Document
 
 interface IDictionaryWebPage {
     suspend fun search(searchTerm: String,
-                       wordLanguageCode: String,
-                       definitionLanguageCode: String,
+                       wordLanguageID: Long,
+                       definitionLanguageID: Long,
                        matchType: MatchType) : Document
 
     fun getSupportedMatchTypes(): Set<MatchType>

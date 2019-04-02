@@ -26,11 +26,11 @@ interface DefinitionDao : BaseDao<Definition> {
         SELECT d.*
         FROM Definition d
         WHERE d.VocabularyID = :vocabularyID
-            AND d.LanguageCode = :definitionLanguageCode
+            AND d.LanguageID = :definitionLanguageID
             AND d.DictionaryID = :dictionaryID
     """)
     fun getVocabularyDefinitions(vocabularyID: Long,
-                                 definitionLanguageCode: String,
+                                 definitionLanguageID: Long,
                                  dictionaryID : Long): Definition?
 
     @Query("""
