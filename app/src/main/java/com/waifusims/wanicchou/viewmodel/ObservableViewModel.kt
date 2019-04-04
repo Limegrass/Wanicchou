@@ -1,12 +1,10 @@
 package com.waifusims.wanicchou.viewmodel
 
 import android.app.Application
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
+import androidx.lifecycle.*
 
 abstract class ObservableViewModel<T>(application: Application) : AndroidViewModel(application){
+    //TODO: MediatorLiveData with source setting.
     private val liveData : MutableLiveData<T> = MutableLiveData()
 
     var value : T?

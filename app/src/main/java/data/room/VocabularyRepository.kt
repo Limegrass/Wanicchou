@@ -27,6 +27,31 @@ class VocabularyRepository(application: Application) {
         VocabularyRepository(it)
     })
 
+    fun updateDefinitionNote(note :DefinitionNote){
+        GlobalScope.launch(Dispatchers.IO){
+            database.definitionNoteDao().update(note)
+        }
+    }
+    fun deleteDefinitionNote(note : DefinitionNote){
+        GlobalScope.launch(Dispatchers.IO){
+            database.definitionNoteDao().delete(note)
+        }
+    }
+    suspend fun updateVocabularyNote(note :VocabularyNote){
+        database.vocabularyNoteDao().update(note)
+    }
+    suspend fun deleteVocabularyNote(note : VocabularyNote){
+        database.vocabularyNoteDao().delete(note)
+    }
+
+    suspend fun updateTag(tag : Tag){
+        database.tagDao().update(tag)
+    }
+
+    suspend fun deleteVocabularyTag(vocabularyID: Long, tagID : Long) {
+        database.vocabularyTagDao().deleteVocabularyTag(vocabularyID, tagID)
+    }
+
     val languages : List<data.room.entity.Language> by lazy {
         runBlocking (Dispatchers.IO){
             database.languageDao().getAllLanguages()
@@ -234,7 +259,7 @@ class VocabularyRepository(application: Application) {
                        .getTemplateString(matchTypeID)
     }
 
-    fun addVocabularyTag(tagText: String,
+    suspend fun addVocabularyTag(tagText: String,
                vocabularyID: Long){
         var tagID = database.tagDao().getExistingTagID(tagText)
         if(tagID == null){
@@ -244,21 +269,16 @@ class VocabularyRepository(application: Application) {
             }
         }
         val vocabularyTag = VocabularyTag(tagID!!, vocabularyID)
-        GlobalScope.launch (Dispatchers.IO) {
-
-            database.vocabularyTagDao().insert(vocabularyTag)
-        }
+        database.vocabularyTagDao().insert(vocabularyTag)
     }
 
     fun getTags(vocabularyID: Long) : List<Tag> {
         return database.tagDao().getTagsForVocabularyID(vocabularyID)
     }
 
-    fun addVocabularyNote(noteText : String, vocabularyID: Long){
-        GlobalScope.launch (Dispatchers.IO) {
-            val note = VocabularyNote(noteText, vocabularyID)
-            database.vocabularyNoteDao().insert(note)
-        }
+    suspend fun addVocabularyNote(noteText : String, vocabularyID: Long){
+        val note = VocabularyNote(noteText, vocabularyID)
+        database.vocabularyNoteDao().insert(note)
     }
 
     fun getVocabularyNotes(vocabularyID: Long) : List<VocabularyNote>{
@@ -267,11 +287,9 @@ class VocabularyRepository(application: Application) {
 
     }
 
-    fun addDefinitionNote(noteText : String, vocabularyID: Long){
-        GlobalScope.launch (Dispatchers.IO) {
-            val note = DefinitionNote(noteText, vocabularyID)
-            database.definitionNoteDao().insert(note)
-        }
+    suspend fun addDefinitionNote(noteText : String, vocabularyID: Long){
+        val note = DefinitionNote(noteText, vocabularyID)
+        database.definitionNoteDao().insert(note)
     }
 
     fun getDefinitionNotes(vocabularyID: Long) : List<DefinitionNote>{

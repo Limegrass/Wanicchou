@@ -66,7 +66,7 @@ class RelatedFragment : Fragment() {
     private fun setRelatedObserver(view : View){
         val context = context!!
         val activity = activity!!
-        val lifecycleOwner : LifecycleOwner = context as LifecycleOwner
+        val lifecycleOwner : LifecycleOwner = this
         relatedVocabularyViewModel.setObserver(lifecycleOwner){
             val recyclerView = view.findViewById<RecyclerView>(R.id.rv_related)
             Log.v(TAG, "LiveData emitted.")

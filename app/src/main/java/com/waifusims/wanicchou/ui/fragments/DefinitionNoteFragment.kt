@@ -3,9 +3,11 @@ package com.waifusims.wanicchou.ui.fragments
 import android.os.Bundle
 import android.util.Log
 import android.view.Gravity
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.AppCompatImageButton
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.RecyclerView
@@ -19,63 +21,112 @@ import com.waifusims.wanicchou.viewmodel.DefinitionNoteViewModel
 import com.waifusims.wanicchou.viewmodel.DefinitionViewModel
 import com.waifusims.wanicchou.viewmodel.VocabularyViewModel
 import data.room.VocabularyRepository
-import data.room.entity.DefinitionNote
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
 class DefinitionNoteFragment : TextBlockFragment("Definition Note") {
     companion object {
         private val TAG : String = DefinitionNoteFragment::class.java.simpleName
     }
+    private lateinit var parentFragmentActivity : FragmentActivity
+
+    //TODO: Refactor to lateinit
+    private val repository : VocabularyRepository by lazy {
+        VocabularyRepository(parentFragmentActivity.application)
+    }
 
     private val vocabularyViewModel : VocabularyViewModel by lazy {
-        ViewModelProviders.of(activity!!)
+        ViewModelProviders.of(parentFragmentActivity)
                 .get(VocabularyViewModel::class.java)
     }
 
-    private val repository : VocabularyRepository by lazy {
-        VocabularyRepository(activity!!.application)
-    }
-
     private val definitionViewModel : DefinitionViewModel by lazy {
-        ViewModelProviders.of(activity!!)
+        ViewModelProviders.of(parentFragmentActivity)
                 .get(DefinitionViewModel::class.java)
     }
 
     private val notesViewModel : DefinitionNoteViewModel by lazy {
         //TODO: Make sure this assert isn't problematic
-        ViewModelProviders.of(activity!!)
+        ViewModelProviders.of(parentFragmentActivity)
                 .get(DefinitionNoteViewModel::class.java)
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        val view = super.onCreateView(inflater, container, savedInstanceState)!!
+        parentFragmentActivity = activity!!
         setRelatedObserver(view)
         setAddTagButtonOnClick(view)
-        super.onViewCreated(view, savedInstanceState)
+        GlobalScope.launch(Dispatchers.IO){
+            refreshNotesViewModel()
+        }
+        return view
+    }
+
+    private fun refreshNotesViewModel(){
+        val dbNotes = repository.getDefinitionNotes(vocabularyViewModel.vocabulary.vocabularyID)
+        parentFragmentActivity.runOnUiThread {
+            notesViewModel.value = dbNotes
+        }
     }
 
     private fun setRelatedObserver(view : View){
-        val lifecycleOwner : LifecycleOwner = activity as LifecycleOwner
-        val activity = activity!!
+        val context = context!!
+        val lifecycleOwner : LifecycleOwner = this
+        val recyclerView = view.findViewById<RecyclerView>(R.id.rv_text_block_contents)
+        val layoutManager = FlexboxLayoutManager(context)
+        layoutManager.flexDirection = FlexDirection.ROW
+        layoutManager.justifyContent = JustifyContent.SPACE_AROUND
+        recyclerView.layoutManager = layoutManager
+
+        val onClickListener = View.OnClickListener { v ->
+            Log.v(TAG, "OnClick")
+            val position = recyclerView.getChildLayoutPosition(v!!)
+            val note = notesViewModel.value!![position]
+            val title = "Edit note"
+
+            val dialogBuilder = InputAlertDialogBuilder(context,
+                    view as ViewGroup,
+                    title,
+                    "" )
+
+            dialogBuilder.input.setText(note.noteText)
+            dialogBuilder.setPositiveButton("Save"){ dialog, _ ->
+                note.noteText = dialogBuilder.input.text.toString()
+                GlobalScope.launch(Dispatchers.IO){
+                    repository.updateDefinitionNote(note)
+                    //Not taking advantage of RecyclerView animations, but it simplifies the code.
+                    refreshNotesViewModel()
+                }
+                dialog.dismiss()
+            }
+
+            dialogBuilder.setNeutralButton("Delete"){ dialog, _ ->
+                GlobalScope.launch(Dispatchers.IO) {
+                    repository.deleteDefinitionNote(note)
+                    refreshNotesViewModel()
+                }
+                dialog.dismiss()
+            }
+
+            dialogBuilder.input.setSingleLine(false)
+            dialogBuilder.input.setLines(1)
+            dialogBuilder.input.maxLines = 5
+            dialogBuilder.input.gravity = (Gravity.START.or(Gravity.TOP))
+            dialogBuilder.input.setHorizontallyScrolling(false)
+            dialogBuilder.show()
+        }
 
         vocabularyViewModel.setObserver(lifecycleOwner){
-            runBlocking (Dispatchers.IO){
-                val dbNotes = repository.getDefinitionNotes(vocabularyViewModel.vocabulary.vocabularyID)
-                activity.runOnUiThread {
-                    notesViewModel.value = dbNotes
-                }
+            GlobalScope.launch(Dispatchers.IO){
+                refreshNotesViewModel()
             }
-            val recyclerView = view.findViewById<RecyclerView>(R.id.rv_text_block_contents)
-            Log.v(TAG, "LiveData emitted.")
+        }
+
+        notesViewModel.setObserver(lifecycleOwner){
             val notes = notesViewModel.value!!.map{ it.noteText }
-                Log.v(TAG, "Result size: [${notes.size}].")
-                val layoutManager = FlexboxLayoutManager(context)
-                layoutManager.flexDirection = FlexDirection.ROW
-                layoutManager.justifyContent = JustifyContent.SPACE_AROUND
-                recyclerView.layoutManager = layoutManager
-                recyclerView.adapter = TextBlockRecyclerViewAdapter(notes)
+            Log.v(TAG, "Result size: [${notes.size}].")
+            recyclerView.adapter = TextBlockRecyclerViewAdapter(notes, onClickListener)
         }
     }
 
@@ -86,29 +137,21 @@ class DefinitionNoteFragment : TextBlockFragment("Definition Note") {
     // Keep Vocabulary and Definition as they are since they won't change without a search anyways?
 
     private fun setAddTagButtonOnClick(view : View) {
+        val context = context!!
         view.findViewById<AppCompatImageButton>(R.id.iv_btn_add).setOnClickListener {
-            val context = context!!
             val title = "Add Definition Note"
             val message = null
             val dialogBuilder = InputAlertDialogBuilder(context,
                     view as ViewGroup,
                     title,
                     message)
-
-            val recyclerViewAdapter = view.findViewById<RecyclerView>(R.id.rv_text_block_contents)
-                                          .adapter!! as TextBlockRecyclerViewAdapter
             dialogBuilder.setPositiveButton("Add") { dialog, _ ->
                 val tagText = dialogBuilder.input.text
-                val definitionID = definitionViewModel.definition.definitionID
+                val vocabularyID = vocabularyViewModel.vocabulary.vocabularyID
                 GlobalScope.launch (Dispatchers.IO){
-                    repository.addDefinitionNote(tagText.toString(), definitionID)
+                    repository.addDefinitionNote(tagText.toString(), vocabularyID)
+                    refreshNotesViewModel()
                 }
-                val tag = DefinitionNote(tagText.toString(), definitionID)
-                val tags = notesViewModel.value!!.toMutableList()
-                tags.add(tag)
-                notesViewModel.value = tags
-                recyclerViewAdapter.list.add(tagText.toString())
-                recyclerViewAdapter.notifyItemInserted(tags.size)
                 dialog.dismiss()
             }
             dialogBuilder.input.setSingleLine(false)

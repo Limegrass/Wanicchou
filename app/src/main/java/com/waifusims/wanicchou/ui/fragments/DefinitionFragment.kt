@@ -52,7 +52,7 @@ class DefinitionFragment : Fragment() {
 
 
     private fun setDefinitionObserver(view: View, activity: Activity){
-        val lifecycleOwner : LifecycleOwner = context as LifecycleOwner
+        val lifecycleOwner : LifecycleOwner = this
         definitionViewModel.setObserver(lifecycleOwner){
             val recyclerView = view.findViewById<RecyclerView>(R.id.rv_definitions)
             Log.v(TAG, "LiveData emitted.")

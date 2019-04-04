@@ -10,6 +10,7 @@ import com.waifusims.wanicchou.R
 import data.room.entity.Vocabulary
 
 
+//TODO: Make this implementation less BAD
 class RelatedVocabularyAdapter(list : List<Vocabulary>, private val onClickListener : View.OnClickListener) :
         ListViewAdapter<Vocabulary, RelatedVocabularyAdapter.ViewHolder>(list.toMutableList(), ::ViewHolder, R.layout.rv_item_text_span){
     companion object {

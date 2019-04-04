@@ -4,7 +4,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 
-abstract class ListViewAdapter<T, VH : ListViewAdapter.ViewHolder<T>>(val list : MutableList<T>,
+abstract class ListViewAdapter<T, VH : ListViewAdapter.ViewHolder<T>>(private val list : MutableList<T>,
                                                              private val viewHolderConstructor: (View) -> VH,
                                                              private val layoutID : Int)
     : androidx.recyclerview.widget.RecyclerView.Adapter<VH>(){
