@@ -11,5 +11,5 @@ interface TranslationDao : BaseDao<Translation> {
         FROM Translation t
         WHERE t.DictionaryID = :dictionaryID
     """)
-    fun getDictionaryTranslations(dictionaryID: Long) : List<Translation>
+    suspend fun getDictionaryTranslations(dictionaryID: Long) : List<Translation>
 }

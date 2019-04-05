@@ -31,9 +31,9 @@ class WanicchouSharedPreferenceHelper(private val context: Context) {
         }
 
     var wordLanguageID: Long
-        get() = getString(R.string.pref_word_language_key, R.string.pref_word_language_default).toLong()
+        get() = getString(R.string.pref_vocabulary_language_key, R.string.pref_word_language_default).toLong()
         set(value) {
-            putString(R.string.pref_word_language_key, value.toString())
+            putString(R.string.pref_vocabulary_language_key, value.toString())
         }
 
     var definitionLanguageID: Long

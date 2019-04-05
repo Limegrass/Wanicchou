@@ -2,7 +2,7 @@
 <resources>
     <!--shared preferences keys-->
     <string name="pref_dictionary_key" translatable="false">PREF_DICTIONARY</string>
-    <string name="pref_word_language_key" translatable="false">PREF_WORD_LANGUAGE</string>
+    <string name="pref_vocabulary_language_key" translatable="false">PREF_WORD_LANGUAGE</string>
     <string name="pref_definition_language_key" translatable="false">PREF_DEFINITION_LANGUAGE</string>
     <string name="pref_match_type_key" translatable="false">PREF_MATCH_TYPE</string>
     <string name="pref_auto_save_key" translatable="false">PREF_AUTO_SAVE</string>

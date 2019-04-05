@@ -5,11 +5,11 @@ import androidx.room.*
 
 @Entity(tableName = "Translation")
 data class Translation (
-        @ColumnInfo(name = "SourceLanguageID")
-        var sourceLanguageID: Long,
+        @ColumnInfo(name = "VocabularyLanguageID")
+        var vocabularyLanguageID: Long,
 
-        @ColumnInfo(name = "TargetLanguageID")
-        var targetLanguageID: Long,
+        @ColumnInfo(name = "DefinitionLanguageID")
+        var definitionLanguageID: Long,
 
         @ColumnInfo(name = "DictionaryID")
         var dictionaryID: Long,

@@ -83,6 +83,10 @@ class VocabularyRepository(application: Application) {
         }
     }
 
+    suspend fun getDictionaryAvailableTranslations(dictionaryID: Long): List<Translation>{
+        return database.translationDao().getDictionaryTranslations(dictionaryID)
+    }
+
 
     fun removeVocabulary(vocabulary: Vocabulary) {
         GlobalScope.launch(Dispatchers.IO) {
