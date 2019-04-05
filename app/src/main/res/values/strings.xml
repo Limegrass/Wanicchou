@@ -69,4 +69,30 @@
     <string name="lbl_word_default_text" translatable="false">わにっちょう</string>
     <string name="lbl_kanji_default_text" translatable="false">和日帳</string>
 
+    <!-- shared -->
+    <string name="edit_note_title" translatable="true">Edit note</string>
+    <string name="save_button_text" translatable="true">Save</string>
+    <string name="delete_button_text" translatable="true">Delete</string>
+    <string name="add_button_text" translatable="true">Add</string>
+
+    <!-- definition note fragment -->
+    <string name="definition_note_title" translatable="true">Definition Note</string>
+    <string name="add_definition_note_title" translatable="true">Add Definition Note</string>
+
+    <!-- settings fragment -->
+    <string name="dictionary_title" translatable="true">Dictionary</string>
+    <string name="match_type_title" translatable="true">Match Type</string>
+    <string name="auto_delete_title" translatable="true">Auto Delete</string>
+    <string name="vocab_language_title" translatable="true">Vocabulary Language</string>
+    <string name="definition_language_title" translatable="true">Definition Language</string>
+
+    <!-- tag fragment -->
+    <string name="tags_title" translatable="true">Tags</string>
+    <string name="edit_tag_title" translatable="true">Edit tag</string>
+    <string name="add_tag_title" translatable="true">Add Tag</string>
+
+    <!-- vocabulary note fragment -->
+    <string name="vocab_notes_title" translatable="true">Vocabulary Notes</string>
+    <string name="add_vocab_note_title" translatable="true">Add Vocabulary Note</string>
+
 </resources>

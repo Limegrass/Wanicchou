@@ -82,14 +82,14 @@ class TagFragment : TextBlockFragment("Tags") {
             Log.v(TAG, "OnClick")
             val position = recyclerView.getChildLayoutPosition(v!!)
             val tag = tagViewModel.value!![position]
-            val title = "Edit tag"
+            val title = getString(R.string.edit_tag_title)
             val dialogBuilder = InputAlertDialogBuilder(context,
                     view as ViewGroup,
                     title,
                     "" )
 
             dialogBuilder.input.setText(tag.tagText)
-            dialogBuilder.setPositiveButton("Save"){ dialog, _ ->
+            dialogBuilder.setPositiveButton(getString(R.string.save_button_text)){ dialog, _ ->
                 tag.tagText = dialogBuilder.input.text.toString()
                 GlobalScope.launch(Dispatchers.IO){
                     repository.updateTag(tag)
@@ -98,7 +98,7 @@ class TagFragment : TextBlockFragment("Tags") {
                 dialog.dismiss()
             }
 
-            dialogBuilder.setNeutralButton("Delete"){ dialog, _ ->
+            dialogBuilder.setNeutralButton(getString(R.string.delete_button_text)){ dialog, _ ->
                 val vocabularyID = vocabularyViewModel.vocabulary.vocabularyID
                 val tagID = tagViewModel.value!![position].tagID
                 GlobalScope.launch(Dispatchers.IO){
@@ -132,14 +132,14 @@ class TagFragment : TextBlockFragment("Tags") {
     private fun setAddTagButtonOnClick(view : View) {
         val context = context!!
         view.findViewById<AppCompatImageButton>(R.id.iv_btn_add).setOnClickListener {
-            val title = "Add Tag"
+            val title = getString(R.string.add_tag_title)
             val message = null
             val dialogBuilder = InputAlertDialogBuilder(context,
                                                         view as ViewGroup,
                                                         title,
                                                         message)
 
-            dialogBuilder.setPositiveButton("Add") { dialog, _ ->
+            dialogBuilder.setPositiveButton(getString(R.string.add_button_text)) { dialog, _ ->
                 val tagText = dialogBuilder.input.text
                 val vocabularyID = vocabularyViewModel.vocabulary.vocabularyID
                 GlobalScope.launch (Dispatchers.IO){
