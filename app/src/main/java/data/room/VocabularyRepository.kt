@@ -64,6 +64,10 @@ class VocabularyRepository(application: Application) {
         }
     }
 
+    suspend fun getDictionaryMatchTypes(dictionaryID : Long) : List<data.room.entity.MatchType>{
+        return database.matchTypeDao().getDictionaryMatchTypes(dictionaryID)
+    }
+
     @WorkerThread
     fun getLatest() : List<Vocabulary> {
         return database.vocabularyDao().getLatest()
@@ -147,7 +151,8 @@ class VocabularyRepository(application: Application) {
     suspend fun vocabularySearch(searchTerm: String,
                                  wordLanguageID: Long,
                                  definitionLanguageID: Long,
-                                 matchType : MatchType,
+                                 dictionaryMatchType : MatchType,
+                                 databaseMatchType : MatchType,
                                  dictionaryID: Long) : List<Vocabulary>{
         val split = searchTerm.split(" ")
         val databaseResults : List<Vocabulary>
@@ -162,8 +167,7 @@ class VocabularyRepository(application: Application) {
             getVocabularyFromDatabase(searchTerm,
                     wordLanguageID,
                     definitionLanguageID,
-                    matchType)
-
+                    databaseMatchType)
         }
         if (databaseResults.isNotEmpty()){
             return databaseResults
@@ -172,7 +176,7 @@ class VocabularyRepository(application: Application) {
         return getVocabularyFromOnline(searchTerm,
                 wordLanguageID,
                 definitionLanguageID,
-                matchType,
+                dictionaryMatchType,
                 dictionaryID)
     }
 

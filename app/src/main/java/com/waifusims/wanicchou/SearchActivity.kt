@@ -164,7 +164,8 @@ class SearchActivity
             val vocabularyList = repository.vocabularySearch(searchTerm,
                     sharedPreferences.wordLanguageID,
                     sharedPreferences.definitionLanguageID,
-                    sharedPreferences.matchType,
+                    sharedPreferences.dictionaryMatchType,
+                    sharedPreferences.databaseMatchType,
                     sharedPreferences.dictionary)
             if (vocabularyList.isNotEmpty()) {
                 runOnUiThread {

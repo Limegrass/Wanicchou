@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProviders
 import com.waifusims.wanicchou.R
+import com.waifusims.wanicchou.util.WanicchouSharedPreferenceHelper
 import com.waifusims.wanicchou.viewmodel.VocabularyViewModel
 import data.room.VocabularyRepository
 import kotlinx.coroutines.Dispatchers
@@ -23,6 +24,10 @@ class WordFragment : Fragment() {
 
     private val repository : VocabularyRepository by lazy {
         VocabularyRepository(activity!!.application)
+    }
+
+    private val sharedPreferenceHelper : WanicchouSharedPreferenceHelper by lazy {
+        WanicchouSharedPreferenceHelper(context!!)
     }
 
     private val vocabularyViewModel : VocabularyViewModel by lazy {

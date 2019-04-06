@@ -10,14 +10,24 @@ class WanicchouSharedPreferenceHelper(private val context: Context) {
 
     private val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
 
-    var matchType: MatchType
+    var databaseMatchType: MatchType
         get() {
-            val pref = getString(R.string.pref_match_type_key,
+            val pref = getString(R.string.pref_database_match_type_key,
                     R.string.pref_match_type_default)
             return MatchType.valueOf(pref)
         }
         set(value) {
-            putString(R.string.pref_match_type_key, value.toString())
+            putString(R.string.pref_database_match_type_key, value.toString())
+        }
+
+    var dictionaryMatchType: MatchType
+        get() {
+            val pref = getString(R.string.pref_dictionary_match_type_key,
+                    R.string.pref_match_type_default)
+            return MatchType.valueOf(pref)
+        }
+        set(value) {
+            putString(R.string.pref_dictionary_match_type_key, value.toString())
         }
 
     var dictionary: Long

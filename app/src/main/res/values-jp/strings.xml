@@ -12,7 +12,7 @@
     <string name="word_label" translatable="true">単語</string>
     <string name="word_hint" translatable="true">何か調べてみて</string>
 
-    <string name="definition_label" translatable="true">意味</string>
+    <string name="definition_label" translatable="true">定義</string>
     <string name="definition_hint" translatable="true">単語が見つけませんでした。。。</string>
 
     <string name="word_searching" translatable="true">検索中。。。</string>
@@ -71,6 +71,25 @@
     <string name="lbl_definition_header_text">Definition</string>
     <string name="lbl_related_button_text">Related</string>
     <string name="lbl_word_button_text">単語</string>
+    <string name="pref_word_language_title" translatable="false">単語言語</string>
+    <string name="pref_definition_language_title">定義言語</string>
+    <string name="add_vocab_note_title">単語のメモ追加</string>
+    <string name="vocab_notes_title">単語のメモ</string>
+    <string name="add_tag_title">タグ追加</string>
+    <string name="edit_tag_title">"エディット "</string>
+    <string name="tags_title">タグ</string>
+    <string name="save_button_text">セーブ</string>
+    <string name="auto_delete_title">オートデリート</string>
+    <string name="dictionary_title">辞書・辞典</string>
+    <string name="add_definition_note_title">定義のメモ追加</string>
+    <string name="definition_note_title">定義のメモ</string>
+    <string name="add_button_text">追加</string>
+    <string name="delete_button_text">削除</string>
+    <string name="edit_note_title">エディット</string>
+    <string name="vocab_language_title">単語言語</string>
+    <string name="definition_language_title">定義言語</string>
+    <string name="database_match_type_title">データベースマッチタイプ</string>
+    <string name="dictionary_match_type_title">辞書マッチタイプ</string>
     <!--<string name="pref_match_type_key" translatable="false">listPrefSearchDir</string>-->
     <!--<string name="pref_match_type_default" translatable="false">1</string>-->
 </resources>

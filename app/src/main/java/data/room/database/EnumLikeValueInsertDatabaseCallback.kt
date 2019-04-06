@@ -69,6 +69,8 @@ class EnumLikeValueInsertDatabaseCallback(private val context : Context) : RoomD
     }
     private suspend fun insertDictionaries(database: WanicchouDatabase){
         val sanseido = Dictionary(SanseidoWebPage.DICTIONARY_NAME,
+                                  JapaneseVocabulary.LANGUAGE_ID,
+                                  JapaneseVocabulary.LANGUAGE_ID,
                                   SanseidoWebPage.DICTIONARY_ID)
         database.dictionaryDao().insert(sanseido)
     }

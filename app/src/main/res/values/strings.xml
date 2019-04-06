@@ -50,8 +50,8 @@
 
     <string name="pref_auto_delete_title" translatable="true">Auto-Deletion</string>
     <string name="pref_auto_save_title" translatable="true">Auto-Save</string>
-    <string name="pref_word_language_title" translatable="false">Vocabulary Language</string>
-    <string name="pref_definition_language_title" translatable="false">Definition Language</string>
+    <string name="pref_word_language_title">Vocabulary Language</string>
+    <string name="pref_definition_language_title">Definition Language</string>
 
     <string name="pref_dictionary_title" translatable="true">Dictionary</string>
 
@@ -81,13 +81,14 @@
 
     <!-- settings fragment -->
     <string name="dictionary_title" translatable="true">Dictionary</string>
-    <string name="match_type_title" translatable="true">Match Type</string>
+    <string name="dictionary_match_type_title" translatable="true">Dictionary Match Type</string>
+    <string name="database_match_type_title" translatable="true">Database Match Type</string>
     <string name="auto_delete_title" translatable="true">Auto Delete</string>
     <string name="vocab_language_title" translatable="true">Vocabulary Language</string>
     <string name="definition_language_title" translatable="true">Definition Language</string>
 
     <!-- tag fragment -->
-    <string name="tags_title" translatable="true">Tags</string>
+    <string name="tags_title">Tags</string>
     <string name="edit_tag_title" translatable="true">Edit tag</string>
     <string name="add_tag_title" translatable="true">Add Tag</string>
 

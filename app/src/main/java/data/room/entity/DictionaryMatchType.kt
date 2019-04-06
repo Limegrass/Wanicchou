@@ -19,11 +19,11 @@ import androidx.room.*
 )
 data class DictionaryMatchType (
         @ColumnInfo(name = "DictionaryID", index = true)
-    var dictionaryID: Long,
+        var dictionaryID: Long,
 
         @ColumnInfo(name = "MatchTypeBitmask", index = true)
-    var matchTypeBitmask: Long,
+        var matchTypeBitmask: Long,
 
         @PrimaryKey(autoGenerate = true)
-    @ColumnInfo(name = "DictionaryMatchTypeID", index = true)
-    var dictionaryMatchTypeID: Long = 0)
+        @ColumnInfo(name = "DictionaryMatchTypeID", index = true)
+        var dictionaryMatchTypeID: Long = 0)

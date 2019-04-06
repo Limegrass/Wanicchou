@@ -25,7 +25,7 @@ import kotlinx.coroutines.launch
 
 // Builder or Factory for the fragment
 // TODO: onCreate is very repeated between tags, notes. Maybe abstract and inherit
-class TagFragment : TextBlockFragment("Tags") {
+class TagFragment : TextBlockFragment() {
     companion object {
         private val TAG : String = TagFragment::class.java.simpleName
     }
@@ -50,6 +50,7 @@ class TagFragment : TextBlockFragment("Tags") {
     override fun onCreateView(inflater: LayoutInflater,
                               container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
+        title = "Tags"
         val view = super.onCreateView(inflater, container, savedInstanceState)!!
         parentFragmentActivity = activity!!
         setObserver(view)

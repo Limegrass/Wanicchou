@@ -10,15 +10,12 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import com.waifusims.wanicchou.R
 import com.waifusims.wanicchou.util.WanicchouSharedPreferenceHelper
-import data.arch.lang.JapaneseVocabulary
 import data.enums.AutoDelete
 import data.enums.MatchType
 import data.room.VocabularyRepository
 import data.room.entity.Translation
 import data.web.sanseido.SanseidoWebPage
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 class SettingsFragment : PreferenceFragmentCompat(),
@@ -36,10 +33,33 @@ class SettingsFragment : PreferenceFragmentCompat(),
         preference.key = fragmentContext.getString(R.string.pref_dictionary_key)
         preference.title = getString(R.string.dictionary_title)
         preference.summary = preference.entry
-        preference.setDefaultValue(SanseidoWebPage.DICTIONARY_ID)
+        preference.setDefaultValue(SanseidoWebPage.DICTIONARY_ID.toString())
         preference
     }
-    private val matchTypePreference: ListPreference by lazy {
+
+    private val dictionaryMatchTypePreference : ListPreference by lazy {
+        val preference = ListPreference(fragmentContext)
+        val dictionaryID = dictionaryPreference.value.toLong()
+        val matchTypes = runBlocking (Dispatchers.IO){
+            repository.getDictionaryMatchTypes(dictionaryID)
+        }
+        preference.entries = matchTypes.map{
+            //TODO Get translated values
+            it.matchTypeName
+        }.toTypedArray()
+        preference.entryValues = matchTypes.map {
+            it.matchTypeName
+        }.toTypedArray()
+        preference.key = fragmentContext.getString(R.string.pref_dictionary_match_type_key)
+        preference.title = "Dictionary Match Type"
+        preference.summary = preference.entry
+        //All dictionaries probably supports some form of equals.
+        preference.setDefaultValue(MatchType.WORD_EQUALS.name)
+        preference
+    }
+
+
+    private val databaseMatchTypePreference: ListPreference by lazy {
         val preference = ListPreference(fragmentContext)
         val matchTypes = repository.matchTypes
         preference.entries = matchTypes.map{
@@ -48,8 +68,8 @@ class SettingsFragment : PreferenceFragmentCompat(),
         preference.entryValues = matchTypes.map {
             it.matchTypeName
         }.toTypedArray()
-        preference.key = fragmentContext.getString(R.string.pref_match_type_key)
-        preference.title = getString(R.string.match_type_title)
+        preference.key = fragmentContext.getString(R.string.pref_database_match_type_key)
+        preference.title = getString(R.string.database_match_type_title)
         preference.summary = preference.entry
         preference.setDefaultValue(MatchType.WORD_EQUALS.name)
         preference
@@ -77,21 +97,36 @@ class SettingsFragment : PreferenceFragmentCompat(),
         val preference = ListPreference(fragmentContext)
         setVocabularyLanguageOptions(preference)
         preference.key = fragmentContext.getString(R.string.pref_vocabulary_language_key)
-        preference.title = getString(R.string.vocab_language_title)
+        preference.title = "Vocabulary Language"
         preference.summary = preference.entry
-        preference.setDefaultValue(JapaneseVocabulary.LANGUAGE_ID.toString())
+        setVocabularyLanguagePreferenceDefault(preference)
         preference
+    }
+
+    private fun setVocabularyLanguagePreferenceDefault(vocabularyLanguagePreference: ListPreference){
+        val dictionary = repository.dictionaries.single{
+            it.dictionaryID == dictionaryPreference.value.toLong()
+        }
+        vocabularyLanguagePreference.value = dictionary.defaultVocabularyLanguageID.toString()
     }
 
     private val definitionLanguagePreference : ListPreference by lazy {
         val preference = ListPreference(fragmentContext)
         setDefinitionLanguagePreference(preference)
         preference.key = fragmentContext.getString(R.string.pref_definition_language_key)
-        preference.title = getString(R.string.definition_language_title)
+        preference.title = "Definition Language"
         preference.summary = preference.entry
-        preference.setDefaultValue(JapaneseVocabulary.LANGUAGE_ID.toString())
+        setDefinitionLanguagePreferenceDefault(preference)
         preference
     }
+
+    private fun setDefinitionLanguagePreferenceDefault(vocabularyLanguagePreference: ListPreference){
+        val dictionary = repository.dictionaries.single{
+            it.dictionaryID == dictionaryPreference.value.toLong()
+        }
+        vocabularyLanguagePreference.value = dictionary.defaultVocabularyLanguageID.toString()
+    }
+
 
     private fun setTranslations(dictionaryID: Long){
         if(translations == null || translations!!.first().dictionaryID != dictionaryID){
@@ -122,7 +157,9 @@ class SettingsFragment : PreferenceFragmentCompat(),
                 l.languageID == t.definitionLanguageID
             }.languageName
         }.distinct().toTypedArray()
-        definitionLanguagePreference.entryValues = translations!!.map {
+        definitionLanguagePreference.entryValues = translations!!.filter{
+            it.vocabularyLanguageID == vocabularyLanguagePreference.value.toLong()
+        }.map {
             it.definitionLanguageID.toString()
         }.distinct().toTypedArray()
     }
@@ -142,7 +179,8 @@ class SettingsFragment : PreferenceFragmentCompat(),
         val dictionaryID = sharedPreferenceHelper.dictionary
         setTranslations(dictionaryID)
         preferenceScreen.addPreference(dictionaryPreference)
-        preferenceScreen.addPreference(matchTypePreference)
+        preferenceScreen.addPreference(dictionaryMatchTypePreference)
+        preferenceScreen.addPreference(databaseMatchTypePreference)
         preferenceScreen.addPreference(autoDeletePreference)
         preferenceScreen.addPreference(vocabularyLanguagePreference)
         preferenceScreen.addPreference(definitionLanguagePreference)
@@ -151,7 +189,8 @@ class SettingsFragment : PreferenceFragmentCompat(),
     override fun onResume() {
         super.onResume()
         dictionaryPreference.summary = dictionaryPreference.entry
-        matchTypePreference.summary = matchTypePreference.entry
+        dictionaryMatchTypePreference.summary = dictionaryMatchTypePreference.entry
+        databaseMatchTypePreference.summary = databaseMatchTypePreference.entry
         autoDeletePreference.summary = autoDeletePreference.entry
         vocabularyLanguagePreference.summary = vocabularyLanguagePreference.entry
         definitionLanguagePreference.summary = definitionLanguagePreference.entry
@@ -173,11 +212,26 @@ class SettingsFragment : PreferenceFragmentCompat(),
                 val dictionaryID = dictionaryPreference.value.toLong()
                 setTranslations(dictionaryID)
                 setVocabularyLanguageOptions(vocabularyLanguagePreference)
+                setVocabularyLanguagePreferenceDefault(vocabularyLanguagePreference)
                 setDefinitionLanguagePreference(definitionLanguagePreference)
+                setVocabularyLanguagePreferenceDefault(definitionLanguagePreference)
                 setSummary(key)
             }
             context!!.getString(R.string.pref_vocabulary_language_key) -> {
                 setDefinitionLanguagePreference(definitionLanguagePreference)
+                val existingValue = definitionLanguagePreference.value
+                if(definitionLanguagePreference.findIndexOfValue(existingValue) < 0){
+                    val defaultDefinitionLanguageID = repository.dictionaries.single{
+                        it.dictionaryID == dictionaryPreference.value.toLong()
+                    }.defaultDefinitionLanguageID.toString()
+                    if(definitionLanguagePreference.findIndexOfValue(defaultDefinitionLanguageID) > 0) {
+                        definitionLanguagePreference.value = defaultDefinitionLanguageID
+                    }
+                    else{
+                        definitionLanguagePreference.value = definitionLanguagePreference.entryValues.first().toString()
+                    }
+                }
+                setSummary(key)
             }
             else -> setSummary(key)
         }

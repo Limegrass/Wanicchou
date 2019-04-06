@@ -24,7 +24,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-class VocabularyNoteFragment : TextBlockFragment("Vocabulary Notes") {
+class VocabularyNoteFragment : TextBlockFragment() {
     companion object {
         private val TAG : String = VocabularyNoteFragment::class.java.simpleName
     }
@@ -45,6 +45,7 @@ class VocabularyNoteFragment : TextBlockFragment("Vocabulary Notes") {
     override fun onCreateView(inflater: LayoutInflater,
                               container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
+        title = "Vocabulary Notes"
         val view = super.onCreateView(inflater, container, savedInstanceState)!!
         parentFragmentActivity = activity!!
         setObserver(view)

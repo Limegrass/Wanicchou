@@ -16,4 +16,13 @@ interface MatchTypeDao : BaseDao<MatchType> {
         SELECT mt.*
         FROM MatchType mt""")
     fun getAllMatchTypes() : List<MatchType>
+
+    @Query("""
+        SELECT mt.*
+        FROM MatchType mt
+        JOIN DictionaryMatchType dmt
+            ON dmt.MatchTypeBitmask = mt.MatchTypeBitmask
+        WHERE dmt.DictionaryID = :dictionaryID
+    """)
+    suspend fun getDictionaryMatchTypes(dictionaryID: Long) : List<MatchType>
 }

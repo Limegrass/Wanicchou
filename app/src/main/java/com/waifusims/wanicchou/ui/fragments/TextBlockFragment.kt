@@ -8,7 +8,8 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.waifusims.wanicchou.R
 
-abstract class TextBlockFragment(private val title: String) : Fragment(){
+abstract class TextBlockFragment : Fragment(){
+    lateinit var title : String
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val attachToRoot = false
         val view = inflater.inflate(R.layout.fragment_text_list,

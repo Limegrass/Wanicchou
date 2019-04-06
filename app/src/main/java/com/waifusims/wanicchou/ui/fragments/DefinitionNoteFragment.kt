@@ -25,7 +25,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-class DefinitionNoteFragment : TextBlockFragment("Definition Note") {
+class DefinitionNoteFragment : TextBlockFragment() {
     companion object {
         private val TAG : String = DefinitionNoteFragment::class.java.simpleName
     }
@@ -53,6 +53,7 @@ class DefinitionNoteFragment : TextBlockFragment("Definition Note") {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        title = "Definition Note"
         val view = super.onCreateView(inflater, container, savedInstanceState)!!
         parentFragmentActivity = activity!!
         setRelatedObserver(view)
