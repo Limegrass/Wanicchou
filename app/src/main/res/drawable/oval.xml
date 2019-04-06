@@ -2,6 +2,6 @@
 <shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="oval" >
     <corners
         android:radius="5dp"/>
-    <solid android:color="@color/colorRelatedWordAlt" />
-    <stroke android:width="2dip" android:color="@color/colorPrimary"/>
+    <solid android:color="@color/color_related_word_alt" />
+    <stroke android:width="2dip" android:color="@color/color_primary"/>
 </shape>

@@ -2,7 +2,6 @@
     <string name="app_name" translatable="true">Wanicchou</string>
 
     <!--search activity-->
-    <string name="last_searched_key" translatable="false">lastSearched</string>
     <string name="settings_action_label" translatable="true">Settings</string>
 
     <!--vocabulary_information related-->
@@ -15,7 +14,7 @@
     <string name="definition_label" translatable="true">Definition</string>
     <string name="definition_hint" translatable="true">Nothing searched yet!</string>
 
-    <string name="word_searching" translatable="true">Searching...</string>
+    <string name="word_searching" translatable="true">Searching for %1$s…</string>
     <string name="word_search_success" translatable="true">%1$s found on Sanseido!</string>
     <string name="word_search_failure" translatable="true">%1$s not found on Sanseido!</string>
 
@@ -34,46 +33,70 @@
     <!--Toast strings-->
     <string name="permissions_denied_toast" translatable="true">Permissions denied.</string>
     <string name="anki_added_toast" translatable="true">Card added to Anki!</string>
-    <string name="searching_related_toast" translatable="true">Searching for selected word...</string>
-    <string name="searched_from_db_toast" translatable="true">%1$s found in DB!</string>
+    <string name="searching_related_toast" translatable="true">Searching for selected word…</string>
+    <string name="toast_found_in_db" translatable="true">%1$s found in DB!</string>
 
 
     <!--related words activity-->
-    <string name="activity_related_words_title" translatable="true">Related Words</string>
+    <string name="activity_word_list_title" translatable="true">Results</string>
 
-    <string name="related_word_key" translatable="false">relatedWords</string>
-    <string name="desired_word_index_key" translatable="false">desiredRelatedWord</string>
 
-    <!--shared preferences keys-->
-    <string name="search_word_key" translatable="false">searchWord</string>
-    <string name="dic_type_key" translatable="false">dicType</string>
-    <string name="url_key" translatable="false">pageUrl</string>
-    <string name="html_key" translatable="false">pageHtml</string>
-    <string name="page_key" translatable="false">webPage</string>
 
 
     <!--settings strings-->
     <string name="search_settings_category_title" translatable="true">Search Settings</string>
     <string name="pref_dictionary_type_title" translatable="true">Dictionary Type</string>
-    <string name="pref_dictionary_type_key" translatable="false">listPrefDicType</string>
-    <string name="pref_dictionary_type_default" translatable="false">JJ</string>
     <string name="pref_match_type_title" translatable="true">Match Type</string>
-    <string name="pref_match_type_key" translatable="false">listPrefSearchDir</string>
-    <string name="pref_match_type_default" translatable="false">1</string>
 
     <string name="pref_auto_delete_title" translatable="true">Auto-Deletion</string>
-    <string name="pref_auto_delete_key" translatable="false">listPrefAutoDelete</string>
-    <string name="pref_auto_delete_default" translatable="false">never</string>
     <string name="pref_auto_save_title" translatable="true">Auto-Save</string>
-    <string name="pref_auto_save_key" translatable="false">listPrefAutoSave</string>
-    <string name="pref_auto_save_default" translatable="false">none</string>
+    <string name="pref_word_language_title" translatable="true">Vocabulary Language</string>
+    <string name="pref_definition_language_title">Definition Language</string>
 
-    <string name="pref_provider_title" translatable="true">Definition Source</string>
-    <string name="pref_provider_key" translatable="true">provider</string>
-    <string name="pref_provider_default" translatable="true">data.vocab.jp.search.sanseido.Sanseido</string>
+    <string name="pref_dictionary_title" translatable="true">Dictionary</string>
 
-    <string name="reading_hint">読み方</string>
-    <string name="pitch_hint">ピッチ</string>
-    <string name="dictionary_hint">辞典型</string>
+    <string name="pronunciation_hint">Pronunciation</string>
+    <string name="pitch_hint">Pitch</string>
+    <string name="dictionary_hint">Dictionary</string>
 
+    <string name="title_selected">%1$d words selected</string>
+    <string name="action_db_delete">Delete</string>
+    <string name="action_db_import">Import</string>
+    <string name="database_title">Database</string>
+    <string name="lbl_definition_header_text">Definition</string>
+    <string name="lbl_word_button_text">Word</string>
+    <string name="lbl_related_button_text">Related</string>
+    <string name="lbl_word_default_text" translatable="false">わにっちょう</string>
+    <string name="lbl_kanji_default_text" translatable="false">和日帳</string>
+
+    <!-- shared -->
+    <string name="edit_note_title" translatable="true">Edit note</string>
+    <string name="save_button_text" translatable="true">Save</string>
+    <string name="delete_button_text" translatable="true">Delete</string>
+    <string name="add_button_text" translatable="true">Add</string>
+
+    <!-- definition note fragment -->
+    <string name="definition_note_title" translatable="true">Definition Note</string>
+    <string name="add_definition_note_title" translatable="true">Add Definition Note</string>
+
+    <!-- settings fragment -->
+    <string name="dictionary_title" translatable="true">Dictionary</string>
+    <string name="dictionary_match_type_title" translatable="true">Dictionary Match Type</string>
+    <string name="database_match_type_title" translatable="true">Database Match Type</string>
+    <string name="auto_delete_title" translatable="true">Auto Delete</string>
+    <string name="vocab_language_title" translatable="true">Vocabulary Language</string>
+    <string name="definition_language_title" translatable="true">Definition Language</string>
+
+    <!-- tag fragment -->
+    <string name="tags_title">Tags</string>
+    <string name="edit_tag_title" translatable="true">Edit tag</string>
+    <string name="add_tag_title" translatable="true">Add Tag</string>
+
+    <!-- vocabulary note fragment -->
+    <string name="vocab_notes_title" translatable="true">Vocabulary Notes</string>
+    <string name="add_vocab_note_title" translatable="true">Add Vocabulary Note</string>
+    <string name="toast_no_network" translatable="true">No network connection and search was not in database.</string>
+    <string name="lbl_fragment_vocabulary_notes_title">Vocabulary Notes</string>
+    <string name="lbl_fragment_definition_note_title">Definition Note</string>
+    <string name="lbl_fragment_tag_title">Tags</string>
 </resources>

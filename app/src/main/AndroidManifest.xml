@@ -1,40 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+<manifest
+    xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.waifusims.wanicchou">
 
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="true"
+        android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".SearchActivity"
+            android:name="com.waifusims.wanicchou.SearchActivity"
             android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
+                <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+            </intent-filter>
+            <meta-data android:name="android.app.searchable"
+                android:resource="@xml/searchable"/>
         </activity>
         <activity
-            android:name=".WordListActivity"
-            android:label="@string/activity_related_words_title"
-            android:parentActivityName=".SearchActivity">
+            android:name="com.waifusims.wanicchou.DatabaseActivity"
+            android:label="@string/database_title">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".SearchActivity" />
+                android:value="com.waifusims.wanicchou.SearchActivity" />
         </activity>
         <activity
-            android:name=".SettingsActivity"
-            android:label="@string/settings_action_label"
-            android:parentActivityName=".SearchActivity">
+            android:name="com.waifusims.wanicchou.SettingsActivity"
+            android:label="@string/settings_action_label">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".SearchActivity" />
+                android:value="com.waifusims.wanicchou.SearchActivity" />
         </activity>
     </application>
 
