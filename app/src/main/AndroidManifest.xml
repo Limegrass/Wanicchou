@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest
     xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.waifusims.wanicchou">
+    package="com.limegrass.wanicchou">
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -15,7 +15,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name="com.waifusims.wanicchou.SearchActivity"
+            android:name="com.limegrass.wanicchou.SearchActivity"
             android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -29,18 +29,18 @@
                 android:resource="@xml/searchable"/>
         </activity>
         <activity
-            android:name="com.waifusims.wanicchou.DatabaseActivity"
+            android:name="com.limegrass.wanicchou.DatabaseActivity"
             android:label="@string/database_title">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.waifusims.wanicchou.SearchActivity" />
+                android:value="com.limegrass.wanicchou.SearchActivity" />
         </activity>
         <activity
-            android:name="com.waifusims.wanicchou.SettingsActivity"
+            android:name="com.limegrass.wanicchou.SettingsActivity"
             android:label="@string/settings_action_label">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.waifusims.wanicchou.SearchActivity" />
+                android:value="com.limegrass.wanicchou.SearchActivity" />
         </activity>
     </application>
 
