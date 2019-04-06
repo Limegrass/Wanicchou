@@ -34,7 +34,7 @@ class SettingsFragment : PreferenceFragmentCompat(),
             it.dictionaryID.toString()
         }.toTypedArray()
         preference.key = fragmentContext.getString(R.string.pref_dictionary_key)
-        preference.title = "Dictionary"
+        preference.title = getString(R.string.dictionary_title)
         preference.summary = preference.entry
         preference.setDefaultValue(SanseidoWebPage.DICTIONARY_ID)
         preference
@@ -49,7 +49,7 @@ class SettingsFragment : PreferenceFragmentCompat(),
             it.matchTypeName
         }.toTypedArray()
         preference.key = fragmentContext.getString(R.string.pref_match_type_key)
-        preference.title = "Match Type"
+        preference.title = getString(R.string.match_type_title)
         preference.summary = preference.entry
         preference.setDefaultValue(MatchType.WORD_EQUALS.name)
         preference
@@ -64,7 +64,7 @@ class SettingsFragment : PreferenceFragmentCompat(),
             it.name
         }.toTypedArray()
         preference.key = fragmentContext.getString(R.string.pref_auto_delete_key)
-        preference.title = "Auto Delete"
+        preference.title = getString(R.string.auto_delete_title)
         preference.summary = preference.entry
         preference.setDefaultValue(AutoDelete.NEVER.name)
         preference
@@ -77,7 +77,7 @@ class SettingsFragment : PreferenceFragmentCompat(),
         val preference = ListPreference(fragmentContext)
         setVocabularyLanguageOptions(preference)
         preference.key = fragmentContext.getString(R.string.pref_vocabulary_language_key)
-        preference.title = "Vocabulary Language"
+        preference.title = getString(R.string.vocab_language_title)
         preference.summary = preference.entry
         preference.setDefaultValue(JapaneseVocabulary.LANGUAGE_ID.toString())
         preference
@@ -87,7 +87,7 @@ class SettingsFragment : PreferenceFragmentCompat(),
         val preference = ListPreference(fragmentContext)
         setDefinitionLanguagePreference(preference)
         preference.key = fragmentContext.getString(R.string.pref_definition_language_key)
-        preference.title = "Definition Language"
+        preference.title = getString(R.string.definition_language_title)
         preference.summary = preference.entry
         preference.setDefaultValue(JapaneseVocabulary.LANGUAGE_ID.toString())
         preference
