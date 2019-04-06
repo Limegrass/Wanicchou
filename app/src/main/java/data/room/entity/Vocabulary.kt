@@ -19,14 +19,14 @@ data class Vocabulary (
     @ColumnInfo(name = "Word")
     var word: String,
 
-    @ColumnInfo(name = "LanguageID")
-    var languageID: Long,
-
     @ColumnInfo(name = "Pronunciation")
-    var pronunciation: String = "",
+    var pronunciation: String,
 
     @ColumnInfo(name = "Pitch")
-    var pitch: String = "",
+    var pitch: String,
+
+    @ColumnInfo(name = "LanguageID")
+    var languageID: Long,
 
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "VocabularyID")

@@ -50,7 +50,7 @@ class TagFragment : TextBlockFragment() {
     override fun onCreateView(inflater: LayoutInflater,
                               container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        title = "Tags"
+        title = getString(R.string.lbl_fragment_tag_title)
         val view = super.onCreateView(inflater, container, savedInstanceState)!!
         parentFragmentActivity = activity!!
         setObserver(view)

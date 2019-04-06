@@ -1,7 +1,9 @@
 //<editor-fold desc="Imports">
 package com.waifusims.wanicchou
 import android.app.SearchManager
+import android.content.Context
 import android.content.Intent
+import android.net.ConnectivityManager
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
@@ -77,6 +79,12 @@ class SearchActivity
         return super.onSearchRequested(searchEvent)
     }
 
+    override fun onPause() {
+        super.onPause()
+        sharedPreferences.lastSearchedVocabularyID =
+                vocabularyViewModel.vocabulary.vocabularyID
+    }
+
     override fun onNewIntent(intent: Intent) {
         Log.i(TAG, "Received new intent. Action: [${intent.action}].")
         super.onNewIntent(intent)
@@ -143,17 +151,17 @@ class SearchActivity
     }
 
     private fun showToast(toastText: String) {
-        val context = this
+        val context = this@SearchActivity
+        toast?.cancel()
         toast = Toast.makeText(context,
                 toastText,
                 Toast.LENGTH_LONG)
         toast!!.show()
     }
 
-
     private fun search(searchTerm: String) {
         Log.i(TAG, "Search Initiated: [$searchTerm].")
-        showToast("Searching for $searchTerm...")
+        showToast(getString(R.string.word_searching, searchTerm))
 
         if (sharedPreferences.autoDelete == AutoDelete.ON_SEARCH) {
             repository.removeVocabulary(vocabularyViewModel.vocabulary)
@@ -161,15 +169,46 @@ class SearchActivity
         //TODO: String template it
         //TODO: Progress bar it
         runBlocking(Dispatchers.IO) {
-            val vocabularyList = repository.vocabularySearch(searchTerm,
+            val databaseList = repository.databaseSearch(searchTerm,
                     sharedPreferences.wordLanguageID,
                     sharedPreferences.definitionLanguageID,
-                    sharedPreferences.dictionaryMatchType,
-                    sharedPreferences.databaseMatchType,
-                    sharedPreferences.dictionary)
-            if (vocabularyList.isNotEmpty()) {
+                    sharedPreferences.databaseMatchType)
+            if (databaseList.isNotEmpty()) {
                 runOnUiThread {
-                    vocabularyViewModel.value = vocabularyList
+                    val message = getString(R.string.toast_found_in_db, searchTerm)
+                    showToast(message)
+                    vocabularyViewModel.value = databaseList
+                }
+            }
+            else {
+                val connectivityManager =
+                        this@SearchActivity.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+                val networkInfo = connectivityManager.activeNetworkInfo
+                if(networkInfo != null){
+                    val onlineResult = repository.onlineSearch(searchTerm,
+                            sharedPreferences.wordLanguageID,
+                            sharedPreferences.definitionLanguageID,
+                            sharedPreferences.dictionaryMatchType,
+                            sharedPreferences.dictionary)
+                    if (onlineResult.isNotEmpty()) {
+                        runOnUiThread {
+                            val message = getString(R.string.word_search_success, searchTerm)
+                            showToast(message)
+                            vocabularyViewModel.value = onlineResult
+                        }
+                    }
+                    else{
+                        runOnUiThread {
+                            val message = getString(R.string.word_search_failure, searchTerm)
+                            showToast(message)
+                        }
+                    }
+                }
+                else{
+                    runOnUiThread {
+                        val message = getString(R.string.toast_no_network)
+                        showToast(message)
+                    }
                 }
             }
         }

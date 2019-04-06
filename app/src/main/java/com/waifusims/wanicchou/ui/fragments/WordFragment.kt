@@ -44,7 +44,7 @@ class WordFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         setVocabularyListObserver(view)
-        getLatest()
+        getLastSearched()
         setOnClickListener(view)
         super.onViewCreated(view, savedInstanceState)
     }
@@ -60,10 +60,10 @@ class WordFragment : Fragment() {
         }
     }
 
-    private fun getLatest(){
+    private fun getLastSearched(){
         val activity = activity!!
         GlobalScope.launch(Dispatchers.IO) {
-            val vocabularyList = repository.getLatest()
+            val vocabularyList = repository.getVocabulary(sharedPreferenceHelper.lastSearchedVocabularyID)
             //TODO: Maybe refactor to just give the DICTIONARY_ID
             // (or when I figure out dynamic settings pref)
             activity.runOnUiThread {

@@ -44,6 +44,10 @@ class VocabularyRepository(application: Application) {
         database.vocabularyNoteDao().delete(note)
     }
 
+    fun getVocabulary(vocabularyID: Long): List<Vocabulary>{
+        return database.vocabularyDao().getVocabulary(vocabularyID)
+    }
+
     suspend fun updateTag(tag : Tag){
         database.tagDao().update(tag)
     }
@@ -105,8 +109,11 @@ class VocabularyRepository(application: Application) {
         val vocabulary = SearchWordVocabularyFactory(document,
                                                      wordLanguageID,
                                                      webPage.dictionaryID).get()
+        if (!vocabulary.word.isBlank()){
+            return database.vocabularyDao().insert(vocabulary)
+        }
+        return -1L
 
-        return database.vocabularyDao().insert(vocabulary)
     }
 
     private suspend fun insertDefinition(document: Document,
@@ -148,15 +155,12 @@ class VocabularyRepository(application: Application) {
     }
 
     @WorkerThread
-    suspend fun vocabularySearch(searchTerm: String,
-                                 wordLanguageID: Long,
-                                 definitionLanguageID: Long,
-                                 dictionaryMatchType : MatchType,
-                                 databaseMatchType : MatchType,
-                                 dictionaryID: Long) : List<Vocabulary>{
-        val split = searchTerm.split(" ")
-        val databaseResults : List<Vocabulary>
-        databaseResults = if(split.size == 2){
+    suspend fun databaseSearch(searchTerm: String,
+                               wordLanguageID: Long,
+                               definitionLanguageID: Long,
+                               databaseMatchType : MatchType) : List<Vocabulary>{
+        val split = searchTerm.trim().split(" ")
+        return if(split.size == 2){
             val word = split[0]
             val pronunciation = split[1]
             val vocabularyID = database.vocabularyDao()
@@ -169,18 +173,9 @@ class VocabularyRepository(application: Application) {
                     definitionLanguageID,
                     databaseMatchType)
         }
-        if (databaseResults.isNotEmpty()){
-            return databaseResults
-        }
-
-        return getVocabularyFromOnline(searchTerm,
-                wordLanguageID,
-                definitionLanguageID,
-                dictionaryMatchType,
-                dictionaryID)
     }
 
-    private suspend fun getVocabularyFromOnline(searchTerm: String,
+    suspend fun onlineSearch(searchTerm: String,
                              wordLanguageID: Long,
                              definitionLanguageID: Long,
                              matchType: MatchType,
@@ -203,8 +198,8 @@ class VocabularyRepository(application: Application) {
                                     vocabularyID,
                                     matchType,
                                     webPage)
-
         }
+
         return database.vocabularyDao().getVocabulary(vocabularyID)
     }
 
@@ -300,9 +295,9 @@ class VocabularyRepository(application: Application) {
         database.definitionNoteDao().insert(note)
     }
 
-    fun getDefinitionNotes(vocabularyID: Long) : List<DefinitionNote>{
+    fun getDefinitionNotes(definitionID: Long) : List<DefinitionNote>{
         return database.definitionNoteDao()
-                       .getNotesForDefinitionID(vocabularyID)
+                       .getNotesForDefinitionID(definitionID)
 
     }
 

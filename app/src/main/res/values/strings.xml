@@ -14,7 +14,7 @@
     <string name="definition_label" translatable="true">Definition</string>
     <string name="definition_hint" translatable="true">Nothing searched yet!</string>
 
-    <string name="word_searching" translatable="true">Searching…</string>
+    <string name="word_searching" translatable="true">Searching for %1$s…</string>
     <string name="word_search_success" translatable="true">%1$s found on Sanseido!</string>
     <string name="word_search_failure" translatable="true">%1$s not found on Sanseido!</string>
 
@@ -34,7 +34,7 @@
     <string name="permissions_denied_toast" translatable="true">Permissions denied.</string>
     <string name="anki_added_toast" translatable="true">Card added to Anki!</string>
     <string name="searching_related_toast" translatable="true">Searching for selected word…</string>
-    <string name="searched_from_db_toast" translatable="true">%1$s found in DB!</string>
+    <string name="toast_found_in_db" translatable="true">%1$s found in DB!</string>
 
 
     <!--related words activity-->
@@ -50,7 +50,7 @@
 
     <string name="pref_auto_delete_title" translatable="true">Auto-Deletion</string>
     <string name="pref_auto_save_title" translatable="true">Auto-Save</string>
-    <string name="pref_word_language_title">Vocabulary Language</string>
+    <string name="pref_word_language_title" translatable="true">Vocabulary Language</string>
     <string name="pref_definition_language_title">Definition Language</string>
 
     <string name="pref_dictionary_title" translatable="true">Dictionary</string>
@@ -95,5 +95,8 @@
     <!-- vocabulary note fragment -->
     <string name="vocab_notes_title" translatable="true">Vocabulary Notes</string>
     <string name="add_vocab_note_title" translatable="true">Add Vocabulary Note</string>
-
+    <string name="toast_no_network" translatable="true">No network connection and search was not in database.</string>
+    <string name="lbl_fragment_vocabulary_notes_title">Vocabulary Notes</string>
+    <string name="lbl_fragment_definition_note_title">Definition Note</string>
+    <string name="lbl_fragment_tag_title">Tags</string>
 </resources>

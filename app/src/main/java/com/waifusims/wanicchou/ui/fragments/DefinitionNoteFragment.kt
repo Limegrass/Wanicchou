@@ -53,7 +53,7 @@ class DefinitionNoteFragment : TextBlockFragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        title = "Definition Note"
+        title = getString(R.string.lbl_fragment_definition_note_title)
         val view = super.onCreateView(inflater, container, savedInstanceState)!!
         parentFragmentActivity = activity!!
         setRelatedObserver(view)
@@ -65,7 +65,7 @@ class DefinitionNoteFragment : TextBlockFragment() {
     }
 
     private fun refreshNotesViewModel(){
-        val dbNotes = repository.getDefinitionNotes(vocabularyViewModel.vocabulary.vocabularyID)
+        val dbNotes = repository.getDefinitionNotes(definitionViewModel.definition.definitionID)
         parentFragmentActivity.runOnUiThread {
             notesViewModel.value = dbNotes
         }
@@ -148,9 +148,9 @@ class DefinitionNoteFragment : TextBlockFragment() {
                     message)
             dialogBuilder.setPositiveButton(getString(R.string.add_button_text)) { dialog, _ ->
                 val tagText = dialogBuilder.input.text
-                val vocabularyID = vocabularyViewModel.vocabulary.vocabularyID
+                val definitionID = definitionViewModel.definition.definitionID
                 GlobalScope.launch (Dispatchers.IO){
-                    repository.addDefinitionNote(tagText.toString(), vocabularyID)
+                    repository.addDefinitionNote(tagText.toString(), definitionID)
                     refreshNotesViewModel()
                 }
                 dialog.dismiss()

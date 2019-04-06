@@ -10,6 +10,16 @@ class WanicchouSharedPreferenceHelper(private val context: Context) {
 
     private val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
 
+    var lastSearchedVocabularyID: Long
+        get() {
+            val pref = getString(R.string.pref_last_searched_id_key,
+                    R.string.pref_last_searched_id_default)
+            return pref.toLong()
+        }
+        set(value) {
+            putString(R.string.pref_last_searched_id_key, value.toString())
+        }
+
     var databaseMatchType: MatchType
         get() {
             val pref = getString(R.string.pref_database_match_type_key,

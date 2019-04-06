@@ -4,7 +4,7 @@ import android.app.Application
 import data.room.entity.Vocabulary
 
 
-// TODO: Remove related words completely and just use the new scheme for queries to find same words
+// TODO: Refactor s.t. I don't need this default
 class VocabularyViewModel(application: Application)
     : ObservableViewModel<List<Vocabulary>>(application) {
 
@@ -28,8 +28,10 @@ class VocabularyViewModel(application: Application)
 
     private fun getDefaultVocabulary() : Vocabulary {
         return Vocabulary(DEFAULT_WORD,
+                          DEFAULT_WORD_PRONUNCIATION,
+                    "",
                           DEFAULT_LANGUAGE_ID,
-                          DEFAULT_WORD_PRONUNCIATION)
+                1)
     }
 
     companion object {

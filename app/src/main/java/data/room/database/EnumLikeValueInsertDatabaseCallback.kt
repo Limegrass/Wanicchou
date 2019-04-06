@@ -23,9 +23,9 @@ class EnumLikeValueInsertDatabaseCallback(private val context : Context) : RoomD
                 insertDictionaries(database)
                 insertMatchTypes(database)
             }
-
             insertDictionaryMatchTypes(database)
             insertTranslations(database)
+            insertDefaultVocabulary(database)
         }
     }
 
@@ -108,6 +108,14 @@ class EnumLikeValueInsertDatabaseCallback(private val context : Context) : RoomD
             database.translationDao().insert(jjTranslation)
             database.translationDao().insert(jeTranslation)
             database.translationDao().insert(ejTranslation)
+        }
+    }
+    private fun insertDefaultVocabulary(database: WanicchouDatabase){
+        GlobalScope.launch {
+            val vocabulary = Vocabulary("和日帳","わにっちょう", "1",1, 1)
+            val definition = Definition( "ある使えないアプリ。", 1, 1, 1)
+            database.vocabularyDao().insert(vocabulary)
+            database.definitionDao().insert(definition)
         }
     }
     //</editor-fold>

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!--shared preferences keys-->
+    <string name="pref_last_searched_id_key" translatable="false">PREF_LAST_SEARCHED_ID_KEY</string>
     <string name="pref_dictionary_key" translatable="false">PREF_DICTIONARY</string>
     <string name="pref_vocabulary_language_key" translatable="false">PREF_WORD_LANGUAGE</string>
     <string name="pref_definition_language_key" translatable="false">PREF_DEFINITION_LANGUAGE</string>
@@ -19,6 +20,7 @@
     <string name="page_key" translatable="false">webPage</string>
 
     <!--defaults-->
+    <string name="pref_last_searched_id_default" translatable="false">1</string>
     <integer name="pref_dictionary_default" translatable="false">1</integer>
     <string name="pref_word_language_default" translatable="false">1</string>
     <string name="pref_definition_language_default" translatable="false">1</string>

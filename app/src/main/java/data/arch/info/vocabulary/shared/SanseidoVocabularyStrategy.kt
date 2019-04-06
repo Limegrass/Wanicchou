@@ -20,9 +20,9 @@ internal class SanseidoVocabularyStrategy : IVocabularyStrategy {
         val pronunciation = isolateReading(wordSource, wordLanguageID)
         val pitch = JapaneseVocabulary.isolatePitch(wordSource)
         return Vocabulary(word,
-                wordLanguageID,
                 pronunciation,
-                pitch)
+                pitch,
+                wordLanguageID)
     }
 
     /**

@@ -45,7 +45,7 @@ class VocabularyNoteFragment : TextBlockFragment() {
     override fun onCreateView(inflater: LayoutInflater,
                               container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        title = "Vocabulary Notes"
+        title = getString(R.string.lbl_fragment_vocabulary_notes_title)
         val view = super.onCreateView(inflater, container, savedInstanceState)!!
         parentFragmentActivity = activity!!
         setObserver(view)
