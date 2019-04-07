@@ -33,7 +33,7 @@
 
     <!--Toast strings-->
     <string name="permissions_denied_toast" translatable="true">許可もらえませんでした</string>
-    <string name="anki_added_toast" translatable="true">暗記に遅れました！</string>
+    <string name="anki_added_toast" translatable="true">%1$sは暗記に遅れました！</string>
     <string name="searching_related_toast" translatable="true">選択した単語の検索中。。。</string>
     <string name="toast_found_in_db" translatable="true">%1$sはデータベースから出来ました！</string>
 
