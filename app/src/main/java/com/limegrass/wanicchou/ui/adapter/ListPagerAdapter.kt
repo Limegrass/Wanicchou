@@ -7,7 +7,7 @@ import androidx.fragment.app.FragmentPagerAdapter
 class ListPagerAdapter(private val fragmentManager: FragmentManager,
                        private var fragments : List<Fragment>,
                        val id : Int)
-    : FragmentPagerAdapter(fragmentManager) {
+    : FragmentPagerAdapter(fragmentManager, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
 
     @Throws(IndexOutOfBoundsException::class)
     override fun getItem(position: Int): Fragment {
