@@ -34,5 +34,8 @@ data class VocabularyRelation (
 
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "VocabularyRelationID")
-    var vocabularyRelationID: Long = 0
-)
+    var vocabularyRelationID: Long = 0)
+// Potential additional column IsMatched
+// For if I want to save matches against the database words
+// Especially in the case of DEFINITION contains or WORD_OR_DEFINITION_CONTAINS
+// As it doesn't seem like SQLite supports Full Text Search
