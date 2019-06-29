@@ -31,7 +31,7 @@ import data.room.entity.*
             Language::class,
             Translation::class
         ],
-        version = 2,
+        version = 3,
         exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -55,12 +55,18 @@ abstract class WanicchouDatabase : RoomDatabase() {
                 database.execSQL(WanicchouMigration.MIGRATION_1_2_QUERY)
             }
         }
+        val MIGRATION_2_3 = object : Migration(2, 3){
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL(WanicchouMigration.MIGRATION_2_3_QUERY)
+            }
+        }
         //TODO: A first run crash occurs. Must combine the callbacks into one
         val enumLikeValueInsertDatabaseCallback = EnumLikeValueInsertDatabaseCallback(it)
         Room.databaseBuilder<WanicchouDatabase>(it.applicationContext,
                                                         WanicchouDatabase::class.java,
                                                        "WanicchouDatabase")
                 .addMigrations(MIGRATION_1_2)
+                .addMigrations(MIGRATION_2_3)
                 .addCallback(enumLikeValueInsertDatabaseCallback)
                 .build()
     })

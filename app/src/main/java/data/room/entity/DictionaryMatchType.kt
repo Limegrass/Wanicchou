@@ -8,12 +8,12 @@ import androidx.room.*
                         parentColumns = ["DictionaryID"],
                         childColumns = ["DictionaryID"]),
                 ForeignKey(entity = MatchType::class,
-                        parentColumns = ["MatchTypeBitmask"],
-                        childColumns = ["MatchTypeBitmask"])
+                        parentColumns = ["MatchTypeID"],
+                        childColumns = ["MatchTypeID"])
         ],
         indices = [Index(
                 value = ["DictionaryID",
-                    "MatchTypeBitmask"],
+                        "MatchTypeID"],
                 unique = true
         )]
 )
@@ -21,8 +21,8 @@ data class DictionaryMatchType (
         @ColumnInfo(name = "DictionaryID", index = true)
         var dictionaryID: Long,
 
-        @ColumnInfo(name = "MatchTypeBitmask", index = true)
-        var matchTypeBitmask: Long,
+        @ColumnInfo(name = "MatchTypeID", index = true)
+        var matchTypeID: Long,
 
         @PrimaryKey(autoGenerate = true)
         @ColumnInfo(name = "DictionaryMatchTypeID", index = true)

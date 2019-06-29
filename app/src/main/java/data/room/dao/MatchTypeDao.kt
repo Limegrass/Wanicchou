@@ -9,7 +9,7 @@ interface MatchTypeDao : BaseDao<MatchType> {
     @Query("""
         SELECT mt.TemplateString
         FROM MatchType mt
-        WHERE mt.MatchTypeBitmask = :bitmask """)
+        WHERE mt.MatchTypeID = :bitmask """)
     fun getTemplateString(bitmask : Long): String
 
     @Query( """
@@ -21,7 +21,7 @@ interface MatchTypeDao : BaseDao<MatchType> {
         SELECT mt.*
         FROM MatchType mt
         JOIN DictionaryMatchType dmt
-            ON dmt.MatchTypeBitmask = mt.MatchTypeBitmask
+            ON dmt.MatchTypeID = mt.MatchTypeID
         WHERE dmt.DictionaryID = :dictionaryID
     """)
     suspend fun getDictionaryMatchTypes(dictionaryID: Long) : List<MatchType>

@@ -203,4 +203,127 @@ DROP TABLE WordContext;
 DROP TABLE RelatedWords;
 """
 
+    const val MIGRATION_2_3_QUERY =
+"""
+-- Rename the old tables and so they can be replaced.
+ALTER TABLE MatchType
+RENAME TO BitmaskedMatchType;
+
+ALTER TABLE DictionaryMatchType
+RENAME TO BitmaskedDictionaryMatchType;
+
+ALTER TABLE VocabularyRelation
+RENAME TO BitmaskedVocabularyRelation;
+
+-- Create their replacements. Simple since the bitmasks weren't foreign keys
+CREATE TABLE MatchType
+(
+    MatchTypeID INTEGER PRIMARY KEY NOT NULL,
+    MatchTypeName TEXT NOT NULL,
+    TemplateString TEXT NOT NULL
+);
+CREATE TABLE DictionaryMatchType
+(
+    DictionaryMatchTypeID INTEGER PRIMARY KEY NOT NULL,
+    FOREIGN KEY(DictionaryID)  REFERENCES Dictionary(DictionaryID),
+    FOREIGN KEY(MatchTypeID) REFERENCES MatchType(MatchTypeID),
+    UNIQUE(DictionaryID, MatchTypeID)
+);
+
+CREATE TABLE VocabularyRelation
+(
+    VocabularyRelationID INTEGER PRIMARY KEY NOT NULL,
+    FOREIGN KEY(SearchVocabularyID) REFERENCES Vocabulary(VocabularyID),
+    FOREIGN KEY(ResultVocabularyID) REFERENCES Vocabulary(VocabularyID),
+    FOREIGN KEY(MatchTypeID) REFERENCES MatchType(MatchTypeID),
+    UNIQUE(SearchVocabularyID, ResultVocabularyID, MatchTypeID)
+);
+
+-- Insert Values
+INSERT INTO MatchType
+VALUES
+    (1, 'WORD_EQUALS', '%s'),
+    (2, 'WORD_STARTS_WITH', '%s%%'),
+    (3, 'WORD_ENDS_WITH', '%%%s'),
+    (4, 'WORD_CONTAINS', '%%%s%%'),
+    (5, 'WORD_WILDCARDS', '%s'),
+    (6, 'DEFINITION_CONTAINS', '%%%s%%'),
+    (7, 'WORD_OR_DEFINITION_CONTAINS', '%%%s%%');
+
+INSERT INTO DictionaryMatchType (DictionaryID, MatchTypeID)
+SELECT bdmt.DictionaryID, 1
+FROM BitmaskedDictionaryMatchType bdmt
+WHERE MatchTypeBitmask & 1 = 1;
+
+INSERT INTO DictionaryMatchType (DictionaryID, MatchTypeID)
+SELECT bdmt.DictionaryID, 2
+FROM BitmaskedDictionaryMatchType bdmt
+WHERE MatchTypeBitmask & 2 = 2;
+
+INSERT INTO DictionaryMatchType (DictionaryID, MatchTypeID)
+SELECT bdmt.DictionaryID, 3
+FROM BitmaskedDictionaryMatchType bdmt
+WHERE MatchTypeBitmask & 4 = 4;
+
+INSERT INTO DictionaryMatchType (DictionaryID, MatchTypeID)
+SELECT bdmt.DictionaryID, 4
+FROM BitmaskedDictionaryMatchType bdmt
+WHERE MatchTypeBitmask & 8 = 8;
+
+INSERT INTO DictionaryMatchType (DictionaryID, MatchTypeID)
+SELECT bdmt.DictionaryID, 5
+FROM BitmaskedDictionaryMatchType bdmt
+WHERE MatchTypeBitmask & 16 = 16;
+
+INSERT INTO DictionaryMatchType (DictionaryID, MatchTypeID)
+SELECT bdmt.DictionaryID, 6
+FROM BitmaskedDictionaryMatchType bdmt
+WHERE MatchTypeBitmask & 32 = 32;
+
+INSERT INTO DictionaryMatchType (DictionaryID, MatchTypeID)
+SELECT bdmt.DictionaryID, 7
+FROM BitmaskedDictionaryMatchType bdmt
+WHERE MatchTypeBitmask & 64 = 64;
+
+
+INSERT INTO VocabularyRelation (SearchVocabularyID, ResultVocabularyID, MatchTypeID)
+SELECT SearchVocabularyID, ResultVocabularyID, 1
+FROM BitmaskedVocabularyRelation
+WHERE MatchTypeBitmask & 1 = 1;
+
+INSERT INTO VocabularyRelation (SearchVocabularyID, ResultVocabularyID, MatchTypeID)
+SELECT SearchVocabularyID, ResultVocabularyID, 2
+FROM BitmaskedVocabularyRelation
+WHERE MatchTypeBitmask & 2 = 2;
+
+INSERT INTO VocabularyRelation (SearchVocabularyID, ResultVocabularyID, MatchTypeID)
+SELECT SearchVocabularyID, ResultVocabularyID, 3
+FROM BitmaskedVocabularyRelation
+WHERE MatchTypeBitmask & 4 = 4;
+
+INSERT INTO VocabularyRelation (SearchVocabularyID, ResultVocabularyID, MatchTypeID)
+SELECT SearchVocabularyID, ResultVocabularyID, 4
+FROM BitmaskedVocabularyRelation
+WHERE MatchTypeBitmask & 8 = 8;
+
+INSERT INTO VocabularyRelation (SearchVocabularyID, ResultVocabularyID, MatchTypeID)
+SELECT SearchVocabularyID, ResultVocabularyID, 5
+FROM BitmaskedVocabularyRelation
+WHERE MatchTypeBitmask & 16 = 16;
+
+INSERT INTO VocabularyRelation (SearchVocabularyID, ResultVocabularyID, MatchTypeID)
+SELECT SearchVocabularyID, ResultVocabularyID, 6
+FROM BitmaskedVocabularyRelation
+WHERE MatchTypeBitmask & 32 = 32;
+
+INSERT INTO VocabularyRelation (SearchVocabularyID, ResultVocabularyID, MatchTypeID)
+SELECT SearchVocabularyID, ResultVocabularyID, 7
+FROM BitmaskedVocabularyRelation
+WHERE MatchTypeBitmask & 64 = 64;
+
+-- Remove the old tables
+DROP TABLE BitmaskedVocabularyRelation;
+DROP TABLE BitmaskedMatchType;
+DROP TABLE BitmaskedDictionaryMatchType;
+"""
 }

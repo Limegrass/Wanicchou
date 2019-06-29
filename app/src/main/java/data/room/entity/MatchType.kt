@@ -13,8 +13,8 @@ data class MatchType (
         var templateString : String,
 
         @PrimaryKey
-        @ColumnInfo(name = "MatchTypeBitmask")
-        var bitmask : Long
+        @ColumnInfo(name = "MatchTypeID")
+        var matchTypeID : Long
 ) {
     override fun toString(): String {
         return matchTypeName
