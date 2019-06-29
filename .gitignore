@@ -16,3 +16,4 @@
 /app/gradlew
 /app/gradlew.bat
 *.vim
+/app/google-services.json
