@@ -6,7 +6,7 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_gravity="end|bottom"
-    android:visibility="visible"
+    android:visibility="invisible"
     android:background="@drawable/ic_circle_outline"
     android:layout_margin="16dp"
      />

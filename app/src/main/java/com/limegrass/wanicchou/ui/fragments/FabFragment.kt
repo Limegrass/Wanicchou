@@ -112,8 +112,7 @@ class FabFragment : Fragment() {
     private fun setFABObserver(){
         val lifecycleOwner = this
         vocabularyViewModel.setObserver(lifecycleOwner){
-            if(!definitionViewModel.value.isNullOrEmpty()
-                    && definitionViewModel.value!![0].vocabularyID != 0L
+            if(!vocabularyViewModel.value.isNullOrEmpty()
                     && ankiDroidHelper.isApiAvailable()) {
                 floatingActionButton.show()
             }
