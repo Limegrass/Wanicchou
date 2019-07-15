@@ -22,12 +22,10 @@ class JapaneseVocabulary {
         const val LANGUAGE_NAME = "日本語"
 
         fun isolateWord(wordSource: String): String {
-            val kanjiMatcher = Pattern
-                    .compile(JapaneseVocabulary.WORD_WITH_KANJI_REGEX)
-                    .matcher(wordSource)
-            val kanaMatcher = Pattern
-                    .compile(JapaneseVocabulary.KANA_REGEX)
-                    .matcher(wordSource)
+            val kanjiMatcher = Pattern.compile(WORD_WITH_KANJI_REGEX)
+                                      .matcher(wordSource)
+            val kanaMatcher = Pattern.compile(KANA_REGEX)
+                                     .matcher(wordSource)
             return when {
                 kanjiMatcher.find() -> kanjiMatcher.group(0)
                 kanaMatcher.find() -> kanaMatcher.group(0)
@@ -36,25 +34,21 @@ class JapaneseVocabulary {
         }
 
         fun isolatePitch(wordSource: String): String {
-            if (wordSource.isBlank()) {
-                return ""
+            val toneMatcher = Pattern.compile(TONE_REGEX)
+                                     .matcher(wordSource)
+            return when {
+                toneMatcher.find() -> toneMatcher.group(0)
+                else -> ""
             }
-
-            var pitch = ""
-            val toneMatcher = Pattern.compile(JapaneseVocabulary.TONE_REGEX).matcher(wordSource)
-            if (toneMatcher.find()) {
-                pitch = toneMatcher.group(0)
-            }
-            return pitch
         }
 
-
-        fun isJapaneseInput(input :String): Boolean {
-            if (input.isBlank()){
-                return false
+        fun String?.isJapaneseInput() : Boolean {
+            return when {
+                !this.isNullOrBlank() -> this.trim().all {
+                    c: Char -> c.toInt() > 255
+                }
+                else -> false
             }
-
-            return input[input.length/2].toInt() < 255
         }
     }
 }
