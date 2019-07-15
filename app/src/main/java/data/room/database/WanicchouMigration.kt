@@ -325,5 +325,9 @@ WHERE MatchTypeBitmask & 64 = 64;
 DROP TABLE BitmaskedVocabularyRelation;
 DROP TABLE BitmaskedMatchType;
 DROP TABLE BitmaskedDictionaryMatchType;
+
+UPDATE DictionaryMatchType
+SET MatchTypeID = 7
+WHERE MatchTypeID = 6 AND DictionaryID = 1
 """
 }

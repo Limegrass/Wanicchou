@@ -76,13 +76,13 @@ class EnumLikeValueInsertDatabaseCallback(private val context : Context) : RoomD
     }
     private fun insertDictionaryMatchTypes(database: WanicchouDatabase){
         val sanseidoWebPage = DictionaryWebPageFactory(SanseidoWebPage.DICTIONARY_ID).get()
-        val sanseidoBitmasks = sanseidoWebPage.getSupportedMatchTypes().map {
+        val sanseidoMatchTypeIDs = sanseidoWebPage.getSupportedMatchTypes().map {
             it.getBitmask()
         }
         GlobalScope.launch {
-            for (bitmask in sanseidoBitmasks) {
+            for (matchTypeID in sanseidoMatchTypeIDs) {
                 val dictionaryMatchType = DictionaryMatchType(SanseidoWebPage.DICTIONARY_ID,
-                        bitmask)
+                        matchTypeID)
                 database.dictionaryMatchTypeDao()
                         .insert(dictionaryMatchType)
             }
