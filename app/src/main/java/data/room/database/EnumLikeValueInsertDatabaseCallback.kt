@@ -90,21 +90,21 @@ class EnumLikeValueInsertDatabaseCallback(private val context : Context) : RoomD
     }
     private fun insertTranslations(database: WanicchouDatabase){
         GlobalScope.launch {
-            val jjName = data.enums.Translation.getTranslationDisplay(JapaneseVocabulary.LANGUAGE_ID, JapaneseVocabulary.LANGUAGE_ID)
+            val jjName = "国語"
             val jjTranslation = Translation(JapaneseVocabulary.LANGUAGE_ID,
                     JapaneseVocabulary.LANGUAGE_ID,
                     SanseidoWebPage.DICTIONARY_ID,
                     jjName)
-            val jeName = data.enums.Translation.getTranslationDisplay(JapaneseVocabulary.LANGUAGE_ID, EnglishVocabulary.LANGUAGE_ID)
+            val japaneseEnglish = "和英"
             val jeTranslation = Translation(JapaneseVocabulary.LANGUAGE_ID,
                     EnglishVocabulary.LANGUAGE_ID,
                     SanseidoWebPage.DICTIONARY_ID,
-                    jeName)
-            val ejName = data.enums.Translation.getTranslationDisplay(EnglishVocabulary.LANGUAGE_ID, JapaneseVocabulary.LANGUAGE_ID)
+                    japaneseEnglish)
+            val englishJapanese = "英和"
             val ejTranslation = Translation(EnglishVocabulary.LANGUAGE_ID,
                     JapaneseVocabulary.LANGUAGE_ID,
                     SanseidoWebPage.DICTIONARY_ID,
-                    ejName)
+                    englishJapanese)
             database.translationDao().insert(jjTranslation)
             database.translationDao().insert(jeTranslation)
             database.translationDao().insert(ejTranslation)
