@@ -1,17 +1,7 @@
 package com.limegrass.wanicchou.viewmodel
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
-import data.room.VocabularyRepository
+import androidx.lifecycle.ViewModel
 import data.room.entity.Vocabulary
 
-class DatabaseViewModel(application: Application)
-    : AndroidViewModel(application){
-    val vocabularyList : LiveData<List<Vocabulary>>
-    init {
-        val repository = VocabularyRepository(application)
-        vocabularyList = repository.getAllSavedVocabulary()
-    }
-
-}
+class DatabaseViewModel(val vocabularyList : LiveData<List<Vocabulary>>) : ViewModel()

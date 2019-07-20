@@ -1,12 +1,11 @@
 package com.limegrass.wanicchou.viewmodel
 
-import android.app.Application
 import data.room.entity.Vocabulary
 
 
 // TODO: Refactor s.t. I don't need this default
-class VocabularyViewModel(application: Application)
-    : ObservableViewModel<List<Vocabulary>>(application) {
+class VocabularyViewModel
+    : ObservableViewModel<List<Vocabulary>>() {
 
     init {
         value = listOf(getDefaultVocabulary())

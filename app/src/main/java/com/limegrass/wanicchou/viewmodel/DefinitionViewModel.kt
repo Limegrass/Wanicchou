@@ -1,13 +1,12 @@
 package com.limegrass.wanicchou.viewmodel
 
-import android.app.Application
 import data.room.entity.Definition
 
 // Temporarily a list due to simplify UI management for now.
 // Need to change
 // TODO: Change from recycler view
-class DefinitionViewModel(application: Application)
-    : ObservableViewModel<List<Definition>>(application){
+class DefinitionViewModel
+    : ObservableViewModel<List<Definition>>(){
     init {
         value = listOf(getDefaultDefinition())
     }
