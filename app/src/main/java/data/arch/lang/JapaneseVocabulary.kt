@@ -18,7 +18,7 @@ class JapaneseVocabulary {
         private const val TONE_REGEX = "[\\d０-９]+"
 
         const val LANGUAGE_ID = 1L // Japanese, assuming I populate the DB
-        const val LANGUAGE_CODE = "jp"
+        const val LANGUAGE_CODE = "jpn"
         const val LANGUAGE_NAME = "日本語"
 
         fun isolateWord(wordSource: String): String {

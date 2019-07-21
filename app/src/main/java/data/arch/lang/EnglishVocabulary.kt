@@ -7,7 +7,7 @@ package data.arch.lang
 class EnglishVocabulary {
     companion object {
         const val LANGUAGE_ID = 2L
-        const val LANGUAGE_CODE = "en"
+        const val LANGUAGE_CODE = "eng"
         const val LANGUAGE_NAME = "English"
     }
 }
