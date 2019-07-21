@@ -32,41 +32,23 @@ class EnumLikeValueInsertDatabaseCallback(private val context : Context) : RoomD
     //<editor-fold desc="Sub methods">
     private fun insertLanguages(database: WanicchouDatabase){
         GlobalScope.launch {
-            val japanese = Language(JapaneseVocabulary.LANGUAGE_NAME,
-                    JapaneseVocabulary.LANGUAGE_CODE,
-                    JapaneseVocabulary.LANGUAGE_ID)
-            val english = Language(EnglishVocabulary.LANGUAGE_NAME,
-                    EnglishVocabulary.LANGUAGE_CODE,
-                    EnglishVocabulary.LANGUAGE_ID)
-            database.languageDao().insert(japanese)
-            database.languageDao().insert(english)
+            for (language in data.enums.Language.values()){
+                val entity = Language(language.name, language.code, language.id)
+                database.languageDao().insert(entity)
+            }
         }
     }
-    private suspend fun insertMatchTypes(database: WanicchouDatabase){
-        val wordEqualsEnum = data.enums.MatchType.WORD_EQUALS
-        val wordEquals = MatchType(wordEqualsEnum.toString(), "%s", wordEqualsEnum.getBitmask())
-        val wordStartsWithEnum = data.enums.MatchType.WORD_STARTS_WITH
-        val wordStartsWith = MatchType(wordStartsWithEnum.toString(), "%s%%", wordStartsWithEnum.getBitmask())
-        val wordEndsWithEnum = data.enums.MatchType.WORD_ENDS_WITH
-        val wordEndsWith = MatchType(wordEndsWithEnum.toString(), "%%%s", wordEndsWithEnum.getBitmask())
-        val wordContainsEnum = data.enums.MatchType.WORD_CONTAINS
-        val wordContains = MatchType(wordContainsEnum.toString(), "%%%s%%", wordContainsEnum.getBitmask())
-        val wordWildCardsEnum = data.enums.MatchType.WORD_WILDCARDS
-        val wordWildCards = MatchType(wordWildCardsEnum.toString(), "%s", wordWildCardsEnum.getBitmask())
-        val definitionContainsEnum =data.enums.MatchType.DEFINITION_CONTAINS
-        val definitionContains = MatchType(definitionContainsEnum.toString(), "%%%s%%", definitionContainsEnum.getBitmask())
-        val wordOrDefinitionContainsEnum = data.enums.MatchType.WORD_OR_DEFINITION_CONTAINS
-        val wordOrDefinitionContains = MatchType(wordOrDefinitionContainsEnum.toString(), "%%%s%%", wordOrDefinitionContainsEnum.getBitmask())
 
+    private suspend fun insertMatchTypes(database: WanicchouDatabase){
         val dao = database.matchTypeDao()
-        dao.insert(wordEquals)
-        dao.insert(wordStartsWith)
-        dao.insert(wordEndsWith)
-        dao.insert(wordContains)
-        dao.insert(wordWildCards)
-        dao.insert(definitionContains)
-        dao.insert(wordOrDefinitionContains)
+        for (matchType in data.enums.MatchType.values()) {
+            val entity = MatchType(matchType.name,
+                                      matchType.templateString,
+                                      matchType.id)
+            dao.insert(entity)
+        }
     }
+
     private suspend fun insertDictionaries(database: WanicchouDatabase){
         val sanseido = Dictionary(SanseidoWebPage.DICTIONARY_NAME,
                                   JapaneseVocabulary.LANGUAGE_ID,
@@ -77,7 +59,7 @@ class EnumLikeValueInsertDatabaseCallback(private val context : Context) : RoomD
     private fun insertDictionaryMatchTypes(database: WanicchouDatabase){
         val sanseidoWebPage = DictionaryWebPageFactory(SanseidoWebPage.DICTIONARY_ID).get()
         val sanseidoMatchTypeIDs = sanseidoWebPage.getSupportedMatchTypes().map {
-            it.getBitmask()
+            it.id
         }
         GlobalScope.launch {
             for (matchTypeID in sanseidoMatchTypeIDs) {
@@ -88,6 +70,7 @@ class EnumLikeValueInsertDatabaseCallback(private val context : Context) : RoomD
             }
         }
     }
+
     private fun insertTranslations(database: WanicchouDatabase){
         GlobalScope.launch {
             val jjName = "国語"
