@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="MATCH_TYPE_WORD_EQUALS" translatable="true">完全一致</string>
+    <string name="MATCH_TYPE_WORD_STARTS_WITH" translatable="true">前方一致</string>
+    <string name="MATCH_TYPE_WORD_ENDS_WITH" translatable="true">後方一致</string>
+    <string name="MATCH_TYPE_WORD_CONTAINS" translatable="true">部分一致</string>
+    <string name="MATCH_TYPE_WORD_WILDCARDS" translatable="true">ワイルドカード付き完全一致〈 _, % 〉</string>
+    <string name="MATCH_TYPE_DEFINITION_CONTAINS" translatable="true">定義部分一致</string>
+    <string name="MATCH_TYPE_WORD_OR_DEFINITION_CONTAINS" translatable="true">全文検索</string>
+</resources>

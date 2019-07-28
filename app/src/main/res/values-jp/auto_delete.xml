@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="AUTO_DELETE_NEVER" translatable="true">しない</string>
+    <string name="AUTO_DELETE_ON_ANKI_IMPORT" translatable="true">暗記ドロイドに送ると同時に</string>
+    <string name="AUTO_DELETE_ON_SEARCH" translatable="true">次の検索が成功すると同時に</string>
+</resources>
