@@ -9,7 +9,8 @@ enum class MatchType {
     DEFINITION_CONTAINS,
     WORD_OR_DEFINITION_CONTAINS;
 
-    val id : Long
+    //TODO: Don't expose IDs
+    val matchTypeID : Long
         get() {
             return when (this) {
                 WORD_EQUALS -> 1L
@@ -25,13 +26,27 @@ enum class MatchType {
     val templateString : String
         get() {
             return when (this){
-                WORD_EQUALS -> "%s"
-                WORD_STARTS_WITH -> "%s%%"
-                WORD_ENDS_WITH -> "%%%s"
-                WORD_CONTAINS -> "%%%s%%"
-                WORD_WILDCARDS -> "%s"
-                DEFINITION_CONTAINS -> "%%%s%%"
-                WORD_OR_DEFINITION_CONTAINS -> "%%%s%%"
+                WORD_EQUALS -> NO_APPENDED_WILDCARDS_TEMPLATE_STRING
+                WORD_STARTS_WITH -> TRAIL_WILDCARD_TEMPLATE_STRING
+                WORD_ENDS_WITH -> LEAD_WILDCARD_TEMPLATE_STRING
+                WORD_CONTAINS -> LEAD_AND_TRAIL_WILDCARD_TEMPLATE_STRING
+                WORD_WILDCARDS -> NO_APPENDED_WILDCARDS_TEMPLATE_STRING
+                DEFINITION_CONTAINS -> LEAD_AND_TRAIL_WILDCARD_TEMPLATE_STRING
+                WORD_OR_DEFINITION_CONTAINS -> LEAD_AND_TRAIL_WILDCARD_TEMPLATE_STRING
             }
         }
+
+    companion object {
+
+        private const val LEAD_AND_TRAIL_WILDCARD_TEMPLATE_STRING = "%%%s%%"
+        private const val TRAIL_WILDCARD_TEMPLATE_STRING = "%s%%"
+        private const val LEAD_WILDCARD_TEMPLATE_STRING = "%%%s"
+        private const val NO_APPENDED_WILDCARDS_TEMPLATE_STRING = "%s"
+
+        fun getMatchType(matchTypeID : Long): MatchType {
+            return values().single{
+                it.matchTypeID == matchTypeID
+            }
+        }
+    }
 }
