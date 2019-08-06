@@ -3,7 +3,7 @@ package data.room.search
 import data.arch.util.IFactory
 import data.enums.MatchType
 
-class DatabaseSearchStrategyFactory(private val matchType : MatchType)
+class DatabaseSearchStrategyFactory(private val matchType: MatchType)
     : IFactory<IDatabaseSearchStrategy> {
     override fun get(): IDatabaseSearchStrategy {
         return when (matchType) {
@@ -13,7 +13,7 @@ class DatabaseSearchStrategyFactory(private val matchType : MatchType)
             MatchType.WORD_ENDS_WITH -> WordLikeDatabaseSearchStrategy()
             MatchType.WORD_CONTAINS -> WordLikeDatabaseSearchStrategy()
             MatchType.DEFINITION_CONTAINS -> DefinitionLikeSearchStrategy()
-            MatchType.WORD_OR_DEFINITION_CONTAINS -> DefinitionOrWordLikeSearchStrategy()
+            MatchType.WORD_OR_DEFINITION_CONTAINS -> WordOrDefinitionLikeSearchStrategy()
         }
     }
 }

@@ -1,9 +1,5 @@
 package data.room.database
 
-import androidx.room.migration.Migration
-import androidx.sqlite.db.SupportSQLiteDatabase
-
-
 object WanicchouMigration {
     // This is actually not functional, I may go back to fix this.
     // I should delete it and let VCS handle the history but...

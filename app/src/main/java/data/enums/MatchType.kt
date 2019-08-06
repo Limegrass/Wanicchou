@@ -9,7 +9,6 @@ enum class MatchType {
     DEFINITION_CONTAINS,
     WORD_OR_DEFINITION_CONTAINS;
 
-    //TODO: Don't expose IDs
     val matchTypeID : Long
         get() {
             return when (this) {

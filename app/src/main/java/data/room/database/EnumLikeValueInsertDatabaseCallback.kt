@@ -3,11 +3,8 @@ package data.room.database
 import android.content.Context
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
-import data.arch.lang.EnglishVocabulary
-import data.arch.lang.JapaneseVocabulary
-import data.room.entity.*
-import data.web.DictionaryWebPageFactory
-import data.web.sanseido.SanseidoWebPage
+import data.room.dbo.entity.*
+import data.web.DictionarySourceFactory
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -16,26 +13,26 @@ import java.util.concurrent.Executors
 class EnumLikeValueInsertDatabaseCallback(private val context : Context) : RoomDatabase.Callback() {
     override fun onCreate(db: SupportSQLiteDatabase) {
         Executors.newSingleThreadExecutor().execute {
-            val database = WanicchouDatabase.getInstance(context)
+            val database = WanicchouDatabase(context)
             super.onCreate(db)
-            insertLanguages(database)
+            runBlocking {
+                insertLanguages(database)
+                insertMatchTypes(database)
+            }
             runBlocking {
                 insertDictionaries(database)
-                insertMatchTypes(database)
             }
             insertDictionaryMatchTypes(database)
             insertTranslations(database)
-            insertDefaultVocabulary(database)
+            insertDefaultEntry(database)
         }
     }
 
     //<editor-fold desc="Sub methods">
-    private fun insertLanguages(database: WanicchouDatabase){
-        GlobalScope.launch {
-            for (language in data.enums.Language.values()){
-                val entity = Language(language.name, language.code, language.id)
-                database.languageDao().insert(entity)
-            }
+    private suspend fun insertLanguages(database: WanicchouDatabase){
+        for (language in data.enums.Language.values()){
+            val entity = Language(language.name, language.languageCode, language.languageID)
+            database.languageDao().insert(entity)
         }
     }
 
@@ -43,62 +40,64 @@ class EnumLikeValueInsertDatabaseCallback(private val context : Context) : RoomD
         val dao = database.matchTypeDao()
         for (matchType in data.enums.MatchType.values()) {
             val entity = MatchType(matchType.name,
-                                      matchType.templateString,
-                                      matchType.id)
+                    matchType.templateString,
+                    matchType.matchTypeID)
             dao.insert(entity)
         }
     }
 
     private suspend fun insertDictionaries(database: WanicchouDatabase){
-        val sanseido = Dictionary(SanseidoWebPage.DICTIONARY_NAME,
-                                  JapaneseVocabulary.LANGUAGE_ID,
-                                  JapaneseVocabulary.LANGUAGE_ID,
-                                  SanseidoWebPage.DICTIONARY_ID)
-        database.dictionaryDao().insert(sanseido)
-    }
-    private fun insertDictionaryMatchTypes(database: WanicchouDatabase){
-        val sanseidoWebPage = DictionaryWebPageFactory(SanseidoWebPage.DICTIONARY_ID).get()
-        val sanseidoMatchTypeIDs = sanseidoWebPage.getSupportedMatchTypes().map {
-            it.id
+        for (dictionary in data.enums.Dictionary.values()){
+            val entity = Dictionary(dictionary.dictionaryName,
+                    dictionary.defaultVocabularyLanguage,
+                    dictionary.defaultVocabularyLanguage,
+                    dictionary.dictionaryID)
+            database.dictionaryDao().insert(entity)
         }
-        GlobalScope.launch {
-            for (matchTypeID in sanseidoMatchTypeIDs) {
-                val dictionaryMatchType = DictionaryMatchType(SanseidoWebPage.DICTIONARY_ID,
-                        matchTypeID)
-                database.dictionaryMatchTypeDao()
-                        .insert(dictionaryMatchType)
+    }
+
+    private fun insertDictionaryMatchTypes(database: WanicchouDatabase){
+        for (dictionary in data.enums.Dictionary.values()){
+            GlobalScope.launch {
+                val webPage = DictionarySourceFactory(dictionary).get()
+                val matchTypeIDs = webPage.supportedMatchTypes
+                for (matchType in matchTypeIDs) {
+                    val dictionaryMatchType = DictionaryMatchType(dictionary,
+                                                                  matchType)
+                    database.dictionaryMatchTypeDao().insert(dictionaryMatchType)
+                }
             }
         }
     }
 
+    // These last two are absolute trash
     private fun insertTranslations(database: WanicchouDatabase){
         GlobalScope.launch {
             val jjName = "国語"
-            val jjTranslation = Translation(JapaneseVocabulary.LANGUAGE_ID,
-                    JapaneseVocabulary.LANGUAGE_ID,
-                    SanseidoWebPage.DICTIONARY_ID,
+            val jjTranslation = Translation(data.enums.Language.JAPANESE,
+                    data.enums.Language.JAPANESE,
+                    data.enums.Dictionary.SANSEIDO,
                     jjName)
             val japaneseEnglish = "和英"
-            val jeTranslation = Translation(JapaneseVocabulary.LANGUAGE_ID,
-                    EnglishVocabulary.LANGUAGE_ID,
-                    SanseidoWebPage.DICTIONARY_ID,
+            val jeTranslation = Translation(data.enums.Language.JAPANESE,
+                    data.enums.Language.ENGLISH,
+                    data.enums.Dictionary.SANSEIDO,
                     japaneseEnglish)
             val englishJapanese = "英和"
-            val ejTranslation = Translation(EnglishVocabulary.LANGUAGE_ID,
-                    JapaneseVocabulary.LANGUAGE_ID,
-                    SanseidoWebPage.DICTIONARY_ID,
+            val ejTranslation = Translation(data.enums.Language.ENGLISH,
+                    data.enums.Language.JAPANESE,
+                    data.enums.Dictionary.SANSEIDO,
                     englishJapanese)
             database.translationDao().insert(jjTranslation)
             database.translationDao().insert(jeTranslation)
             database.translationDao().insert(ejTranslation)
         }
     }
-    private fun insertDefaultVocabulary(database: WanicchouDatabase){
+
+    private fun insertDefaultEntry(database: WanicchouDatabase){
         GlobalScope.launch {
-            val vocabulary = Vocabulary("和日帳","わにっちょう", "1",1, 1)
-            val definition = Definition( "ある使えないアプリ。", 1, 1, 1)
-            database.vocabularyDao().insert(vocabulary)
-            database.definitionDao().insert(definition)
+            database.vocabularyDao().insert(Vocabulary.DEFAULT_VOCABULARY)
+            database.definitionDao().insert(Definition.DEFAULT_DEFINITION)
         }
     }
     //</editor-fold>

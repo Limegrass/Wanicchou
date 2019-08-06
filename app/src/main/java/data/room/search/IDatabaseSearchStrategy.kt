@@ -1,11 +1,10 @@
 package data.room.search
 
+import data.arch.search.SearchRequest
 import data.room.database.WanicchouDatabase
-import data.room.entity.Vocabulary
+import data.room.dbo.composite.DictionaryEntry
 
 interface IDatabaseSearchStrategy {
     suspend fun search(database : WanicchouDatabase,
-               searchTerm : String,
-               wordLanguageID : Long,
-               definitionLanguageID : Long) : List<Vocabulary>
+                       searchRequest: SearchRequest) : List<DictionaryEntry>
 }

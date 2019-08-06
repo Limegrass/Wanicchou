@@ -8,14 +8,16 @@ import androidx.room.TypeConverters
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import data.arch.util.SingletonHolder
-import data.room.dao.*
+import data.room.dao.composite.DictionaryEntryDao
+import data.room.dao.composite.VocabularyAndTagDao
+import data.room.dao.entity.*
 import data.room.database.migration.WanicchouMigrationV2V3
-import data.room.entity.*
+import data.room.dbo.composite.VocabularyAndTag
+import data.room.dbo.entity.*
 
 /**
  * Database object using the Room Persistence Library.
- * Singleton design to avoid multiple instances of database
- * connection when it is not needed.
+ * Invoke the singleton by calling the class with a context
  */
 @Database(
         entities = [
@@ -32,6 +34,7 @@ import data.room.entity.*
             Language::class,
             Translation::class
         ],
+        views = [VocabularyAndTag::class],
         version = 3,
         exportSchema = false
 )
@@ -49,6 +52,8 @@ abstract class WanicchouDatabase : RoomDatabase() {
     abstract fun dictionaryMatchTypeDao(): DictionaryMatchTypeDao
     abstract fun languageDao(): LanguageDao
     abstract fun translationDao(): TranslationDao
+    abstract fun dictionaryEntryDao(): DictionaryEntryDao
+    abstract fun vocabularyAndTagDao(): VocabularyAndTagDao
 
     companion object : SingletonHolder<WanicchouDatabase, Context>({
         val MIGRATION_1_2 = object : Migration(1, 2){
@@ -64,5 +69,10 @@ abstract class WanicchouDatabase : RoomDatabase() {
                 .addMigrations(MIGRATION_1_2, WanicchouMigrationV2V3)
                 .addCallback(enumLikeValueInsertDatabaseCallback)
                 .build()
-    })
+    }) {
+        operator fun invoke(context: Context) : WanicchouDatabase {
+            return getInstance(context)
+        }
+        const val INSERTION_FAILED_ID = -1L // Room's return value for failed @Insert calls
+    }
 }

@@ -3,23 +3,17 @@ package data.arch.lang
 import java.util.regex.Pattern
 
 /**
- * Created by Limegrass on 4/4/2018.
+ * Helpers related to parsing Japanese Vocabulary
  */
-
-//TODO: Potentially create a formatter class to handle these functions
-// Before submission
 class JapaneseVocabulary {
     companion object {
         // Kanji followed by Kana
-        private const val WORD_WITH_KANJI_REGEX = "\\p{script=Han}+[\\p{script=Hiragana}|\\p{script=Katakana}]*\\p{script=Han}*"
+        private const val WORD_WITH_KANJI_REGEX =
+                """\p{script=Han}+[\p{script=Hiragana}|\p{script=Katakana}]*\p{script=Han}*"""
         // Pure Kana
-        private const val KANA_REGEX = "[\\p{script=Hiragana}|\\p{script=Katakana}]+"
+        private const val KANA_REGEX = """[\p{script=Hiragana}|\p{script=Katakana}]+"""
         // Tone, accounting for full-width numbers
-        private const val TONE_REGEX = "[\\d０-９]+"
-
-        const val LANGUAGE_ID = 1L // Japanese, assuming I populate the DB
-        const val LANGUAGE_CODE = "jpn"
-        const val LANGUAGE_NAME = "日本語"
+        private const val TONE_REGEX = """[\d０-９]+"""
 
         fun isolateWord(wordSource: String): String {
             val kanjiMatcher = Pattern.compile(WORD_WITH_KANJI_REGEX)
