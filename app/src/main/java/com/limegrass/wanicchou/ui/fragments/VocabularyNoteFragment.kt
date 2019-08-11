@@ -18,8 +18,13 @@ import com.limegrass.wanicchou.R
 import com.limegrass.wanicchou.ui.adapter.TextBlockRecyclerViewAdapter
 import com.limegrass.wanicchou.util.InputAlertDialogBuilder
 import com.limegrass.wanicchou.viewmodel.VocabularyNoteViewModel
-import com.limegrass.wanicchou.viewmodel.VocabularyViewModel
-import data.room.VocabularyRepository
+import com.limegrass.wanicchou.viewmodel.DictionaryEntryViewModel
+import data.arch.models.INote
+import data.arch.models.IVocabulary
+import data.arch.util.IRepository
+import data.models.Note
+import data.room.repository.VocabularyNoteRepository
+import data.room.database.WanicchouDatabase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -29,12 +34,13 @@ class VocabularyNoteFragment : TextBlockFragment() {
         private val TAG : String = VocabularyNoteFragment::class.java.simpleName
     }
 
-    private val repository : VocabularyRepository by lazy {
-        VocabularyRepository(parentFragmentActivity.application)
+    private val repository : IRepository<INote<IVocabulary>, IVocabulary> by lazy {
+        val database = WanicchouDatabase(parentFragmentActivity.application)
+        VocabularyNoteRepository(database)
     }
-    private val vocabularyViewModel : VocabularyViewModel by lazy {
+    private val dictionaryEntryViewModel : DictionaryEntryViewModel by lazy {
          ViewModelProviders.of(parentFragmentActivity)
-                .get(VocabularyViewModel::class.java)
+                .get(DictionaryEntryViewModel::class.java)
     }
     private val notesViewModel : VocabularyNoteViewModel by lazy {
         ViewModelProviders.of(parentFragmentActivity)
@@ -45,8 +51,8 @@ class VocabularyNoteFragment : TextBlockFragment() {
     override fun onCreateView(inflater: LayoutInflater,
                               container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        title = getString(R.string.lbl_fragment_vocabulary_notes_title)
         val view = super.onCreateView(inflater, container, savedInstanceState)!!
+        title = getString(R.string.lbl_fragment_vocabulary_notes_title)
         parentFragmentActivity = activity!!
         setObserver(view)
         setAddTagButtonOnClick(view)
@@ -56,10 +62,13 @@ class VocabularyNoteFragment : TextBlockFragment() {
         return view
     }
 
-    private fun refreshNotesViewModel(){
-        val dbNotes = repository.getVocabularyNotes(vocabularyViewModel.vocabulary.vocabularyID)
-        parentFragmentActivity.runOnUiThread {
-            notesViewModel.value = dbNotes
+    private suspend fun refreshNotesViewModel(){
+        val dictionaryEntry = dictionaryEntryViewModel.value
+        if(dictionaryEntry != null) {
+            val dbNotes = repository.search(dictionaryEntry.vocabulary)
+            parentFragmentActivity.runOnUiThread {
+                notesViewModel.value = dbNotes
+            }
         }
     }
 
@@ -85,9 +94,9 @@ class VocabularyNoteFragment : TextBlockFragment() {
 
             dialogBuilder.input.setText(note.noteText)
             dialogBuilder.setPositiveButton(getString(R.string.save_button_text)){ dialog, _ ->
-                note.noteText = dialogBuilder.input.text.toString()
+                val updatedNote = Note(note.topic, dialogBuilder.input.text.toString())
                 GlobalScope.launch(Dispatchers.IO){
-                    repository.updateVocabularyNote(note)
+                    repository.update(note, updatedNote)
                     //Not taking advantage of RecyclerView animations, but it simplifies the code.
                     refreshNotesViewModel()
                 }
@@ -96,7 +105,7 @@ class VocabularyNoteFragment : TextBlockFragment() {
 
             dialogBuilder.setNeutralButton(getString(R.string.delete_button_text)){ dialog, _ ->
                 GlobalScope.launch(Dispatchers.IO) {
-                    repository.deleteVocabularyNote(note)
+                    repository.delete(note)
                     refreshNotesViewModel()
                 }
                 dialog.dismiss()
@@ -110,7 +119,7 @@ class VocabularyNoteFragment : TextBlockFragment() {
             dialogBuilder.show()
         }
 
-        vocabularyViewModel.setObserver(lifecycleOwner){
+        dictionaryEntryViewModel.setObserver(lifecycleOwner){
             GlobalScope.launch(Dispatchers.IO){
                 refreshNotesViewModel()
             }
@@ -139,11 +148,15 @@ class VocabularyNoteFragment : TextBlockFragment() {
                     title,
                     message)
             dialogBuilder.setPositiveButton(getString(R.string.add_button_text)) { dialog, _ ->
-                val tagText = dialogBuilder.input.text
-                val vocabularyID = vocabularyViewModel.vocabulary.vocabularyID
-                GlobalScope.launch (Dispatchers.IO){
-                    repository.addVocabularyNote(tagText.toString(), vocabularyID)
-                    refreshNotesViewModel()
+                val dictionaryEntry = dictionaryEntryViewModel.value
+                if(dictionaryEntry != null) {
+                    val noteText = dialogBuilder.input.text.toString()
+                    val vocabulary = dictionaryEntry.vocabulary
+                    GlobalScope.launch (Dispatchers.IO){
+                        val note = Note(vocabulary, noteText)
+                        repository.insert(note)
+                        refreshNotesViewModel()
+                    }
                 }
                 dialog.dismiss()
             }

@@ -1,4 +1,4 @@
-package data.enums
+package com.limegrass.wanicchou.enums
 
 enum class AutoDelete {
     NEVER,

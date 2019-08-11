@@ -8,12 +8,12 @@ import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import com.limegrass.wanicchou.R
-import data.arch.search.IDictionaryWebPage
-import data.enums.AutoDelete
+import data.arch.search.IDictionarySource
+import com.limegrass.wanicchou.enums.AutoDelete
 import data.enums.Dictionary
 import data.enums.Language
 import data.enums.MatchType
-import data.web.DictionaryWebPageFactory
+import data.web.DictionarySourceFactory
 
 class SettingsFragment : PreferenceFragmentCompat(),
                          SharedPreferences.OnSharedPreferenceChangeListener {
@@ -40,7 +40,7 @@ class SettingsFragment : PreferenceFragmentCompat(),
 
     private val dictionaryMatchTypePreference : ListPreference by lazy {
         val preference = ListPreference(fragmentContext)
-        val webPage = DictionaryWebPageFactory(dictionary).get()
+        val webPage = DictionarySourceFactory(dictionary).get()
         val matchTypes = webPage.supportedMatchTypes
         preference.entries = matchTypes.map{
             val id = fragmentContext.resources.getIdentifier("MATCH_TYPE_${it.name}",
@@ -124,8 +124,8 @@ class SettingsFragment : PreferenceFragmentCompat(),
             val dictionaryID = dictionaryPreference.value.toLong()
             return Dictionary.getDictionary(dictionaryID)
         }
-    private val webPage : IDictionaryWebPage
-        get() = DictionaryWebPageFactory(dictionary).get()
+    private val webPage : IDictionarySource
+        get() = DictionarySourceFactory(dictionary).get()
 
     private val vocabularyLanguage : Language
         get() {

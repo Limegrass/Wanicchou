@@ -11,9 +11,18 @@ import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModelProviders
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.limegrass.wanicchou.R
+import com.limegrass.wanicchou.enums.AutoDelete
+import com.limegrass.wanicchou.util.WanicchouSharedPreferenceHelper
 import com.limegrass.wanicchou.viewmodel.*
-import data.arch.anki.AnkiDroidHelper
-import data.room.VocabularyRepository
+import data.anki.AnkiDroidHelper
+import data.arch.models.IDictionaryEntry
+import data.arch.search.SearchRequest
+import data.arch.util.IRepository
+import data.room.database.WanicchouDatabase
+import data.room.repository.DictionaryEntryRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 class FabFragment : Fragment() {
     private lateinit var floatingActionButton : FloatingActionButton
@@ -25,19 +34,19 @@ class FabFragment : Fragment() {
         private const val ANKI_PERMISSION_REQUEST_CALLBACK_CODE : Int = 420
     }
 
-    private val repository : VocabularyRepository by lazy {
-        VocabularyRepository.getInstance(parentActivity.application)
+    private val sharedPreferences : WanicchouSharedPreferenceHelper by lazy {
+        WanicchouSharedPreferenceHelper(parentContext)
+    }
+    private val repository : IRepository<IDictionaryEntry, SearchRequest> by lazy {
+        val database = WanicchouDatabase(parentContext)
+        DictionaryEntryRepository(database)
     }
 
-    private val vocabularyViewModel : VocabularyViewModel by lazy {
+    private val dictionaryEntryViewModel : DictionaryEntryViewModel by lazy {
         ViewModelProviders.of(parentActivity)
-                          .get(VocabularyViewModel::class.java)
+                          .get(DictionaryEntryViewModel::class.java)
     }
 
-    private val definitionViewModel : DefinitionViewModel by lazy {
-        ViewModelProviders.of(parentActivity)
-                          .get(DefinitionViewModel::class.java)
-    }
     private val vocabularyNoteViewModel : VocabularyNoteViewModel by lazy {
         ViewModelProviders.of(parentActivity)
                 .get(VocabularyNoteViewModel::class.java)
@@ -73,33 +82,36 @@ class FabFragment : Fragment() {
                 ankiDroidHelper.requestPermission(parentActivity,
                         ANKI_PERMISSION_REQUEST_CALLBACK_CODE)
             }
-            val vocabulary = vocabularyViewModel.vocabulary
-            val definition = definitionViewModel.definition
-            val dictionaryName = repository.dictionaries.single {
-                    it.dictionaryID == definition.dictionaryID
-            }.dictionaryName
-            val notes = getNotes()
-            val tags = tagViewModel.value!!.map{ it.tagText }.toSet()
-            val wordLangaugeCode = repository.languages.single{
-                it.languageID == vocabulary.languageID
-            }.languageCode
-            val definitionLanguageCode = repository.languages.single{
-                it.languageID == definition.languageID
-            }.languageCode
-            ankiDroidHelper.addUpdateNote(vocabulary.word,
-                                          vocabulary.pronunciation,
-                                          vocabulary.pitch,
-                                          wordLangaugeCode,
-                                          definition.definitionText,
-                                          definitionLanguageCode,
-                                          dictionaryName,
-                                          notes,
-                                          tags)
-            val word = vocabularyViewModel.vocabulary.word
-            val message = getString(R.string.anki_added_toast, word)
-            Toast.makeText(context,
-                          message,
-                          Toast.LENGTH_LONG).show()
+            val dictionaryEntry = dictionaryEntryViewModel.value
+            if(dictionaryEntry != null){
+                val definition = dictionaryEntry.definitions[0]
+                val vocabulary = dictionaryEntry.vocabulary
+                val dictionaryName = definition.dictionary.dictionaryName
+                val notes = getNotes()
+                val tags = tagViewModel.value!!.map{ it.tag }.toSet()
+                val wordLangaugeCode = vocabulary.language.languageCode
+                val definitionLanguageCode = definition.language.languageCode
+                ankiDroidHelper.addUpdateNote(vocabulary.word,
+                        vocabulary.pronunciation,
+                        vocabulary.pitch,
+                        wordLangaugeCode,
+                        definition.definitionText,
+                        definitionLanguageCode,
+                        dictionaryName,
+                        notes,
+                        tags)
+                val word = vocabulary.word
+                val message = getString(R.string.anki_added_toast, word)
+                Toast.makeText(context,
+                        message,
+                        Toast.LENGTH_LONG).show()
+
+                if (sharedPreferences.autoDelete == AutoDelete.ON_ANKI_IMPORT){
+                    GlobalScope.launch (Dispatchers.IO) {
+                        repository.delete(dictionaryEntry)
+                    }
+                }
+            }
         }
     }
     private fun getNotes() : List<String>{
@@ -111,9 +123,8 @@ class FabFragment : Fragment() {
     }
     private fun setFABObserver(){
         val lifecycleOwner = this
-        vocabularyViewModel.setObserver(lifecycleOwner){
-            if(!vocabularyViewModel.value.isNullOrEmpty()
-                    && ankiDroidHelper.isApiAvailable()) {
+        dictionaryEntryViewModel.setObserver(lifecycleOwner){
+            if(ankiDroidHelper.isApiAvailable()) {
                 floatingActionButton.show()
             }
         }

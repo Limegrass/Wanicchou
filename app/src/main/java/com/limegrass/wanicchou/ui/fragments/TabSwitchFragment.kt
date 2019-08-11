@@ -33,35 +33,42 @@ class TabSwitchFragment : Fragment() {
                                     attachToRoot)
         wordButton = view.findViewById(R.id.btn_tab_word)
         relatedButton = view.findViewById(R.id.btn_tab_related)
+        wordButton.isActivated = true
+        relatedButton.isActivated = false
         setWordButtonOnClick(view)
         setRelatedButtonOnClick(view)
         return view
+    }
+
+    override fun onResume() {
+        super.onResume()
+        //TODO: This might be the place to fix the definition view problem if onViewCreated change doesn't
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val pager = view.rootView.findViewById<ViewPager>(R.id.pager)
         val tabDots = view.rootView.findViewById<TabLayout>(R.id.tab_dots)
         tabDots.setupWithViewPager(pager, true)
-        val fragments = listOf(DefinitionFragment(),
-                VocabularyNoteFragment(),
-                DefinitionNoteFragment())
+        val fragments = if (wordButton.isActivated){
+            wordFragments
+        } else {
+            relatedFragments
+        }
         pager.adapter = ListPagerAdapter(fragmentManager!!,
                 fragments,
-                TabSwitchFragment.WORD_PAGER_ID)
+                WORD_PAGER_ID)
         super.onViewCreated(view, savedInstanceState)
     }
 
     private fun setWordButtonOnClick(view : View){
-        val wordButton = view.findViewById<TextView>(R.id.btn_tab_word)
         wordButton.setOnClickListener {
             val pager = view.rootView.findViewById<ViewPager>(R.id.pager)
             val adapter = pager.adapter as ListPagerAdapter
             if (adapter.id != WORD_PAGER_ID) {
-                val fragments = listOf(DefinitionFragment(),
-                        VocabularyNoteFragment(),
-                        DefinitionNoteFragment())
+                wordButton.isActivated = true
+                relatedButton.isActivated = false
                 val replacementAdapter = ListPagerAdapter(fragmentManager!!,
-                        fragments,
+                        wordFragments,
                         WORD_PAGER_ID)
                 pager.replaceListPagerAdapter(replacementAdapter)
                 relatedButton.setBackgroundColor(
@@ -74,16 +81,22 @@ class TabSwitchFragment : Fragment() {
         }
     }
 
+    private val wordFragments : List<Fragment>
+        get() = listOf(DefinitionFragment(),
+                VocabularyNoteFragment(),
+                DefinitionNoteFragment())
+    private val relatedFragments : List<Fragment>
+        get() = listOf(RelatedFragment(), TagFragment())
+
     private fun setRelatedButtonOnClick(view: View){
-        val relatedButton = view.findViewById<TextView>(R.id.btn_tab_related)
         relatedButton.setOnClickListener {
+            wordButton.isActivated = false
+            relatedButton.isActivated = true
             val pager = view.rootView.findViewById<ViewPager>(R.id.pager)
             val adapter = pager.adapter as ListPagerAdapter
             if (adapter.id != NAVIGATION_PAGER_ID) {
-                val fragments = listOf(RelatedFragment(),
-                                       TagFragment())
                 val replacementAdapter = ListPagerAdapter(fragmentManager!!,
-                                                          fragments,
+                                                          relatedFragments,
                                                           NAVIGATION_PAGER_ID)
                 pager.replaceListPagerAdapter(replacementAdapter)
                 wordButton.setBackgroundColor(

@@ -1,9 +1,10 @@
 package com.limegrass.wanicchou.viewmodel
 
-import data.room.entity.VocabularyNote
+import data.arch.models.INote
+import data.arch.models.IVocabulary
 
 class VocabularyNoteViewModel
-    : ObservableViewModel<List<VocabularyNote>>(){
+    : ObservableViewModel<List<INote<IVocabulary>>>(){
     init {
         value = listOf()
     }
