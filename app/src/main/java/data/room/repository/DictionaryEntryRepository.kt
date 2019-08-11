@@ -8,17 +8,15 @@ import data.arch.util.IRepository
 import data.enums.Dictionary
 import data.enums.Language
 import data.enums.MatchType
-import data.models.DictionaryEntry
 import data.room.database.WanicchouDatabase
 import data.room.dbo.entity.Definition
 import data.room.dbo.entity.Vocabulary
-import data.room.dbo.entity.VocabularyRelation
 import data.room.search.DatabaseSearchStrategyFactory
 import data.web.DictionarySourceFactory
 import kotlinx.coroutines.runBlocking
 
 class DictionaryEntryRepository(private val database : WanicchouDatabase)
-    : IRepository<IDictionaryEntry>, IDictionarySource {
+    : IRepository<IDictionaryEntry, SearchRequest>, IDictionarySource {
 
     override val supportedMatchTypes: Set<MatchType>
         get() = SUPPORTED_MATCH_TYPES
@@ -102,24 +100,4 @@ class DictionaryEntryRepository(private val database : WanicchouDatabase)
         }
     }
 
-//    private suspend fun addVocabularyRelation(searched: Vocabulary,
-//                                              relatedWords: List<Vocabulary>?,
-//                                              matchType: MatchType?) {
-//        if (relatedWords == null || matchType == null) {
-//            return
-//        }
-//        for (relatedVocabulary in relatedWords) {
-//            var relatedVocabularyID = database.vocabularyDao().insert(relatedVocabulary)
-//            if (relatedVocabularyID == -1L){
-//                relatedVocabularyID = database.vocabularyDao().getVocabularyID(relatedVocabulary.word,
-//                                                                               relatedVocabulary.pronunciation,
-//                                                                               relatedVocabulary.language,
-//                                                                               relatedVocabulary.pitch)!!
-//            }
-//            val vocabularyRelation = VocabularyRelation(searched.vocabularyID,
-//                                                        relatedVocabularyID,
-//                                                        matchType)
-//            database.vocabularyRelationDao().insert(vocabularyRelation)
-//        }
-//    }
 }

@@ -1,7 +1,6 @@
 package data.room.repository
 
 import data.arch.util.IRepository
-import data.arch.util.ISearchProvider
 import data.arch.models.INote
 import data.arch.models.IDefinition
 import data.models.Note
@@ -10,8 +9,7 @@ import data.room.dbo.entity.Definition
 import data.room.dbo.entity.DefinitionNote
 
 class DefinitionNoteRepository(private val database : WanicchouDatabase)
-    : IRepository<INote<IDefinition>>,
-        ISearchProvider<List<INote<IDefinition>>, IDefinition> {
+    : IRepository<INote<IDefinition>, IDefinition>  {
 
     override suspend fun search(request: IDefinition): List<INote<IDefinition>> {
         val definitionID = Definition.getDefinitionID(request, database) ?: return listOf()

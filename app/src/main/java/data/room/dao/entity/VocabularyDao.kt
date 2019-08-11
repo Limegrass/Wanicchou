@@ -24,10 +24,10 @@ interface VocabularyDao : BaseDao<Vocabulary> {
         WHERE v.Word = :word
             AND v.Pronunciation = :pronunciation
             AND v.Pitch = :pitch
-            AND v.LanguageID = :wordLanguage
+            AND v.LanguageID = :vocabularyLanguage
     """)
     fun getVocabularyID(word: String,
                         pronunciation: String,
                         pitch: String,
-                        wordLanguage: Language): Long?
+                        vocabularyLanguage: Language): Long?
 }

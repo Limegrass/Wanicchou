@@ -12,19 +12,19 @@ interface DictionaryEntryDao {
     @Query("""
         SELECT *
         FROM Vocabulary v
-        WHERE v.LanguageID = :wordLanguage
+        WHERE v.LanguageID = :vocabularyLanguage
             AND (v.Word LIKE :searchTerm
                 OR v.Pronunciation LIKE :searchTerm)""")
-    fun searchWordLike(searchTerm: String, wordLanguage: Language) : List<DictionaryEntry>
+    fun searchWordLike(searchTerm: String, vocabularyLanguage: Language) : List<DictionaryEntry>
 
     @Transaction
     @Query("""
         SELECT *
         FROM Vocabulary v
-        WHERE v.LanguageID = :wordLanguage
+        WHERE v.LanguageID = :vocabularyLanguage
             AND (v.Word = :searchTerm
                 OR v.Pronunciation = :searchTerm)""")
-    fun searchWordEqual(searchTerm: String, wordLanguage: Language) : List<DictionaryEntry>
+    fun searchWordEqual(searchTerm: String, vocabularyLanguage: Language) : List<DictionaryEntry>
 
     @Transaction
     @Query("""
@@ -42,12 +42,12 @@ interface DictionaryEntryDao {
         FROM Vocabulary v
         LEFT JOIN Definition d
             ON d.VocabularyID = v.VocabularyID
-        WHERE v.LanguageID = :wordLanguage
+        WHERE v.LanguageID = :vocabularyLanguage
             AND d.LanguageID = :definitionLanguage
             AND (v.Word LIKE :searchTerm
                 OR v.Pronunciation LIKE :searchTerm
                 OR d.DefinitionText LIKE :searchTerm)""")
     fun searchWordOrDefinitionLike(searchTerm: String,
-                                   wordLanguage : Language,
+                                   vocabularyLanguage : Language,
                                    definitionLanguage: Language) : List<DictionaryEntry>
 }

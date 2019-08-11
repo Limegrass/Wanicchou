@@ -3,7 +3,6 @@ package data.room.repository
 import data.arch.models.ITaggedItem
 import data.arch.models.IVocabulary
 import data.arch.util.IRepository
-import data.arch.util.ISearchProvider
 import data.room.database.WanicchouDatabase
 import data.room.dbo.composite.VocabularyAndTag
 import data.room.dbo.entity.Tag
@@ -12,8 +11,7 @@ import data.room.dbo.entity.VocabularyTag
 import kotlinx.coroutines.runBlocking
 
 class VocabularyTagRepository(private val database : WanicchouDatabase)
-    : IRepository<ITaggedItem<IVocabulary>>,
-        ISearchProvider<List<ITaggedItem<IVocabulary>>, IVocabulary>{
+    : IRepository<ITaggedItem<IVocabulary>, IVocabulary> {
 
     override suspend fun search(request: IVocabulary): List<ITaggedItem<IVocabulary>> {
         val vocabularyID = Vocabulary.getVocabularyID(request, database) ?: return listOf()

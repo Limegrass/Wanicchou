@@ -1,7 +1,6 @@
 package data.room.repository
 
 import data.arch.util.IRepository
-import data.arch.util.ISearchProvider
 import data.arch.models.INote
 import data.arch.models.IVocabulary
 import data.models.Note
@@ -10,8 +9,7 @@ import data.room.dbo.entity.Vocabulary
 import data.room.dbo.entity.VocabularyNote
 
 class VocabularyNoteRepository(private val database : WanicchouDatabase)
-    : IRepository<INote<IVocabulary>>,
-    ISearchProvider<List<INote<IVocabulary>>, IVocabulary> {
+    : IRepository<INote<IVocabulary>, IVocabulary> {
 
     override suspend fun search(request: IVocabulary): List<INote<IVocabulary>> {
         val vocabularyID = Vocabulary.getVocabularyID(request, database) ?: return listOf()
