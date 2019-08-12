@@ -2,7 +2,7 @@ package data.arch.search
 
 import data.arch.models.IDictionaryEntry
 import data.arch.util.ISearchProvider
-import data.web.DictionarySourceFactory
+import data.web.DictionarySearchProviderFactory
 import java.util.*
 
 /**
@@ -28,7 +28,7 @@ class DictionarySearchBuilder {
     }
 
     fun register(dictionary : data.enums.Dictionary, searchRequest: SearchRequest) {
-        val dictionarySource = DictionarySourceFactory(dictionary).get()
+        val dictionarySource = DictionarySearchProviderFactory(dictionary).get()
         val combination = SearchCombination(dictionarySource, searchRequest)
         searchCombinations.add(combination)
     }

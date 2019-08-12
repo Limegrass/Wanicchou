@@ -1,12 +1,11 @@
 package data.arch.search
 
-import data.arch.models.IDictionaryEntry
-import data.arch.util.ISearchProvider
 import data.enums.Language
 import data.enums.MatchType
-import data.models.DictionaryEntry
+import java.net.URL
 
-interface IDictionarySource : ISearchProvider<List<IDictionaryEntry>, SearchRequest> {
+interface IDictionarySource  {
+    fun buildSearchQueryURL(searchRequest: SearchRequest) : URL
     val supportedMatchTypes : Set<MatchType>
     /**
      * A map of support languages from its source word language to a target definition language

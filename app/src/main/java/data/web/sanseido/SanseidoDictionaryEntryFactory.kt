@@ -1,30 +1,30 @@
 package data.web.sanseido
 
 import data.arch.lang.JapaneseVocabulary
-import data.arch.util.IFactory
+import data.arch.search.jsoup.IJsoupDictionaryEntryFactory
 import data.enums.Dictionary
 import data.enums.Language
 import data.models.Definition
 import data.models.DictionaryEntry
 import data.models.Vocabulary
-import org.jsoup.nodes.Document
+import org.jsoup.nodes.Element
 import java.util.regex.Pattern
 
 // Not great exposing Document to another class, but allows it to be testable and
 // theoretically there are other ways to generate Jsoup documents.
-class SanseidoDictionaryEntryFactory (private val document : Document,
-                                      private val wordLanguage: Language,
-                                      private val definitionLanguage: Language)
-    : IFactory<List<DictionaryEntry>> {
+class SanseidoDictionaryEntryFactory
+    : IJsoupDictionaryEntryFactory {
 
-    override fun get(): List<DictionaryEntry> {
-        val searchWordSource = document.getElementById(SANSEIDO_WORD_ID).text()
-        val vocabulary = getVocabulary(searchWordSource, wordLanguage)
+    override fun getDictionaryEntries(element : Element,
+                                      vocabularyLanguage: Language,
+                                      definitionLanguage: Language): List<DictionaryEntry> {
+        val searchWordSource = element.getElementById(SANSEIDO_WORD_ID).text()
+        val vocabulary = getVocabulary(searchWordSource, vocabularyLanguage)
         if (vocabulary.word == ""){
             return listOf()
         }
-        val definition = getDefinition(document, definitionLanguage)
-        val relatedVocabulary = getRelatedVocabulary(document, wordLanguage)
+        val definition = getDefinition(element, definitionLanguage)
+        val relatedVocabulary = getRelatedVocabulary(element, vocabularyLanguage)
         val relatedDictionaryEntries = relatedVocabulary.map {
             DictionaryEntry(it)
         }
@@ -121,9 +121,9 @@ class SanseidoDictionaryEntryFactory (private val document : Document,
     }
     //</editor-fold>
     //<editor-fold desc="Definition">
-    private fun getDefinition(htmlDocument: Document,
+    private fun getDefinition(element: Element,
                               definitionLanguage: Language) : Definition {
-        val definitionSource = getDefinitionSource(htmlDocument)
+        val definitionSource = getDefinitionSource(element)
         val definition = formatDefinitionSource(definitionSource)
         return Definition(definition,
                 definitionLanguage,
@@ -142,8 +142,8 @@ class SanseidoDictionaryEntryFactory (private val document : Document,
         return formattedDefinition.trim()
     }
 
-    private fun getDefinitionSource(html : Document) : String {
-        val definitionParentElement = html.getElementById(SANSEIDO_WORD_DEFINITION_ID)
+    private fun getDefinitionSource(element : Element) : String {
+        val definitionParentElement = element.getElementById(SANSEIDO_WORD_DEFINITION_ID)
         return if (definitionParentElement.children().size > 0) {
             definitionParentElement.child(0).text()
         }
@@ -154,10 +154,10 @@ class SanseidoDictionaryEntryFactory (private val document : Document,
     //</editor-fold>
 
     //<editor-fold desc="Related Vocabulary">
-    private fun getRelatedVocabulary(document: Document,
+    private fun getRelatedVocabulary(element: Element,
                                      wordLanguage : Language): List<Vocabulary> {
         val relatedWordEntries = ArrayList<Vocabulary>()
-        val table = document.select("table")[RELATED_WORDS_TABLE_INDEX]
+        val table = element.select("table")[RELATED_WORDS_TABLE_INDEX]
         val rows = table.select("tr")
 
         for (row in rows) {

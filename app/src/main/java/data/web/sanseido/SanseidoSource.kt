@@ -1,8 +1,10 @@
 package data.web.sanseido
 
 import android.net.Uri
-import data.arch.search.JsoupDictionarySource
+import data.arch.models.IDictionaryEntry
+import data.arch.search.IDictionarySource
 import data.arch.search.SearchRequest
+import data.arch.util.IFactory
 import data.enums.Language
 import data.enums.MatchType
 import data.models.DictionaryEntry
@@ -10,16 +12,7 @@ import org.jsoup.nodes.Document
 import java.net.MalformedURLException
 import java.net.URL
 
-class SanseidoSource
-    : JsoupDictionarySource() {
-
-    override fun getDictionaryEntry(document: Document, searchRequest: SearchRequest): List<DictionaryEntry> {
-        val dictionaryEntryFactory = SanseidoDictionaryEntryFactory(document,
-                                                                    searchRequest.wordLanguage,
-                                                                    searchRequest.definitionLanguage)
-        return dictionaryEntryFactory.get()
-    }
-
+class SanseidoSource : IDictionarySource {
     override val supportedMatchTypes: Set<MatchType>
         get() = SUPPORTED_MATCH_TYPES.keys
 
@@ -27,15 +20,12 @@ class SanseidoSource
         get() = SUPPORTED_TRANSLATIONS
 
     @Throws(MalformedURLException::class)
-    override fun buildQueryURL(searchTerm: String,
-                               wordLanguage: Language,
-                               definitionLanguage: Language,
-                               matchType: MatchType): URL {
+    override fun buildSearchQueryURL(searchRequest : SearchRequest): URL {
         val uriBuilder = Uri.parse(SANSEIDO_BASE_URL).buildUpon()
-        uriBuilder.setSearchType(matchType)
-        uriBuilder.setSearchTerm(searchTerm)
+        uriBuilder.setSearchType(searchRequest.matchType)
+        uriBuilder.setSearchTerm(searchRequest.searchTerm)
         uriBuilder.setDictionaryOrder(DORDER_DEFAULT)
-        uriBuilder.setQueryLanguage(wordLanguage, definitionLanguage)
+        uriBuilder.setQueryLanguage(searchRequest.vocabularyLanguage, searchRequest.definitionLanguage)
         return URL(uriBuilder.build().toString())
     }
 
