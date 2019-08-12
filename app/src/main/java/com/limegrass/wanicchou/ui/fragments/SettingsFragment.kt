@@ -13,7 +13,7 @@ import com.limegrass.wanicchou.enums.AutoDelete
 import data.enums.Dictionary
 import data.enums.Language
 import data.enums.MatchType
-import data.web.DictionarySourceFactory
+import data.web.DictionarySearchProviderFactory
 
 class SettingsFragment : PreferenceFragmentCompat(),
                          SharedPreferences.OnSharedPreferenceChangeListener {
@@ -40,7 +40,7 @@ class SettingsFragment : PreferenceFragmentCompat(),
 
     private val dictionaryMatchTypePreference : ListPreference by lazy {
         val preference = ListPreference(fragmentContext)
-        val webPage = DictionarySourceFactory(dictionary).get()
+        val webPage = DictionarySearchProviderFactory(dictionary).get()
         val matchTypes = webPage.supportedMatchTypes
         preference.entries = matchTypes.map{
             val id = fragmentContext.resources.getIdentifier("MATCH_TYPE_${it.name}",
@@ -125,7 +125,7 @@ class SettingsFragment : PreferenceFragmentCompat(),
             return Dictionary.getDictionary(dictionaryID)
         }
     private val webPage : IDictionarySource
-        get() = DictionarySourceFactory(dictionary).get()
+        get() = DictionarySearchProviderFactory(dictionary).get()
 
     private val vocabularyLanguage : Language
         get() {

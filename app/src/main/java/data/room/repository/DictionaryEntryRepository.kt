@@ -2,31 +2,20 @@ package data.room.repository
 
 import androidx.annotation.WorkerThread
 import data.arch.models.IDictionaryEntry
-import data.arch.search.IDictionarySource
 import data.arch.search.SearchRequest
 import data.arch.util.IRepository
-import data.enums.Dictionary
-import data.enums.Language
-import data.enums.MatchType
 import data.room.database.WanicchouDatabase
 import data.room.dbo.entity.Definition
 import data.room.dbo.entity.Vocabulary
 import data.room.search.DatabaseSearchStrategyFactory
-import data.web.DictionarySourceFactory
 import kotlinx.coroutines.runBlocking
 
 class DictionaryEntryRepository(private val database : WanicchouDatabase)
-    : IRepository<IDictionaryEntry, SearchRequest>, IDictionarySource {
-
-    override val supportedMatchTypes: Set<MatchType>
-        get() = SUPPORTED_MATCH_TYPES
-    override val supportedTranslations: Map<Language, Set<Language>>
-        get() = SUPPORTED_TRANSLATIONS
+    : IRepository<IDictionaryEntry, SearchRequest> {
 
     @WorkerThread
     override suspend fun search(request: SearchRequest) : List<IDictionaryEntry> {
         val searchStrategy = DatabaseSearchStrategyFactory(request.matchType).get()
-        //TODO: Add RelatedVocabulary
         return searchStrategy.search(database, request)
     }
 
@@ -81,23 +70,4 @@ class DictionaryEntryRepository(private val database : WanicchouDatabase)
             database.definitionDao().delete(definitionEntity)
         }
     }
-
-    companion object {
-        private val SUPPORTED_MATCH_TYPES = MatchType.values().toSet()
-        private val SUPPORTED_TRANSLATIONS by lazy {
-            val translations = mutableMapOf<Language, MutableSet<Language>>()
-            for (dictionary in Dictionary.values()) {
-                val dictionarySource = DictionarySourceFactory(dictionary).get()
-                for (key in dictionarySource.supportedTranslations.keys) {
-                    if (!translations.containsKey(key)){
-                        translations[key] = mutableSetOf()
-                    }
-                    translations.getValue(key)
-                            .addAll(dictionarySource.supportedTranslations.getValue(key))
-                }
-            }
-            translations
-        }
-    }
-
 }

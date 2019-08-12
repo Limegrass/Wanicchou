@@ -10,8 +10,6 @@ import data.models.Vocabulary
 import org.jsoup.nodes.Element
 import java.util.regex.Pattern
 
-// Not great exposing Document to another class, but allows it to be testable and
-// theoretically there are other ways to generate Jsoup documents.
 class SanseidoDictionaryEntryFactory
     : IJsoupDictionaryEntryFactory {
 

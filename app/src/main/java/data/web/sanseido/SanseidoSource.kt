@@ -1,14 +1,10 @@
 package data.web.sanseido
 
 import android.net.Uri
-import data.arch.models.IDictionaryEntry
 import data.arch.search.IDictionarySource
 import data.arch.search.SearchRequest
-import data.arch.util.IFactory
 import data.enums.Language
 import data.enums.MatchType
-import data.models.DictionaryEntry
-import org.jsoup.nodes.Document
 import java.net.MalformedURLException
 import java.net.URL
 
