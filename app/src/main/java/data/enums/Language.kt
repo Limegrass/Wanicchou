@@ -6,7 +6,6 @@ enum class Language {
     JAPANESE,
     ENGLISH;
 
-    //TODO: Don't expose IDs
     val languageID : Long
         get() {
         return when (this) {

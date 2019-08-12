@@ -3,7 +3,6 @@ package data.enums
 enum class Dictionary {
     SANSEIDO;
 
-    //TODO: Don't expose IDs
     val dictionaryID : Long
         get() {
             return when (this) {
