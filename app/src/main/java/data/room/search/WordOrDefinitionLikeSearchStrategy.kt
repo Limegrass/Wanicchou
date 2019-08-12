@@ -12,7 +12,7 @@ class WordOrDefinitionLikeSearchStrategy : IDatabaseSearchStrategy {
         val formattedSearchTerm = templateString.format(searchRequest.searchTerm)
         val dao = database.dictionaryEntryDao()
         return dao.searchWordOrDefinitionLike(formattedSearchTerm,
-                                              searchRequest.wordLanguage,
+                                              searchRequest.vocabularyLanguage,
                                               searchRequest.definitionLanguage)
     }
 }

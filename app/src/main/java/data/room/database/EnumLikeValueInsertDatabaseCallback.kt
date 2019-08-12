@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
 import data.room.dbo.entity.*
-import data.web.DictionarySourceFactory
+import data.web.DictionarySearchProviderFactory
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -59,7 +59,7 @@ class EnumLikeValueInsertDatabaseCallback(private val context : Context) : RoomD
     private fun insertDictionaryMatchTypes(database: WanicchouDatabase){
         for (dictionary in data.enums.Dictionary.values()){
             GlobalScope.launch {
-                val webPage = DictionarySourceFactory(dictionary).get()
+                val webPage = DictionarySearchProviderFactory(dictionary).get()
                 val matchTypeIDs = webPage.supportedMatchTypes
                 for (matchType in matchTypeIDs) {
                     val dictionaryMatchType = DictionaryMatchType(dictionary,

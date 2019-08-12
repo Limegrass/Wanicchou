@@ -12,5 +12,5 @@ internal class WordLikeDatabaseSearchStrategy : IDatabaseSearchStrategy {
         val formattedSearchTerm = templateString.format(searchRequest.searchTerm)
         val dao = database.dictionaryEntryDao()
         return dao.searchWordLike(formattedSearchTerm,
-                                  searchRequest.wordLanguage) }
+                                  searchRequest.vocabularyLanguage) }
 }

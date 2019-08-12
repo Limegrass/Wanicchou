@@ -27,7 +27,6 @@ import data.room.dbo.entity.*
             Dictionary::class,
             Tag::class,
             VocabularyNote::class,
-            VocabularyRelation::class,
             VocabularyTag::class,
             MatchType::class,
             DictionaryMatchType::class,
@@ -46,7 +45,6 @@ abstract class WanicchouDatabase : RoomDatabase() {
     abstract fun tagDao(): TagDao
     abstract fun vocabularyDao(): VocabularyDao
     abstract fun vocabularyNoteDao(): VocabularyNoteDao
-    abstract fun vocabularyRelationDao(): VocabularyRelationDao
     abstract fun vocabularyTagDao(): VocabularyTagDao
     abstract fun matchTypeDao(): MatchTypeDao
     abstract fun dictionaryMatchTypeDao(): DictionaryMatchTypeDao
