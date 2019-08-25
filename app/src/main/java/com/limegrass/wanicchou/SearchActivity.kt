@@ -3,6 +3,7 @@ package com.limegrass.wanicchou
 import android.app.SearchManager
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import android.os.Bundle
 import android.util.Log
@@ -20,6 +21,13 @@ import com.limegrass.wanicchou.viewmodel.DictionaryEntryViewModel
 import data.arch.search.SearchRequest
 import com.limegrass.wanicchou.enums.AutoDelete
 import com.limegrass.wanicchou.util.WanicchouSearchManager
+import com.limegrass.wanicchou.viewmodel.DefinitionNoteViewModel
+import com.limegrass.wanicchou.viewmodel.TagViewModel
+import com.limegrass.wanicchou.viewmodel.VocabularyNoteViewModel
+import data.anki.AnkiDroidApi
+import data.anki.AnkiDroidConfig
+import data.anki.AnkiDroidHelper
+import data.anki.WanicchouAnkiEntry
 import data.arch.models.IDictionaryEntry
 import data.arch.search.DictionarySearchBuilder
 import data.arch.util.IRepository
@@ -54,6 +62,11 @@ class SearchActivity
         private val TAG: String = SearchActivity::class.java.simpleName
     }
 
+    private val ankiDroidHelper : AnkiDroidHelper by lazy {
+        val ankiDroidApi = AnkiDroidApi(this)
+        AnkiDroidHelper(this, this, ankiDroidApi, AnkiDroidConfig)
+    }
+
     private lateinit var menu : Menu
 
     private val dictionaryEntryViewModel: DictionaryEntryViewModel by lazy {
@@ -73,7 +86,57 @@ class SearchActivity
     private var toast: Toast? = null
     //</editor-fold>
 
+    //TODO: Move all of this somewhere so it's not repeated
+    private val vocabularyNoteViewModel : VocabularyNoteViewModel by lazy {
+        ViewModelProviders.of(this)
+                .get(VocabularyNoteViewModel::class.java)
+    }
+    private val definitionNoteViewModel : DefinitionNoteViewModel by lazy {
+        ViewModelProviders.of(this)
+                .get(DefinitionNoteViewModel::class.java)
+    }
+    private val tagViewModel : TagViewModel by lazy {
+        ViewModelProviders.of(this)
+                .get(TagViewModel::class.java)
+    }
+    private fun getNotes() : List<String>{
+        val notes = vocabularyNoteViewModel.value!!.map{
+            it.noteText
+        }.toMutableList()
+        notes.addAll(definitionNoteViewModel.value!!.map{ it.noteText })
+        return notes
+    }
+
     //<editor-fold desc="Activity LifeCycle">
+    override fun onRequestPermissionsResult(requestCode: Int,
+                                            permissions: Array<out String>,
+                                            grantResults: IntArray) {
+        if (requestCode == AnkiDroidHelper.ANKI_PERMISSION_REQUEST_CALLBACK_CODE
+                && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            val dictionaryEntry = dictionaryEntryViewModel.value
+            if(dictionaryEntry != null){
+                val ankiEntry = WanicchouAnkiEntry(dictionaryEntry.vocabulary,
+                        dictionaryEntry.definitions[0],
+                        getNotes())
+                val tags = tagViewModel.value!!.map{ it.tag }.toSet()
+                ankiDroidHelper.addUpdateNote(ankiEntry, tags)
+                val word = dictionaryEntry.vocabulary.word
+                val message = getString(R.string.anki_added_toast, word)
+                Toast.makeText(this,
+                        message,
+                        Toast.LENGTH_LONG).show()
+
+                if (sharedPreferences.autoDelete == AutoDelete.ON_ANKI_IMPORT){
+                    GlobalScope.launch (Dispatchers.IO) {
+                        repository.delete(dictionaryEntry)
+                    }
+                }
+            }
+        } else {
+            showToast(getString(R.string.permissions_denied_toast))
+        }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_wanicchou)

@@ -1,94 +1,172 @@
 package data.anki
 
-import java.util.*
+import data.enums.Dictionary
+import data.enums.Language
+import data.models.Definition
+import data.models.Vocabulary
 
 /**
  * Defines the structure of cards imported to AnkiDroid from Wanicchou
  * Modified AnkiDroidConfig modelled from  from 'ankidroid/apisample'
  */
-object AnkiDroidConfig {
+object AnkiDroidConfig : IAnkiDroidConfig<WanicchouAnkiEntry> {
+    override val frontSideKey: String
+        get() = "Word"
+    override val backSideKey: String
+        get() = "Definition"
 
-    const val DECK_NAME = "Wanicchou"
-    const val MODEL_NAME = "wanicchou"
+    override fun mapFromNoteFields(fields : Array<String>): WanicchouAnkiEntry {
+        val vocabularyLanguage = Language.values().single {
+            it.languageCode == fields[fieldMapping.getValue(VOCABULARY_LANGUAGE_KEY)]
+        }
+        val vocabulary = Vocabulary(fields[fieldMapping.getValue(WORD_KEY)],
+                fields[fieldMapping.getValue(PRONUNCIATION_KEY)],
+                fields[fieldMapping.getValue(PITCH_KEY)],
+                vocabularyLanguage)
 
-    // Optional space separated list of tags to add to every noteText
-    val TAGS : Set<String> = HashSet<String>(listOf("Wanicchou"))
+        val definitionLanguage = Language.values().single {
+            it.languageCode == fields[fieldMapping.getValue(DEFINITION_LANGUAGE_KEY)]
+        }
 
-    // List of field names that will be used in AnkiDroid model
-    val FIELDS = arrayOf("Word",
-                        "Word Language",
-                        "Definition",
-                        "Definition Language",
-                        "Dictionary",
-                        "Pronunciation",
-                        "Pitch",
-                        "Furigana",
-                        "Notes")
+        val dictionary = Dictionary.values().single {
+            it.dictionaryName == fields[fieldMapping.getValue(DICTIONARY_KEY)]
+        }
+        val definition = Definition(fields[fieldMapping.getValue(DEFINITION_TEXT_KEY)],
+                definitionLanguage,
+                dictionary)
+        val notes = fields[fieldMapping.getValue(NOTES_KEY)].split(NOTES_DELIMITER)
+        return WanicchouAnkiEntry(vocabulary, definition, notes)
+    }
 
-    const val FIELDS_INDEX_WORD = 0
-    const val FIELDS_INDEX_WORD_LANGUAGE = 1
-    const val FIELDS_INDEX_DEFINITION = 2
-    const val FIELDS_INDEX_DEFINITION_LANGUAGE = 3
-    const val FIELDS_INDEX_DICTIONARY = 4
-    const val FIELDS_INDEX_PRONUNCIATION = 5
-    const val FIELDS_INDEX_PITCH = 6
-    const val FIELDS_INDEX_FURIGANA = 7
-    const val FIELDS_INDEX_NOTES = 8
+    private const val NOTES_DELIMITER : String = "\n" + 0x0
 
-    // List of card names that will be used in AnkiDroid (one for each direction of learning)
-    val CARD_NAMES = arrayOf("Word > Pronunciation", "Word > Definition")
+    override fun mapToNoteFields(noteEntry: WanicchouAnkiEntry): Array<String> {
+        val word = noteEntry.vocabulary.word
+        val pronunciation = noteEntry.vocabulary.pronunciation
+        val furigana = getFurigana(word, pronunciation)
 
-    const val CSS = """
-.card {
-    font-family: 'NotoSansJP';
-    font-size: 24px;
-    text-align: center;
-    color: white;
-    background-color: #202020;
-    word-wrap: break-word;
-}
+        val fields = Array(fieldMapping.size){ "" }
+        fields[fieldMapping.getValue(WORD_KEY)] =                word
+        fields[fieldMapping.getValue(VOCABULARY_LANGUAGE_KEY)] = noteEntry.vocabulary.language.languageCode
+        fields[fieldMapping.getValue(DEFINITION_TEXT_KEY)] =     noteEntry.definition.definitionText
+        fields[fieldMapping.getValue(DEFINITION_LANGUAGE_KEY)] = noteEntry.definition.language.languageCode
+        fields[fieldMapping.getValue(DICTIONARY_KEY)] =          noteEntry.definition.dictionary.dictionaryName
+        fields[fieldMapping.getValue(PRONUNCIATION_KEY)] =       pronunciation
+        fields[fieldMapping.getValue(PITCH_KEY)] =               noteEntry.vocabulary.pitch
+        fields[fieldMapping.getValue(FURIGANA_KEY)] =            furigana
+        fields[fieldMapping.getValue(NOTES_KEY)] =               noteEntry.notes.joinToString(NOTES_DELIMITER)
+        return fields
+    }
 
-@font-face {
-    font-family: 'NotoSansJP';
-    src: url('_NotoSansJP-Regular.otf');
-}
+    override val sortField: Int?
+        get() = null
 
-@font-face {
-    font-family: 'NotoSansJP';
-    src: url('_NotoSansJP-Bold.otf');
-    font-weight: bold;
-}
+    override val deckName: String
+        get() = "Wanicchou"
+    override val modelName: String
+        get() = "wanicchou"
 
-.big {
-    font-size: 24px;
-}
+    override val fields: Array<String>
+        get() {
+            val fields = Array(fieldMapping.size){ "" }
+            for ((fieldName, index) in fieldMapping){
+                fields[index] = fieldName
+            }
+            return fields
+        }
 
-.small {
-    font-size: 12px;
-}
+    private const val WORD_KEY = "Word"
+    private const val VOCABULARY_LANGUAGE_KEY = "Word Language"
+    private const val DEFINITION_TEXT_KEY = "Definition"
+    private const val DEFINITION_LANGUAGE_KEY = "Definition Language"
+    private const val DICTIONARY_KEY = "Dictionary"
+    private const val PRONUNCIATION_KEY = "Pronunciation"
+    private const val PITCH_KEY = "Pitch"
+    private const val FURIGANA_KEY = "Furigana"
+    private const val NOTES_KEY = "Notes"
 
-.highlight {
-    color: #247E80
-}
+    private fun getFurigana(word: String, pronunciation: String): String {
+        return if (word == pronunciation) {
+            pronunciation
+        } else "$word[$pronunciation]"
+    }
 
-ruby rt {
-    visibility: hidden;
-}
-ruby:hover rt {
-    visibility: visible;
-}"""
-    // Template for the question of each card
+    private val fieldMapping : Map<String, Int>
+        get() = mapOf(WORD_KEY to 0,
+                      VOCABULARY_LANGUAGE_KEY to 1,
+                      DEFINITION_TEXT_KEY to 2,
+                      DEFINITION_LANGUAGE_KEY to 3,
+                      DICTIONARY_KEY to 4,
+                      PRONUNCIATION_KEY to 5,
+                      PITCH_KEY to 6,
+                      FURIGANA_KEY to 7,
+                      NOTES_KEY to 8)
+
+    override val cardFormats: List<CardFormat>
+        get() = listOf(pronunciationFormat, definitionFormat)
+
     //TODO: Add a clozed  type option where they can edit the clozed word through UI
-    private const val QFMT1 = "<div class=\"big highlight\">{{Word}}:読み方</div>"
-    private const val QFMT2 = "<div class=big>{{furigana:Furigana}}:意味</div>"
-    val QFMT = arrayOf(QFMT1, QFMT2)
+    private val pronunciationFormat = CardFormat("Word > Pronunciation",
+            """<div class="big highlight">{{Word}}:読み方</div>""",
+            """
+                {{FrontSide}}
+                <br>
+                <hr id=answer>
+                <br>
+                {{Pronunciation}}
+                <br>
+                <div class=extra>{{Definition}}
+            """.trimIndent())
+    private val definitionFormat = CardFormat("Word > Definition",
+            """<div class=big>{{furigana:Furigana}}:意味</div>""",
+            """
+                {{FrontSide}}
+                <br>
+                <hr id=answer>
+                <br>
+                {{Definition}}
+            """.trimIndent())
 
-    // Template for the answer (use identical for both sides)
-    private const val AFMT1 = "{{FrontSide}}\n<br>\n<hr id=answer>\n<br>\n{{Pronunciation}}\n<br>\n" + "<div class=extra>{{Definition}}"
-    private const val AFMT2 = "{{FrontSide}}\n<br>\n<hr id=answer>\n<br>\n" + "{{Definition}}"
-    val AFMT = arrayOf(AFMT1, AFMT2)
+    override val css: String
+        get() = """
+                .card {
+                    font-family: 'NotoSansJP';
+                    font-size: 24px;
+                    text-align: center;
+                    color: white;
+                    background-color: #202020;
+                    word-wrap: break-word;
+                }
 
-    // Define two keys which will be used when using legacy ACTION_SEND intent
-    val FRONT_SIDE_KEY = FIELDS[FIELDS_INDEX_WORD]  //Kanji
-    val BACK_SIDE_KEY = FIELDS[FIELDS_INDEX_DEFINITION]   //Definition
+                @font-face {
+                    font-family: 'NotoSansJP';
+                    src: url('_NotoSansJP-Regular.otf');
+                }
+
+                @font-face {
+                    font-family: 'NotoSansJP';
+                    src: url('_NotoSansJP-Bold.otf');
+                    font-weight: bold;
+                }
+
+                .big {
+                    font-size: 24px;
+                }
+
+                .small {
+                    font-size: 12px;
+                }
+
+                .highlight {
+                    color: #247E80
+                }
+
+                ruby rt {
+                    visibility: hidden;
+                }
+                ruby:hover rt {
+                    visibility: visible;
+                }
+                """.trimIndent()
+
 }

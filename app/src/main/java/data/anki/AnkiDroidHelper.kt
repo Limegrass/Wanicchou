@@ -1,29 +1,29 @@
 package data.anki
-
 import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import android.util.SparseArray
 import com.ichi2.anki.api.AddContentApi
 import com.ichi2.anki.api.AddContentApi.READ_WRITE_PERMISSION
-import com.ichi2.anki.api.NoteInfo
 import java.util.*
 
 /**
  * Interface between Wanicchou and the AnkiDroid api.
  */
-class AnkiDroidHelper(context: Context) {
+class AnkiDroidHelper(context : Context,
+                      private val callbackActivity : Activity,
+                      private val api : IAnkiDroidApi,
+                      private val configuration : IAnkiDroidConfig<WanicchouAnkiEntry>) {
     //<editor-fold desc="Fields/Properties">
     companion object {
+        const val ANKI_PERMISSION_REQUEST_CALLBACK_CODE : Int = 420
         private const val SHARED_PREF_DECK_DB = "com.ichi2.anki.api.decks"
         private const val SHARED_PREF_MODEL_DB = "com.ichi2.anki.api.models"
     }
 
-    private val mContext: Context = context.applicationContext
-    private val api: AddContentApi = AddContentApi(mContext)
+    private val applicationContext = context.applicationContext
 
     /**
      * Checks for the DeckID in sharedPref, then in AnkiDroid
@@ -33,26 +33,21 @@ class AnkiDroidHelper(context: Context) {
     private val wanicchouDeckID: Long
         get() {
             //Check shared preferences, then AnkiDroid for a valid deckID
-            var deckID : Long? = sharedPreferencesDeckID
-            val deckIDisNotInAnkiDroid = api.getDeckName(deckID).isNullOrBlank()
-            if(deckIDisNotInAnkiDroid){
-                deckID = ankiDeckID
+            val deckIDFromSharedPreferences = sharedPreferencesDeckID
+            val deckNameFromSharedPreferenceID = api.getDeckName(deckIDFromSharedPreferences)
+            if(!deckNameFromSharedPreferenceID.isNullOrBlank()){
+                return deckIDFromSharedPreferences
             }
-
-            //If none are found, add a deck and return that deck
-            if (deckID == null) {
-                deckID = api.addNewDeck(AnkiDroidConfig.DECK_NAME)
-                storeDeckReference(AnkiDroidConfig.DECK_NAME, deckID!!)
-            }
-            return deckID
-
+            val addedDeckID = api.addNewDeck(configuration.deckName)
+            storeDeckReference(configuration.deckName, addedDeckID)
+            return addedDeckID
         }
 
     private val sharedPreferencesDeckID : Long
     get() {
-        val sharedPreferencesDecks = mContext.getSharedPreferences(SHARED_PREF_DECK_DB,
+        val sharedPreferencesDecks = applicationContext.getSharedPreferences(SHARED_PREF_DECK_DB,
                 Context.MODE_PRIVATE)
-        return sharedPreferencesDecks.getLong(AnkiDroidConfig.DECK_NAME, -1)
+        return sharedPreferencesDecks.getLong(configuration.deckName, -1)
     }
 
     /**
@@ -61,18 +56,10 @@ class AnkiDroidHelper(context: Context) {
      */
     private val wanicchouModelID: Long
         get() {
-            var modelID = findModelIDByName(AnkiDroidConfig.MODEL_NAME, AnkiDroidConfig.FIELDS.size)
-            val sortField = null
+            var modelID = findModelIDByName(configuration.modelName, configuration.fields.size)
             if (modelID == null) {
-                modelID = api.addNewCustomModel(AnkiDroidConfig.MODEL_NAME,
-                        AnkiDroidConfig.FIELDS,
-                        AnkiDroidConfig.CARD_NAMES,
-                        AnkiDroidConfig.QFMT,
-                        AnkiDroidConfig.AFMT,
-                        AnkiDroidConfig.CSS,
-                        wanicchouDeckID,
-                        sortField)
-                storeModelReference(AnkiDroidConfig.MODEL_NAME, modelID!!)
+                modelID = api.addNewCustomModel(configuration, wanicchouDeckID)
+                storeModelReference(configuration.modelName, modelID)
             }
             return modelID
         }
@@ -85,121 +72,67 @@ class AnkiDroidHelper(context: Context) {
      * @return true if the API is available to use
      */
     fun isApiAvailable(): Boolean {
-        return AddContentApi.getAnkiDroidPackageName(mContext) != null
+        return AddContentApi.getAnkiDroidPackageName(applicationContext) != null
+    }
+
+    private fun shouldRequestPermission(): Boolean {
+        val currentBuildVersion = Build.VERSION.SDK_INT
+        val firstBuildRequiringPermissions = Build.VERSION_CODES.M
+        val isBuildWithPermissionRequired = currentBuildVersion >= firstBuildRequiringPermissions
+        return isBuildWithPermissionRequired &&
+                (ContextCompat.checkSelfPermission(applicationContext, READ_WRITE_PERMISSION)
+                        != PackageManager.PERMISSION_GRANTED)
     }
 
     /**
-     * Whether or not we should request full access to the AnkiDroid API
+     * The callbackActivity must implement onRequestPermissionResult and include the callback code.
      */
-    fun shouldRequestPermission(): Boolean {
-        return if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            false
-        } else {
-            (ContextCompat.checkSelfPermission(mContext, READ_WRITE_PERMISSION)
-                    != PackageManager.PERMISSION_GRANTED)
-        }
-    }
-
-    /**
-     * Request permission from the user to access the AnkiDroid API (for SDK 23+)
-     * @param callbackActivity An Activity which implements onRequestPermissionsResult()
-     * @param callbackCode The callback code to be used in onRequestPermissionsResult()
-     */
-    fun requestPermission(callbackActivity: Activity, callbackCode: Int) {
+    private fun requestPermission() {
         ActivityCompat.requestPermissions(callbackActivity,
                 arrayOf(READ_WRITE_PERMISSION),
-                callbackCode)
+                ANKI_PERMISSION_REQUEST_CALLBACK_CODE)
+    }
+
+    private fun getExistingNoteID(ankiEntry: WanicchouAnkiEntry) : Long? {
+        val existingNotes = api.findDuplicateNotes(wanicchouModelID, ankiEntry.vocabulary.word)
+        for (note in existingNotes) {
+            val entryFromNote = configuration.mapFromNoteFields(note.fields)
+            //All existing notes already have same word
+            if (entryFromNote.vocabulary.language == ankiEntry.vocabulary.language
+                    && entryFromNote.definition.language == ankiEntry.definition.language
+                    && entryFromNote.definition.dictionary == ankiEntry.definition.dictionary
+                    && entryFromNote.vocabulary.pronunciation == ankiEntry.vocabulary.pronunciation
+                    && entryFromNote.definition.definitionText == ankiEntry.definition.definitionText) {
+                return note.id
+            }
+        }
+        return null
     }
 
     // Attempts to find existing noteText and update it if it exists, else add it
-    fun addUpdateNote(word : String,
-                      pronunciation: String,
-                      pitch: String,
-                      wordLanguageCode: String,
-                      definitionText: String,
-                      definitionLanguageCode : String,
-                      dictionaryName: String,
-                      notes: List<String>,
-                      tags: Set<String>): List<Long> {
-        val existingNotes = findDuplicateNotes(wanicchouModelID, word)
-        val noteIDs: MutableList<Long> = mutableListOf()
-
-        var isExisting = false
-        var existingNoteID : Long? = null
-        for (note in existingNotes) {
-            val noteWordLanguage = note.fields[AnkiDroidConfig.FIELDS_INDEX_WORD_LANGUAGE]
-            val noteDefinitionLanguage = note.fields[AnkiDroidConfig.FIELDS_INDEX_DEFINITION_LANGUAGE]
-            val noteDictionary = note.fields[AnkiDroidConfig.FIELDS_INDEX_DICTIONARY]
-            val notePronunciation = note.fields[AnkiDroidConfig.FIELDS_INDEX_PRONUNCIATION]
-            val noteDefinition = note.fields[AnkiDroidConfig.FIELDS_INDEX_DEFINITION]
-            //All existing notes already have same word
-            if (noteWordLanguage == wordLanguageCode
-                    && noteDefinitionLanguage == definitionLanguageCode
-                    && noteDictionary == dictionaryName
-                    && notePronunciation == pronunciation
-                    && noteDefinition == definitionText)
-            {
-                isExisting = true
-                existingNoteID = note.id
-            }
+    fun addUpdateNote(ankiEntry : WanicchouAnkiEntry,
+                      tags: Set<String>): Long {
+        if(shouldRequestPermission()){
+            requestPermission()
         }
-
-        if(isExisting){
-            updateNoteFields(existingNoteID!!,
-                             word,
-                             pronunciation,
-                             pitch,
-                             wordLanguageCode,
-                             definitionText,
-                             definitionLanguageCode,
-                             dictionaryName,
-                             notes)
-            updateNoteTags(existingNoteID, tags)
-            noteIDs.add(existingNoteID)
+        val existingNoteID = getExistingNoteID(ankiEntry)
+        val fields = configuration.mapToNoteFields(ankiEntry)
+        return if (existingNoteID == null){
+            api.addNote(wanicchouModelID, wanicchouDeckID, fields, tags)
         }
-        else {
-            val addedNoteID = addNote(word,
-                                      pronunciation,
-                                      pitch,
-                                      wordLanguageCode,
-                                      definitionText,
-                                      definitionLanguageCode,
-                                      dictionaryName,
-                                      notes,
-                                      tags)
-            noteIDs.add(addedNoteID)
+        else{
+            api.updateNoteFields(existingNoteID, fields)
+            api.updateNoteTags(existingNoteID, tags)
+            existingNoteID
         }
-        return noteIDs
     }
     //</editor-fold>
-
-
-    private fun addNote(word: String,
-                        pronunciation: String,
-                        pitch: String,
-                        wordLanguageCode: String,
-                        definitionText: String,
-                        definitionLanguageCode: String,
-                        dictionary: String,
-                        notes: List<String>,
-                        tags: Set<String>): Long {
-        val fields = getFieldsArray(word,
-                                    pronunciation,
-                                    pitch,
-                                    wordLanguageCode,
-                                    definitionText,
-                                    definitionLanguageCode,
-                                    dictionary,
-                                    notes)
-        return api.addNote(wanicchouModelID, wanicchouDeckID, fields, tags)
-    }
-
 
     /**
      * Save a mapping from deckName to getDeckId in the SharedPreferences
      */
     private fun storeDeckReference(deckName: String, deckId: Long) {
-        val decksDb = mContext.getSharedPreferences(SHARED_PREF_DECK_DB, Context.MODE_PRIVATE)
+        val decksDb = applicationContext.getSharedPreferences(SHARED_PREF_DECK_DB, Context.MODE_PRIVATE)
         decksDb.edit().putLong(deckName, deckId).apply()
     }
 
@@ -207,7 +140,7 @@ class AnkiDroidHelper(context: Context) {
      * Save a mapping from modelName to modelId in the SharedPreferences
      */
     private fun storeModelReference(modelName: String, modelId: Long) {
-        val modelsDb = mContext.getSharedPreferences(SHARED_PREF_MODEL_DB, Context.MODE_PRIVATE)
+        val modelsDb = applicationContext.getSharedPreferences(SHARED_PREF_MODEL_DB, Context.MODE_PRIVATE)
         modelsDb.edit().putLong(modelName, modelId).apply()
     }
 
@@ -224,11 +157,12 @@ class AnkiDroidHelper(context: Context) {
      * @return the model ID
      */
     private fun findModelIDByName(modelName: String, numFields: Int): Long? {
-        val modelsDb = mContext.getSharedPreferences(SHARED_PREF_MODEL_DB, Context.MODE_PRIVATE)
-        val prefsModelID = modelsDb.getLong(modelName, -1)
+        val modelsDb = applicationContext.getSharedPreferences(SHARED_PREF_MODEL_DB, Context.MODE_PRIVATE)
+        val prefsModelID = modelsDb.getLong(modelName, -1L)
         // if we have a reference saved to modelName and it exists and has at least numFields then return it
+        val fieldsList = api.getFieldList(prefsModelID)!!
         if (prefsModelID != -1L && api.getModelName(prefsModelID) != null
-                && api.getFieldList(prefsModelID).size >= numFields) { // could potentially have been renamed
+                && fieldsList.size >= numFields) { // could potentially have been renamed
             return prefsModelID
         }
         val modelList = api.getModelList(numFields)
@@ -251,7 +185,7 @@ class AnkiDroidHelper(context: Context) {
         val deckList = api.deckList
         val ignoreCase = true
         for ((key, value) in deckList) {
-            if (value.contains(AnkiDroidConfig.DECK_NAME, ignoreCase)) {
+            if (value.contains(configuration.deckName, ignoreCase)) {
                 return key
             }
         }
@@ -259,142 +193,11 @@ class AnkiDroidHelper(context: Context) {
     }
 
 
-    private fun separateNotes(notes: List<String>): String {
-        if (notes.isEmpty()) {
-            return ""
-        }
-        return notes.reduce { a, b -> a + "\n" + b }
-    }
-
-    private fun getFieldsArray(word: String,
-                               pronunciation: String,
-                               pitch : String,
-                               wordLanguageCode: String,
-                               definitionText: String,
-                               definitionLanguageCode : String,
-                               dictionary: String,
-                               notes: List<String>): Array<String?> {
-        val fieldNames = api.getFieldList(wanicchouModelID)
-        val fields = arrayOfNulls<String>(fieldNames.size)
-        fields[AnkiDroidConfig.FIELDS_INDEX_WORD] = word
-        fields[AnkiDroidConfig.FIELDS_INDEX_WORD_LANGUAGE] = wordLanguageCode
-        fields[AnkiDroidConfig.FIELDS_INDEX_PRONUNCIATION] = pronunciation
-        fields[AnkiDroidConfig.FIELDS_INDEX_DEFINITION] = definitionText
-        fields[AnkiDroidConfig.FIELDS_INDEX_DEFINITION_LANGUAGE] = definitionLanguageCode
-        fields[AnkiDroidConfig.FIELDS_INDEX_FURIGANA] = getFurigana(word, pronunciation)
-        fields[AnkiDroidConfig.FIELDS_INDEX_PITCH] = pitch
-        fields[AnkiDroidConfig.FIELDS_INDEX_NOTES] = separateNotes(notes)
-        fields[AnkiDroidConfig.FIELDS_INDEX_DICTIONARY] = dictionary
-        return fields
-    }
-
     //TODO: Change click to expand a menu and add associated UI elements
     //TODO: Maybe implement a clozed type when sentence search is included
     //TODO: Duplicate checking
 
-    private fun updateNoteFields(noteID: Long,
-                                 word: String,
-                                 pronunciation: String,
-                                 pitch: String,
-                                 wordLanguageCode: String,
-                                 definitionText: String,
-                                 definitionLanguageCode: String,
-                                 dictionary: String,
-                                 notes: List<String>) {
-        val fields = getFieldsArray(word,
-                                    pronunciation,
-                                    pitch,
-                                    wordLanguageCode,
-                                    definitionText,
-                                    definitionLanguageCode,
-                                    dictionary,
-                                    notes)
-        api.updateNoteFields(noteID, fields)
-    }
-
-    private fun updateNoteTags(noteID: Long, tags: Set<String>): Boolean {
-        return api.updateNoteTags(noteID, tags)
-    }
-
-    //<editor-fold desc="AddAPIContent methods">
-    private fun findDuplicateNotes(modelID: Long, key: String): List<NoteInfo> {
-        return api.findDuplicateNotes(modelID, key)
-    }
-
-    private fun findDuplicateNotes(modelID: Long, keys: List<String>): SparseArray<List<NoteInfo>> {
-        return api.findDuplicateNotes(modelID, keys)
-    }
-
-    private fun getNoteCount(modelID: Long): Int {
-        return api.getNoteCount(modelID)
-    }
-
-
-    private fun getNote(noteID: Long): NoteInfo? {
-        return api.getNote(noteID)
-    }
-
-    private fun previewNewNote(modelID: Long, fields: Array<String>): Map<String, Map<String, String>> {
-        return api.previewNewNote(modelID, fields)
-    }
-
-    private fun getCurrentModelID(): Long {
-        return api.currentModelId
-    }
-
-    private fun getFieldList(modelID: Long): Array<String> {
-        return api.getFieldList(modelID)
-    }
-
-    private fun getModelList(): Map<Long, String> {
-        return api.modelList
-    }
-
-    private fun getModelList(minFieldCount: Int): Map<Long, String> {
-        return api.getModelList(minFieldCount)
-    }
-
-    private fun getModelName(modelID: Long): String {
-        return api.getModelName(modelID)
-    }
-
-    private fun addNewDeck(deckName: String): Long {
-        return api.addNewDeck(deckName)
-    }
-
-    private fun getSelectedDeckName(): String {
-        return api.selectedDeckName
-    }
-
-    private fun getDeckList(): Map<Long, String> {
-        return api.deckList
-    }
-
-    private fun getDeckName(deckID: Long): String {
-        return api.getDeckName(deckID)
-    }
-
-    private fun getAnkiDroidPackageName(): String {
-        return AddContentApi.getAnkiDroidPackageName(mContext)
-    }
-
-    private fun getApiHostSpecVersion(): Int {
-        return api.apiHostSpecVersion
-    }
-    //</editor-fold>
-
     //<editor-fold desc="Helpers">
-    /**
-     * Generates an Anki format furigana string if word is not its pronunciation
-     * @return a string for Anki's furigana display.
-     */
-    private fun getFurigana(word: String, pronunciation: String): String {
-        return if (word == pronunciation) {
-            pronunciation
-        } else "$word[$pronunciation]"
-    }
-
-
     /**
      * Remove the duplicates from a list of noteText fields and tags
      * @param fields List of fields to remove duplicates from
