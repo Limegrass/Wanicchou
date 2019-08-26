@@ -8,12 +8,12 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.4.2'
+        classpath 'com.android.tools.build:gradle:3.5.0'
         classpath 'de.mobilej.unmock:UnMockPlugin:0.6.5'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.3.40"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.3.41"
 
         // for Crashlytics. Currently causing a compiler warning
-        classpath 'com.google.gms:google-services:4.3.0'
+        classpath 'com.google.gms:google-services:4.3.1'
         classpath 'io.fabric.tools:gradle:1.29.0'
     }
 }
