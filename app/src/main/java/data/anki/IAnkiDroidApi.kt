@@ -21,4 +21,12 @@ interface IAnkiDroidApi {
     fun <T> addNewCustomModel(configuration : IAnkiDroidConfig<T>, deckID : Long) : Long
     fun addNote(modelID : Long, deckID: Long, fields : Array<String>, tags : Set<String>) : Long
     fun getModelList(minFieldCount : Int) : Map<Long, String>
+
+    // Maybe these could live in a separate interface
+    val hasAvailableApi : Boolean
+    val hasAnkiReadWritePermission : Boolean
+    fun addAnkiSharedPreferencesDeckID(deckName : String, deckID : Long)
+    fun getAnkiSharedPreferencesModelID(modelName : String, minimumFieldsCount : Int) : Long?
+    fun addAnkiSharedPreferencesModelID(modelName : String, modelID : Long)
+    fun getAnkiSharedPreferencesDeckID(deckName : String) : Long?
 }

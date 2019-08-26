@@ -42,4 +42,8 @@
     <string name="pref_previous_definition_language_default" translatable="false">JAPANESE</string>
     <string name="pref_previous_definition_dictionary_key" translatable="false">PREF_PREVIOUS_DEFINITION_DICTIONARY</string>
     <string name="pref_previous_definition_dictionary_default" translatable="false">SANSEIDO</string>
+
+    <!--anki-->
+    <string name="pref_anki_decks_key" translatable="false">com.ichi2.anki.api.decks</string>
+    <string name="pref_anki_models_key" translatable="false">com.ichi2.anki.api.models</string>
 </resources>
