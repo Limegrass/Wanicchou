@@ -1,5 +1,6 @@
 package com.limegrass.wanicchou.ui.fragments
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,7 +11,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProviders
 import com.limegrass.wanicchou.R
-import com.limegrass.wanicchou.util.WanicchouSharedPreferenceHelper
+import com.limegrass.wanicchou.util.cancelSetAndShowWanicchouToast
 import com.limegrass.wanicchou.viewmodel.DictionaryEntryViewModel
 
 class WordFragment : Fragment() {
@@ -22,6 +23,7 @@ class WordFragment : Fragment() {
         ViewModelProviders.of(activity!!)
                           .get(DictionaryEntryViewModel::class.java)
     }
+    private lateinit var parentContext : Context
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val attachToRoot = false
@@ -33,18 +35,17 @@ class WordFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         setVocabularyListObserver(view)
         setOnClickListener(view)
+        parentContext = context!!
         super.onViewCreated(view, savedInstanceState)
     }
 
     private fun setOnClickListener(view: View){
         val tvPronunciation = view.findViewById<TextView>(R.id.tv_pronunciation)
-        val context = context
         tvPronunciation.setOnClickListener {
             val dictionaryEntry = dictionaryEntryViewModel.value
             if (dictionaryEntry != null){
-                Toast.makeText(context,
-                        "Pitch: ${dictionaryEntry.vocabulary.pitch}",
-                        Toast.LENGTH_SHORT).show()
+                val toastText = getString(R.string.toast_pitch, dictionaryEntry.vocabulary.pitch)
+                cancelSetAndShowWanicchouToast(parentContext, toastText, Toast.LENGTH_SHORT)
             }
 
         }

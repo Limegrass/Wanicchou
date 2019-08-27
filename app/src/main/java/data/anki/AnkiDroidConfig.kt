@@ -7,7 +7,6 @@ import data.models.Vocabulary
 
 /**
  * Defines the structure of cards imported to AnkiDroid from Wanicchou
- * Modified AnkiDroidConfig modelled from  from 'ankidroid/apisample'
  */
 object AnkiDroidConfig : IAnkiDroidConfig<WanicchouAnkiEntry> {
     override val frontSideKey: String
@@ -38,14 +37,12 @@ object AnkiDroidConfig : IAnkiDroidConfig<WanicchouAnkiEntry> {
         return WanicchouAnkiEntry(vocabulary, definition, notes)
     }
 
-    private const val NOTES_DELIMITER : String = "\n" + 0x0
 
     override fun mapToNoteFields(noteEntry: WanicchouAnkiEntry): Array<String> {
         val word = noteEntry.vocabulary.word
         val pronunciation = noteEntry.vocabulary.pronunciation
         val furigana = getFurigana(word, pronunciation)
-
-        val fields = Array(fieldMapping.size){ "" }
+        val fields = arrayOfNulls<String>(fieldMapping.size)
         fields[fieldMapping.getValue(WORD_KEY)] =                word
         fields[fieldMapping.getValue(VOCABULARY_LANGUAGE_KEY)] = noteEntry.vocabulary.language.languageCode
         fields[fieldMapping.getValue(DEFINITION_TEXT_KEY)] =     noteEntry.definition.definitionText
@@ -55,7 +52,7 @@ object AnkiDroidConfig : IAnkiDroidConfig<WanicchouAnkiEntry> {
         fields[fieldMapping.getValue(PITCH_KEY)] =               noteEntry.vocabulary.pitch
         fields[fieldMapping.getValue(FURIGANA_KEY)] =            furigana
         fields[fieldMapping.getValue(NOTES_KEY)] =               noteEntry.notes.joinToString(NOTES_DELIMITER)
-        return fields
+        return fields.map{ it!! }.toTypedArray()
     }
 
     override val sortField: Int?
@@ -64,17 +61,18 @@ object AnkiDroidConfig : IAnkiDroidConfig<WanicchouAnkiEntry> {
     override val deckName: String
         get() = "Wanicchou"
     override val modelName: String
-        get() = "wanicchou"
+        get() = "Wanicchou"
 
     override val fields: Array<String>
         get() {
-            val fields = Array(fieldMapping.size){ "" }
+            val fields = arrayOfNulls<String>(fieldMapping.size)
             for ((fieldName, index) in fieldMapping){
                 fields[index] = fieldName
             }
-            return fields
+            return fields.map{ it!! }.toTypedArray()
         }
 
+    private const val NOTES_DELIMITER : String = "\n" + 0x0
     private const val WORD_KEY = "Word"
     private const val VOCABULARY_LANGUAGE_KEY = "Word Language"
     private const val DEFINITION_TEXT_KEY = "Definition"
@@ -168,5 +166,4 @@ object AnkiDroidConfig : IAnkiDroidConfig<WanicchouAnkiEntry> {
                     visibility: visible;
                 }
                 """.trimIndent()
-
 }

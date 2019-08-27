@@ -1,7 +1,17 @@
 package com.limegrass.wanicchou.util
 
+import android.content.Context
 import android.widget.Toast
 
-object WanicchouToast {
-    var toast : Toast? = null
+var WanicchouToast : Toast? = null
+
+fun cancelSetAndShowWanicchouToast(context : Context,
+                                   toastText : String,
+                                   duration: Int) {
+    WanicchouToast?.cancel()
+    WanicchouToast = Toast.makeText(context,
+            toastText,
+            duration)
+    WanicchouToast!!.show()
+
 }

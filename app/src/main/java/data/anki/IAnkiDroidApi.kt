@@ -18,15 +18,17 @@ interface IAnkiDroidApi {
     fun updateNoteTags(noteID : Long, tags : Set<String>) : Boolean
     fun findDuplicateNotes(modelID : Long, firstFieldValue : String) : List<NoteInfo>
     fun findDuplicateNotes(modelID : Long, firstFieldValues : List<String>) : SparseArray<List<NoteInfo>>
-    fun <T> addNewCustomModel(configuration : IAnkiDroidConfig<T>, deckID : Long) : Long
+    fun addNewCustomModel(modelName : String,
+                          fields : Array<String>,
+                          cardFormatNames : Array<String>,
+                          cardQuestionFormats : Array<String>,
+                          cardAnswerFormats : Array<String>,
+                          cardCSS : String,
+                          deckID : Long,
+                          indexOfFieldToSort : Int?): Long
     fun addNote(modelID : Long, deckID: Long, fields : Array<String>, tags : Set<String>) : Long
     fun getModelList(minFieldCount : Int) : Map<Long, String>
 
-    // Maybe these could live in a separate interface
     val hasAvailableApi : Boolean
     val hasAnkiReadWritePermission : Boolean
-    fun addAnkiSharedPreferencesDeckID(deckName : String, deckID : Long)
-    fun getAnkiSharedPreferencesModelID(modelName : String, minimumFieldsCount : Int) : Long?
-    fun addAnkiSharedPreferencesModelID(modelName : String, modelID : Long)
-    fun getAnkiSharedPreferencesDeckID(deckName : String) : Long?
 }

@@ -14,9 +14,9 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.ichi2.anki.FlashCardsContract
 import com.limegrass.wanicchou.R
 import com.limegrass.wanicchou.enums.AutoDelete
-import com.limegrass.wanicchou.util.AnkiDroidHelper
-import com.limegrass.wanicchou.util.WanicchouSharedPreferenceHelper
-import com.limegrass.wanicchou.util.WanicchouToast
+import data.anki.AnkiDroidHelper
+import com.limegrass.wanicchou.util.WanicchouSharedPreferences
+import com.limegrass.wanicchou.util.cancelSetAndShowWanicchouToast
 import com.limegrass.wanicchou.viewmodel.DefinitionNoteViewModel
 import com.limegrass.wanicchou.viewmodel.DictionaryEntryViewModel
 import com.limegrass.wanicchou.viewmodel.TagViewModel
@@ -42,11 +42,11 @@ class FabFragment : Fragment() {
     }
 
     private val ankiDroidHelper : AnkiDroidHelper by lazy {
-        AnkiDroidHelper(ankiDroidApi, AnkiDroidConfig)
+        AnkiDroidHelper(ankiDroidApi, AnkiDroidConfig, sharedPreferences)
     }
 
-    private val sharedPreferences : WanicchouSharedPreferenceHelper by lazy {
-        WanicchouSharedPreferenceHelper(parentContext)
+    private val sharedPreferences : WanicchouSharedPreferences by lazy {
+        WanicchouSharedPreferences(parentContext)
     }
 
     private val repository : IRepository<IDictionaryEntry, SearchRequest> by lazy {
@@ -92,28 +92,14 @@ class FabFragment : Fragment() {
                                             permissions: Array<out String>,
                                             grantResults: IntArray) {
         when(requestCode){
-            AnkiDroidApi.ANKI_READ_WRITE_PERMISSION_CALLBACK_CODE -> {
+            ANKI_READ_WRITE_PERMISSION_CALLBACK_CODE -> {
                 if(grantResults.isNotEmpty()
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    val dictionaryEntry = dictionaryEntryViewModel.value
-                    if (dictionaryEntry != null) {
-                        val ankiEntry = WanicchouAnkiEntry(dictionaryEntry.vocabulary,
-                                dictionaryEntry.definitions[0],
-                                getNotes())
-                        val tags = tagViewModel.value!!.map { it.tag }.toSet()
-                        ankiDroidHelper.addUpdateNote(ankiEntry, tags)
-                        if (sharedPreferences.autoDelete == AutoDelete.ON_ANKI_IMPORT) {
-                            GlobalScope.launch(Dispatchers.IO) {
-                                repository.delete(dictionaryEntry)
-                            }
-                        }
-                    }
+                    sendCurrentEntryToAnkiDroid()
                 }
                 else {
-                    WanicchouToast.toast?.cancel()
                     val message = (getString(R.string.permissions_denied_toast))
-                    WanicchouToast.toast = Toast.makeText(parentContext, message, Toast.LENGTH_LONG)
-                    WanicchouToast.toast!!.show()
+                    cancelSetAndShowWanicchouToast(parentContext, message, Toast.LENGTH_LONG)
                 }
             }
             else -> super.onRequestPermissionsResult(requestCode, permissions, grantResults)
@@ -122,23 +108,30 @@ class FabFragment : Fragment() {
 
     private fun setFABOnClick() {
         floatingActionButton.setOnClickListener {
-            val dictionaryEntry = dictionaryEntryViewModel.value
-            if(dictionaryEntry != null){
-                val ankiEntry = WanicchouAnkiEntry(dictionaryEntry.vocabulary,
-                                                   dictionaryEntry.definitions[0],
-                                                   getNotes())
-                val tags = tagViewModel.value!!.map{ it.tag }.toSet()
-                if(!ankiDroidApi.hasAnkiReadWritePermission){
-                    requestPermissions(arrayOf(FlashCardsContract.READ_WRITE_PERMISSION),
-                            AnkiDroidApi.ANKI_READ_WRITE_PERMISSION_CALLBACK_CODE)
-                }
-                else {
-                    ankiDroidHelper.addUpdateNote(ankiEntry, tags)
-                    if (sharedPreferences.autoDelete == AutoDelete.ON_ANKI_IMPORT){
-                        GlobalScope.launch (Dispatchers.IO) {
-                            repository.delete(dictionaryEntry)
-                        }
-                    }
+            if(!ankiDroidApi.hasAnkiReadWritePermission){
+                requestPermissions(arrayOf(FlashCardsContract.READ_WRITE_PERMISSION),
+                        ANKI_READ_WRITE_PERMISSION_CALLBACK_CODE)
+            }
+            else {
+                sendCurrentEntryToAnkiDroid()
+            }
+        }
+    }
+
+    private fun sendCurrentEntryToAnkiDroid() {
+        val dictionaryEntry = dictionaryEntryViewModel.value
+        if(dictionaryEntry != null){
+            val ankiEntry = WanicchouAnkiEntry(dictionaryEntry.vocabulary,
+                    dictionaryEntry.definitions[0],
+                    getNotes())
+            val tags = tagViewModel.value!!.map{ it.tag }.toSet()
+            ankiDroidHelper.addUpdateNote(ankiEntry, tags)
+            val toastText = parentContext.getString(R.string.anki_added_toast,
+                                                    dictionaryEntry.vocabulary.word)
+            cancelSetAndShowWanicchouToast(parentContext, toastText, Toast.LENGTH_LONG)
+            if (sharedPreferences.autoDelete == AutoDelete.ON_ANKI_IMPORT){
+                GlobalScope.launch (Dispatchers.IO) {
+                    repository.delete(dictionaryEntry)
                 }
             }
         }
@@ -159,5 +152,9 @@ class FabFragment : Fragment() {
                 floatingActionButton.show()
             }
         }
+    }
+
+    companion object{
+        private const val ANKI_READ_WRITE_PERMISSION_CALLBACK_CODE: Int = 420
     }
 }

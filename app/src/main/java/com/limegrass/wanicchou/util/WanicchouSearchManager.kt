@@ -17,7 +17,7 @@ import kotlinx.coroutines.launch
 class WanicchouSearchManager(context : Context) {
     private val repository = DictionaryEntryRepository(WanicchouDatabase(context))
     private val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-    private val sharedPreferences : WanicchouSharedPreferenceHelper = WanicchouSharedPreferenceHelper(context)
+    private val sharedPreferences = WanicchouSharedPreferences(context)
 
     suspend fun search(searchTerm : String,
                        vocabularyLanguage : Language = sharedPreferences.vocabularyLanguage,

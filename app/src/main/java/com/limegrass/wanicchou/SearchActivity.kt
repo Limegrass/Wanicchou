@@ -16,8 +16,8 @@ import com.limegrass.wanicchou.enums.AutoDelete
 import com.limegrass.wanicchou.ui.fragments.FabFragment
 import com.limegrass.wanicchou.ui.fragments.TabSwitchFragment
 import com.limegrass.wanicchou.ui.fragments.WordFragment
-import com.limegrass.wanicchou.util.WanicchouSharedPreferenceHelper
-import com.limegrass.wanicchou.util.WanicchouToast
+import com.limegrass.wanicchou.util.WanicchouSharedPreferences
+import com.limegrass.wanicchou.util.cancelSetAndShowWanicchouToast
 import com.limegrass.wanicchou.viewmodel.DictionaryEntryViewModel
 import data.arch.models.IDictionaryEntry
 import data.arch.search.DictionarySearchBuilder
@@ -66,8 +66,8 @@ class SearchActivity
         DictionaryEntryRepository(database)
     }
 
-    private val sharedPreferences : WanicchouSharedPreferenceHelper by lazy {
-        WanicchouSharedPreferenceHelper(this)
+    private val sharedPreferences : WanicchouSharedPreferences by lazy {
+        WanicchouSharedPreferences(this)
     }
     //</editor-fold>
 
@@ -175,11 +175,7 @@ class SearchActivity
 
     private fun showToast(toastText: String) {
         val context = this@SearchActivity
-        WanicchouToast.toast?.cancel()
-        WanicchouToast.toast = Toast.makeText(context,
-                toastText,
-                Toast.LENGTH_LONG)
-        WanicchouToast.toast!!.show()
+        cancelSetAndShowWanicchouToast(context, toastText, Toast.LENGTH_LONG)
     }
 
 
@@ -218,8 +214,8 @@ class SearchActivity
                             }
                         }
                         val message = getString(R.string.word_search_success,
-                                searchTerm,
-                                dictionaryEntry.definitions[0].dictionary.dictionaryName)
+                                                searchTerm,
+                                                dictionaryEntry.definitions[0].dictionary.dictionaryName)
                         showToast(message)
                     }
                     GlobalScope.launch(Dispatchers.IO){
