@@ -34,6 +34,7 @@
     <string name="permissions_denied_toast" translatable="true">Permissions denied.</string>
     <string name="anki_added_toast" translatable="true">%1$s sent to AnkiDroid.</string>
     <string name="searching_related_toast" translatable="true">Searching for selected word…</string>
+    <string name="toast_pitch" translatable="true">Pitch: %1$s</string>
 
 
     <!--related words activity-->
