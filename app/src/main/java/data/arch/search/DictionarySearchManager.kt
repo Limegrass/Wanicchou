@@ -8,7 +8,7 @@ import java.util.*
 /**
  * Manages the order of search performed based on user preference.
  */
-class DictionarySearchBuilder {
+class DictionarySearchManager {
     private val searchCombinations : Queue<SearchCombination> = ArrayDeque()
     suspend fun executeSearches(): List<IDictionaryEntry> {
         while (searchCombinations.isNotEmpty()){
@@ -24,12 +24,6 @@ class DictionarySearchBuilder {
     fun register(searchProvider: ISearchProvider<List<IDictionaryEntry>, SearchRequest>,
                  searchRequest: SearchRequest) {
         val combination = SearchCombination(searchProvider, searchRequest)
-        searchCombinations.add(combination)
-    }
-
-    fun register(dictionary : data.enums.Dictionary, searchRequest: SearchRequest) {
-        val dictionarySource = DictionarySearchProviderFactory(dictionary).get()
-        val combination = SearchCombination(dictionarySource, searchRequest)
         searchCombinations.add(combination)
     }
 

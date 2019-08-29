@@ -12,17 +12,13 @@ import android.view.SearchEvent
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProviders
-import com.limegrass.wanicchou.enums.AutoDelete
 import com.limegrass.wanicchou.ui.fragments.FabFragment
 import com.limegrass.wanicchou.ui.fragments.TabSwitchFragment
 import com.limegrass.wanicchou.ui.fragments.WordFragment
+import com.limegrass.wanicchou.util.WanicchouSearchManager
 import com.limegrass.wanicchou.util.WanicchouSharedPreferences
 import com.limegrass.wanicchou.util.cancelSetAndShowWanicchouToast
 import com.limegrass.wanicchou.viewmodel.DictionaryEntryViewModel
-import data.arch.models.IDictionaryEntry
-import data.arch.search.DictionarySearchBuilder
-import data.arch.search.SearchRequest
-import data.arch.util.IRepository
 import data.enums.MatchType
 import data.room.database.WanicchouDatabase
 import data.room.dbo.entity.Vocabulary
@@ -56,19 +52,25 @@ class SearchActivity
 
     private lateinit var menu : Menu
 
-    private val dictionaryEntryViewModel: DictionaryEntryViewModel by lazy {
+
+    private val dictionaryEntryViewModel : DictionaryEntryViewModel by lazy {
         ViewModelProviders.of(this)
                 .get(DictionaryEntryViewModel::class.java)
-    }
-
-    private val repository : IRepository<IDictionaryEntry, SearchRequest> by lazy {
-        val database = WanicchouDatabase(this)
-        DictionaryEntryRepository(database)
     }
 
     private val sharedPreferences : WanicchouSharedPreferences by lazy {
         WanicchouSharedPreferences(this)
     }
+
+    private val searchManager by lazy {
+        val database = WanicchouDatabase(this)
+        val repository = DictionaryEntryRepository(database)
+        WanicchouSearchManager(repository,
+                connectivityManager,
+                sharedPreferences,
+                this)
+    }
+
     //</editor-fold>
 
     //<editor-fold desc="Activity LifeCycle">
@@ -109,17 +111,11 @@ class SearchActivity
             val vocab = data?.extras?.getParcelable<Vocabulary>("Vocabulary")
             if(vocab != null){
                 GlobalScope.launch(Dispatchers.IO) {
-                    val searchManager = DictionarySearchBuilder()
-                    val searchRequest = SearchRequest(vocab.word,
-                            vocab.language,
-                            sharedPreferences.definitionLanguage,
-                            MatchType.WORD_EQUALS)
-                    searchManager.register(repository, searchRequest)
-                    searchManager.register(sharedPreferences.dictionary, searchRequest)
-                    val searchResults = searchManager.executeSearches()
-                    runOnUiThread {
-                        dictionaryEntryViewModel.availableDictionaryEntries = searchResults
-                    }
+                    searchManager.search(vocab.word,
+                                         vocab.language,
+                                         sharedPreferences.definitionLanguage,
+                                         MatchType.WORD_EQUALS,
+                                         MatchType.WORD_EQUALS)
                 }
             }
         }
@@ -178,62 +174,13 @@ class SearchActivity
         cancelSetAndShowWanicchouToast(context, toastText, Toast.LENGTH_LONG)
     }
 
-
     private fun search(searchTerm: String) {
         Log.i(TAG, "Search Initiated: [$searchTerm].")
         showToast(getString(R.string.word_searching, searchTerm))
-
         //TODO: Progress bar it
         runBlocking(Dispatchers.IO) {
-            val searchBuilder = DictionarySearchBuilder()
-            val databaseRequest = SearchRequest(searchTerm,
-                    sharedPreferences.vocabularyLanguage,
-                    sharedPreferences.definitionLanguage,
-                    sharedPreferences.databaseMatchType)
-            searchBuilder.register(repository, databaseRequest)
-            if(connectivityManager.activeNetworkInfo != null) {
-                val dictionary = sharedPreferences.dictionary
-                val dictionaryRequest = SearchRequest(searchTerm,
-                        sharedPreferences.vocabularyLanguage,
-                        sharedPreferences.definitionLanguage,
-                        sharedPreferences.dictionaryMatchType)
-                searchBuilder.register(dictionary, dictionaryRequest)
-            }
-            val searchResults = searchBuilder.executeSearches()
-
-            if(searchResults.isNotEmpty()){
-                runOnUiThread {
-                    val oldDictionaryEntry = dictionaryEntryViewModel.value
-                    dictionaryEntryViewModel.availableDictionaryEntries = searchResults
-                    val dictionaryEntry = dictionaryEntryViewModel.value
-                    if(dictionaryEntry != null) {
-                        if (oldDictionaryEntry != null
-                                && sharedPreferences.autoDelete == AutoDelete.ON_SEARCH){
-                            GlobalScope.launch (Dispatchers.IO) {
-                                repository.delete(oldDictionaryEntry)
-                            }
-                        }
-                        val message = getString(R.string.word_search_success,
-                                                searchTerm,
-                                                dictionaryEntry.definitions[0].dictionary.dictionaryName)
-                        showToast(message)
-                    }
-                    GlobalScope.launch(Dispatchers.IO){
-                        for(result in searchResults){
-                            repository.insert(result)
-                        }
-                    }
-
-                }
-            }
-            else {
-                runOnUiThread {
-                    val message = getString(R.string.word_search_failure, searchTerm)
-                    showToast(message)
-                }
-            }
+            searchManager.search(searchTerm)
         }
     }
     //</editor-fold>
 }
-

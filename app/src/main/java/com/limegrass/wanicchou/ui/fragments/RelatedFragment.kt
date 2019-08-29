@@ -1,11 +1,12 @@
 package com.limegrass.wanicchou.ui.fragments
 
+import android.content.Context
+import android.net.ConnectivityManager
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.LifecycleOwner
@@ -17,7 +18,10 @@ import com.google.android.flexbox.JustifyContent
 import com.limegrass.wanicchou.R
 import com.limegrass.wanicchou.ui.adapter.TextSpanRecyclerViewAdapter
 import com.limegrass.wanicchou.util.WanicchouSearchManager
+import com.limegrass.wanicchou.util.WanicchouSharedPreferences
 import com.limegrass.wanicchou.viewmodel.DictionaryEntryViewModel
+import data.room.database.WanicchouDatabase
+import data.room.repository.DictionaryEntryRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 
@@ -30,8 +34,12 @@ class RelatedFragment : Fragment() {
             .get(DictionaryEntryViewModel::class.java)
     }
 
-    private val searchManager : WanicchouSearchManager by lazy {
-        WanicchouSearchManager(parentFragmentActivity)
+    private val searchManager by lazy {
+        val database = WanicchouDatabase(parentFragmentActivity)
+        val repository = DictionaryEntryRepository(database)
+        val connectivityManager = parentFragmentActivity.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val sharedPreferences = WanicchouSharedPreferences(parentFragmentActivity)
+        WanicchouSearchManager(repository, connectivityManager, sharedPreferences, parentFragmentActivity)
     }
 
     private lateinit var parentFragmentActivity : FragmentActivity
@@ -65,16 +73,8 @@ class RelatedFragment : Fragment() {
                     if(dictionaryEntry.definitions.isNotEmpty()){
                         dictionaryEntryViewModel.value = dictionaryEntry
                     } else {
-                        Toast.makeText(context,
-                                getString(R.string.word_searching, dictionaryEntry.vocabulary.word),
-                                Toast.LENGTH_LONG).show()
                         runBlocking(Dispatchers.IO){
                             val searchResults = searchManager.search(dictionaryEntry.vocabulary.word)
-                            if (searchResults.isNotEmpty()){
-                                parentFragmentActivity.runOnUiThread {
-                                    dictionaryEntryViewModel.availableDictionaryEntries = searchResults
-                                }
-                            }
                             Log.v(TAG, "Result size: [${searchResults.size}].")
                         }
                     }
