@@ -49,14 +49,7 @@ class AnkiDroidHelper(private val ankiDroidApi : IAnkiDroidApi,
         get() {
             return storedModelID ?: run {
                 val modelID = ankiNameMatchedModelID
-                        ?: ankiDroidApi.addNewCustomModel(configuration.modelName,
-                                configuration.fields,
-                                configuration.cardFormats.map { it.formatName }.toTypedArray(),
-                                configuration.cardFormats.map { it.questionFormat }.toTypedArray(),
-                                configuration.cardFormats.map { it.answerFormat }.toTypedArray(),
-                                configuration.css,
-                                wanicchouDeckID,
-                                configuration.sortField)
+                        ?: ankiDroidApi.addNewCustomModel(configuration, wanicchouDeckID)
                 ankiIdStorage.addModelID(configuration.modelName, modelID)
                 return modelID
             }

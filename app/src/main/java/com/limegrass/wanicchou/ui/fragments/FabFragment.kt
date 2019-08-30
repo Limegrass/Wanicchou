@@ -112,7 +112,11 @@ class FabFragment : Fragment() {
                 requestPermissions(arrayOf(FlashCardsContract.READ_WRITE_PERMISSION),
                         ANKI_READ_WRITE_PERMISSION_CALLBACK_CODE)
             }
-            else {
+            else if (!ankiDroidApi.hasStoragePermission) {
+                val message = getString(R.string.toast_anki_storage_permission_required)
+                cancelSetAndShowWanicchouToast(parentContext, message, Toast.LENGTH_LONG)
+            }
+            else{
                 sendCurrentEntryToAnkiDroid()
             }
         }

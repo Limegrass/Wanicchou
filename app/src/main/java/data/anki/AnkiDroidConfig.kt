@@ -10,7 +10,7 @@ import data.models.Vocabulary
  */
 object AnkiDroidConfig : IAnkiDroidConfig<WanicchouAnkiEntry> {
     override val frontSideKey: String
-        get() = "Word"
+        get() = fields[0]
     override val backSideKey: String
         get() = "Definition"
 
@@ -33,6 +33,7 @@ object AnkiDroidConfig : IAnkiDroidConfig<WanicchouAnkiEntry> {
         val definition = Definition(fields[fieldMapping.getValue(DEFINITION_TEXT_KEY)],
                 definitionLanguage,
                 dictionary)
+        //TODO: Confirm if the null char is preserved in Anki
         val notes = fields[fieldMapping.getValue(NOTES_KEY)].split(NOTES_DELIMITER)
         return WanicchouAnkiEntry(vocabulary, definition, notes)
     }

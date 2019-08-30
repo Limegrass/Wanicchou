@@ -25,6 +25,13 @@ class AnkiDroidApi(private val context : Context)
                             == PackageManager.PERMISSION_GRANTED)
         }
 
+    override val hasStoragePermission: Boolean
+        get() {
+            val packageManager = context.packageManager
+            return packageManager.checkPermission("android.permission.WRITE_EXTERNAL_STORAGE",
+                    "com.ichi2.anki") == PackageManager.PERMISSION_GRANTED
+        }
+
     private val api = AddContentApi(context)
 
     override val modelList : Map<Long, String>
@@ -89,22 +96,16 @@ class AnkiDroidApi(private val context : Context)
         return api.findDuplicateNotes(modelID, firstFieldValues) ?: SparseArray()
     }
 
-    override fun addNewCustomModel(modelName : String,
-                                   fields : Array<String>,
-                                   cardFormatNames : Array<String>,
-                                   cardQuestionFormats : Array<String>,
-                                   cardAnswerFormats : Array<String>,
-                                   cardCSS : String,
-                                   deckID : Long,
-                                   indexOfFieldToSort : Int?): Long {
-        return api.addNewCustomModel(modelName,
-                fields,
-                cardFormatNames,
-                cardQuestionFormats,
-                cardAnswerFormats,
-                cardCSS,
+    override fun <T> addNewCustomModel(configuration : IAnkiDroidConfig<T>,
+                                       deckID : Long): Long {
+        return api.addNewCustomModel(configuration.modelName,
+                configuration.fields,
+                configuration.cardFormats.map{ it.formatName }.toTypedArray(),
+                configuration.cardFormats.map{ it.questionFormat }.toTypedArray(),
+                configuration.cardFormats.map{ it.answerFormat }.toTypedArray(),
+                configuration.css,
                 deckID,
-                indexOfFieldToSort)
+                configuration.sortField)
     }
 
     override fun addNote(modelID: Long, deckID: Long, fields: Array<String>, tags: Set<String>): Long {
