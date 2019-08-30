@@ -28,8 +28,9 @@ class AnkiDroidApi(private val context : Context)
     override val hasStoragePermission: Boolean
         get() {
             val packageManager = context.packageManager
-            return packageManager.checkPermission("android.permission.WRITE_EXTERNAL_STORAGE",
-                    "com.ichi2.anki") == PackageManager.PERMISSION_GRANTED
+            val ankiDroidPackageName = AddContentApi.getAnkiDroidPackageName(context)
+            return packageManager.checkPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    ankiDroidPackageName) == PackageManager.PERMISSION_GRANTED
         }
 
     private val api = AddContentApi(context)
