@@ -25,10 +25,10 @@ class AnkiDroidConfigTest {
         val notesIndex = fields.indexOf("Notes")
         assertEquals(fieldValues[wordIndex], ankiEntry.vocabulary.word)
         assertEquals(fieldValues[pronunciationIndex], ankiEntry.vocabulary.pronunciation)
-        assertEquals(fieldValues[vocabularyLanguageIndex], ankiEntry.vocabulary.language.displayName)
+        assertEquals(fieldValues[vocabularyLanguageIndex], ankiEntry.vocabulary.language.languageCode)
         assertEquals(fieldValues[pitchIndex], ankiEntry.vocabulary.pitch)
         assertEquals(fieldValues[definitionIndex], ankiEntry.definition.definitionText)
-        assertEquals(fieldValues[definitionLanguageIndex], ankiEntry.definition.language.displayName)
+        assertEquals(fieldValues[definitionLanguageIndex], ankiEntry.definition.language.languageCode)
         assertEquals(fieldValues[dictionaryIndex], ankiEntry.definition.dictionary.dictionaryName)
 
         for (note in ankiEntry.notes){
