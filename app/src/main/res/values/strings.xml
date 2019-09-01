@@ -99,4 +99,5 @@
     <string name="lbl_fragment_vocabulary_notes_title">Vocabulary Notes</string>
     <string name="lbl_fragment_definition_note_title">Definition Note</string>
     <string name="lbl_fragment_tag_title">Tags</string>
+    <string name="toast_anki_storage_permission_required" translatable="true">AnkiDroid must granted external storage permissions first.</string>
 </resources>

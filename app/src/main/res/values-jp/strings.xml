@@ -81,4 +81,5 @@
     <string name="lbl_fragment_vocabulary_notes_title">単語のメモ</string>
     <string name="lbl_fragment_definition_note_title">定義のメモ</string>
     <string name="lbl_fragment_tag_title">タグ</string>
+    <string name="toast_anki_storage_permission_required" translatable="true">暗記ドロイドの保存許可は許していません。</string>
 </resources>
