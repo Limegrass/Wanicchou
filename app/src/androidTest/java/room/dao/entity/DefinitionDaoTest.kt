@@ -5,9 +5,10 @@ import room.dbo.entity.Definition
 import room.dbo.entity.Vocabulary
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
+import room.dao.AbstractDaoTest
 import kotlin.test.assertEquals
 
-class DefinitionDaoTest : DaoTest() {
+class DefinitionDaoTest : AbstractDaoTest() {
     private val definitionText = "Test"
     private val dictionary = data.enums.Dictionary.SANSEIDO
     private val language = Language.JAPANESE

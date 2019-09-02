@@ -11,7 +11,7 @@ interface DefinitionNoteDao : BaseDao<DefinitionNote> {
         SELECT dn.NoteText
         FROM DefinitionNote dn
         WHERE dn.DefinitionID = :definitionID """)
-    fun getNotesForDefinition(definitionID: Long) : List<String>
+    suspend fun getNotesForDefinition(definitionID: Long) : List<String>
 
     @Query("""
         UPDATE DefinitionNote

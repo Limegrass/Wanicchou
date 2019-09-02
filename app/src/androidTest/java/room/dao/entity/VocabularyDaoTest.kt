@@ -8,10 +8,11 @@ import room.dbo.entity.Vocabulary
 import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.Test
+import room.dao.AbstractDaoTest
 import util.awaitValue
 import kotlin.test.assertEquals
 
-class VocabularyDaoTest : DaoTest() {
+class VocabularyDaoTest : AbstractDaoTest() {
     @get:Rule
     var instantTaskExecutorRule = InstantTaskExecutorRule()
 

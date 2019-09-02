@@ -10,7 +10,7 @@ interface VocabularyTagDao : BaseDao<VocabularyTag> {
     @Query("""
         DELETE
         FROM VocabularyTag
-        WHERE VocabularyTagID IN (
+        WHERE VocabularyTagID = (
             SELECT vt.VocabularyTagID
             FROM VocabularyTag vt
             JOIN Tag t
@@ -18,5 +18,5 @@ interface VocabularyTagDao : BaseDao<VocabularyTag> {
             WHERE t.TagText = :tagText
                 AND vt.VocabularyID = :vocabularyID )
     """)
-    suspend fun deleteVocabularyTag(vocabularyID: Long, tagText: String)
+    suspend fun deleteVocabularyTag(vocabularyID: Long, tagText: String) : Int
 }
