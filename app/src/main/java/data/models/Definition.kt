@@ -1,6 +1,5 @@
 package data.models
 
-import data.arch.models.IDefinition
 import data.enums.Dictionary
 import data.enums.Language
 

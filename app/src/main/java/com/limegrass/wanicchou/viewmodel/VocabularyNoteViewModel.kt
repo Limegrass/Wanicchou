@@ -1,7 +1,7 @@
 package com.limegrass.wanicchou.viewmodel
 
-import data.arch.models.INote
-import data.arch.models.IVocabulary
+import data.models.INote
+import data.models.IVocabulary
 
 class VocabularyNoteViewModel
     : ObservableViewModel<List<INote<IVocabulary>>>(){

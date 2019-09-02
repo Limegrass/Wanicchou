@@ -25,11 +25,11 @@ import data.anki.AnkiDroidApi
 import data.anki.AnkiDroidConfig
 import data.anki.IAnkiDroidApi
 import data.anki.WanicchouAnkiEntry
-import data.arch.models.IDictionaryEntry
-import data.arch.search.SearchRequest
-import data.arch.util.IRepository
-import data.room.database.WanicchouDatabase
-import data.room.repository.DictionaryEntryRepository
+import data.models.IDictionaryEntry
+import data.search.SearchRequest
+import data.architecture.IRepository
+import room.database.WanicchouDatabase
+import room.repository.DictionaryEntryRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch

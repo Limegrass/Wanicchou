@@ -1,7 +1,7 @@
 package com.limegrass.wanicchou.viewmodel
 
-import data.arch.models.IDefinition
-import data.arch.models.INote
+import data.models.IDefinition
+import data.models.INote
 
 class DefinitionNoteViewModel
     : ObservableViewModel<List<INote<IDefinition>>>(){

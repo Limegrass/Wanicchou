@@ -20,8 +20,8 @@ import com.limegrass.wanicchou.ui.adapter.TextSpanRecyclerViewAdapter
 import com.limegrass.wanicchou.util.WanicchouSearchManager
 import com.limegrass.wanicchou.util.WanicchouSharedPreferences
 import com.limegrass.wanicchou.viewmodel.DictionaryEntryViewModel
-import data.room.database.WanicchouDatabase
-import data.room.repository.DictionaryEntryRepository
+import room.database.WanicchouDatabase
+import room.repository.DictionaryEntryRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 

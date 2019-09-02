@@ -3,8 +3,8 @@ package com.limegrass.wanicchou.viewmodel
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
-import data.room.database.WanicchouDatabase
-import data.room.dbo.entity.Vocabulary
+import room.database.WanicchouDatabase
+import room.dbo.entity.Vocabulary
 import kotlinx.coroutines.runBlocking
 
 class DatabaseViewModel(application: Application)

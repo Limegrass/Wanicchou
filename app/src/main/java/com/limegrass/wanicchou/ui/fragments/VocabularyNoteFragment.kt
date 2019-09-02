@@ -19,12 +19,12 @@ import com.limegrass.wanicchou.ui.adapter.TextBlockRecyclerViewAdapter
 import com.limegrass.wanicchou.util.InputAlertDialogBuilder
 import com.limegrass.wanicchou.viewmodel.VocabularyNoteViewModel
 import com.limegrass.wanicchou.viewmodel.DictionaryEntryViewModel
-import data.arch.models.INote
-import data.arch.models.IVocabulary
-import data.arch.util.IRepository
+import data.models.INote
+import data.models.IVocabulary
+import data.architecture.IRepository
 import data.models.Note
-import data.room.repository.VocabularyNoteRepository
-import data.room.database.WanicchouDatabase
+import room.repository.VocabularyNoteRepository
+import room.database.WanicchouDatabase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch

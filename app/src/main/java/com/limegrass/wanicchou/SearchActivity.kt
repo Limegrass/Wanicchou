@@ -20,9 +20,9 @@ import com.limegrass.wanicchou.util.WanicchouSharedPreferences
 import com.limegrass.wanicchou.util.cancelSetAndShowWanicchouToast
 import com.limegrass.wanicchou.viewmodel.DictionaryEntryViewModel
 import data.enums.MatchType
-import data.room.database.WanicchouDatabase
-import data.room.dbo.entity.Vocabulary
-import data.room.repository.DictionaryEntryRepository
+import room.database.WanicchouDatabase
+import room.dbo.entity.Vocabulary
+import room.repository.DictionaryEntryRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch

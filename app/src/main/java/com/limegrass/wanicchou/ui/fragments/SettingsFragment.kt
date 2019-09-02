@@ -8,7 +8,7 @@ import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import com.limegrass.wanicchou.R
-import data.arch.search.IDictionarySource
+import data.search.IDictionarySource
 import com.limegrass.wanicchou.enums.AutoDelete
 import data.enums.Dictionary
 import data.enums.Language
@@ -34,7 +34,7 @@ class SettingsFragment : PreferenceFragmentCompat(),
         preference.key = fragmentContext.getString(R.string.pref_dictionary_key)
         preference.title = getString(R.string.dictionary_title)
         preference.summary = preference.entry
-        preference.setDefaultValue(data.enums.Dictionary.SANSEIDO.dictionaryID.toString())
+        preference.setDefaultValue(Dictionary.SANSEIDO.dictionaryID.toString())
         preference
     }
 

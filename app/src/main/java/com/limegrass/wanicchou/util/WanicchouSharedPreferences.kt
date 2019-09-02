@@ -5,9 +5,9 @@ import android.preference.PreferenceManager
 import com.limegrass.wanicchou.R
 import com.limegrass.wanicchou.enums.AutoDelete
 import data.anki.IAnkiDroidConfigIdentifierStorage
-import data.arch.models.IDefinition
-import data.arch.models.IDictionaryEntry
-import data.arch.models.IVocabulary
+import data.models.IDefinition
+import data.models.IDictionaryEntry
+import data.models.IVocabulary
 import data.enums.Dictionary
 import data.enums.Language
 import data.enums.MatchType

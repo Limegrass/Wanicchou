@@ -1,6 +1,6 @@
 package com.limegrass.wanicchou.viewmodel
 
-import data.arch.models.IDictionaryEntry
+import data.models.IDictionaryEntry
 
 class DictionaryEntryViewModel
     : ObservableViewModel<IDictionaryEntry>() {

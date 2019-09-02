@@ -1,6 +1,6 @@
 package com.limegrass.wanicchou.viewmodel
 
-import data.arch.models.IVocabulary
+import data.models.IVocabulary
 
 class RelatedVocabularyViewModel
     : ObservableViewModel<List<IVocabulary>>(){

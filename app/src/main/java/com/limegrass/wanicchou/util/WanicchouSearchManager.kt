@@ -7,10 +7,10 @@ import androidx.lifecycle.ViewModelProviders
 import com.limegrass.wanicchou.R
 import com.limegrass.wanicchou.enums.AutoDelete
 import com.limegrass.wanicchou.viewmodel.DictionaryEntryViewModel
-import data.arch.models.IDictionaryEntry
-import data.arch.search.DictionarySearchManager
-import data.arch.search.SearchRequest
-import data.arch.util.IRepository
+import data.models.IDictionaryEntry
+import data.search.DictionarySearchManager
+import data.search.SearchRequest
+import data.architecture.IRepository
 import data.enums.Language
 import data.enums.MatchType
 import data.web.DictionarySearchProviderFactory

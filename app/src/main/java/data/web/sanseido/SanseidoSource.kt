@@ -1,8 +1,8 @@
 package data.web.sanseido
 
 import android.net.Uri
-import data.arch.search.IDictionarySource
-import data.arch.search.SearchRequest
+import data.search.IDictionarySource
+import data.search.SearchRequest
 import data.enums.Language
 import data.enums.MatchType
 import java.net.MalformedURLException

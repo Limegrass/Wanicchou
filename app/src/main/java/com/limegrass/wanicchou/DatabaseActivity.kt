@@ -13,7 +13,7 @@ import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
 import com.limegrass.wanicchou.ui.adapter.TextSpanRecyclerViewAdapter
 import com.limegrass.wanicchou.viewmodel.DatabaseViewModel
-import data.room.dbo.entity.Vocabulary
+import room.dbo.entity.Vocabulary
 
 
 /**

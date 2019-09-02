@@ -1,7 +1,7 @@
 package data.web.sanseido
 
-import data.arch.lang.JapaneseVocabulary
-import data.arch.search.jsoup.IJsoupDictionaryEntryFactory
+import data.lang.JapaneseVocabulary
+import data.search.jsoup.IJsoupDictionaryEntryFactory
 import data.enums.Dictionary
 import data.enums.Language
 import data.models.Definition
