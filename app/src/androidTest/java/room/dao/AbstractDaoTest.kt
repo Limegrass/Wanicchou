@@ -1,4 +1,4 @@
-package room.dao.entity
+package room.dao
 
 import android.content.Context
 import androidx.room.Room
@@ -12,7 +12,7 @@ import org.junit.After
 import org.junit.Before
 import java.io.IOException
 
-abstract class DaoTest {
+abstract class AbstractDaoTest {
     protected lateinit var db : WanicchouDatabase
 
     @Before
