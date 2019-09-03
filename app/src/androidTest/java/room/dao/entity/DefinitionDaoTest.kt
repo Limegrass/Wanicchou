@@ -28,21 +28,21 @@ class DefinitionDaoTest : AbstractDaoTest() {
     @Test
     fun getDefinitionID_Exists_ReturnsID() {
         insertTestData()
-        val daoDefinitionID = db.definitionDao().getDefinitionID(definitionText, dictionary, language)
+        val daoDefinitionID = db.definitionDao().getDefinitionID(definitionText, language, dictionary)
         assertEquals(definitionID, daoDefinitionID)
     }
 
     @Test
     fun getDefinitionID_DefinitionTextMismatch_ReturnsNull() {
         insertTestData()
-        val daoDefinitionID = db.definitionDao().getDefinitionID("", dictionary, language)
+        val daoDefinitionID = db.definitionDao().getDefinitionID("", language, dictionary)
         assertEquals(null, daoDefinitionID)
     }
 
     @Test
     fun getDefinitionID_LanguageMismatch_ReturnsNull() {
         insertTestData()
-        val daoDefinitionID = db.definitionDao().getDefinitionID("", dictionary, Language.ENGLISH)
+        val daoDefinitionID = db.definitionDao().getDefinitionID("", Language.ENGLISH, dictionary)
         assertEquals(null, daoDefinitionID)
     }
 }

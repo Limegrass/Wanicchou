@@ -27,8 +27,8 @@ class DefinitionNoteRepository(private val database : WanicchouDatabase)
 
     override suspend fun update(original: INote<IDefinition>,
                                 updated: INote<IDefinition>) {
-        if (original.topic != updated.topic) {
-            throw IllegalArgumentException("Original and update notes reference different definitions.")
+        require(original.topic == updated.topic) {
+            "Original and update notes reference different definitions."
         }
         val definitionID = Definition.getDefinitionID(original.topic, database)!!
         database.definitionNoteDao().updateNote(updated.noteText, original.noteText, definitionID)

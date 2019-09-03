@@ -64,8 +64,8 @@ data class Definition (
             }
             else runBlocking {
                 database.definitionDao().getDefinitionID(definition.definitionText,
-                        definition.dictionary,
-                        definition.language)
+                        definition.language,
+                        definition.dictionary)
             }
         }
 

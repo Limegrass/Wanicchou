@@ -15,5 +15,5 @@ interface DefinitionDao : BaseDao<Definition> {
         WHERE d.DefinitionText = :definitionText
             AND d.DictionaryID = :dictionary
             AND d.LanguageID = :definitionLanguage """)
-    fun getDefinitionID(definitionText : String, dictionary: Dictionary, definitionLanguage : Language) : Long?
+    fun getDefinitionID(definitionText: String, definitionLanguage: Language, dictionary: Dictionary) : Long?
 }

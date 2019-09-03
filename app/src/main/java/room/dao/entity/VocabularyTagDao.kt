@@ -18,5 +18,5 @@ interface VocabularyTagDao : BaseDao<VocabularyTag> {
             WHERE t.TagText = :tagText
                 AND vt.VocabularyID = :vocabularyID )
     """)
-    suspend fun deleteVocabularyTag(vocabularyID: Long, tagText: String) : Int
+    suspend fun deleteVocabularyTag(tagText: String, vocabularyID: Long) : Int
 }

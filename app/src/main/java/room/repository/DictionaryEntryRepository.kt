@@ -35,6 +35,7 @@ class DictionaryEntryRepository(private val database : WanicchouDatabase)
      * Updates every vocabulary and definition entry provided.
      */
     override suspend fun update(original: IDictionaryEntry, updated: IDictionaryEntry) {
+        require(original.vocabulary == updated.vocabulary)
         val originalDefinitions = original.definitions
         val updatedDefinitions = updated.definitions
         require(originalDefinitions.size == updatedDefinitions.size)

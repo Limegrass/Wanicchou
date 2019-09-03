@@ -35,6 +35,9 @@ class VocabularyTagRepository(private val database : WanicchouDatabase)
      */
     override suspend fun update(original: ITaggedItem<IVocabulary>,
                                 updated: ITaggedItem<IVocabulary>) {
+        require(original.item == updated.item) {
+            "Original and updated tags reference different words."
+        }
         val tagID = if (original is VocabularyAndTag) {
             original.tagEntity.tagID
         }
@@ -48,6 +51,6 @@ class VocabularyTagRepository(private val database : WanicchouDatabase)
     override suspend fun delete(entity: ITaggedItem<IVocabulary>) {
         val vocabulary = entity.item
         val vocabularyID = Vocabulary.getVocabularyID(vocabulary, database)!!
-        database.vocabularyTagDao().deleteVocabularyTag(vocabularyID, entity.tag)
+        database.vocabularyTagDao().deleteVocabularyTag(entity.tag, vocabularyID)
     }
 }

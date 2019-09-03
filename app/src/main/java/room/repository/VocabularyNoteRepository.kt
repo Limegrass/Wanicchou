@@ -34,8 +34,8 @@ class VocabularyNoteRepository(private val database : WanicchouDatabase)
 
     override suspend fun update(original: INote<IVocabulary>,
                                 updated: INote<IVocabulary>) {
-        if (original.topic != updated.topic) {
-            throw IllegalArgumentException("Original and update notes reference different vocabulary words.")
+        require(original.topic == updated.topic) {
+            "Original and update notes reference different vocabulary words."
         }
         val vocabularyID = Vocabulary.getVocabularyID(original.topic, database)!!
         database.vocabularyNoteDao().updateNote(updated.noteText, original.noteText, vocabularyID)

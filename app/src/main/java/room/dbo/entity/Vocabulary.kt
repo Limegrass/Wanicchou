@@ -45,7 +45,7 @@ data class Vocabulary (
     }
 
     override fun equals(other: Any?): Boolean {
-        if (other == null || other !is Vocabulary){
+        if (other == null || other !is IVocabulary){
             return false
         }
         return this.word == other.word
@@ -55,12 +55,11 @@ data class Vocabulary (
     }
 
     override fun hashCode(): Int {
-        var hash = 17
-        hash = hash * 31 + word.hashCode()
-        hash = hash * 31 + pronunciation.hashCode()
-        hash = hash * 31 + language.hashCode()
-        hash = hash * 31 + pitch.hashCode()
-        return hash
+        return word.hashCode() xor
+                pronunciation.hashCode() xor
+                language.hashCode() xor
+                pitch.hashCode()
+
     }
     companion object {
         /**
