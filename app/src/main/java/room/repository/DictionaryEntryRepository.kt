@@ -1,22 +1,36 @@
 package room.repository
 
 import androidx.annotation.WorkerThread
+import data.architecture.IRepository
+import data.enums.MatchType
 import data.models.IDictionaryEntry
 import data.search.SearchRequest
-import data.architecture.IRepository
+import kotlinx.coroutines.runBlocking
 import room.database.WanicchouDatabase
 import room.dbo.entity.Definition
 import room.dbo.entity.Vocabulary
-import room.search.DatabaseSearchStrategyFactory
-import kotlinx.coroutines.runBlocking
 
 class DictionaryEntryRepository(private val database : WanicchouDatabase)
     : IRepository<IDictionaryEntry, SearchRequest> {
-
     @WorkerThread
     override suspend fun search(request: SearchRequest) : List<IDictionaryEntry> {
-        val searchStrategy = DatabaseSearchStrategyFactory(request.matchType).get()
-        return searchStrategy.search(database, request)
+        val formattedSearchTerm = request.matchType.templateString.format(request.searchTerm)
+        return when(request.matchType){
+            MatchType.WORD_EQUALS -> database.dictionaryEntryDao()
+                    .searchWordEqual(formattedSearchTerm, request.vocabularyLanguage, request.definitionLanguage)
+            MatchType.WORD_STARTS_WITH -> database.dictionaryEntryDao()
+                    .searchWordLike(formattedSearchTerm, request.vocabularyLanguage, request.definitionLanguage)
+            MatchType.WORD_ENDS_WITH -> database.dictionaryEntryDao()
+                    .searchWordLike(formattedSearchTerm, request.vocabularyLanguage, request.definitionLanguage)
+            MatchType.WORD_CONTAINS -> database.dictionaryEntryDao()
+                    .searchWordLike(formattedSearchTerm, request.vocabularyLanguage, request.definitionLanguage)
+            MatchType.WORD_WILDCARDS -> database.dictionaryEntryDao()
+                    .searchWordLike(formattedSearchTerm, request.vocabularyLanguage, request.definitionLanguage)
+            MatchType.DEFINITION_CONTAINS -> database.dictionaryEntryDao()
+                    .searchDefinitionLike(formattedSearchTerm, request.vocabularyLanguage, request.definitionLanguage)
+            MatchType.WORD_OR_DEFINITION_CONTAINS -> database.dictionaryEntryDao()
+                    .searchWordOrDefinitionLike(formattedSearchTerm, request.vocabularyLanguage, request.definitionLanguage)
+        }
     }
 
     override suspend fun insert(entity: IDictionaryEntry) {
