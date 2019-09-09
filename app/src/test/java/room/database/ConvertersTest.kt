@@ -2,7 +2,6 @@ package room.database
 
 import data.enums.Dictionary
 import data.enums.Language
-import data.enums.MatchType
 import room.dbo.entity.Vocabulary
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -42,19 +41,5 @@ class ConvertersTest {
         val dictionary = Dictionary.SANSEIDO
         val converters = Converters()
         assertEquals(dictionary, converters.toDictionary(dictionary.dictionaryID))
-    }
-
-    @Test
-    fun `fromMatchType returns matchTypeID`(){
-        val matchType = MatchType.DEFINITION_CONTAINS
-        val converters = Converters()
-        assertEquals(matchType.matchTypeID, converters.fromMatchType(matchType))
-    }
-
-    @Test
-    fun `toMatchType returns MatchType enum`(){
-        val matchType = MatchType.WORD_EQUALS
-        val converters = Converters()
-        assertEquals(matchType, converters.toMatchType(matchType.matchTypeID))
     }
 }

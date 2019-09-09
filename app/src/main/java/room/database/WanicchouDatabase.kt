@@ -28,10 +28,7 @@ import room.dbo.entity.*
             Tag::class,
             VocabularyNote::class,
             VocabularyTag::class,
-            MatchType::class,
-            DictionaryMatchType::class,
-            Language::class,
-            Translation::class
+            Language::class
         ],
         views = [VocabularyAndTag::class],
         version = 3,
@@ -46,10 +43,7 @@ abstract class WanicchouDatabase : RoomDatabase() {
     abstract fun vocabularyDao(): VocabularyDao
     abstract fun vocabularyNoteDao(): VocabularyNoteDao
     abstract fun vocabularyTagDao(): VocabularyTagDao
-    abstract fun matchTypeDao(): MatchTypeDao
-    abstract fun dictionaryMatchTypeDao(): DictionaryMatchTypeDao
     abstract fun languageDao(): LanguageDao
-    abstract fun translationDao(): TranslationDao
     abstract fun dictionaryEntryDao(): DictionaryEntryDao
     abstract fun vocabularyAndTagDao(): VocabularyAndTagDao
 
@@ -71,6 +65,5 @@ abstract class WanicchouDatabase : RoomDatabase() {
         operator fun invoke(context: Context) : WanicchouDatabase {
             return getInstance(context)
         }
-        const val INSERTION_FAILED_ID = -1L // Room's return value for failed @Insert calls
     }
 }

@@ -6,7 +6,6 @@ import androidx.test.core.app.ApplicationProvider
 import room.database.WanicchouDatabase
 import room.dbo.entity.Dictionary
 import room.dbo.entity.Language
-import room.dbo.entity.MatchType
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Before
@@ -24,7 +23,6 @@ abstract class AbstractDaoTest {
                 .build()
         runBlocking {
             insertLanguages(db)
-            insertMatchTypes(db)
         }
         runBlocking {
             insertDictionaries(db)
@@ -42,16 +40,6 @@ abstract class AbstractDaoTest {
         for (language in data.enums.Language.values()){
             val entity = Language(language.name, language.languageCode, language.languageID)
             database.languageDao().insert(entity)
-        }
-    }
-
-    private suspend fun insertMatchTypes(database: WanicchouDatabase){
-        val dao = database.matchTypeDao()
-        for (matchType in data.enums.MatchType.values()) {
-            val entity = MatchType(matchType.name,
-                    matchType.templateString,
-                    matchType.matchTypeID)
-            dao.insert(entity)
         }
     }
 
