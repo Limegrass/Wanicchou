@@ -10,7 +10,6 @@ import org.junit.Test
 import room.dao.entity.DefinitionDao
 import room.dao.entity.VocabularyDao
 import room.database.WanicchouDatabase
-import room.dbo.entity.Definition.Companion.getDefinitionID
 import room.dbo.entity.Vocabulary
 import kotlin.random.Random
 import kotlin.test.assertEquals
@@ -21,7 +20,7 @@ class DictionaryEntryRepositoryTest {
         val vocabulary = data.models.Vocabulary("", "", "", Language.JAPANESE)
         val dictionaryEntry = DictionaryEntry(vocabulary, listOf())
         val vocabularyDao = mockk<VocabularyDao>{
-            every {
+            coEvery {
                 getVocabularyID(any(), any(), any(), any())
             } returns null
             coEvery {
@@ -51,7 +50,7 @@ class DictionaryEntryRepositoryTest {
                 Definition("2", Language.ENGLISH, Dictionary.SANSEIDO)
         ))
         val vocabularyDao = mockk<VocabularyDao>{
-            every {
+            coEvery {
                 getVocabularyID(vocabulary.word,
                                 vocabulary.pronunciation,
                                 vocabulary.pitch,
@@ -111,7 +110,7 @@ class DictionaryEntryRepositoryTest {
         ))
 
         val vocabularyDao = mockk<VocabularyDao>{
-            every {
+            coEvery {
                 getVocabularyID(vocabulary.word,
                         vocabulary.pronunciation,
                         vocabulary.pitch,
@@ -142,7 +141,7 @@ class DictionaryEntryRepositoryTest {
                 Definition("2", Language.ENGLISH, Dictionary.SANSEIDO)
         ))
         val vocabularyDao = mockk<VocabularyDao>{
-            every {
+            coEvery {
                 getVocabularyID(vocabulary.word,
                         vocabulary.pronunciation,
                         vocabulary.pitch,
@@ -182,7 +181,7 @@ class DictionaryEntryRepositoryTest {
         val definitionDao = mockk<DefinitionDao>{
             for (i in dictionaryEntry.definitions.indices){
                 coEvery {
-                    getDefinitionIDByDefinitionText(dictionaryEntry.definitions[i].definitionText,
+                    getDefinitionIDByVocabularyID(vocabularyID,
                             dictionaryEntry.definitions[i].language,
                             dictionaryEntry.definitions[i].dictionary)
                 } returns definitionIDs[i]
@@ -192,7 +191,7 @@ class DictionaryEntryRepositoryTest {
             } just Runs
         }
         val vocabularyDao = mockk<VocabularyDao>{
-            every {
+            coEvery {
                 getVocabularyID(vocabulary.word,
                         vocabulary.pronunciation,
                         vocabulary.pitch,
@@ -243,17 +242,23 @@ class DictionaryEntryRepositoryTest {
     fun `delete deletes only definition entry`(){
         //Could update this to delete the Vocabulary if the deleted definition was the last one.
         val vocabulary = data.models.Vocabulary("", "", "", Language.JAPANESE)
+        val vocabularyID = Random.nextLong()
         val definitionIDs = listOf(Random.nextLong(), Random.nextLong())
         val definitions = listOf(
                 Definition("1", Language.JAPANESE, Dictionary.SANSEIDO),
                 Definition("2", Language.ENGLISH, Dictionary.SANSEIDO))
         val dictionaryEntry = DictionaryEntry(vocabulary, definitions)
+        val vocabularyDao = mockk<VocabularyDao>{
+            coEvery {
+                getVocabularyID(any(), any(), any(), any())
+            } returns vocabularyID
+        }
 
         val definitionDao = mockk<DefinitionDao>{
             for (i in definitions.indices){
                 coEvery {
-                    getDefinitionIDByDefinitionText(
-                            definitions[i].definitionText,
+                    getDefinitionIDByVocabularyID(
+                            vocabularyID,
                             definitions[i].language,
                             definitions[i].dictionary)
                 } returns definitionIDs[i]
@@ -263,6 +268,9 @@ class DictionaryEntryRepositoryTest {
             } just Runs
         }
         val db = mockk<WanicchouDatabase>{
+            every {
+                vocabularyDao()
+            } returns vocabularyDao
             every {
                 definitionDao()
             } returns definitionDao

@@ -14,14 +14,14 @@ class VocabularyTagRepository(private val database : WanicchouDatabase)
     : IRepository<ITaggedItem<IVocabulary>, IVocabulary> {
 
     override suspend fun search(request: IVocabulary): List<ITaggedItem<IVocabulary>> {
-        val vocabularyID = Vocabulary.getVocabularyID(request, database) ?: return listOf()
+        val vocabularyID = Vocabulary.getVocabularyID(database, request) ?: return listOf()
         return database.vocabularyAndTagDao().getVocabularyAndTag(vocabularyID)
     }
 
     override suspend fun insert(entity: ITaggedItem<IVocabulary>) {
         val tagText = entity.tag
         val vocabulary = entity.item
-        val vocabularyID = Vocabulary.getVocabularyID(vocabulary, database)!!
+        val vocabularyID = Vocabulary.getVocabularyID(database, vocabulary)!!
         val tagID = database.tagDao().getExistingTagID(tagText) ?: runBlocking {
             val tag = Tag(tagText.trim())
             database.tagDao().insert(tag)
@@ -50,7 +50,7 @@ class VocabularyTagRepository(private val database : WanicchouDatabase)
 
     override suspend fun delete(entity: ITaggedItem<IVocabulary>) {
         val vocabulary = entity.item
-        val vocabularyID = Vocabulary.getVocabularyID(vocabulary, database)!!
+        val vocabularyID = Vocabulary.getVocabularyID(database, vocabulary)!!
         database.vocabularyTagDao().deleteVocabularyTag(entity.tag, vocabularyID)
     }
 }

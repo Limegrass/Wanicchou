@@ -34,7 +34,7 @@ class DictionaryEntryRepository(private val database : WanicchouDatabase)
     }
 
     override suspend fun insert(entity: IDictionaryEntry) {
-        val vocabularyID = Vocabulary.getVocabularyID(entity.vocabulary, database) ?: runBlocking {
+        val vocabularyID = Vocabulary.getVocabularyID(database, entity.vocabulary) ?: runBlocking {
             val vocabularyEntity = Vocabulary(entity.vocabulary)
             database.vocabularyDao().insert(vocabularyEntity)
         }
@@ -54,7 +54,7 @@ class DictionaryEntryRepository(private val database : WanicchouDatabase)
         val updatedDefinitions = updated.definitions
         require(originalDefinitions.size == updatedDefinitions.size)
 
-        val vocabularyID = Vocabulary.getVocabularyID(original.vocabulary, database)!!
+        val vocabularyID = Vocabulary.getVocabularyID(database, original.vocabulary)!!
         val vocabularyEntity = Vocabulary(updated.vocabulary.word,
                 updated.vocabulary.pronunciation,
                 updated.vocabulary.pitch,
@@ -79,7 +79,7 @@ class DictionaryEntryRepository(private val database : WanicchouDatabase)
      * Deletes the linked definition from the database. The vocabulary row remains intact.
      */
     override suspend fun delete(entity: IDictionaryEntry) {
-        val vocabularyID = Vocabulary.getVocabularyID(entity.vocabulary, database)!!
+        val vocabularyID = Vocabulary.getVocabularyID(database, entity.vocabulary)!!
         for (definition in entity.definitions) {
             val definitionID = Definition.getDefinitionID(database, definition, vocabularyID)!!
             val definitionEntity = Definition(definition.definitionText,

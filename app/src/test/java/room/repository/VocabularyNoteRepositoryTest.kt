@@ -16,7 +16,7 @@ class VocabularyNoteRepositoryTest {
     fun search_ReturnsNoResultsWithNoVocabularyID(){
         val vocabulary = data.models.Vocabulary("", "", "", Language.JAPANESE)
         val vocabularyDao = mockk<VocabularyDao>{
-            every {
+            coEvery {
                 getVocabularyID(any(), any(), any(), any())
             } returns null
         }
@@ -31,7 +31,7 @@ class VocabularyNoteRepositoryTest {
             repository.search(vocabulary)
         }
         assertEquals(0, searchResults.size)
-        verifyAll {
+        coVerifyAll {
             vocabularyDao.getVocabularyID(any(), any(), any(), any())
         }
     }
@@ -44,7 +44,7 @@ class VocabularyNoteRepositoryTest {
             every {
                 vocabularyDao()
             } returns mockk {
-                every {
+                coEvery {
                     getVocabularyID(vocabulary.word,
                                     vocabulary.pronunciation,
                                     vocabulary.pitch,
@@ -78,7 +78,7 @@ class VocabularyNoteRepositoryTest {
             every {
                 vocabularyDao()
             } returns mockk {
-                every {
+                coEvery {
                     getVocabularyID(vocabulary.word,
                             vocabulary.pronunciation,
                             vocabulary.pitch,
@@ -112,7 +112,7 @@ class VocabularyNoteRepositoryTest {
             every {
                 vocabularyDao()
             } returns mockk {
-                every {
+                coEvery {
                     getVocabularyID(vocabulary.word,
                             vocabulary.pronunciation,
                             vocabulary.pitch,
@@ -131,7 +131,7 @@ class VocabularyNoteRepositoryTest {
         val vocabularyID = Random.nextLong()
         val vocabulary = data.models.Vocabulary("", "", "", Language.JAPANESE)
         val vocabularyDao = mockk<VocabularyDao>{
-            every {
+            coEvery {
                 getVocabularyID(vocabulary.word,
                         vocabulary.pronunciation,
                         vocabulary.pitch,
@@ -170,7 +170,7 @@ class VocabularyNoteRepositoryTest {
             every {
                 vocabularyDao()
             } returns mockk {
-                every {
+                coEvery {
                     getVocabularyID(vocabulary.word,
                             vocabulary.pronunciation,
                             vocabulary.pitch,
@@ -205,7 +205,7 @@ class VocabularyNoteRepositoryTest {
             every {
                 vocabularyDao()
             } returns mockk {
-                every {
+                coEvery {
                     getVocabularyID(vocabulary.word,
                             vocabulary.pronunciation,
                             vocabulary.pitch,
@@ -239,7 +239,7 @@ class VocabularyNoteRepositoryTest {
             every {
                 vocabularyDao()
             } returns mockk {
-                every {
+                coEvery {
                     getVocabularyID(vocabulary.word,
                             vocabulary.pronunciation,
                             vocabulary.pitch,

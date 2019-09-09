@@ -12,7 +12,7 @@ class VocabularyNoteRepository(private val database : WanicchouDatabase)
     : IRepository<INote<IVocabulary>, IVocabulary> {
 
     override suspend fun search(request: IVocabulary): List<INote<IVocabulary>> {
-        val vocabularyID = Vocabulary.getVocabularyID(request, database) ?: return listOf()
+        val vocabularyID = Vocabulary.getVocabularyID(database, request) ?: return listOf()
         val vocabularyNotes = database.vocabularyNoteDao().getNotesForVocabulary(vocabularyID)
         val vocabulary = if(request is Vocabulary) {
             request
@@ -27,7 +27,7 @@ class VocabularyNoteRepository(private val database : WanicchouDatabase)
     }
 
     override suspend fun insert(entity: INote<IVocabulary>) {
-        val vocabularyID = Vocabulary.getVocabularyID(entity.topic, database)!!
+        val vocabularyID = Vocabulary.getVocabularyID(database, entity.topic)!!
         val vocabularyNote = VocabularyNote(entity.noteText, vocabularyID)
         database.vocabularyNoteDao().insert(vocabularyNote)
     }
@@ -37,12 +37,12 @@ class VocabularyNoteRepository(private val database : WanicchouDatabase)
         require(original.topic == updated.topic) {
             "Original and update notes reference different vocabulary words."
         }
-        val vocabularyID = Vocabulary.getVocabularyID(original.topic, database)!!
+        val vocabularyID = Vocabulary.getVocabularyID(database, original.topic)!!
         database.vocabularyNoteDao().updateNote(updated.noteText, original.noteText, vocabularyID)
     }
 
     override suspend fun delete(entity: INote<IVocabulary>) {
-        val vocabularyID = Vocabulary.getVocabularyID(entity.topic, database)!!
+        val vocabularyID = Vocabulary.getVocabularyID(database, entity.topic)!!
         database.vocabularyNoteDao().deleteNote(entity.noteText, vocabularyID)
     }
 
