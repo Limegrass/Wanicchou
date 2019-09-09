@@ -13,6 +13,7 @@ class DefinitionLikeSearchStrategy
         val formattedSearchTerm = templateString.format(searchRequest.searchTerm)
         val dao = database.dictionaryEntryDao()
         return dao.searchDefinitionLike(formattedSearchTerm,
+                                        searchRequest.vocabularyLanguage,
                                         searchRequest.definitionLanguage)
     }
 }

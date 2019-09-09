@@ -12,6 +12,7 @@ internal class WordEqualsDatabaseSearchStrategy : IDatabaseSearchStrategy {
         val formattedSearchTerm = templateString.format(searchRequest.searchTerm)
         val dao = database.dictionaryEntryDao()
         return dao.searchWordEqual(formattedSearchTerm,
-                                   searchRequest.vocabularyLanguage)
+                                   searchRequest.vocabularyLanguage,
+                                   searchRequest.definitionLanguage)
     }
 }

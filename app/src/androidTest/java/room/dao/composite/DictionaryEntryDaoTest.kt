@@ -25,7 +25,7 @@ class DictionaryEntryDaoTest : AbstractDaoTest() {
                 db.vocabularyDao().insert(vocabulary)
             }
         }
-        val entries = db.dictionaryEntryDao().searchWordLike("""__S%""", Language.JAPANESE)
+        val entries = db.dictionaryEntryDao().searchWordLike("""__S%""", Language.JAPANESE, Language.JAPANESE)
         val expected = listOf("TES", "TEST")
         assertEquals(expected.size, entries.size)
         for (entry in entries){
@@ -48,7 +48,7 @@ class DictionaryEntryDaoTest : AbstractDaoTest() {
             }
         }
         // Seems it's case sensitive
-        val entries = db.dictionaryEntryDao().searchWordEqual("""TEST""", Language.JAPANESE)
+        val entries = db.dictionaryEntryDao().searchWordEqual("""TEST""", Language.JAPANESE, Language.JAPANESE)
         val expected = listOf("TEST")
         assertEquals(expected.size, entries.size)
         for (entry in entries){
@@ -76,7 +76,7 @@ class DictionaryEntryDaoTest : AbstractDaoTest() {
                 db.definitionDao().insert(definition)
             }
         }
-        val entries = db.dictionaryEntryDao().searchDefinitionLike("""_P%""", Language.JAPANESE)
+        val entries = db.dictionaryEntryDao().searchDefinitionLike("""_P%""", Language.JAPANESE, Language.JAPANESE)
         val expected = listOf("TEST")
         assertEquals(expected.size, entries.size)
         assert(entries.single().definitions.any { it.definitionText.contains(".P.*".toRegex()) } )

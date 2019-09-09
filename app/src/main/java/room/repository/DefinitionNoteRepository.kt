@@ -12,7 +12,7 @@ class DefinitionNoteRepository(private val database : WanicchouDatabase)
     : IRepository<INote<IDefinition>, IDefinition> {
 
     override suspend fun search(request: IDefinition): List<INote<IDefinition>> {
-        val definitionID = Definition.getDefinitionID(request, database) ?: return listOf()
+        val definitionID = Definition.getDefinitionID(database, request) ?: return listOf()
         val notes = database.definitionNoteDao().getNotesForDefinition(definitionID)
         return notes.map {
             Note(request, it)
@@ -20,7 +20,7 @@ class DefinitionNoteRepository(private val database : WanicchouDatabase)
     }
 
     override suspend fun insert(entity: INote<IDefinition>) {
-        val definitionID = Definition.getDefinitionID(entity.topic, database)!!
+        val definitionID = Definition.getDefinitionID(database, entity.topic)!!
         val definitionNote = DefinitionNote(entity.noteText, definitionID)
         database.definitionNoteDao().insert(definitionNote)
     }
@@ -30,12 +30,12 @@ class DefinitionNoteRepository(private val database : WanicchouDatabase)
         require(original.topic == updated.topic) {
             "Original and update notes reference different definitions."
         }
-        val definitionID = Definition.getDefinitionID(original.topic, database)!!
+        val definitionID = Definition.getDefinitionID(database, original.topic)!!
         database.definitionNoteDao().updateNote(updated.noteText, original.noteText, definitionID)
     }
 
     override suspend fun delete(entity: INote<IDefinition>) {
-        val definitionID = Definition.getDefinitionID(entity.topic, database)!!
+        val definitionID = Definition.getDefinitionID(database, entity.topic)!!
         database.definitionNoteDao().deleteNote(entity.noteText, definitionID)
     }
 }

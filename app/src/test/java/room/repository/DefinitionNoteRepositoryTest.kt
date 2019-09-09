@@ -17,8 +17,8 @@ class DefinitionNoteRepositoryTest {
     fun search_ReturnsNoResultsWithNoDefinitionID(){
         val definition = data.models.Definition("", Language.JAPANESE, Dictionary.SANSEIDO)
         val definitionDao = mockk<DefinitionDao>{
-            every {
-                getDefinitionID(any(), any(), any())
+            coEvery {
+                getDefinitionIDByDefinitionText(any(), any(), any())
             } returns null
         }
         val db = mockk<WanicchouDatabase>{
@@ -32,8 +32,8 @@ class DefinitionNoteRepositoryTest {
             repository.search(definition)
         }
         assertEquals(0, searchResults.size)
-        verifyAll {
-            definitionDao.getDefinitionID(any(), any(), any())
+        coVerifyAll {
+            definitionDao.getDefinitionIDByDefinitionText(any(), any(), any())
         }
     }
 
@@ -45,8 +45,8 @@ class DefinitionNoteRepositoryTest {
             every {
                 definitionDao()
             } returns mockk {
-                every {
-                    getDefinitionID(any(), any(), any())
+                coEvery {
+                    getDefinitionIDByDefinitionText(any(), any(), any())
                 } returns definitionID + 1
             }
             every {
@@ -76,8 +76,8 @@ class DefinitionNoteRepositoryTest {
             every {
                 definitionDao()
             } returns mockk {
-                every {
-                    getDefinitionID(any(), any(), any())
+                coEvery {
+                    getDefinitionIDByDefinitionText(any(), any(), any())
                 } returns definitionID
             }
             every {
@@ -107,8 +107,8 @@ class DefinitionNoteRepositoryTest {
             every {
                 definitionDao()
             } returns mockk {
-                every {
-                    getDefinitionID(any(), any(), any())
+                coEvery {
+                    getDefinitionIDByDefinitionText(any(), any(), any())
                 } returns null
             }
         }
@@ -123,8 +123,8 @@ class DefinitionNoteRepositoryTest {
         val definitionID = Random.nextLong()
         val definition = data.models.Definition("", Language.JAPANESE, Dictionary.SANSEIDO)
         val definitionDao = mockk<DefinitionDao>{
-            every {
-                getDefinitionID(any(), any(), any())
+            coEvery {
+                getDefinitionIDByDefinitionText(any(), any(), any())
             } returns definitionID
         }
         val definitionNoteDao = mockk<DefinitionNoteDao>{
@@ -159,8 +159,8 @@ class DefinitionNoteRepositoryTest {
             every {
                 definitionDao()
             } returns mockk {
-                every {
-                    getDefinitionID(any(), any(), any())
+                coEvery {
+                    getDefinitionIDByDefinitionText(any(), any(), any())
                 } returns definitionID
             }
             every {
@@ -191,8 +191,8 @@ class DefinitionNoteRepositoryTest {
             every {
                 definitionDao()
             } returns mockk {
-                every {
-                    getDefinitionID(any(), any(), any())
+                coEvery {
+                    getDefinitionIDByDefinitionText(any(), any(), any())
                 } returns definitionID
             }
             every {
@@ -222,8 +222,8 @@ class DefinitionNoteRepositoryTest {
             every {
                 definitionDao()
             } returns mockk {
-                every {
-                    getDefinitionID(any(), any(), any())
+                coEvery {
+                    getDefinitionIDByDefinitionText(any(), any(), any())
                 } returns definitionID
             }
             every {

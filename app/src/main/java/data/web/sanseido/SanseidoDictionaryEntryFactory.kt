@@ -50,14 +50,11 @@ class SanseidoDictionaryEntryFactory
 
     //<editor-fold desc="Vocabulary">
     private fun getVocabulary(wordSource: String,
-                              wordLanguage: Language) : Vocabulary {
-        val word = isolateWord(wordSource, wordLanguage)
-        val pronunciation = isolateReading(wordSource, wordLanguage)
-        val pitch = JapaneseVocabulary.isolatePitch(wordSource)
-        return Vocabulary(word,
-                pronunciation,
-                pitch,
-                wordLanguage)
+                              vocabularyLanguage: Language) : Vocabulary {
+        val word = isolateWord(wordSource, vocabularyLanguage).trim()
+        val pronunciation = isolateReading(wordSource, vocabularyLanguage).trim()
+        val pitch = JapaneseVocabulary.isolatePitch(wordSource).trim()
+        return Vocabulary(word, pronunciation, pitch, vocabularyLanguage)
     }
 
     /**
@@ -66,17 +63,17 @@ class SanseidoDictionaryEntryFactory
      * uses the JapaneseVocabulary.isolateWord helper methods if that fails.
      */
     @Throws(IllegalArgumentException::class)
-    private fun isolateWord(wordSource: String, wordLanguage: Language): String {
+    private fun isolateWord(wordSource: String, vocabularyLanguage: Language): String {
         val cleanedWordSource = wordSource.replace(SEPARATOR_FRAGMENTS_REGEX.toRegex(), "")
         //TODO: Move use make english vocab if it is
-        if (wordLanguage == Language.ENGLISH) {
+        if (vocabularyLanguage == Language.ENGLISH) {
             val ejMatcher = Pattern.compile(EXACT_EJ_REGEX).matcher(cleanedWordSource)
             if (ejMatcher.find()) {
                 return ejMatcher.group(0)
             }
             return cleanedWordSource
         }
-        else if (wordLanguage == Language.JAPANESE) {
+        else if (vocabularyLanguage == Language.JAPANESE) {
             val exactMatcher = Pattern
                     .compile(EXACT_WORD_REGEX)
                     .matcher(cleanedWordSource)
@@ -87,7 +84,7 @@ class SanseidoDictionaryEntryFactory
                 JapaneseVocabulary.isolateWord(cleanedWordSource)
             }
         }
-        throw IllegalArgumentException("Invalid Language Code: $wordLanguage for Sanseido." +
+        throw IllegalArgumentException("Invalid Language Code: $vocabularyLanguage for Sanseido." +
                 " Source: $cleanedWordSource.")
     }
 
@@ -136,7 +133,6 @@ class SanseidoDictionaryEntryFactory
         //TODO: FIX REGEX
         formattedDefinition = formattedDefinition.replace(MULTIPLE_DEFINITION_REGEX.toRegex(),
                 MULTIPLE_DEFINITION_SEPARATOR)
-
         return formattedDefinition.trim()
     }
 

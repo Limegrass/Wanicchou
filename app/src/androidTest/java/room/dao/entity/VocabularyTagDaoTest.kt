@@ -29,7 +29,7 @@ class VocabularyTagDaoTest : AbstractDaoTest() {
             db.vocabularyTagDao().insert(vocabularyTag)
         }
         val deletedCount = runBlocking {
-            db.vocabularyTagDao().deleteVocabularyTag(vocabularyID, tagText)
+            db.vocabularyTagDao().deleteVocabularyTag(tagText, vocabularyID)
         }
         assertEquals(1, deletedCount)
     }

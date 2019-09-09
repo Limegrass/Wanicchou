@@ -4,7 +4,6 @@ import androidx.room.*
 import androidx.room.ForeignKey.CASCADE
 import data.models.IDefinition
 import room.database.WanicchouDatabase
-import kotlinx.coroutines.runBlocking
 
 @Entity(tableName = "Definition",
         foreignKeys = [
@@ -25,8 +24,7 @@ import kotlinx.coroutines.runBlocking
                     onDelete = CASCADE)
         ],
         indices = [Index(
-                value = arrayOf("DefinitionText",
-                        "VocabularyID"),
+                value = arrayOf("VocabularyID", "LanguageID", "DictionaryID"),
                 unique = true)]
 )
 data class Definition (
@@ -58,14 +56,23 @@ data class Definition (
          * Gets the DefinitionID from the IDefinition if it's an instance of the entity class,
          * else will perform a database request for it from the database given
          */
-        fun getDefinitionID(definition : IDefinition, database: WanicchouDatabase) : Long? {
+        suspend fun getDefinitionID(database: WanicchouDatabase,
+                                    definition: IDefinition,
+                                    vocabularyID: Long? = null) : Long? {
             return if (definition is Definition){
                 definition.definitionID
             }
-            else runBlocking {
-                database.definitionDao().getDefinitionID(definition.definitionText,
-                        definition.language,
-                        definition.dictionary)
+            else if (vocabularyID != null){
+                database.definitionDao()
+                        .getDefinitionIDByVocabularyID(vocabularyID,
+                                definition.language,
+                                definition.dictionary)
+            }
+            else {
+                database.definitionDao()
+                        .getDefinitionIDByDefinitionText(definition.definitionText,
+                                definition.language,
+                                definition.dictionary)
             }
         }
 

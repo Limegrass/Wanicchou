@@ -72,7 +72,7 @@
     <string name="definition_note_title">定義のメモ</string>
     <string name="add_button_text">追加</string>
     <string name="delete_button_text">削除</string>
-    <string name="edit_note_title">エディット</string>
+    <string name="edit_note_title">メモ</string>
     <string name="vocab_language_title">単語言語</string>
     <string name="definition_language_title">定義言語</string>
     <string name="database_match_type_title">データベースマッチタイプ</string>
@@ -82,4 +82,5 @@
     <string name="lbl_fragment_definition_note_title">定義のメモ</string>
     <string name="lbl_fragment_tag_title">タグ</string>
     <string name="toast_anki_storage_permission_required" translatable="true">暗記ドロイドの保存許可は許していません。</string>
+    <string name="edit_definition_title" translatable="true">意味</string>
 </resources>

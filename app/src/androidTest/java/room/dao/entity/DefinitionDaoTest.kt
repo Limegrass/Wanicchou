@@ -26,23 +26,62 @@ class DefinitionDaoTest : AbstractDaoTest() {
     }
 
     @Test
-    fun getDefinitionID_Exists_ReturnsID() {
+    fun getDefinitionIDByDefinitionText_Exists_ReturnsID() {
         insertTestData()
-        val daoDefinitionID = db.definitionDao().getDefinitionID(definitionText, language, dictionary)
+        val daoDefinitionID = runBlocking {
+            db.definitionDao().getDefinitionIDByDefinitionText(definitionText, language, dictionary)
+        }
         assertEquals(definitionID, daoDefinitionID)
     }
 
     @Test
-    fun getDefinitionID_DefinitionTextMismatch_ReturnsNull() {
+    fun getDefinitionIDByDefinitionText_DefinitionTextMismatch_ReturnsNull() {
         insertTestData()
-        val daoDefinitionID = db.definitionDao().getDefinitionID("", language, dictionary)
+        val daoDefinitionID = runBlocking{
+            db.definitionDao().getDefinitionIDByDefinitionText("", language, dictionary)
+        }
         assertEquals(null, daoDefinitionID)
     }
 
     @Test
-    fun getDefinitionID_LanguageMismatch_ReturnsNull() {
+    fun getDefinitionIDByDefinitionText_LanguageMismatch_ReturnsNull() {
         insertTestData()
-        val daoDefinitionID = db.definitionDao().getDefinitionID("", Language.ENGLISH, dictionary)
+        val daoDefinitionID = runBlocking {
+            db.definitionDao().getDefinitionIDByDefinitionText("", Language.ENGLISH, dictionary)
+        }
+        assertEquals(null, daoDefinitionID)
+    }
+
+    @Test
+    fun getDefinitionIDByVocabularyID_LanguageMismatch_ReturnsNull() {
+        insertTestData()
+        val daoDefinitionID = runBlocking {
+            db.definitionDao().getDefinitionIDByDefinitionText("", Language.ENGLISH, dictionary)
+        }
+        assertEquals(null, daoDefinitionID)
+    }
+    @Test
+    fun getDefinitionIDByVocabularyID_IDMismatch_ReturnsNull() {
+        insertTestData()
+        val daoDefinitionID = runBlocking {
+            db.definitionDao().getDefinitionIDByDefinitionText("", Language.ENGLISH, dictionary)
+        }
+        assertEquals(null, daoDefinitionID)
+    }
+    @Test
+    fun getDefinitionIDByVocabularyID_VocabularyIDMismatch_ReturnsNull() {
+        insertTestData()
+        val daoDefinitionID = runBlocking {
+            db.definitionDao().getDefinitionIDByDefinitionText("", Language.ENGLISH, dictionary)
+        }
+        assertEquals(null, daoDefinitionID)
+    }
+    @Test
+    fun getDefinitionIDByVocabularyID_Match_ReturnsID() {
+        insertTestData()
+        val daoDefinitionID = runBlocking {
+            db.definitionDao().getDefinitionIDByDefinitionText("", Language.ENGLISH, dictionary)
+        }
         assertEquals(null, daoDefinitionID)
     }
 }

@@ -10,7 +10,10 @@ import org.junit.Test
 import room.dao.entity.DefinitionDao
 import room.dao.entity.VocabularyDao
 import room.database.WanicchouDatabase
+import room.dbo.entity.Definition.Companion.getDefinitionID
+import room.dbo.entity.Vocabulary
 import kotlin.random.Random
+import kotlin.test.assertEquals
 
 class DictionaryEntryRepositoryTest {
     @Test
@@ -159,35 +162,33 @@ class DictionaryEntryRepositoryTest {
 
     @Test
     fun `update updates all given`(){
-        val vocabulary = data.models.Vocabulary("", "", "", Language.JAPANESE)
         val vocabularyID = Random.nextLong()
-        val definition1 = Definition("Updated", Language.JAPANESE, Dictionary.SANSEIDO)
-        val definitionID1 = Random.nextLong()
-        val definition2 = Definition("2", Language.ENGLISH, Dictionary.SANSEIDO)
-        val definitionID2 = Random.nextLong()
+        val vocabulary = data.models.Vocabulary("", "", "", Language.JAPANESE)
+        val definitionIDs = listOf(Random.nextLong(), Random.nextLong())
+
         val dictionaryEntry = DictionaryEntry(vocabulary, listOf(
-                definition1,
-                definition2
+                Definition("1", Language.JAPANESE, Dictionary.SANSEIDO),
+                        Definition("2", Language.ENGLISH, Dictionary.SANSEIDO)
         ))
 
-        val updatedDictionaryEntry = DictionaryEntry(vocabulary, listOf(
-                Definition("Updated", definition1.language, definition1.dictionary),
-                Definition("Updated2", definition2.language, definition2.dictionary)
-        ))
+        val vocabularySlot = slot<Vocabulary>()
+        val definitionsSlot = mutableListOf<room.dbo.entity.Definition>()
+
+        val updatedDefinitionList = dictionaryEntry.definitions.map {
+            Definition("Updated" + it.definitionText, it.language, it.dictionary)
+        }
+        val updatedDictionaryEntry = DictionaryEntry(vocabulary, updatedDefinitionList)
 
         val definitionDao = mockk<DefinitionDao>{
-            every {
-                getDefinitionID(definition1.definitionText,
-                                definition1.language,
-                                definition1.dictionary)
-            } returns definitionID1
-            every {
-                getDefinitionID(definition2.definitionText,
-                                definition2.language,
-                                definition2.dictionary)
-            } returns definitionID2
+            for (i in dictionaryEntry.definitions.indices){
+                coEvery {
+                    getDefinitionIDByDefinitionText(dictionaryEntry.definitions[i].definitionText,
+                            dictionaryEntry.definitions[i].language,
+                            dictionaryEntry.definitions[i].dictionary)
+                } returns definitionIDs[i]
+            }
             coEvery {
-                update(any())
+                update(capture(definitionsSlot))
             } just Runs
         }
         val vocabularyDao = mockk<VocabularyDao>{
@@ -198,7 +199,7 @@ class DictionaryEntryRepositoryTest {
                         vocabulary.language)
             } returns vocabularyID
             coEvery {
-                update(any())
+                update(capture(vocabularySlot))
             } just Runs
         }
         val db = mockk<WanicchouDatabase>{
@@ -216,8 +217,25 @@ class DictionaryEntryRepositoryTest {
         coVerify {
             vocabularyDao.update(any())
         }
+        assertEquals(vocabulary.language, vocabularySlot.captured.language)
+        assertEquals(vocabulary.word, vocabularySlot.captured.word)
+        assertEquals(vocabulary.pronunciation, vocabularySlot.captured.pronunciation)
+        assertEquals(vocabulary.pitch, vocabularySlot.captured.pitch)
         coVerify(exactly = 2) {
             definitionDao.update(any())
+        }
+        assertEquals(updatedDictionaryEntry.definitions.size, definitionsSlot.size)
+        for (i in updatedDictionaryEntry.definitions.indices){
+            assertEquals(updatedDefinitionList[i].definitionText,
+                         definitionsSlot[i].definitionText)
+            assertEquals(updatedDefinitionList[i].dictionary,
+                    definitionsSlot[i].dictionary)
+            assertEquals(updatedDefinitionList[i].language,
+                    definitionsSlot[i].language)
+            assertEquals(vocabularyID,
+                    definitionsSlot[i].vocabularyID)
+            assertEquals(definitionIDs[i],
+                    definitionsSlot[i].definitionID)
         }
     }
 
@@ -225,26 +243,21 @@ class DictionaryEntryRepositoryTest {
     fun `delete deletes only definition entry`(){
         //Could update this to delete the Vocabulary if the deleted definition was the last one.
         val vocabulary = data.models.Vocabulary("", "", "", Language.JAPANESE)
-        val definition1 = Definition("Updated", Language.JAPANESE, Dictionary.SANSEIDO)
-        val definitionID1 = Random.nextLong()
-        val definition2 = Definition("2", Language.ENGLISH, Dictionary.SANSEIDO)
-        val definitionID2 = Random.nextLong()
-        val dictionaryEntry = DictionaryEntry(vocabulary, listOf(
-                definition1,
-                definition2
-        ))
+        val definitionIDs = listOf(Random.nextLong(), Random.nextLong())
+        val definitions = listOf(
+                Definition("1", Language.JAPANESE, Dictionary.SANSEIDO),
+                Definition("2", Language.ENGLISH, Dictionary.SANSEIDO))
+        val dictionaryEntry = DictionaryEntry(vocabulary, definitions)
 
         val definitionDao = mockk<DefinitionDao>{
-            every {
-                getDefinitionID(definition1.definitionText,
-                        definition1.language,
-                        definition1.dictionary)
-            } returns definitionID1
-            every {
-                getDefinitionID(definition2.definitionText,
-                        definition2.language,
-                        definition2.dictionary)
-            } returns definitionID2
+            for (i in definitions.indices){
+                coEvery {
+                    getDefinitionIDByDefinitionText(
+                            definitions[i].definitionText,
+                            definitions[i].language,
+                            definitions[i].dictionary)
+                } returns definitionIDs[i]
+            }
             coEvery {
                 delete(any())
             } just Runs

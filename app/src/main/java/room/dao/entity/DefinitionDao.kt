@@ -12,8 +12,16 @@ interface DefinitionDao : BaseDao<Definition> {
     @Query("""
         SELECT d.DefinitionID
         FROM Definition d
+        WHERE d.VocabularyID = :vocabularyID
+            AND d.DictionaryID = :dictionary
+            AND d.LanguageID = :definitionLanguage """)
+    suspend fun getDefinitionIDByVocabularyID(vocabularyID : Long, definitionLanguage: Language, dictionary: Dictionary) : Long?
+
+    @Query("""
+        SELECT d.DefinitionID
+        FROM Definition d
         WHERE d.DefinitionText = :definitionText
             AND d.DictionaryID = :dictionary
             AND d.LanguageID = :definitionLanguage """)
-    fun getDefinitionID(definitionText: String, definitionLanguage: Language, dictionary: Dictionary) : Long?
+    suspend fun getDefinitionIDByDefinitionText(definitionText: String, definitionLanguage: Language, dictionary: Dictionary) : Long?
 }
