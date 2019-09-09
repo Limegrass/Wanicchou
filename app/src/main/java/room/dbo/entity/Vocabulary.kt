@@ -79,12 +79,6 @@ data class Vocabulary (
             }
         }
 
-        val DEFAULT_VOCABULARY = Vocabulary(
-                word = "和日帳",
-                pronunciation =  "わにっちょう",
-                pitch = "",
-                language = data.enums.Language.JAPANESE,
-                vocabularyID = 1)
     }
 
 }

@@ -59,31 +59,20 @@ data class Definition (
         suspend fun getDefinitionID(database: WanicchouDatabase,
                                     definition: IDefinition,
                                     vocabularyID: Long? = null) : Long? {
-            return if (definition is Definition){
-                definition.definitionID
-            }
-            else if (vocabularyID != null){
-                database.definitionDao()
+            return when {
+                definition is Definition -> definition.definitionID
+                vocabularyID != null -> database.definitionDao()
                         .getDefinitionIDByVocabularyID(vocabularyID,
                                 definition.language,
                                 definition.dictionary)
-            }
-            else {
-                database.definitionDao()
+                else -> database.definitionDao()
                         .getDefinitionIDByDefinitionText(definition.definitionText,
                                 definition.language,
                                 definition.dictionary)
             }
         }
 
-        val DEFAULT_DEFINITION = Definition(
-                definitionText = "ある使えないアプリ。",
-                language = data.enums.Language.JAPANESE,
-                dictionary = data.enums.Dictionary.SANSEIDO,
-                vocabularyID = 1,
-                definitionID = 1)
     }
-
 
     override fun toString(): String {
         return definitionText
