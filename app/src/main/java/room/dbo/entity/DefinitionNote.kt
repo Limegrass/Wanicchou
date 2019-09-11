@@ -1,14 +1,15 @@
 package room.dbo.entity
 
 import androidx.room.*
+import androidx.room.ForeignKey.CASCADE
 
 @Entity(tableName = "DefinitionNote",
         foreignKeys = [
             ForeignKey(
                     entity = Definition::class,
                     parentColumns = ["DefinitionID"],
-                    childColumns = ["DefinitionID"])
-        ]
+                    childColumns = ["DefinitionID"],
+                    onDelete = CASCADE)]
 )
 data class DefinitionNote (
     @ColumnInfo(name = "NoteText")

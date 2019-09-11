@@ -1,21 +1,23 @@
 package room.dbo.entity
 
 import androidx.room.*
+import androidx.room.ForeignKey.CASCADE
 
 @Entity(tableName = "VocabularyTag",
         foreignKeys = [
             ForeignKey(
                     entity = Vocabulary::class,
                     parentColumns = ["VocabularyID"],
-                    childColumns = ["VocabularyID"]),
+                    childColumns = ["VocabularyID"],
+                    onDelete = CASCADE),
             ForeignKey(
                     entity = Tag::class,
                     parentColumns = ["TagID"],
-                    childColumns = ["TagID"])
-        ],
+                    childColumns = ["TagID"],
+                    onDelete = CASCADE)],
         indices = [Index(
-                value = ["TagID",
-                         "VocabularyID"],
+                value = ["VocabularyID",
+                         "TagID"],
                 unique = true
         )]
 )
@@ -25,9 +27,9 @@ data class VocabularyTag (
     @ColumnInfo(name = "TagID")
     var tagID: Long,
 
-    @ColumnInfo(name = "VocabularyID", index = true)
+    @ColumnInfo(name = "VocabularyID")
     var vocabularyID: Long,
 
     @PrimaryKey(autoGenerate = true)
-    @ColumnInfo(name = "VocabularyTagID", index = true)
+    @ColumnInfo(name = "VocabularyTagID")
     var vocabularyTagID: Long = 0)

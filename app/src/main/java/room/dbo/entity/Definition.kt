@@ -31,13 +31,13 @@ data class Definition (
         @ColumnInfo(name = "DefinitionText")
         override var definitionText: String,
 
-        @ColumnInfo(name = "LanguageID", index = true)
+        @ColumnInfo(name = "LanguageID")
         override var language: data.enums.Language,
 
-        @ColumnInfo(name = "DictionaryID", index = true)
+        @ColumnInfo(name = "DictionaryID")
         override var dictionary: data.enums.Dictionary,
 
-        @ColumnInfo(name = "VocabularyID", index = true)
+        @ColumnInfo(name = "VocabularyID")
         var vocabularyID: Long,
 
         @PrimaryKey(autoGenerate = true)

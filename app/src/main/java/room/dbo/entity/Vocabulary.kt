@@ -1,10 +1,8 @@
 package room.dbo.entity
 
 import android.os.Parcelable
-import androidx.room.ColumnInfo
-import androidx.room.Entity
-import androidx.room.Index
-import androidx.room.PrimaryKey
+import androidx.room.*
+import androidx.room.ForeignKey.CASCADE
 import data.models.IVocabulary
 import room.database.WanicchouDatabase
 import kotlinx.android.parcel.Parcelize
@@ -12,11 +10,16 @@ import kotlinx.coroutines.runBlocking
 
 @Parcelize
 @Entity(tableName = "Vocabulary",
+        foreignKeys = [ForeignKey(
+                        entity = Language::class,
+                        parentColumns = ["LanguageID"],
+                        childColumns = ["LanguageID"],
+                        onDelete = CASCADE)],
         indices = [Index(
                 value = arrayOf("Word",
                                 "Pronunciation",
-                                "LanguageID",
-                                "Pitch"),
+                                "Pitch",
+                                "LanguageID"),
                 unique = true)]
 )
 
@@ -66,8 +69,8 @@ data class Vocabulary (
          * Gets the VocabularyID from the IVocabulary if it's an instance of the entity class,
          * else will perform a database request for it from the database given
          */
-        fun getVocabularyID(vocabulary: IVocabulary,
-                            database: WanicchouDatabase) : Long? {
+        fun getVocabularyID(database: WanicchouDatabase,
+                            vocabulary: IVocabulary) : Long? {
             return if (vocabulary is Vocabulary){
                 vocabulary.vocabularyID
             }
@@ -78,7 +81,6 @@ data class Vocabulary (
                         vocabulary.language)
             }
         }
-
     }
 
 }

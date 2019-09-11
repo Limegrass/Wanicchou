@@ -3,6 +3,7 @@ package room.dbo.entity
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.ForeignKey.CASCADE
 import androidx.room.PrimaryKey
 
 @Entity(tableName = "VocabularyNote",
@@ -10,7 +11,8 @@ import androidx.room.PrimaryKey
             ForeignKey(
                     entity = Vocabulary::class,
                     parentColumns = ["VocabularyID"],
-                    childColumns = ["VocabularyID"])
+                    childColumns = ["VocabularyID"],
+                    onDelete = CASCADE)
         ]
 )
 
