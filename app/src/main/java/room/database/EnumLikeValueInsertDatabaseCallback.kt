@@ -51,7 +51,21 @@ class EnumLikeValueInsertDatabaseCallback(private val context : Context) : RoomD
                     language = data.enums.Language.JAPANESE,
                     vocabularyID = 1)
             val defaultDefinition = Definition(
-                    definitionText = "ある使えないアプリ。",
+                    definitionText = """タイトルバーを押して、検索できる辞書アプリ。
+Tap the title bar to begin entering a search term. 
+Navigate to the settings screen from the menu bar at the top right. 
+The floating action button will send the current definition to AnkiDroid. 
+Tags will be imported to AnkiDroid. 
+Vocabulary Notes will persist across the vocabulary term (for example, a note that is relevant to both
+the Japanese-Japanese definition and the Japanese-English definition for a given word.) 
+Tapping on dark grey boxes will bring up a window to edit the text. 
+Tapping on an entry in Related will attempt to search that word. 
+Report bugs at github.com/Limegrass/Wanicchou/issues. 
+設定画面は右上隅のメニューに移られます。 
+FABを押して、カードは暗記ドロイドに送ります。 
+単語のメモはどんな定義でも、そのメモが出てきます。 
+普通の灰色より暗い灰色のところを押せば、そのテキストのエディットボックスが現れます。 
+バグが現れたら、github.com/Limegrass/Wanicchou/issues に新しいIssueを追加してください。""",
                     language = data.enums.Language.JAPANESE,
                     dictionary = data.enums.Dictionary.SANSEIDO,
                     vocabularyID = 1,

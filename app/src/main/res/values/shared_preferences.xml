@@ -37,23 +37,21 @@
     <string name="pref_previous_vocabulary_language_key" translatable="false">PREF_PREVIOUS_WORD_LANGUAGE</string>
     <string name="pref_previous_vocabulary_language_default" translatable="false">JAPANESE</string>
     <string name="pref_previous_definition_text_key" translatable="false">PREF_PREVIOUS_DEFINITION_TEXT</string>
-    <string name="pref_previous_definition_text_default" translatable="false">
-        タイトルバーを押して、検索できる辞書アプリ。
-        Tap the title bar to begin entering a search term.
-        Navigate to the settings screen from the menu bar at the top right.
-        The floating action button will send the current definition to AnkiDroid.
-        Tags will be imported to AnkiDroid.
-        Vocabulary Notes will persist across the vocabulary term (for example, a note that is relevant to both
-        the Japanese-Japanese definition and the Japanese-English definition for a given word.)
-        Tapping on dark grey boxes will bring up a window to edit the text.
-        Tapping on an entry in Related will attempt to search that word.
-        Report bugs at github.com/Limegrass/Wanicchou/issues.
-        設定画面は右上隅のメニューに移られます。
-        FABを押して、カードは暗記ドロイドに送ります。
-        単語のメモはどんな定義でも、そのメモが出てきます。
-        普通の灰色より暗い灰色のところを押せば、そのテキストのエディットボックスが現れます。
-        バグが現れたら、github.com/Limegrass/Wanicchou/issues に新しいIssueを追加してください。
-    </string>
+    <string name="pref_previous_definition_text_default" translatable="false">タイトルバーを押して、検索できる辞書アプリ。\n
+Tap the title bar to begin entering a search term. \n
+Navigate to the settings screen from the menu bar at the top right. \n
+The floating action button will send the current definition to AnkiDroid. \n
+Tags will be imported to AnkiDroid. \n
+Vocabulary Notes will persist across the vocabulary term (for example, a note that is relevant to both
+the Japanese-Japanese definition and the Japanese-English definition for a given word.) \n
+Tapping on dark grey boxes will bring up a window to edit the text. \n
+Tapping on an entry in Related will attempt to search that word. \n
+Report bugs at github.com/Limegrass/Wanicchou/issues. \n
+設定画面は右上隅のメニューに移られます。 \n
+FABを押して、カードは暗記ドロイドに送ります。 \n
+単語のメモはどんな定義でも、そのメモが出てきます。 \n
+普通の灰色より暗い灰色のところを押せば、そのテキストのエディットボックスが現れます。 \n
+バグが現れたら、github.com/Limegrass/Wanicchou/issues に新しいIssueを追加してください。</string>
     <string name="pref_previous_definition_language_key" translatable="false">PREF_PREVIOUS_DEFINITION_LANGUAGE</string>
     <string name="pref_previous_definition_language_default" translatable="false">JAPANESE</string>
     <string name="pref_previous_definition_dictionary_key" translatable="false">PREF_PREVIOUS_DEFINITION_DICTIONARY</string>
