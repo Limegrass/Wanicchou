@@ -49,7 +49,10 @@ class VocabularyDaoTest : AbstractDaoTest() {
         val vocabularyID = runBlocking {
             db.vocabularyDao().insert(Vocabulary(word, pronunciation, pitch, language))
         }
-        assertEquals(vocabularyID, db.vocabularyDao().getVocabularyID(word, pronunciation, pitch, language))
+        val reacquiredID = runBlocking {
+            db.vocabularyDao().getVocabularyID(word, pronunciation, pitch, language)
+        }
+        assertEquals(vocabularyID, reacquiredID)
     }
 
     @Test
@@ -61,7 +64,10 @@ class VocabularyDaoTest : AbstractDaoTest() {
         runBlocking {
             db.vocabularyDao().insert(Vocabulary(word, pronunciation, pitch, language))
         }
-        assertEquals(null, db.vocabularyDao().getVocabularyID("One", pronunciation, pitch, language))
+        val reacquiredID = runBlocking {
+            db.vocabularyDao().getVocabularyID("One", pronunciation, pitch, language)
+        }
+        assertEquals(null, reacquiredID)
     }
 
     @Test
@@ -73,7 +79,10 @@ class VocabularyDaoTest : AbstractDaoTest() {
         runBlocking {
             db.vocabularyDao().insert(Vocabulary(word, pronunciation, pitch, language))
         }
-        assertEquals(null, db.vocabularyDao().getVocabularyID(word, "One", pitch, language))
+        val reacquiredID = runBlocking {
+            db.vocabularyDao().getVocabularyID(word, "One", pitch, language)
+        }
+        assertEquals(null, reacquiredID)
     }
 
     @Test
@@ -85,7 +94,10 @@ class VocabularyDaoTest : AbstractDaoTest() {
         runBlocking {
             db.vocabularyDao().insert(Vocabulary(word, pronunciation, pitch, language))
         }
-        assertEquals(null, db.vocabularyDao().getVocabularyID(word, pronunciation, "1", language))
+        val reacquiredID = runBlocking {
+            db.vocabularyDao().getVocabularyID(word, pronunciation, "1", language)
+        }
+        assertEquals(null, reacquiredID)
     }
 
     @Test
@@ -97,6 +109,9 @@ class VocabularyDaoTest : AbstractDaoTest() {
         runBlocking {
             db.vocabularyDao().insert(Vocabulary(word, pronunciation, pitch, language))
         }
-        assertEquals(null, db.vocabularyDao().getVocabularyID(word, pronunciation, pitch, Language.ENGLISH))
+        val reacquiredID = runBlocking {
+            db.vocabularyDao().getVocabularyID(word, pronunciation, pitch, Language.ENGLISH)
+        }
+        assertEquals(null, reacquiredID)
     }
 }
