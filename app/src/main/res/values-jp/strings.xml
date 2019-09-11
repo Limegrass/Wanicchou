@@ -55,8 +55,8 @@
     <string name="action_db_delete">削除</string>
     <string name="title_selected">%1$d 単語をセレクトしています。</string>
     <string name="database_title">データベース</string>
-    <string name="lbl_definition_header_text">Definition</string>
-    <string name="lbl_related_button_text">Related</string>
+    <string name="lbl_definition_header_text" translatable="true">定義</string>
+    <string name="lbl_related_button_text" translatable="true">類語</string>
     <string name="lbl_word_button_text">単語</string>
     <string name="pref_word_language_title" translatable="true">単語言語</string>
     <string name="pref_definition_language_title">定義言語</string>
