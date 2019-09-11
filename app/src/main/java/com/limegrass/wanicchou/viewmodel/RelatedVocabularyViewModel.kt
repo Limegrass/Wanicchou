@@ -1,10 +1,9 @@
 package com.limegrass.wanicchou.viewmodel
 
-import android.app.Application
-import data.room.entity.Vocabulary
+import data.models.IVocabulary
 
-class RelatedVocabularyViewModel(application: Application)
-    : ObservableViewModel<List<Vocabulary>>(application){
+class RelatedVocabularyViewModel
+    : ObservableViewModel<List<IVocabulary>>(){
     init{
         value = listOf()
     }

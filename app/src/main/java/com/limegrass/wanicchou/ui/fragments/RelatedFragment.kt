@@ -1,12 +1,14 @@
 package com.limegrass.wanicchou.ui.fragments
 
+import android.content.Context
+import android.net.ConnectivityManager
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.RecyclerView
@@ -14,45 +16,38 @@ import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
 import com.limegrass.wanicchou.R
-import com.limegrass.wanicchou.ui.adapter.RelatedVocabularyAdapter
-import com.limegrass.wanicchou.util.WanicchouSharedPreferenceHelper
-import com.limegrass.wanicchou.viewmodel.DefinitionViewModel
-import com.limegrass.wanicchou.viewmodel.RelatedVocabularyViewModel
-import com.limegrass.wanicchou.viewmodel.VocabularyViewModel
-import data.room.VocabularyRepository
+import com.limegrass.wanicchou.ui.adapter.TextSpanRecyclerViewAdapter
+import com.limegrass.wanicchou.util.WanicchouSearchManager
+import com.limegrass.wanicchou.util.WanicchouSharedPreferences
+import com.limegrass.wanicchou.viewmodel.DictionaryEntryViewModel
+import room.database.WanicchouDatabase
+import room.repository.DictionaryEntryRepository
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 class RelatedFragment : Fragment() {
     companion object {
         private val TAG : String = RelatedFragment::class.java.simpleName
     }
-    private val vocabularyViewModel : VocabularyViewModel by lazy {
-        //TODO: Make sure this assert isn't problematic
-        ViewModelProviders.of(activity!!)
-            .get(VocabularyViewModel::class.java)
+    private val dictionaryEntryViewModel : DictionaryEntryViewModel by lazy {
+        ViewModelProviders.of(parentFragmentActivity)
+            .get(DictionaryEntryViewModel::class.java)
     }
-    private val relatedVocabularyViewModel : RelatedVocabularyViewModel by lazy {
-        //TODO: Make sure this assert isn't problematic
-        ViewModelProviders.of(activity!!)
-                .get(RelatedVocabularyViewModel::class.java)
+
+    private val searchManager by lazy {
+        val database = WanicchouDatabase(parentFragmentActivity)
+        val repository = DictionaryEntryRepository(database)
+        val connectivityManager = parentFragmentActivity.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val sharedPreferences = WanicchouSharedPreferences(parentFragmentActivity)
+        WanicchouSearchManager(repository, connectivityManager, sharedPreferences, parentFragmentActivity)
     }
-    private val definitionViewModel : DefinitionViewModel by lazy {
-        ViewModelProviders.of(activity!!)
-                          .get(DefinitionViewModel::class.java)
-    }
-    private val repository : VocabularyRepository by lazy {
-        VocabularyRepository(activity!!.application)
-    }
-    private val sharedPreferenceHelper : WanicchouSharedPreferenceHelper by lazy {
-        WanicchouSharedPreferenceHelper(context!!)
-    }
+
+    private lateinit var parentFragmentActivity : FragmentActivity
     override fun onCreateView(inflater: LayoutInflater,
                               container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         val attachToRoot = false
+        parentFragmentActivity = activity!!
         return inflater.inflate(R.layout.fragment_related,
                 container,
                 attachToRoot)
@@ -65,46 +60,38 @@ class RelatedFragment : Fragment() {
 
     private fun setRelatedObserver(view : View){
         val context = context!!
-        val activity = activity!!
         val lifecycleOwner : LifecycleOwner = this
-        relatedVocabularyViewModel.setObserver(lifecycleOwner){
+        dictionaryEntryViewModel.setObserver(lifecycleOwner){
             val recyclerView = view.findViewById<RecyclerView>(R.id.rv_related)
             Log.v(TAG, "LiveData emitted.")
-            val relatedVocabularyList = relatedVocabularyViewModel.value
-            if(!relatedVocabularyList.isNullOrEmpty()){
+            val dictionaryEntries = dictionaryEntryViewModel.availableDictionaryEntries
+            if(!dictionaryEntries.isNullOrEmpty()){
                 val onClickListener = View.OnClickListener { v ->
                     Log.v(TAG, "OnClick")
                     val position = recyclerView.getChildLayoutPosition(v!!)
-                    val vocab = relatedVocabularyList[position]
-                    Toast.makeText(context, "Searching for ${vocab.word}.", Toast.LENGTH_LONG).show()
-                    runBlocking(Dispatchers.IO){
-                        val definition = repository.getRelatedVocabularyDefinition(vocab,
-                                sharedPreferenceHelper.definitionLanguageID,
-                                sharedPreferenceHelper.dictionary)
-                        activity.runOnUiThread {
-                            vocabularyViewModel.value = listOf(vocab)
-                            definitionViewModel.value = listOf(definition)
+                    val dictionaryEntry = dictionaryEntries[position]
+                    if(dictionaryEntry.definitions.isNotEmpty()){
+                        dictionaryEntryViewModel.value = dictionaryEntry
+                    } else {
+                        runBlocking(Dispatchers.IO){
+                            val searchResults = searchManager.search(dictionaryEntry.vocabulary.word)
+                            Log.v(TAG, "Result size: [${searchResults.size}].")
                         }
                     }
                 }
-                Log.v(TAG, "Result size: [${relatedVocabularyList.size}].")
                 val layoutManager = FlexboxLayoutManager(context)
                 layoutManager.flexDirection = FlexDirection.ROW
                 layoutManager.justifyContent = JustifyContent.SPACE_AROUND
-
-                recyclerView.layoutManager = layoutManager
-                recyclerView.adapter = RelatedVocabularyAdapter(relatedVocabularyList, onClickListener)
-            }
-        }
-
-        vocabularyViewModel.setObserver(lifecycleOwner){
-            GlobalScope.launch(Dispatchers.IO) {
-                val vocabularyID = vocabularyViewModel.vocabulary.vocabularyID
-                val relatedWordList = repository.getRelatedWords(vocabularyID)
-                activity.runOnUiThread {
-                    relatedVocabularyViewModel.value = relatedWordList
+                val activeEntry = dictionaryEntryViewModel.value
+                val relatedVocabularies = dictionaryEntries.filter {
+                    it != activeEntry
+                }.map {
+                    "${it.vocabulary.word} [${it.vocabulary.pronunciation}]"
                 }
+                recyclerView.layoutManager = layoutManager
+                recyclerView.adapter = TextSpanRecyclerViewAdapter(relatedVocabularies, onClickListener)
             }
+
         }
     }
 }

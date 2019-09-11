@@ -17,8 +17,13 @@ import com.limegrass.wanicchou.R
 import com.limegrass.wanicchou.ui.adapter.TextSpanRecyclerViewAdapter
 import com.limegrass.wanicchou.util.InputAlertDialogBuilder
 import com.limegrass.wanicchou.viewmodel.TagViewModel
-import com.limegrass.wanicchou.viewmodel.VocabularyViewModel
-import data.room.VocabularyRepository
+import com.limegrass.wanicchou.viewmodel.DictionaryEntryViewModel
+import data.models.ITaggedItem
+import data.models.IVocabulary
+import data.architecture.IRepository
+import data.models.TaggedItem
+import room.database.WanicchouDatabase
+import room.repository.VocabularyTagRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -36,13 +41,14 @@ class TagFragment : TextBlockFragment() {
                 .get(TagViewModel::class.java)
     }
 
-    private val vocabularyViewModel : VocabularyViewModel by lazy {
+    private val dictionaryEntryViewModel : DictionaryEntryViewModel by lazy {
         ViewModelProviders.of(parentFragmentActivity)
-                          .get(VocabularyViewModel::class.java)
+                          .get(DictionaryEntryViewModel::class.java)
     }
 
-    private val repository : VocabularyRepository by lazy {
-        VocabularyRepository(parentFragmentActivity.application)
+    private val tagRepository : IRepository<ITaggedItem<IVocabulary>, IVocabulary> by lazy {
+        val database = WanicchouDatabase(parentFragmentActivity.application)
+        VocabularyTagRepository(database)
     }
 
     private lateinit var parentFragmentActivity : FragmentActivity
@@ -50,8 +56,8 @@ class TagFragment : TextBlockFragment() {
     override fun onCreateView(inflater: LayoutInflater,
                               container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        title = getString(R.string.lbl_fragment_tag_title)
         val view = super.onCreateView(inflater, container, savedInstanceState)!!
+        title = getString(R.string.lbl_fragment_tag_title)
         parentFragmentActivity = activity!!
         setObserver(view)
         setAddTagButtonOnClick(view)
@@ -61,10 +67,13 @@ class TagFragment : TextBlockFragment() {
         return view
     }
 
-    private fun refreshTagViewModel(){
-        val dbTags = repository.getTags(vocabularyViewModel.vocabulary.vocabularyID)
-        parentFragmentActivity.runOnUiThread {
-            tagViewModel.value = dbTags
+    private suspend fun refreshTagViewModel(){
+        val dictionaryEntry = dictionaryEntryViewModel.value
+        if (dictionaryEntry != null){
+            val dbTags = tagRepository.search(dictionaryEntry.vocabulary)
+            parentFragmentActivity.runOnUiThread {
+                tagViewModel.value = dbTags
+            }
         }
     }
 
@@ -89,21 +98,19 @@ class TagFragment : TextBlockFragment() {
                     title,
                     "" )
 
-            dialogBuilder.input.setText(tag.tagText)
+            dialogBuilder.input.setText(tag.tag)
             dialogBuilder.setPositiveButton(getString(R.string.save_button_text)){ dialog, _ ->
-                tag.tagText = dialogBuilder.input.text.toString()
+                val updatedTag = TaggedItem(tag.item, dialogBuilder.input.text.toString())
                 GlobalScope.launch(Dispatchers.IO){
-                    repository.updateTag(tag)
+                    tagRepository.update(tag, updatedTag)
                     refreshTagViewModel()
                 }
                 dialog.dismiss()
             }
 
             dialogBuilder.setNeutralButton(getString(R.string.delete_button_text)){ dialog, _ ->
-                val vocabularyID = vocabularyViewModel.vocabulary.vocabularyID
-                val tagID = tagViewModel.value!![position].tagID
                 GlobalScope.launch(Dispatchers.IO){
-                    repository.deleteVocabularyTag(vocabularyID, tagID)
+                    tagRepository.delete(tag)
                     refreshTagViewModel()
                 }
                 dialog.dismiss()
@@ -111,14 +118,14 @@ class TagFragment : TextBlockFragment() {
             dialogBuilder.show()
         }
 
-        vocabularyViewModel.setObserver(lifecycleOwner){
+        dictionaryEntryViewModel.setObserver(lifecycleOwner){
             GlobalScope.launch(Dispatchers.IO){
                 refreshTagViewModel()
             }
         }
 
         tagViewModel.setObserver(lifecycleOwner){
-            val tags = tagViewModel.value!!.map{ it.tagText }
+            val tags = tagViewModel.value!!.map{ it.tag }
             Log.v(TAG, "Result size: [${tags.size}].")
             recyclerView.adapter = TextSpanRecyclerViewAdapter(tags, onClickListener)
         }
@@ -141,11 +148,15 @@ class TagFragment : TextBlockFragment() {
                                                         message)
 
             dialogBuilder.setPositiveButton(getString(R.string.add_button_text)) { dialog, _ ->
-                val tagText = dialogBuilder.input.text
-                val vocabularyID = vocabularyViewModel.vocabulary.vocabularyID
-                GlobalScope.launch (Dispatchers.IO){
-                    repository.addVocabularyTag(tagText.toString(), vocabularyID)
-                    refreshTagViewModel()
+                val tagText = dialogBuilder.input.text.toString()
+                val dictionaryEntry = dictionaryEntryViewModel.value
+                if(dictionaryEntry != null){
+                    val vocabulary = dictionaryEntry.vocabulary
+                    GlobalScope.launch (Dispatchers.IO){
+                        val tag = TaggedItem(vocabulary, tagText)
+                        tagRepository.insert(tag)
+                        refreshTagViewModel()
+                    }
                 }
                 dialog.dismiss()
             }

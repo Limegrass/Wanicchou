@@ -4,6 +4,9 @@
 [<img src="https://gitlab.com/fdroid/artwork/raw/master/badge/get-it-on-jp.png"
      alt="Get it on F-Droid"
      height="90">](https://f-droid.org/packages/com.waifusims.wanicchou/)
+[<img src="https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png"
+      alt="Get it on Google Play Store"
+      height="90">](https://play.google.com/store/apps/details?id=com.limegrass.wanicchou)
 
 他の言語: [English](README.md)
 

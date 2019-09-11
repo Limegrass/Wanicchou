@@ -1,10 +1,10 @@
 package com.limegrass.wanicchou.viewmodel
 
-import android.app.Application
-import data.room.entity.Tag
+import data.models.ITaggedItem
+import data.models.IVocabulary
 
-class TagViewModel(application: Application)
-    : ObservableViewModel<List<Tag>>(application){
+class TagViewModel
+    : ObservableViewModel<List<ITaggedItem<IVocabulary>>>(){
     init {
         value = listOf()
     }

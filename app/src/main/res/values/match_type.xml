@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="MATCH_TYPE_WORD_EQUALS" translatable="true">Exact Word Match</string>
+    <string name="MATCH_TYPE_WORD_STARTS_WITH" translatable="true">Word Starts With</string>
+    <string name="MATCH_TYPE_WORD_ENDS_WITH" translatable="true">Word Ends With</string>
+    <string name="MATCH_TYPE_WORD_CONTAINS" translatable="true">Word Contains</string>
+    <string name="MATCH_TYPE_WORD_WILDCARDS" translatable="true">Word Match with Wildcard characters (_, %)</string>
+    <string name="MATCH_TYPE_DEFINITION_CONTAINS" translatable="true">Definition Contains</string>
+    <string name="MATCH_TYPE_WORD_OR_DEFINITION_CONTAINS" translatable="true">Word or Definition Contains</string>
+</resources>

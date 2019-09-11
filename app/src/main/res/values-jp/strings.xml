@@ -16,7 +16,7 @@
     <string name="definition_hint" translatable="true">単語が見つけませんでした。。。</string>
 
     <string name="word_searching" translatable="true">「%1$s」検索中。。。</string>
-    <string name="word_search_success" translatable="true">%1$sは三省堂から出来ました！</string>
+    <string name="word_search_success" translatable="true">%1$sは%2$sから出来ました！</string>
     <string name="word_search_failure" translatable="true">%1$sが見つけませんでした。。。</string>
 
     <!--anki_additional_fields-->
@@ -35,28 +35,15 @@
     <string name="permissions_denied_toast" translatable="true">許可もらえませんでした</string>
     <string name="anki_added_toast" translatable="true">%1$sは暗記に遅れました！</string>
     <string name="searching_related_toast" translatable="true">選択した単語の検索中。。。</string>
-    <string name="toast_found_in_db" translatable="true">%1$sはデータベースから出来ました！</string>
+    <string name="toast_pitch" translatable="true">ピッチ: %1$s</string>
 
 
     <!--related words activity-->
     <string name="activity_word_list_title" translatable="true">関係ある言葉</string>
 
-    <!--<string name="related_word_key" translatable="false">relatedWords</string>-->
-    <!--<string name="desired_word_index_key" translatable="false">desiredRelatedWord</string>-->
-
-    <!--shared preferences keys-->
-    <!--<string name="search_word_key" translatable="false">searchWord</string>-->
-    <!--<string name="dic_type_key" translatable="false">dicType</string>-->
-    <!--<string name="url_key" translatable="false">pageUrl</string>-->
-    <!--<string name="html_key" translatable="false">pageHtml</string>-->
-    <!--<string name="page_key" translatable="false">webPage</string>-->
-
-
     <!--settings strings-->
     <string name="search_settings_category_title" translatable="true">検索設定</string>
     <string name="pref_dictionary_type_title" translatable="true">辞書型</string>
-    <!--<string name="pref_dictionary_type_key" translatable="false">listPrefDicType</string>-->
-    <!--<string name="pref_dictionary_type_default" translatable="false">JJ</string>-->
     <string name="pref_match_type_title" translatable="true">マッチ型</string>
     <string name="pref_auto_save_title">オートセーブ</string>
     <string name="pref_auto_delete_title">オートデリート</string>
@@ -85,7 +72,7 @@
     <string name="definition_note_title">定義のメモ</string>
     <string name="add_button_text">追加</string>
     <string name="delete_button_text">削除</string>
-    <string name="edit_note_title">エディット</string>
+    <string name="edit_note_title">メモ</string>
     <string name="vocab_language_title">単語言語</string>
     <string name="definition_language_title">定義言語</string>
     <string name="database_match_type_title">データベースマッチタイプ</string>
@@ -94,6 +81,6 @@
     <string name="lbl_fragment_vocabulary_notes_title">単語のメモ</string>
     <string name="lbl_fragment_definition_note_title">定義のメモ</string>
     <string name="lbl_fragment_tag_title">タグ</string>
-    <!--<string name="pref_match_type_key" translatable="false">listPrefSearchDir</string>-->
-    <!--<string name="pref_match_type_default" translatable="false">1</string>-->
+    <string name="toast_anki_storage_permission_required" translatable="true">暗記ドロイドの保存許可は許していません。</string>
+    <string name="edit_definition_title" translatable="true">意味</string>
 </resources>

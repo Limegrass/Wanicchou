@@ -1,13 +1,12 @@
 package com.limegrass.wanicchou.viewmodel
 
-import android.app.Application
 import androidx.lifecycle.*
 
-abstract class ObservableViewModel<T>(application: Application) : AndroidViewModel(application){
+abstract class ObservableViewModel<T> : ViewModel(){
     //TODO: MediatorLiveData with source setting.
     private val liveData : MutableLiveData<T> = MutableLiveData()
 
-    var value : T?
+    open var value : T?
         get() {
             return liveData.value
         }

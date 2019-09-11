@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="AUTO_DELETE_NEVER" translatable="true">Never</string>
+    <string name="AUTO_DELETE_ON_ANKI_IMPORT" translatable="true">On Anki Import</string>
+    <string name="AUTO_DELETE_ON_SEARCH" translatable="true">On Next Successful Search</string>
+</resources>

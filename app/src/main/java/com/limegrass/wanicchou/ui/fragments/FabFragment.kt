@@ -1,6 +1,7 @@
 package com.limegrass.wanicchou.ui.fragments
 
 import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,34 +11,54 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModelProviders
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.ichi2.anki.FlashCardsContract
 import com.limegrass.wanicchou.R
-import com.limegrass.wanicchou.viewmodel.*
-import data.arch.anki.AnkiDroidHelper
-import data.room.VocabularyRepository
+import com.limegrass.wanicchou.enums.AutoDelete
+import data.anki.AnkiDroidHelper
+import com.limegrass.wanicchou.util.WanicchouSharedPreferences
+import com.limegrass.wanicchou.util.cancelSetAndShowWanicchouToast
+import com.limegrass.wanicchou.viewmodel.DefinitionNoteViewModel
+import com.limegrass.wanicchou.viewmodel.DictionaryEntryViewModel
+import com.limegrass.wanicchou.viewmodel.TagViewModel
+import com.limegrass.wanicchou.viewmodel.VocabularyNoteViewModel
+import data.anki.AnkiDroidApi
+import data.anki.AnkiDroidConfig
+import data.anki.IAnkiDroidApi
+import data.anki.WanicchouAnkiEntry
+import data.models.IDictionaryEntry
+import data.search.SearchRequest
+import data.architecture.IRepository
+import room.database.WanicchouDatabase
+import room.repository.DictionaryEntryRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 class FabFragment : Fragment() {
     private lateinit var floatingActionButton : FloatingActionButton
 
+    private val ankiDroidApi : IAnkiDroidApi by lazy {
+        AnkiDroidApi(parentContext)
+    }
+
     private val ankiDroidHelper : AnkiDroidHelper by lazy {
-        AnkiDroidHelper(parentContext)
-    }
-    companion object {
-        private const val ANKI_PERMISSION_REQUEST_CALLBACK_CODE : Int = 420
+        AnkiDroidHelper(ankiDroidApi, AnkiDroidConfig, sharedPreferences)
     }
 
-    private val repository : VocabularyRepository by lazy {
-        VocabularyRepository.getInstance(parentActivity.application)
+    private val sharedPreferences : WanicchouSharedPreferences by lazy {
+        WanicchouSharedPreferences(parentContext)
     }
 
-    private val vocabularyViewModel : VocabularyViewModel by lazy {
+    private val repository : IRepository<IDictionaryEntry, SearchRequest> by lazy {
+        val database = WanicchouDatabase(parentContext)
+        DictionaryEntryRepository(database)
+    }
+
+    private val dictionaryEntryViewModel : DictionaryEntryViewModel by lazy {
         ViewModelProviders.of(parentActivity)
-                          .get(VocabularyViewModel::class.java)
+                          .get(DictionaryEntryViewModel::class.java)
     }
 
-    private val definitionViewModel : DefinitionViewModel by lazy {
-        ViewModelProviders.of(parentActivity)
-                          .get(DefinitionViewModel::class.java)
-    }
     private val vocabularyNoteViewModel : VocabularyNoteViewModel by lazy {
         ViewModelProviders.of(parentActivity)
                 .get(VocabularyNoteViewModel::class.java)
@@ -67,41 +88,59 @@ class FabFragment : Fragment() {
         return view
     }
 
-    private fun setFABOnClick() {
-        floatingActionButton.setOnClickListener {
-            if(ankiDroidHelper.shouldRequestPermission()){
-                ankiDroidHelper.requestPermission(parentActivity,
-                        ANKI_PERMISSION_REQUEST_CALLBACK_CODE)
+    override fun onRequestPermissionsResult(requestCode: Int,
+                                            permissions: Array<out String>,
+                                            grantResults: IntArray) {
+        when(requestCode){
+            ANKI_READ_WRITE_PERMISSION_CALLBACK_CODE -> {
+                if(grantResults.isNotEmpty()
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    sendCurrentEntryToAnkiDroid()
+                }
+                else {
+                    val message = (getString(R.string.permissions_denied_toast))
+                    cancelSetAndShowWanicchouToast(parentContext, message, Toast.LENGTH_LONG)
+                }
             }
-            val vocabulary = vocabularyViewModel.vocabulary
-            val definition = definitionViewModel.definition
-            val dictionaryName = repository.dictionaries.single {
-                    it.dictionaryID == definition.dictionaryID
-            }.dictionaryName
-            val notes = getNotes()
-            val tags = tagViewModel.value!!.map{ it.tagText }.toSet()
-            val wordLangaugeCode = repository.languages.single{
-                it.languageID == vocabulary.languageID
-            }.languageCode
-            val definitionLanguageCode = repository.languages.single{
-                it.languageID == definition.languageID
-            }.languageCode
-            ankiDroidHelper.addUpdateNote(vocabulary.word,
-                                          vocabulary.pronunciation,
-                                          vocabulary.pitch,
-                                          wordLangaugeCode,
-                                          definition.definitionText,
-                                          definitionLanguageCode,
-                                          dictionaryName,
-                                          notes,
-                                          tags)
-            val word = vocabularyViewModel.vocabulary.word
-            val message = getString(R.string.anki_added_toast, word)
-            Toast.makeText(context,
-                          message,
-                          Toast.LENGTH_LONG).show()
+            else -> super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         }
     }
+
+    private fun setFABOnClick() {
+        floatingActionButton.setOnClickListener {
+            if(!ankiDroidApi.hasAnkiReadWritePermission){
+                requestPermissions(arrayOf(FlashCardsContract.READ_WRITE_PERMISSION),
+                        ANKI_READ_WRITE_PERMISSION_CALLBACK_CODE)
+            }
+            else if (!ankiDroidApi.hasStoragePermission) {
+                val message = getString(R.string.toast_anki_storage_permission_required)
+                cancelSetAndShowWanicchouToast(parentContext, message, Toast.LENGTH_LONG)
+            }
+            else{
+                sendCurrentEntryToAnkiDroid()
+            }
+        }
+    }
+
+    private fun sendCurrentEntryToAnkiDroid() {
+        val dictionaryEntry = dictionaryEntryViewModel.value
+        if(dictionaryEntry != null){
+            val ankiEntry = WanicchouAnkiEntry(dictionaryEntry.vocabulary,
+                    dictionaryEntry.definitions[0],
+                    getNotes())
+            val tags = tagViewModel.value!!.map{ it.tag }.toSet()
+            ankiDroidHelper.addUpdateNote(ankiEntry, tags)
+            val toastText = parentContext.getString(R.string.anki_added_toast,
+                                                    dictionaryEntry.vocabulary.word)
+            cancelSetAndShowWanicchouToast(parentContext, toastText, Toast.LENGTH_LONG)
+            if (sharedPreferences.autoDelete == AutoDelete.ON_ANKI_IMPORT){
+                GlobalScope.launch (Dispatchers.IO) {
+                    repository.delete(dictionaryEntry)
+                }
+            }
+        }
+    }
+
     private fun getNotes() : List<String>{
         val notes = vocabularyNoteViewModel.value!!.map{
             it.noteText
@@ -109,14 +148,17 @@ class FabFragment : Fragment() {
         notes.addAll(definitionNoteViewModel.value!!.map{ it.noteText })
         return notes
     }
+
     private fun setFABObserver(){
         val lifecycleOwner = this
-        vocabularyViewModel.setObserver(lifecycleOwner){
-            if(!definitionViewModel.value.isNullOrEmpty()
-                    && definitionViewModel.value!![0].vocabularyID != 0L
-                    && ankiDroidHelper.isApiAvailable()) {
+        dictionaryEntryViewModel.setObserver(lifecycleOwner){
+            if(ankiDroidApi.hasAvailableApi) {
                 floatingActionButton.show()
             }
         }
+    }
+
+    companion object{
+        private const val ANKI_READ_WRITE_PERMISSION_CALLBACK_CODE: Int = 420
     }
 }

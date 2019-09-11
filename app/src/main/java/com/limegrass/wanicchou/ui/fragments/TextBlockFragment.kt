@@ -7,15 +7,20 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.limegrass.wanicchou.R
+import kotlin.properties.Delegates
 
-abstract class TextBlockFragment : Fragment(){
-    lateinit var title : String
+abstract class TextBlockFragment : Fragment() {
+    protected var title by Delegates.observable(""){
+        _, _, newValue ->
+        fragmentView.findViewById<TextView>(R.id.tv_text_block_label).text = newValue
+    }
+    private lateinit var fragmentView : View
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val attachToRoot = false
-        val view = inflater.inflate(R.layout.fragment_text_list,
+        fragmentView = inflater.inflate(R.layout.fragment_text_list,
                 container,
                 attachToRoot)
-        view.findViewById<TextView>(R.id.tv_text_block_label).text = title
-        return view
+        fragmentView.findViewById<TextView>(R.id.tv_text_block_label).text = title
+        return fragmentView
     }
 }

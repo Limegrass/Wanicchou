@@ -8,8 +8,7 @@ Other languages: [日本語](README.jp.md)
      height="90">](https://f-droid.org/packages/com.waifusims.wanicchou/)
 [<img src="https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png"
       alt="Get it on Google Play Store"
-      height="90">]
-(https://play.google.com/store/apps/details?id=com.limegrass.wanicchou)
+      height="90">](https://play.google.com/store/apps/details?id=com.limegrass.wanicchou)
 
 ## Table of Contents
   - [Usage](#usage)

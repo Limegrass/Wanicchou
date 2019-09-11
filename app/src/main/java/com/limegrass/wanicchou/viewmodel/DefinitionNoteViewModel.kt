@@ -1,10 +1,10 @@
 package com.limegrass.wanicchou.viewmodel
 
-import android.app.Application
-import data.room.entity.DefinitionNote
+import data.models.IDefinition
+import data.models.INote
 
-class DefinitionNoteViewModel(application: Application)
-    : ObservableViewModel<List<DefinitionNote>>(application){
+class DefinitionNoteViewModel
+    : ObservableViewModel<List<INote<IDefinition>>>(){
     init{
         value = listOf()
     }
