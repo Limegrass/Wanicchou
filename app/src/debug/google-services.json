@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "86828245787",
+    "firebase_url": "https://wanicchou.firebaseio.com",
+    "project_id": "wanicchou",
+    "storage_bucket": "wanicchou.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:86828245787:android:b20635909a5b84cb",
+        "android_client_info": {
+          "package_name": "com.limegrass.wanicchou"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "nottherealclientid.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "notarealkey"
+        }
+      ]
+    }
+  ],
+  "configuration_version": "1"
+}
