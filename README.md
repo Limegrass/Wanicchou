@@ -3,9 +3,6 @@ Online dictionary drawing definitions from [Sanseido](https://www.sanseido.biz/)
 
 Other languages: [日本語](README.jp.md)
 
-[<img src="https://f-droid.org/badge/get-it-on.png"
-     alt="Get it on F-Droid"
-     height="90">](https://f-droid.org/packages/com.waifusims.wanicchou/)
 [<img src="https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png"
       alt="Get it on Google Play Store"
       height="90">](https://play.google.com/store/apps/details?id=com.limegrass.wanicchou)
